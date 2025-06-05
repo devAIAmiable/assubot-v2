@@ -100,7 +100,7 @@ Future modules may include:
 
 ### Implementation details
 
-- The platform is built with Vite, React, Redux, and Tailwind CSS
+- The platform is built with Vite, React, Redux, React Router, Headless UI, React Icons and Tailwind CSS
 - There's no backend yet, but it's planned to be built with FastAPI
 - Use redux to persist the state of the app
 - Use a fake backend for the time being with mocked data
