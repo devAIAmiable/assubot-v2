@@ -20,10 +20,16 @@ import {
 } from 'react-icons/fa';
 
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 const LandingPage = () => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const navigate = useNavigate();
+
+	const navigateToApp = () => {
+		navigate('/app');
+	};
 
 	const features = [
 		{
@@ -133,7 +139,10 @@ const LandingPage = () => {
 							<a href="#contact" className="text-gray-700 hover:text-[#1e51ab] transition-colors">
 								Contact
 							</a>
-							<button className="bg-[#1e51ab] text-white px-4 py-2 rounded-lg hover:bg-[#163d82] transition-colors">
+							<button 
+								className="bg-[#1e51ab] text-white px-4 py-2 rounded-lg hover:bg-[#163d82] transition-colors"
+								onClick={navigateToApp}
+							>
 								Commencer
 							</button>
 						</div>
@@ -166,7 +175,10 @@ const LandingPage = () => {
 								<a href="#contact" className="block px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
 									Contact
 								</a>
-								<button className="w-full text-left bg-[#1e51ab] text-white px-3 py-2 rounded-lg hover:bg-[#163d82] transition-colors">
+								<button 
+									className="w-full text-left bg-[#1e51ab] text-white px-3 py-2 rounded-lg hover:bg-[#163d82] transition-colors"
+									onClick={navigateToApp}
+								>
 									Commencer
 								</button>
 							</div>
@@ -205,7 +217,10 @@ const LandingPage = () => {
 								className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
 								variants={itemVariants}
 							>
-								<button className="bg-[#1e51ab] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-[#163d82] transition-colors shadow-lg">
+								<button 
+									className="bg-[#1e51ab] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-[#163d82] transition-colors shadow-lg"
+									onClick={navigateToApp}
+								>
 									Commencer la gestion
 								</button>
 								<button className="border-2 border-[#1e51ab] text-[#1e51ab] px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors">
@@ -736,6 +751,7 @@ const LandingPage = () => {
 						viewport={{ once: true }}
 						whileHover={{ scale: 1.05 }}
 						whileTap={{ scale: 0.95 }}
+						onClick={navigateToApp}
 					>
 						Commencer Aujourd'hui
 					</motion.button>
