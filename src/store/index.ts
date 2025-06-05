@@ -3,15 +3,17 @@ import { persistReducer, persistStore } from 'redux-persist';
 
 import contractsReducer from './contractsSlice';
 import storage from 'redux-persist/lib/storage';
+import userReducer from './userSlice';
 
 const persistConfig = {
 	key: 'root',
 	storage,
-	whitelist: ['contracts'], // Only persist contracts
+	whitelist: ['contracts', 'user'], // Persist both contracts and user
 };
 
 const rootReducer = combineReducers({
 	contracts: contractsReducer,
+	user: userReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

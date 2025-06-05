@@ -34,6 +34,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const Dashboard = () => {
 	const navigate = useNavigate();
 	const contracts = useAppSelector((state) => (state.contracts as any)?.contracts || []);
+	const user = useAppSelector((state) => (state.user as any)?.currentUser);
 
 	const handleNavigateToModule = (module: string) => {
 		navigate(`/app/${module}`);
@@ -267,9 +268,13 @@ const Dashboard = () => {
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.6 }}
 			>
-				<h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+				<h1 className="text-2xl font-bold text-gray-900 mb-2">Dashboard</h1>
 				<p className="text-gray-600 text-lg">
-					Bienvenue ! Voici un aperçu de votre situation d'assurance.
+					{(() => {
+						const hour = new Date().getHours();
+						const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
+						return `${greeting} ${user?.first_name || 'Utilisateur'} ! Voici un aperçu de votre situation d'assurance.`;
+					})()}
 				</p>
 			</motion.div>
 
@@ -283,8 +288,8 @@ const Dashboard = () => {
 				<div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-sm font-medium text-gray-600 mb-1">Contrats Actifs</p>
-							<p className="text-3xl font-bold text-gray-900">{contractStats.active}</p>
+							<p className="text-xs font-medium text-gray-600 mb-1">Contrats Actifs</p>
+							<p className="text-2xl font-bold text-gray-900">{contractStats.active}</p>
 						</div>
 						<div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
 							<FaShieldAlt className="h-6 w-6 text-[#1e51ab]" />
@@ -300,8 +305,8 @@ const Dashboard = () => {
 				<div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-sm font-medium text-gray-600 mb-1">Primes Mensuelles</p>
-							<p className="text-3xl font-bold text-gray-900">{contractStats.monthlyPremium.toFixed(0)}€</p>
+							<p className="text-xs font-medium text-gray-600 mb-1">Primes Mensuelles</p>
+							<p className="text-2xl font-bold text-gray-900">{contractStats.monthlyPremium.toFixed(0)}€</p>
 						</div>
 						<div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
 							<FaEuroSign className="h-6 w-6 text-green-600" />
@@ -315,8 +320,8 @@ const Dashboard = () => {
 				<div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-sm font-medium text-gray-600 mb-1">Dépenses Annuelles</p>
-							<p className="text-3xl font-bold text-gray-900">{totalAnnual.toLocaleString()}€</p>
+							<p className="text-xs font-medium text-gray-600 mb-1">Dépenses Annuelles</p>
+							<p className="text-2xl font-bold text-gray-900">{totalAnnual.toLocaleString()}€</p>
 						</div>
 						<div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
 							<FaChartPie className="h-6 w-6 text-purple-600" />
@@ -330,8 +335,8 @@ const Dashboard = () => {
 				<div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-sm font-medium text-gray-600 mb-1">Expire Bientôt</p>
-							<p className="text-3xl font-bold text-amber-600">{contractStats.expiring}</p>
+							<p className="text-xs font-medium text-gray-600 mb-1">Expire Bientôt</p>
+							<p className="text-2xl font-bold text-amber-600">{contractStats.expiring}</p>
 						</div>
 						<div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center">
 							<FaClock className="h-6 w-6 text-amber-600" />
@@ -346,8 +351,8 @@ const Dashboard = () => {
 				<div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-sm font-medium text-gray-600 mb-1">Alertes</p>
-							<p className="text-3xl font-bold text-[#1e51ab]">2</p>
+							<p className="text-xs font-medium text-gray-600 mb-1">Alertes</p>
+							<p className="text-2xl font-bold text-[#1e51ab]">2</p>
 						</div>
 						<div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
 							<FaBell className="h-6 w-6 text-[#1e51ab]" />
@@ -371,7 +376,9 @@ const Dashboard = () => {
 						<FaLightbulb className="h-6 w-6 text-yellow-500 mr-3" />
 						Suggestions intelligentes
 					</h2>
-					<span className="text-sm text-gray-500">Basées sur votre profil</span>
+					<span className="text-sm text-gray-500">
+						Adaptées à votre profil{user?.professional_category ? ` (${user.professional_category})` : ''}
+					</span>
 				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 					{smartSuggestions.map((suggestion) => {
@@ -418,7 +425,7 @@ const Dashboard = () => {
 						{/* Chart */}
 						<div className="space-y-4">
 							<div className="text-center mb-6">
-								<p className="text-3xl font-bold text-gray-900">{totalAnnual.toLocaleString()}€</p>
+								<p className="text-2xl font-bold text-gray-900">{totalAnnual.toLocaleString()}€</p>
 								<p className="text-gray-600">Budget annuel total</p>
 							</div>
 							

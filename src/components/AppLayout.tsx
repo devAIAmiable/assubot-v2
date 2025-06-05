@@ -12,12 +12,18 @@ import {
 import { Fragment, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 
+import { logout } from '../store/userSlice';
 import { motion } from 'framer-motion';
 
 const AppLayout = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
+	const dispatch = useAppDispatch();
+	
+	// Get user from Redux store
+	const { currentUser, isAuthenticated } = useAppSelector((state) => (state.user as any) || { currentUser: null, isAuthenticated: false });
 	
 	const [notifications] = useState([
 		{ id: 1, message: 'Votre contrat santé expire dans 45 jours', time: '2h', unread: true },
@@ -63,8 +69,31 @@ const AppLayout = () => {
 		navigate(path);
 	};
 
+	const handleLogout = () => {
+		dispatch(logout());
+		navigate('/');
+	};
+
 	const handleNavigateToLanding = () => {
 		navigate('/');
+	};
+
+	// Get user initials for avatar
+	const getUserInitials = () => {
+		if (currentUser) {
+			const firstInitial = currentUser.first_name?.charAt(0) || '';
+			const lastInitial = currentUser.last_name?.charAt(0) || '';
+			return (firstInitial + lastInitial).toUpperCase() || 'U';
+		}
+		return 'U';
+	};
+
+	// Get user display name
+	const getUserDisplayName = () => {
+		if (currentUser) {
+			return currentUser.name || `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'Utilisateur';
+		}
+		return 'Utilisateur';
 	};
 
 	return (
@@ -179,10 +208,23 @@ const AppLayout = () => {
 							{/* User Menu */}
 							<Menu as="div" className="relative">
 								<Menu.Button className="flex items-center space-x-2 p-2 text-gray-600 hover:text-[#1e51ab] hover:bg-gray-50 rounded-lg transition-colors">
-									<div className="w-8 h-8 bg-gradient-to-br from-[#1e51ab] to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-										U
+									{currentUser?.avatar ? (
+										<img 
+											src={currentUser.avatar} 
+											alt="Avatar" 
+											className="w-8 h-8 rounded-full object-cover"
+										/>
+									) : (
+										<div className="w-8 h-8 bg-gradient-to-br from-[#1e51ab] to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+											{getUserInitials()}
+										</div>
+									)}
+									<div className="hidden sm:block text-left">
+										<p className="text-sm font-medium text-gray-900">{getUserDisplayName()}</p>
+										{currentUser?.email && (
+											<p className="text-xs text-gray-500">{currentUser.email}</p>
+										)}
 									</div>
-									<span className="hidden sm:block text-sm font-medium">Utilisateur</span>
 								</Menu.Button>
 
 								<Transition
@@ -194,7 +236,39 @@ const AppLayout = () => {
 									leaveFrom="transform opacity-100 scale-100"
 									leaveTo="transform opacity-0 scale-95"
 								>
-									<Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right rounded-lg bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+									<Menu.Items className="absolute right-0 mt-2 w-64 origin-top-right rounded-lg bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+										{/* User Info Header */}
+										{currentUser && (
+											<div className="px-4 py-3 border-b border-gray-100">
+												<div className="flex items-center space-x-3">
+													{currentUser.avatar ? (
+														<img 
+															src={currentUser.avatar} 
+															alt="Avatar" 
+															className="w-10 h-10 rounded-full object-cover"
+														/>
+													) : (
+														<div className="w-10 h-10 bg-gradient-to-br from-[#1e51ab] to-blue-600 rounded-full flex items-center justify-center text-white font-medium">
+															{getUserInitials()}
+														</div>
+													)}
+													<div className="flex-1 min-w-0">
+														<p className="text-sm font-medium text-gray-900 truncate">
+															{getUserDisplayName()}
+														</p>
+														<p className="text-xs text-gray-500 truncate">
+															{currentUser.email}
+														</p>
+														{currentUser.professional_category && (
+															<p className="text-xs text-gray-400">
+																{currentUser.professional_category}
+															</p>
+														)}
+													</div>
+												</div>
+											</div>
+										)}
+
 										<Menu.Item>
 											{({ active }) => (
 												<button
@@ -233,19 +307,37 @@ const AppLayout = () => {
 											)}
 										</Menu.Item>
 										<div className="border-t border-gray-100 my-1"></div>
-										<Menu.Item>
-											{({ active }) => (
-												<button
-													onClick={handleNavigateToLanding}
-													className={`flex items-center w-full px-4 py-2 text-sm text-gray-700 ${
-														active ? 'bg-gray-50' : ''
-													}`}
-												>
-													<FaSignOutAlt className="h-4 w-4 mr-3" />
-													Retour à l'accueil
-												</button>
-											)}
-										</Menu.Item>
+										
+										{/* Logout vs Return to Landing based on auth status */}
+										{isAuthenticated ? (
+											<Menu.Item>
+												{({ active }) => (
+													<button
+														onClick={handleLogout}
+														className={`flex items-center w-full px-4 py-2 text-sm text-red-600 ${
+															active ? 'bg-red-50' : ''
+														}`}
+													>
+														<FaSignOutAlt className="h-4 w-4 mr-3" />
+														Se déconnecter
+													</button>
+												)}
+											</Menu.Item>
+										) : (
+											<Menu.Item>
+												{({ active }) => (
+													<button
+														onClick={handleNavigateToLanding}
+														className={`flex items-center w-full px-4 py-2 text-sm text-gray-700 ${
+															active ? 'bg-gray-50' : ''
+														}`}
+													>
+														<FaSignOutAlt className="h-4 w-4 mr-3" />
+														Retour à l'accueil
+													</button>
+												)}
+											</Menu.Item>
+										)}
 									</Menu.Items>
 								</Transition>
 							</Menu>
