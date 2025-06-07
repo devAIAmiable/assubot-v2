@@ -1,6 +1,7 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { persistReducer, persistStore } from 'redux-persist';
 
+import chatReducer from './chatSlice';
 import contractsReducer from './contractsSlice';
 import storage from 'redux-persist/lib/storage';
 import userReducer from './userSlice';
@@ -8,12 +9,13 @@ import userReducer from './userSlice';
 const persistConfig = {
 	key: 'root',
 	storage,
-	whitelist: ['contracts', 'user'], // Persist both contracts and user
+	whitelist: ['contracts', 'user', 'chat'], // Persist contracts, user, and chat history
 };
 
 const rootReducer = combineReducers({
 	contracts: contractsReducer,
 	user: userReducer,
+	chat: chatReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -1,9 +1,10 @@
-import type { Contract, ContractsState, User, UserState } from '../types';
+import type { ChatMessage, ChatState, Contract, ContractsState, QuickReply, User, UserState } from '../types';
 
 // Type for the persisted state (with optional properties due to redux-persist)
 type PersistedState = {
 	user?: UserState;
 	contracts?: ContractsState;
+	chat?: ChatState;
 	_persist?: {
 		version: number;
 		rehydrated: boolean;
@@ -37,5 +38,54 @@ export const getContractsState = (state: PersistedState): ContractsState => {
 		selectedStatus: 'all',
 		loading: false,
 		error: null
+	};
+};
+
+export const getChatSessions = (state: PersistedState) => {
+	return state.chat?.sessions || [];
+};
+
+export const getCurrentChatSession = (state: PersistedState) => {
+	const sessions = state.chat?.sessions || [];
+	const currentSessionId = state.chat?.currentSessionId;
+	return sessions.find(session => session.id === currentSessionId) || null;
+};
+
+export const getChatMessages = (state: PersistedState): ChatMessage[] => {
+	const currentSession = getCurrentChatSession(state);
+	return currentSession?.messages || [];
+};
+
+export const getChatIsTyping = (state: PersistedState): boolean => {
+	return state.chat?.isTyping || false;
+};
+
+export const getChatQuickReplies = (state: PersistedState): QuickReply[] => {
+	return state.chat?.quickReplies || [];
+};
+
+export const getSelectedContractIds = (state: PersistedState): string[] => {
+	return state.chat?.selectedContractIds || [];
+};
+
+export const getChatSearchQuery = (state: PersistedState): string => {
+	return state.chat?.searchQuery || '';
+};
+
+export const getChatSearchResults = (state: PersistedState): ChatMessage[] => {
+	return state.chat?.searchResults || [];
+};
+
+export const getChatState = (state: PersistedState): ChatState => {
+	return state.chat || {
+		sessions: [],
+		currentSessionId: null,
+		selectedContractIds: [],
+		isTyping: false,
+		isConnected: true,
+		quickReplies: [],
+		error: null,
+		searchQuery: '',
+		searchResults: [],
 	};
 }; 

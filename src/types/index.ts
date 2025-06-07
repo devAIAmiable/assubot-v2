@@ -28,6 +28,7 @@ export interface ContractsState {
 export interface RootState {
 	contracts: ContractsState;
 	user: UserState;
+	chat: ChatState;
 }
 
 // Component Props Types
@@ -152,4 +153,49 @@ export interface InsuranceStats {
 	count: number;
 	color: string;
 	icon: React.ComponentType<{ className?: string }>;
+}
+
+// Chat Types
+export interface ChatMessage {
+	id: string;
+	content: string;
+	sender: 'user' | 'bot';
+	timestamp: string;
+	isTyping?: boolean;
+	type?: 'text' | 'quick_reply' | 'suggestion';
+	contractIds?: string[]; // Associated contract IDs for context
+}
+
+export interface QuickReply {
+	id: string;
+	text: string;
+	payload?: string;
+}
+
+export interface ChatSession {
+	id: string;
+	title: string;
+	createdAt: string;
+	updatedAt: string;
+	messages: ChatMessage[];
+	selectedContractIds: string[];
+	messageCount: number;
+}
+
+export interface ChatState {
+	sessions: ChatSession[];
+	currentSessionId: string | null;
+	selectedContractIds: string[];
+	isTyping: boolean;
+	isConnected: boolean;
+	quickReplies: QuickReply[];
+	error: string | null;
+	searchQuery: string;
+	searchResults: ChatMessage[];
+}
+
+export interface ChatResponse {
+	message: string;
+	quickReplies?: QuickReply[];
+	suggestions?: string[];
 } 
