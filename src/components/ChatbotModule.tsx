@@ -216,7 +216,7 @@ const ChatbotModule = () => {
 						</div>
 						
 						<p className="text-sm text-gray-600 mb-4">
-							Choisissez un ou plusieurs contrats pour personnaliser votre conversation avec AssuBot.
+							Choisissez un ou plusieurs contrats pour personnaliser votre conversation avec AI'A.
 						</p>
 						
 						{/* Chat Title Input */}
@@ -362,7 +362,7 @@ const ChatbotModule = () => {
 										className="p-3 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200"
 									>
 										<div className="text-xs text-gray-500 mb-1">
-											{formatTime(result.timestamp)} • {result.sender === 'user' ? 'Vous' : 'AssuBot'}
+											{formatTime(result.timestamp)} • {result.sender === 'user' ? 'Vous' : 'AI'A'}
 										</div>
 										<div 
 											className="text-sm"
@@ -488,7 +488,7 @@ const ChatbotModule = () => {
 							</motion.div>
 							<div className="flex-1 min-w-0">
 								<div className="flex items-center space-x-2">
-									<h1 className="text-lg font-semibold">AssuBot</h1>
+									<h1 className="text-lg font-semibold">AI'A</h1>
 									{currentSession && (
 										<span className="text-sm bg-white/20 px-2 py-1 rounded text-white/90">
 											{currentSession.title}
@@ -575,7 +575,7 @@ const ChatbotModule = () => {
 									Aucune conversation active
 								</h3>
 								<p className="text-gray-600 text-sm mb-4">
-									Créez une nouvelle conversation pour commencer à discuter avec AssuBot.
+									Créez une nouvelle conversation pour commencer à discuter avec AI'A.
 								</p>
 								<motion.button
 									onClick={() => setShowContractSelection(true)}
@@ -611,7 +611,7 @@ const ChatbotModule = () => {
 									Bienvenue dans votre conversation ! 👋
 								</h3>
 								<p className="text-gray-600 text-sm mb-4">
-									Commencez à taper votre message pour discuter avec AssuBot. Je suis là pour vous aider avec vos questions d'assurance.
+									Commencez à taper votre message pour discuter avec AI'A. Je suis là pour vous aider avec vos questions d'assurance.
 								</p>
 								{selectedContractIds.length > 0 && (
 									<div className="text-xs mt-3 p-2 rounded" style={{ 
@@ -667,7 +667,7 @@ const ChatbotModule = () => {
 									<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
 									<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
 								</div>
-								<span className="text-sm text-gray-500">AssuBot écrit...</span>
+								<span className="text-sm text-gray-500">AI'A écrit...</span>
 							</div>
 						</div>
 					)}
