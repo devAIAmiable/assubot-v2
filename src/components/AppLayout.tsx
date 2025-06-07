@@ -22,10 +22,10 @@ const AppLayout = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const dispatch = useAppDispatch();
-	
+
 	// Get user from Redux store
 	const { currentUser, isAuthenticated } = useAppSelector(getUserState);
-	
+
 	const [notifications] = useState([
 		{ id: 1, message: 'Votre contrat santé expire dans 45 jours', time: '2h', unread: true },
 		{ id: 2, message: 'Nouvelle offre auto disponible', time: '1j', unread: true },
@@ -51,7 +51,7 @@ const AppLayout = () => {
 			current: getCurrentModule() === 'contrats',
 		},
 		{
-			name: 'AssuBot',
+			name: "AI'A",
 			path: '/app/chatbot',
 			icon: FaRobot,
 			current: getCurrentModule() === 'chatbot',
@@ -64,7 +64,7 @@ const AppLayout = () => {
 		},
 	];
 
-	const unreadNotifications = notifications.filter(n => n.unread).length;
+	const unreadNotifications = notifications.filter((n) => n.unread).length;
 
 	const handleNavigate = (path: string) => {
 		navigate(path);
@@ -92,7 +92,11 @@ const AppLayout = () => {
 	// Get user display name
 	const getUserDisplayName = () => {
 		if (currentUser) {
-			return currentUser.name || `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'Utilisateur';
+			return (
+				currentUser.name ||
+				`${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() ||
+				'Utilisateur'
+			);
 		}
 		return 'Utilisateur';
 	};
@@ -100,7 +104,7 @@ const AppLayout = () => {
 	return (
 		<div className="min-h-screen bg-gray-50">
 			{/* Top Navigation Bar */}
-			<motion.nav 
+			<motion.nav
 				className="bg-white border-b border-gray-200 sticky top-0 z-50"
 				initial={{ y: -100 }}
 				animate={{ y: 0 }}
@@ -109,7 +113,7 @@ const AppLayout = () => {
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="flex justify-between items-center h-16">
 						{/* Logo */}
-						<motion.div 
+						<motion.div
 							className="flex items-center cursor-pointer"
 							whileHover={{ scale: 1.05 }}
 							onClick={() => handleNavigate('/app/dashboard')}
@@ -195,7 +199,7 @@ const AppLayout = () => {
 											))}
 										</div>
 										<div className="px-4 py-2 border-t border-gray-100">
-											<button 
+											<button
 												onClick={() => handleNavigate('/app/notifications')}
 												className="text-sm text-[#1e51ab] hover:text-[#163d82] font-medium"
 											>
@@ -210,9 +214,9 @@ const AppLayout = () => {
 							<Menu as="div" className="relative">
 								<Menu.Button className="flex items-center space-x-2 p-2 text-gray-600 hover:text-[#1e51ab] hover:bg-gray-50 rounded-lg transition-colors">
 									{currentUser?.avatar ? (
-										<img 
-											src={currentUser.avatar} 
-											alt="Avatar" 
+										<img
+											src={currentUser.avatar}
+											alt="Avatar"
 											className="w-8 h-8 rounded-full object-cover"
 										/>
 									) : (
@@ -243,9 +247,9 @@ const AppLayout = () => {
 											<div className="px-4 py-3 border-b border-gray-100">
 												<div className="flex items-center space-x-3">
 													{currentUser.avatar ? (
-														<img 
-															src={currentUser.avatar} 
-															alt="Avatar" 
+														<img
+															src={currentUser.avatar}
+															alt="Avatar"
 															className="w-10 h-10 rounded-full object-cover"
 														/>
 													) : (
@@ -257,9 +261,7 @@ const AppLayout = () => {
 														<p className="text-sm font-medium text-gray-900 truncate">
 															{getUserDisplayName()}
 														</p>
-														<p className="text-xs text-gray-500 truncate">
-															{currentUser.email}
-														</p>
+														<p className="text-xs text-gray-500 truncate">{currentUser.email}</p>
 														{currentUser.professional_category && (
 															<p className="text-xs text-gray-400">
 																{currentUser.professional_category}
@@ -308,7 +310,7 @@ const AppLayout = () => {
 											)}
 										</Menu.Item>
 										<div className="border-t border-gray-100 my-1"></div>
-										
+
 										{/* Logout vs Return to Landing based on auth status */}
 										{isAuthenticated ? (
 											<Menu.Item>
@@ -378,4 +380,4 @@ const AppLayout = () => {
 	);
 };
 
-export default AppLayout; 
+export default AppLayout;
