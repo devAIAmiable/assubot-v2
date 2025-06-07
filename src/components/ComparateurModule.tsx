@@ -1,11 +1,6 @@
-import {
-	FaCar,
-	FaHome,
-	FaMedkit,
-	FaMotorcycle,
-} from 'react-icons/fa';
+import { FaCar, FaHome, FaMedkit, FaMotorcycle } from 'react-icons/fa';
 import type { InsuranceType, InsuranceTypeConfig } from '../types';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { ComparisonService, type ComparisonOffer } from '../services/comparisonService';
 
 // Import the new components
@@ -24,7 +19,7 @@ export interface SimpleFormData {
 	location: string;
 	postalCode: string;
 	monthlyBudget: string;
-	
+
 	// Auto specific
 	vehicleType: string;
 	brand: string;
@@ -37,7 +32,7 @@ export interface SimpleFormData {
 	parkingLocation: string;
 	claimsHistory: string;
 	drivingExperience: string;
-	
+
 	// Habitation specific
 	propertyType: string;
 	propertyStatus: string;
@@ -45,14 +40,14 @@ export interface SimpleFormData {
 	numberOfRooms: string;
 	hasAlarm: string;
 	securityLevel: string;
-	
+
 	// Santé specific
 	familyStatus: string;
 	numberOfDependents: string;
 	hasCurrentInsurance: string;
 	wearGlasses: string;
 	needsDental: string;
-	
+
 	// Coverage
 	coverageLevel: string;
 }
@@ -66,9 +61,7 @@ import { useComparisons } from '../hooks/useComparisons';
 const ComparateurModule = () => {
 	const user = useAppSelector((state) => state.user?.currentUser);
 	const contracts = useAppSelector((state) => state.contracts?.contracts || []);
-	const { 
-		saveComparison
-	} = useComparisons();
+	const { saveComparison } = useComparisons();
 
 	// State management
 	const [currentStep, setCurrentStep] = useState<ComparateurStep>('history');
@@ -93,9 +86,9 @@ const ComparateurModule = () => {
 		age: calculateAge(user?.birth_date || '') || '',
 		profession: user?.professional_category || '',
 		location: user?.city || '',
-		postalCode: '',
+		postalCode: user?.zipcode || '',
 		monthlyBudget: '',
-		
+
 		// Auto specific
 		vehicleType: '',
 		brand: '',
@@ -108,7 +101,7 @@ const ComparateurModule = () => {
 		parkingLocation: '',
 		claimsHistory: '',
 		drivingExperience: '',
-		
+
 		// Habitation specific
 		propertyType: '',
 		propertyStatus: '',
@@ -116,14 +109,14 @@ const ComparateurModule = () => {
 		numberOfRooms: '',
 		hasAlarm: '',
 		securityLevel: '',
-		
+
 		// Santé specific
 		familyStatus: '',
 		numberOfDependents: '',
 		hasCurrentInsurance: '',
 		wearGlasses: '',
 		needsDental: '',
-		
+
 		// Coverage
 		coverageLevel: '',
 	});
@@ -149,15 +142,15 @@ const ComparateurModule = () => {
 
 	// Separate state setters to minimize re-renders
 	const updatePriceRange = useCallback((newRange: number[]) => {
-		setFilters(prev => ({ ...prev, priceRange: newRange }));
+		setFilters((prev) => ({ ...prev, priceRange: newRange }));
 	}, []);
 
 	const updateInsurers = useCallback((newInsurers: string[]) => {
-		setFilters(prev => ({ ...prev, insurers: newInsurers }));
+		setFilters((prev) => ({ ...prev, insurers: newInsurers }));
 	}, []);
 
 	const updateRating = useCallback((newRating: number) => {
-		setFilters(prev => ({ ...prev, rating: newRating }));
+		setFilters((prev) => ({ ...prev, rating: newRating }));
 	}, []);
 
 	const resetFilters = useCallback(() => {
@@ -185,20 +178,20 @@ const ComparateurModule = () => {
 	// Memoize filtered results to prevent unnecessary recalculations
 	const filteredResults = useMemo(() => {
 		return comparisonResults.filter((offer) => {
-		if (filters.rating > 0 && offer.rating < filters.rating) return false;
-		if (filters.insurers.length > 0 && !filters.insurers.includes(offer.insurer)) return false;
-		if (offer.price.monthly < filters.priceRange[0] || offer.price.monthly > filters.priceRange[1])
-			return false;
-		return true;
-	});
+			if (filters.rating > 0 && offer.rating < filters.rating) return false;
+			if (filters.insurers.length > 0 && !filters.insurers.includes(offer.insurer)) return false;
+			if (
+				offer.price.monthly < filters.priceRange[0] ||
+				offer.price.monthly > filters.priceRange[1]
+			)
+				return false;
+			return true;
+		});
 	}, [comparisonResults, filters.rating, filters.insurers, filters.priceRange]);
 
 	// Memoize pagination calculations
 	const paginatedResults = useMemo(() => {
-		return filteredResults.slice(
-		(currentPage - 1) * itemsPerPage,
-		currentPage * itemsPerPage
-	);
+		return filteredResults.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 	}, [filteredResults, currentPage, itemsPerPage]);
 
 	const totalPages = useMemo(() => {
@@ -206,58 +199,67 @@ const ComparateurModule = () => {
 	}, [filteredResults.length, itemsPerPage]);
 
 	// Debounce timer ref
-	const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+	const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	// Handle price range changes with debouncing
-	const handlePriceRangeChange = useCallback((newRange: number[]) => {
-		setIsFilteringResults(true);
-		
-		// Clear existing timer
-		if (debounceTimerRef.current) {
-			clearTimeout(debounceTimerRef.current);
-		}
-		
-		// Set new timer for debounced update
-		debounceTimerRef.current = setTimeout(() => {
-			updatePriceRange(newRange);
-			setCurrentPage(1);
-			setIsFilteringResults(false);
-		}, 500);
-	}, [updatePriceRange]);
+	const handlePriceRangeChange = useCallback(
+		(newRange: number[]) => {
+			setIsFilteringResults(true);
+
+			// Clear existing timer
+			if (debounceTimerRef.current) {
+				clearTimeout(debounceTimerRef.current);
+			}
+
+			// Set new timer for debounced update
+			debounceTimerRef.current = setTimeout(() => {
+				updatePriceRange(newRange);
+				setCurrentPage(1);
+				setIsFilteringResults(false);
+			}, 500);
+		},
+		[updatePriceRange]
+	);
 
 	// Handle rating changes immediately
-	const handleRatingChange = useCallback((newRating: number) => {
-		setIsFilteringResults(true);
-		updateRating(newRating);
-		setCurrentPage(1);
-		
-		setTimeout(() => {
-			setIsFilteringResults(false);
-		}, 150);
-	}, [updateRating]);
+	const handleRatingChange = useCallback(
+		(newRating: number) => {
+			setIsFilteringResults(true);
+			updateRating(newRating);
+			setCurrentPage(1);
+
+			setTimeout(() => {
+				setIsFilteringResults(false);
+			}, 150);
+		},
+		[updateRating]
+	);
 
 	// Handle insurer changes immediately
-	const handleInsurerChange = useCallback((insurer: string, isChecked: boolean) => {
-		setIsFilteringResults(true);
-		
-		if (isChecked) {
-			updateInsurers([...filters.insurers, insurer]);
-		} else {
-			updateInsurers(filters.insurers.filter((i) => i !== insurer));
-		}
-		setCurrentPage(1);
-		
-		setTimeout(() => {
-			setIsFilteringResults(false);
-		}, 150);
-	}, [filters.insurers, updateInsurers]);
+	const handleInsurerChange = useCallback(
+		(insurer: string, isChecked: boolean) => {
+			setIsFilteringResults(true);
+
+			if (isChecked) {
+				updateInsurers([...filters.insurers, insurer]);
+			} else {
+				updateInsurers(filters.insurers.filter((i) => i !== insurer));
+			}
+			setCurrentPage(1);
+
+			setTimeout(() => {
+				setIsFilteringResults(false);
+			}, 150);
+		},
+		[filters.insurers, updateInsurers]
+	);
 
 	// Handle filter reset
 	const handleFilterReset = useCallback(() => {
 		setIsFilteringResults(true);
 		resetFilters();
 		setCurrentPage(1);
-		
+
 		setTimeout(() => {
 			setIsFilteringResults(false);
 		}, 150);
@@ -271,28 +273,31 @@ const ComparateurModule = () => {
 		}));
 	}, []);
 
-	const handleTypeSelection = useCallback((type: InsuranceType) => {
-		setSelectedType(type);
+	const handleTypeSelection = useCallback(
+		(type: InsuranceType) => {
+			setSelectedType(type);
 
-		// Prefill from existing contracts
-		const existingContract = contracts.find((c) => c.type === type && c.status === 'active');
-		if (existingContract) {
-			setFormData((prev) => ({
-				...prev,
-				monthlyBudget: Math.round(existingContract.premium / 12).toString(),
-				vehicleType: type === 'auto' ? 'car' : '',
-				coverageLevel: type === 'auto' ? 'tous_risques' : 'standard',
-			}));
-		}
-		
-		setCurrentStep('form');
-	}, [contracts]);
+			// Prefill from existing contracts
+			const existingContract = contracts.find((c) => c.type === type && c.status === 'active');
+			if (existingContract) {
+				setFormData((prev) => ({
+					...prev,
+					monthlyBudget: Math.round(existingContract.premium / 12).toString(),
+					vehicleType: type === 'auto' ? 'car' : '',
+					coverageLevel: type === 'auto' ? 'tous_risques' : 'standard',
+				}));
+			}
+
+			setCurrentStep('form');
+		},
+		[contracts]
+	);
 
 	const handleFormSubmit = useCallback(async () => {
 		if (!selectedType) return;
-		
+
 		setCurrentStep('loading');
-		
+
 		try {
 			// Use current formData directly, not through dependency
 			setFormData((currentFormData) => {
@@ -325,13 +330,13 @@ const ComparateurModule = () => {
 						hasAntiTheft: false,
 					}),
 				} as Parameters<typeof ComparisonService.getComparisons>[1];
-				
+
 				// Process comparison asynchronously
 				ComparisonService.getComparisons(selectedType, serviceFormData)
 					.then((results) => {
 						setComparisonResults(results);
 						setCurrentStep('results');
-						
+
 						// Save this comparison to history using Redux
 						const comparisonData = {
 							insuranceType: selectedType,
@@ -350,14 +355,14 @@ const ComparateurModule = () => {
 								rating: results[0]?.rating || 0,
 							},
 						};
-						
+
 						saveComparison(comparisonData);
 					})
 					.catch((error) => {
 						console.error('Error fetching comparison results:', error);
 						setCurrentStep('form');
 					});
-				
+
 				// Return unchanged form data
 				return currentFormData;
 			});
@@ -383,8 +388,8 @@ const ComparateurModule = () => {
 				lowerQuestion.includes('économie')
 			) {
 				const cheapestOffer = comparisonResults.length > 0 ? comparisonResults[0] : null;
-				const recommendedOffer = comparisonResults.find(offer => offer.recommended);
-				
+				const recommendedOffer = comparisonResults.find((offer) => offer.recommended);
+
 				if (recommendedOffer && cheapestOffer && recommendedOffer.id === cheapestOffer.id) {
 					response = `Excellente nouvelle ! **${recommendedOffer.insurer}** à ${recommendedOffer.price.monthly}€/mois est à la fois notre recommandation et l'offre la moins chère. Cette offre vous fait économiser tout en conservant une couverture complète avec assistance 24h/24.`;
 				} else if (cheapestOffer) {
@@ -407,7 +412,8 @@ const ComparateurModule = () => {
 			} else if (lowerQuestion.includes('franchise') || lowerQuestion.includes('remboursement')) {
 				response = `Pour minimiser les franchises, **Direct Assurance** propose un bris de glace sans franchise, tandis qu'Allianz applique 50€ et MAIF 100€. Cela peut représenter une économie significative en cas de sinistre.`;
 			} else {
-				const recommendedOffer = comparisonResults.find(offer => offer.recommended) || comparisonResults[0];
+				const recommendedOffer =
+					comparisonResults.find((offer) => offer.recommended) || comparisonResults[0];
 				response = recommendedOffer
 					? `**Recommandation principale : ${recommendedOffer.insurer}**
 - Prix optimal : ${recommendedOffer.price.monthly}€/mois
@@ -457,9 +463,7 @@ Cette offre correspond parfaitement à vos critères et vous offre le meilleur r
 					setCurrentStep={setCurrentStep}
 				/>
 			)}
-			{currentStep === 'loading' && (
-				<LoadingView selectedType={selectedType} />
-			)}
+			{currentStep === 'loading' && <LoadingView selectedType={selectedType} />}
 			{currentStep === 'results' && (
 				<ResultsView
 					selectedType={selectedType}
