@@ -374,55 +374,6 @@ const Dashboard = () => {
 				</div>
 			</motion.div>
 
-			{/* Smart Suggestions */}
-			<motion.div
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.6, delay: 0.15 }}
-			>
-				<div className="flex items-center justify-between mb-6">
-					<h2 className="text-2xl font-bold text-gray-900 flex items-center">
-						<FaLightbulb className="h-6 w-6 text-yellow-500 mr-3" />
-						Suggestions intelligentes
-					</h2>
-					<span className="text-sm text-gray-500">
-						Adaptées à votre profil
-						{user?.professional_category ? ` (${user.professional_category})` : ''}
-					</span>
-				</div>
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-					{smartSuggestions.map((suggestion) => {
-						const Icon = suggestion.icon;
-						return (
-							<motion.div
-								key={suggestion.id}
-								className={`border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${getPriorityColor(suggestion.priority)}`}
-								whileHover={{ scale: 1.02 }}
-							>
-								<div className="flex items-start justify-between mb-4">
-									<div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-white`}>
-										<Icon className={`h-5 w-5 ${getPriorityIconColor(suggestion.priority)}`} />
-									</div>
-									{suggestion.savings && (
-										<span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-											Économie: {suggestion.savings}
-										</span>
-									)}
-								</div>
-								<h3 className="font-semibold text-gray-900 mb-2">{suggestion.title}</h3>
-								<p className="text-gray-600 text-sm mb-4">{suggestion.description}</p>
-								<button
-									onClick={() => handleNavigateToModule('comparateur')}
-									className="w-full bg-white text-[#1e51ab] border border-[#1e51ab] px-4 py-2 rounded-xl font-medium hover:bg-[#1e51ab] hover:text-white transition-colors text-sm"
-								>
-									{suggestion.action}
-								</button>
-							</motion.div>
-						);
-					})}
-				</div>
-			</motion.div>
-
 			{/* Insurance Budget Chart */}
 			<motion.div
 				initial={{ opacity: 0, y: 20 }}
@@ -534,6 +485,55 @@ const Dashboard = () => {
 							)}
 						</div>
 					</div>
+				</div>
+			</motion.div>
+
+			{/* Smart Suggestions */}
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.6, delay: 0.15 }}
+			>
+				<div className="flex items-center justify-between mb-6">
+					<h2 className="text-2xl font-bold text-gray-900 flex items-center">
+						<FaLightbulb className="h-6 w-6 text-yellow-500 mr-3" />
+						Suggestions intelligentes
+					</h2>
+					<span className="text-sm text-gray-500">
+						Adaptées à votre profil
+						{user?.professional_category ? ` (${user.professional_category})` : ''}
+					</span>
+				</div>
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+					{smartSuggestions.map((suggestion) => {
+						const Icon = suggestion.icon;
+						return (
+							<motion.div
+								key={suggestion.id}
+								className={`border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${getPriorityColor(suggestion.priority)}`}
+								whileHover={{ scale: 1.02 }}
+							>
+								<div className="flex items-start justify-between mb-4">
+									<div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-white`}>
+										<Icon className={`h-5 w-5 ${getPriorityIconColor(suggestion.priority)}`} />
+									</div>
+									{suggestion.savings && (
+										<span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+											Économie: {suggestion.savings}
+										</span>
+									)}
+								</div>
+								<h3 className="font-semibold text-gray-900 mb-2">{suggestion.title}</h3>
+								<p className="text-gray-600 text-sm mb-4">{suggestion.description}</p>
+								<button
+									onClick={() => handleNavigateToModule('comparateur')}
+									className="w-full bg-white text-[#1e51ab] border border-[#1e51ab] px-4 py-2 rounded-xl font-medium hover:bg-[#1e51ab] hover:text-white transition-colors text-sm"
+								>
+									{suggestion.action}
+								</button>
+							</motion.div>
+						);
+					})}
 				</div>
 			</motion.div>
 
