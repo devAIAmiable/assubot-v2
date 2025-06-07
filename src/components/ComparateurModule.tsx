@@ -13,6 +13,7 @@ import {
 	FaStar,
 	FaTimes,
 } from 'react-icons/fa';
+import type { InsuranceType, InsuranceTypeConfig } from '../types';
 
 import { motion } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
@@ -84,7 +85,7 @@ const ComparateurModule = () => {
 	});
 
 	// Insurance types
-	const insuranceTypes = [
+	const insuranceTypes: InsuranceTypeConfig[] = [
 		{ id: 'auto', name: 'Assurance Auto', icon: FaCar, color: 'from-blue-500 to-blue-600' },
 		{
 			id: 'habitation',
@@ -220,7 +221,7 @@ const ComparateurModule = () => {
 
 	const totalPages = Math.ceil(filteredResults.length / itemsPerPage);
 
-	const handleTypeSelection = (type: 'auto' | 'habitation' | 'sante' | 'moto') => {
+	const handleTypeSelection = (type: InsuranceType) => {
 		setSelectedType(type);
 		setCurrentStep('form');
 

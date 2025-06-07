@@ -56,6 +56,14 @@ export interface InsuranceTypeInfo {
 	features: string[];
 }
 
+// Insurance Type Configuration for the selection step
+export interface InsuranceTypeConfig {
+	id: InsuranceType;
+	name: string;
+	icon: React.ComponentType<{ className?: string }>;
+	color: string; // Tailwind gradient classes like 'from-blue-500 to-blue-600'
+}
+
 export interface InsuranceFormData {
 	// Auto insurance
 	vehicleType?: string;
