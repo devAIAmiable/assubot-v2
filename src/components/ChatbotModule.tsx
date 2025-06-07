@@ -362,7 +362,7 @@ const ChatbotModule = () => {
 										className="p-3 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200"
 									>
 										<div className="text-xs text-gray-500 mb-1">
-											{formatTime(result.timestamp)} • {result.sender === 'user' ? 'Vous' : 'AI'A'}
+											{formatTime(result.timestamp)} • {result.sender === 'user' ? 'Vous' : 'AI\'A'}
 										</div>
 										<div 
 											className="text-sm"
