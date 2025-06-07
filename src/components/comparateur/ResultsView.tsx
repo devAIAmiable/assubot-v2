@@ -32,7 +32,7 @@ interface ResultsViewProps {
 	aiResponse: string;
 	isAiLoading: boolean;
 	isFilteringResults: boolean;
-	setCurrentStep: (step: string) => void;
+	setCurrentStep: (step: 'history' | 'type' | 'form' | 'results' | 'loading') => void;
 	setAiQuestion: (question: string) => void;
 	handleAiQuestion: () => void;
 	handlePriceRangeChange: (range: number[]) => void;

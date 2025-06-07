@@ -1,7 +1,9 @@
 import { FaCheck, FaChevronLeft } from 'react-icons/fa';
 
+import type { Contract } from '../../store/contractsSlice';
 import type { InsuranceType } from '../../types';
 import React from 'react';
+import type { User } from '../../store/userSlice';
 import { motion } from 'framer-motion';
 
 interface InsuranceTypeConfig {
@@ -11,22 +13,11 @@ interface InsuranceTypeConfig {
 	color: string;
 }
 
-interface Contract {
-	type: InsuranceType;
-	status: string;
-	[key: string]: unknown;
-}
-
-interface User {
-	first_name?: string;
-	[key: string]: unknown;
-}
-
 interface TypeSelectionViewProps {
 	user: User | null;
 	insuranceTypes: InsuranceTypeConfig[];
 	contracts: Contract[];
-	setCurrentStep: (step: string) => void;
+	setCurrentStep: (step: 'history' | 'type' | 'form' | 'results' | 'loading') => void;
 	handleTypeSelection: (type: InsuranceType) => void;
 }
 
@@ -78,7 +69,7 @@ const TypeSelectionView: React.FC<TypeSelectionViewProps> = ({
 									<Icon className="h-10 w-10 text-white" />
 								</div>
 								<h3 className="text-xl font-semibold text-gray-900 mb-3">{type.name}</h3>
-								{contracts.some((c) => c.type === type.id && c.status === 'active') && (
+								{contracts.some((c) => (c.type === type.id || (c.type === 'autre' && type.id === 'moto')) && c.status === 'active') && (
 									<div className="flex items-center justify-center text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
 										<FaCheck className="h-3 w-3 mr-2" />
 										Contrat existant détecté

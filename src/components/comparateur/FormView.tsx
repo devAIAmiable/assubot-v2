@@ -39,7 +39,7 @@ interface FormViewProps {
 	formData: SimpleFormData;
 	updateFormField: (field: keyof SimpleFormData, value: string) => void;
 	handleFormSubmit: () => void;
-	setCurrentStep: (step: string) => void;
+	setCurrentStep: (step: 'history' | 'type' | 'form' | 'results' | 'loading') => void;
 }
 
 const FormView: React.FC<FormViewProps> = ({

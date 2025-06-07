@@ -6,6 +6,8 @@ import {
 
 import type { InsuranceType } from '../../types';
 import React from 'react';
+import type { SimpleFormData } from '../ComparateurModule';
+import type { User } from '../../store/userSlice';
 import { motion } from 'framer-motion';
 import { useComparisons } from '../../hooks/useComparisons';
 
@@ -16,21 +18,7 @@ interface InsuranceTypeConfig {
 	color: string;
 }
 
-interface SimpleFormData {
-	age: string;
-	profession: string;
-	location: string;
-	postalCode: string;
-	monthlyBudget: string;
-	vehicleType: string;
-	coverageLevel: string;
-	[key: string]: string;
-}
 
-interface User {
-	first_name?: string;
-	[key: string]: unknown;
-}
 
 interface PastComparisonsViewProps {
 	user: User | null;
@@ -38,7 +26,7 @@ interface PastComparisonsViewProps {
 	historyPage: number;
 	historyItemsPerPage: number;
 	setHistoryPage: (page: number) => void;
-	setCurrentStep: (step: string) => void;
+	setCurrentStep: (step: 'history' | 'type' | 'form' | 'results' | 'loading') => void;
 	setSelectedType: (type: InsuranceType) => void;
 	setFormData: React.Dispatch<React.SetStateAction<SimpleFormData>>;
 }

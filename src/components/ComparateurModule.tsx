@@ -15,8 +15,10 @@ import FormView from './comparateur/FormView';
 import LoadingView from './comparateur/LoadingView';
 import ResultsView from './comparateur/ResultsView';
 
-// Keep the existing simple form data interface for now
-interface SimpleFormData {
+// Import types from Redux are now used in the component interfaces
+
+// Export the SimpleFormData interface for use in components
+export interface SimpleFormData {
 	age: string;
 	profession: string;
 	location: string;
@@ -55,6 +57,9 @@ interface SimpleFormData {
 	coverageLevel: string;
 }
 
+// Create a step type union for type safety
+type ComparateurStep = 'history' | 'type' | 'form' | 'results' | 'loading';
+
 import { useAppSelector } from '../store/hooks';
 import { useComparisons } from '../hooks/useComparisons';
 
@@ -66,7 +71,7 @@ const ComparateurModule = () => {
 	} = useComparisons();
 
 	// State management
-	const [currentStep, setCurrentStep] = useState<'history' | 'type' | 'form' | 'results' | 'loading'>('history');
+	const [currentStep, setCurrentStep] = useState<ComparateurStep>('history');
 	const [selectedType, setSelectedType] = useState<'auto' | 'habitation' | 'sante' | 'moto' | null>(
 		null
 	);
@@ -424,22 +429,22 @@ Cette offre correspond parfaitement à vos critères et vous offre le meilleur r
 		<div className="space-y-8">
 			{currentStep === 'history' && (
 				<PastComparisonsView
-					user={user as any}
+					user={user}
 					insuranceTypes={insuranceTypes}
 					historyPage={historyPage}
 					historyItemsPerPage={historyItemsPerPage}
 					setHistoryPage={setHistoryPage}
-					setCurrentStep={(step: string) => setCurrentStep(step as any)}
+					setCurrentStep={setCurrentStep}
 					setSelectedType={setSelectedType}
 					setFormData={setFormData}
 				/>
 			)}
 			{currentStep === 'type' && (
 				<TypeSelectionView
-					user={user as any}
+					user={user}
 					insuranceTypes={insuranceTypes}
-					contracts={contracts as any}
-					setCurrentStep={(step: string) => setCurrentStep(step as any)}
+					contracts={contracts}
+					setCurrentStep={setCurrentStep}
 					handleTypeSelection={handleTypeSelection}
 				/>
 			)}
@@ -449,7 +454,7 @@ Cette offre correspond parfaitement à vos critères et vous offre le meilleur r
 					formData={formData}
 					updateFormField={updateFormField}
 					handleFormSubmit={handleFormSubmit}
-					setCurrentStep={(step: string) => setCurrentStep(step as any)}
+					setCurrentStep={setCurrentStep}
 				/>
 			)}
 			{currentStep === 'loading' && (
@@ -467,7 +472,7 @@ Cette offre correspond parfaitement à vos critères et vous offre le meilleur r
 					aiResponse={aiResponse}
 					isAiLoading={isAiLoading}
 					isFilteringResults={isFilteringResults}
-					setCurrentStep={(step: string) => setCurrentStep(step as any)}
+					setCurrentStep={setCurrentStep}
 					setAiQuestion={setAiQuestion}
 					handleAiQuestion={handleAiQuestion}
 					handlePriceRangeChange={handlePriceRangeChange}
