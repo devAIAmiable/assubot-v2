@@ -168,11 +168,12 @@ export class ChatService {
 	private getContractContextualResponse(message: string, contractIds: string[], responseKey: string): ChatResponse[] {
 		const contractCount = contractIds.length;
 		const contractText = contractCount === 1 ? 'contrat sélectionné' : 'contrats sélectionnés';
+		const userQuestion = message.length > 50 ? message.substring(0, 50) + '...' : message;
 		
 		// Add contract-specific context to responses
 		const contextualResponses: ChatResponse[] = [
 			{
-				message: `Basé sur ${contractCount === 1 ? 'le' : 'les'} ${contractCount} ${contractText}, voici ce que je peux vous dire : ${getRandomResponse(mockResponses[responseKey] || mockResponses.default).message}`,
+				message: `Concernant "${userQuestion}", et basé sur ${contractCount === 1 ? 'le' : 'les'} ${contractCount} ${contractText}, voici ce que je peux vous dire : ${getRandomResponse(mockResponses[responseKey] || mockResponses.default).message}`,
 				quickReplies: [
 					{ id: '1', text: 'Modifier ma sélection', payload: 'change_contracts' },
 					{ id: '2', text: 'Détails du contrat', payload: 'contract_details' },
