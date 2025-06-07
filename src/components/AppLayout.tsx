@@ -14,6 +14,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
+import { getUserState } from '../utils/stateHelpers';
 import { logout } from '../store/userSlice';
 import { motion } from 'framer-motion';
 
@@ -23,7 +24,7 @@ const AppLayout = () => {
 	const dispatch = useAppDispatch();
 	
 	// Get user from Redux store
-	const { currentUser, isAuthenticated } = useAppSelector((state) => (state.user as any) || { currentUser: null, isAuthenticated: false });
+	const { currentUser, isAuthenticated } = useAppSelector(getUserState);
 	
 	const [notifications] = useState([
 		{ id: 1, message: 'Votre contrat santé expire dans 45 jours', time: '2h', unread: true },

@@ -10,7 +10,6 @@ import {
 	FaSave,
 	FaTimes,
 	FaUser,
-	FaUserTie,
 } from 'react-icons/fa';
 import {
 	changePasswordSuccess,
@@ -23,12 +22,13 @@ import {
 } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
+import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 const ProfilModule = () => {
 	const dispatch = useAppDispatch();
-	const { currentUser, loading, error } = useAppSelector((state) => (state.user as any) || { currentUser: null, loading: false, error: null });
+	const { currentUser } = useAppSelector(getUserState);
 
 	const [isEditingPersonal, setIsEditingPersonal] = useState(false);
 	const [isEditingAddress, setIsEditingAddress] = useState(false);

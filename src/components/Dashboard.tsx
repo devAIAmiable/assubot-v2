@@ -1,9 +1,4 @@
-import {
-	ArcElement,
-	Chart as ChartJS,
-	Legend,
-	Tooltip,
-} from 'chart.js';
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import {
 	FaArrowDown,
 	FaArrowRight,
@@ -33,8 +28,8 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Dashboard = () => {
 	const navigate = useNavigate();
-	const contracts = useAppSelector((state) => (state.contracts as any)?.contracts || []);
-	const user = useAppSelector((state) => (state.user as any)?.currentUser);
+	const contracts = useAppSelector((state) => state.contracts?.contracts || []);
+	const user = useAppSelector((state) => state.user?.currentUser);
 
 	const handleNavigateToModule = (module: string) => {
 		navigate(`/app/${module}`);
@@ -42,41 +37,47 @@ const Dashboard = () => {
 
 	// Calculate insurance budget from Redux contracts data
 	const insuranceBudget = [
-		{ 
-			type: 'Santé', 
-			amount: contracts.filter((c: any) => c.type === 'sante' && c.status === 'active').reduce((sum: number, c: any) => sum + c.premium, 0),
-			color: '#ef4444', 
-			percentage: 0 
+		{
+			type: 'Santé',
+			amount: contracts
+				.filter((c) => c.type === 'sante' && c.status === 'active')
+				.reduce((sum: number, c) => sum + c.premium, 0),
+			color: '#ef4444',
+			percentage: 0,
 		},
-		{ 
-			type: 'Automobile', 
-			amount: contracts.filter((c: any) => c.type === 'auto' && c.status === 'active').reduce((sum: number, c: any) => sum + c.premium, 0),
-			color: '#3b82f6', 
-			percentage: 0 
+		{
+			type: 'Automobile',
+			amount: contracts
+				.filter((c) => c.type === 'auto' && c.status === 'active')
+				.reduce((sum: number, c) => sum + c.premium, 0),
+			color: '#3b82f6',
+			percentage: 0,
 		},
-		{ 
-			type: 'Habitation', 
-			amount: contracts.filter((c: any) => c.type === 'habitation' && c.status === 'active').reduce((sum: number, c: any) => sum + c.premium, 0),
-			color: '#10b981', 
-			percentage: 0 
+		{
+			type: 'Habitation',
+			amount: contracts
+				.filter((c) => c.type === 'habitation' && c.status === 'active')
+				.reduce((sum: number, c) => sum + c.premium, 0),
+			color: '#10b981',
+			percentage: 0,
 		},
 	];
 
 	const totalAnnual = insuranceBudget.reduce((sum, item) => sum + item.amount, 0);
 
 	// Calculate percentages
-	insuranceBudget.forEach(item => {
+	insuranceBudget.forEach((item) => {
 		item.percentage = totalAnnual > 0 ? Math.round((item.amount / totalAnnual) * 100) : 0;
 	});
 
 	// Chart.js data configuration
 	const chartData = {
-		labels: insuranceBudget.map(item => item.type),
+		labels: insuranceBudget.map((item) => item.type),
 		datasets: [
 			{
-				data: insuranceBudget.map(item => item.amount),
-				backgroundColor: insuranceBudget.map(item => item.color),
-				borderColor: insuranceBudget.map(item => item.color),
+				data: insuranceBudget.map((item) => item.amount),
+				backgroundColor: insuranceBudget.map((item) => item.color),
+				borderColor: insuranceBudget.map((item) => item.color),
 				borderWidth: 2,
 				hoverOffset: 8,
 				hoverBorderWidth: 3,
@@ -94,12 +95,12 @@ const Dashboard = () => {
 			},
 			tooltip: {
 				callbacks: {
-					label: function(context) {
+					label: function (context) {
 						const label = context.label || '';
 						const value = context.parsed;
 						const percentage = totalAnnual > 0 ? ((value / totalAnnual) * 100).toFixed(1) : '0';
 						return `${label}: ${value.toLocaleString()}€ (${percentage}%)`;
-					}
+					},
 				},
 				backgroundColor: '#1f2937',
 				titleColor: '#ffffff',
@@ -162,7 +163,7 @@ const Dashboard = () => {
 	const quickActions = [
 		{
 			title: 'Gérer mes contrats',
-			description: 'Centralisez et organisez tous vos contrats d\'assurance',
+			description: "Centralisez et organisez tous vos contrats d'assurance",
 			icon: FaFileContract,
 			module: 'contrats',
 			color: 'bg-blue-50 text-[#1e51ab]',
@@ -170,7 +171,7 @@ const Dashboard = () => {
 		},
 		{
 			title: 'Parler à AssuBot',
-			description: 'Posez vos questions sur l\'assurance à notre IA',
+			description: "Posez vos questions sur l'assurance à notre IA",
 			icon: FaRobot,
 			module: 'chatbot',
 			color: 'bg-purple-50 text-purple-600',
@@ -249,15 +250,19 @@ const Dashboard = () => {
 
 	// Calculate dashboard stats from contracts
 	const contractStats = {
-		active: contracts.filter((c: any) => c.status === 'active').length,
+		active: contracts.filter((c) => c.status === 'active').length,
 		total: contracts.length,
-		expiring: contracts.filter((c: any) => {
+		expiring: contracts.filter((c) => {
 			const endDate = new Date(c.endDate);
 			const now = new Date();
-			const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+			const daysUntilExpiry = Math.ceil(
+				(endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+			);
 			return daysUntilExpiry <= 60 && daysUntilExpiry > 0;
 		}).length,
-		monthlyPremium: contracts.filter((c: any) => c.status === 'active').reduce((sum: number, c: any) => sum + (c.premium / 12), 0),
+		monthlyPremium: contracts
+			.filter((c) => c.status === 'active')
+			.reduce((sum: number, c) => sum + c.premium / 12, 0),
 	};
 
 	return (
@@ -297,7 +302,9 @@ const Dashboard = () => {
 					</div>
 					<div className="flex items-center mt-4 text-sm">
 						<FaArrowUp className="h-4 w-4 text-green-500 mr-1" />
-						<span className="text-green-600 font-medium">+{contractStats.total - contractStats.active}</span>
+						<span className="text-green-600 font-medium">
+							+{contractStats.total - contractStats.active}
+						</span>
 						<span className="text-gray-500 ml-1">total</span>
 					</div>
 				</div>
@@ -306,7 +313,9 @@ const Dashboard = () => {
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-xs font-medium text-gray-600 mb-1">Primes Mensuelles</p>
-							<p className="text-2xl font-bold text-gray-900">{contractStats.monthlyPremium.toFixed(0)}€</p>
+							<p className="text-2xl font-bold text-gray-900">
+								{contractStats.monthlyPremium.toFixed(0)}€
+							</p>
 						</div>
 						<div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
 							<FaEuroSign className="h-6 w-6 text-green-600" />
@@ -377,7 +386,8 @@ const Dashboard = () => {
 						Suggestions intelligentes
 					</h2>
 					<span className="text-sm text-gray-500">
-						Adaptées à votre profil{user?.professional_category ? ` (${user.professional_category})` : ''}
+						Adaptées à votre profil
+						{user?.professional_category ? ` (${user.professional_category})` : ''}
 					</span>
 				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -401,7 +411,7 @@ const Dashboard = () => {
 								</div>
 								<h3 className="font-semibold text-gray-900 mb-2">{suggestion.title}</h3>
 								<p className="text-gray-600 text-sm mb-4">{suggestion.description}</p>
-								<button 
+								<button
 									onClick={() => handleNavigateToModule('comparateur')}
 									className="w-full bg-white text-[#1e51ab] border border-[#1e51ab] px-4 py-2 rounded-xl font-medium hover:bg-[#1e51ab] hover:text-white transition-colors text-sm"
 								>
@@ -428,7 +438,7 @@ const Dashboard = () => {
 								<p className="text-2xl font-bold text-gray-900">{totalAnnual.toLocaleString()}€</p>
 								<p className="text-gray-600">Budget annuel total</p>
 							</div>
-							
+
 							{/* Chart.js Pie Chart */}
 							<div className="h-80 flex items-center justify-center">
 								{totalAnnual > 0 ? (
@@ -444,15 +454,17 @@ const Dashboard = () => {
 							{/* Custom Legend */}
 							{totalAnnual > 0 && (
 								<div className="flex justify-center space-x-6 mt-4">
-									{insuranceBudget.filter(item => item.amount > 0).map((item, index) => (
-										<div key={index} className="flex items-center">
-											<div 
-												className="w-4 h-4 rounded-full mr-2" 
-												style={{ backgroundColor: item.color }}
-											></div>
-											<span className="text-sm font-medium text-gray-700">{item.type}</span>
-										</div>
-									))}
+									{insuranceBudget
+										.filter((item) => item.amount > 0)
+										.map((item, index) => (
+											<div key={index} className="flex items-center">
+												<div
+													className="w-4 h-4 rounded-full mr-2"
+													style={{ backgroundColor: item.color }}
+												></div>
+												<span className="text-sm font-medium text-gray-700">{item.type}</span>
+											</div>
+										))}
 								</div>
 							)}
 						</div>
@@ -460,31 +472,35 @@ const Dashboard = () => {
 						{/* Legend and Details */}
 						<div className="space-y-4">
 							<h3 className="text-lg font-semibold text-gray-900 mb-4">Détails par type</h3>
-							{insuranceBudget.filter(item => item.amount > 0).map((item, index) => (
-								<motion.div 
-									key={index} 
-									className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
-									initial={{ opacity: 0, x: 20 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
-								>
-									<div className="flex items-center">
-										<div 
-											className="w-4 h-4 rounded-full mr-3" 
-											style={{ backgroundColor: item.color }}
-										></div>
-										<div>
-											<p className="font-medium text-gray-900">{item.type}</p>
-											<p className="text-sm text-gray-600">{(item.amount / 12).toFixed(2)}€/mois</p>
+							{insuranceBudget
+								.filter((item) => item.amount > 0)
+								.map((item, index) => (
+									<motion.div
+										key={index}
+										className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+										initial={{ opacity: 0, x: 20 }}
+										animate={{ opacity: 1, x: 0 }}
+										transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
+									>
+										<div className="flex items-center">
+											<div
+												className="w-4 h-4 rounded-full mr-3"
+												style={{ backgroundColor: item.color }}
+											></div>
+											<div>
+												<p className="font-medium text-gray-900">{item.type}</p>
+												<p className="text-sm text-gray-600">
+													{(item.amount / 12).toFixed(2)}€/mois
+												</p>
+											</div>
 										</div>
-									</div>
-									<div className="text-right">
-										<p className="font-semibold text-gray-900">{item.amount.toLocaleString()}€</p>
-										<p className="text-sm text-gray-600">{item.percentage}% du total</p>
-									</div>
-								</motion.div>
-							))}
-							
+										<div className="text-right">
+											<p className="font-semibold text-gray-900">{item.amount.toLocaleString()}€</p>
+											<p className="text-sm text-gray-600">{item.percentage}% du total</p>
+										</div>
+									</motion.div>
+								))}
+
 							{totalAnnual === 0 && (
 								<div className="text-center text-gray-500 py-8">
 									<p>Aucun contrat actif trouvé</p>
@@ -496,9 +512,9 @@ const Dashboard = () => {
 									</button>
 								</div>
 							)}
-							
+
 							{totalAnnual > 0 && (
-								<motion.div 
+								<motion.div
 									className="mt-6 p-4 bg-blue-50 rounded-xl"
 									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
@@ -539,7 +555,9 @@ const Dashboard = () => {
 								whileHover={{ scale: 1.02 }}
 								whileTap={{ scale: 0.98 }}
 							>
-								<div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${action.color}`}>
+								<div
+									className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${action.color}`}
+								>
 									<Icon className="h-6 w-6" />
 								</div>
 								<h3 className="text-lg font-semibold text-gray-900 mb-2">{action.title}</h3>
@@ -564,22 +582,30 @@ const Dashboard = () => {
 				<div className="bg-white border border-gray-100 rounded-2xl p-6">
 					<div className="space-y-4">
 						{recentActivity.map((activity) => (
-							<div key={activity.id} className="flex items-start space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-colors">
-								<div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-									activity.priority === 'high' ? 'bg-red-50' :
-									activity.priority === 'medium' ? 'bg-amber-50' : 'bg-gray-50'
-								}`}>
+							<div
+								key={activity.id}
+								className="flex items-start space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-colors"
+							>
+								<div
+									className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+										activity.priority === 'high'
+											? 'bg-red-50'
+											: activity.priority === 'medium'
+												? 'bg-amber-50'
+												: 'bg-gray-50'
+									}`}
+								>
 									{activity.type === 'contract_expiry' && (
-										<FaExclamationTriangle className={`h-5 w-5 ${
-											activity.priority === 'high' ? 'text-red-600' : 'text-amber-600'
-										}`} />
+										<FaExclamationTriangle
+											className={`h-5 w-5 ${
+												activity.priority === 'high' ? 'text-red-600' : 'text-amber-600'
+											}`}
+										/>
 									)}
 									{activity.type === 'new_offer' && (
 										<FaChartLine className="h-5 w-5 text-emerald-600" />
 									)}
-									{activity.type === 'payment' && (
-										<FaEuroSign className="h-5 w-5 text-gray-600" />
-									)}
+									{activity.type === 'payment' && <FaEuroSign className="h-5 w-5 text-gray-600" />}
 								</div>
 								<div className="flex-1">
 									<div className="flex items-center justify-between">
@@ -592,7 +618,7 @@ const Dashboard = () => {
 						))}
 					</div>
 					<div className="mt-6 pt-4 border-t border-gray-100">
-						<button 
+						<button
 							onClick={() => handleNavigateToModule('notifications')}
 							className="w-full text-center text-[#1e51ab] hover:text-[#163d82] font-medium text-sm"
 						>
@@ -610,37 +636,43 @@ const Dashboard = () => {
 			>
 				<h2 className="text-2xl font-bold text-gray-900 mb-6">Aperçu de votre couverture</h2>
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-					{contracts.filter((contract: any) => contract.status === 'active').slice(0, 3).map((contract: any, index: number) => (
-						<div key={contract.id} className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-							<div className="flex items-center justify-between mb-4">
-								<h3 className="font-semibold text-gray-900">{contract.name}</h3>
-								<span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-									{contract.status === 'active' ? 'Actif' : contract.status}
-								</span>
+					{contracts
+						.filter((contract) => contract.status === 'active')
+						.slice(0, 3)
+						.map((contract) => (
+							<div
+								key={contract.id}
+								className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300"
+							>
+								<div className="flex items-center justify-between mb-4">
+									<h3 className="font-semibold text-gray-900">{contract.name}</h3>
+									<span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+										{contract.status === 'active' ? 'Actif' : contract.status}
+									</span>
+								</div>
+								<p className="text-gray-600 text-sm mb-3">{contract.insurer}</p>
+								<div className="flex items-center justify-between">
+									<span className="text-lg font-bold text-gray-900">
+										{(contract.premium / 12).toFixed(2)}€/mois
+									</span>
+									<button
+										onClick={() => handleNavigateToModule('contrats')}
+										className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
+									>
+										Voir détails
+									</button>
+								</div>
 							</div>
-							<p className="text-gray-600 text-sm mb-3">{contract.insurer}</p>
-							<div className="flex items-center justify-between">
-								<span className="text-lg font-bold text-gray-900">{(contract.premium / 12).toFixed(2)}€/mois</span>
-								<button 
-									onClick={() => handleNavigateToModule('contrats')}
-									className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
-								>
-									Voir détails
-								</button>
-							</div>
-						</div>
-					))}
-					
-					{contracts.filter((contract: any) => contract.status === 'active').length === 0 && (
+						))}
+
+					{contracts.filter((contract) => contract.status === 'active').length === 0 && (
 						<div className="col-span-3 bg-white border border-gray-100 rounded-2xl p-12 text-center">
 							<FaFileContract className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-							<h3 className="text-lg font-semibold text-gray-900 mb-2">
-								Aucun contrat actif
-							</h3>
+							<h3 className="text-lg font-semibold text-gray-900 mb-2">Aucun contrat actif</h3>
 							<p className="text-gray-600 mb-6">
 								Commencez par ajouter vos contrats d'assurance pour voir votre couverture.
 							</p>
-							<button 
+							<button
 								onClick={() => handleNavigateToModule('contrats')}
 								className="bg-[#1e51ab] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#163d82] transition-colors"
 							>
@@ -654,4 +686,4 @@ const Dashboard = () => {
 	);
 };
 
-export default Dashboard; 
+export default Dashboard;

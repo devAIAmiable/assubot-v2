@@ -1,7 +1,8 @@
+import { getUser } from '../utils/stateHelpers';
 import { useAppSelector } from '../store/hooks';
 
 const NotificationsModule = () => {
-	const user = useAppSelector((state) => (state.user as any)?.currentUser);
+	const user = useAppSelector(getUser);
 
 	return (
 		<div className="p-6">
