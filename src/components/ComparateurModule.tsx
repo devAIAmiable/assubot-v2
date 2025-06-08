@@ -129,6 +129,11 @@ const ComparateurModule = () => {
 	const [isAiLoading, setIsAiLoading] = useState(false);
 	const [isFilteringResults, setIsFilteringResults] = useState(false);
 	const [comparisonResults, setComparisonResults] = useState<ComparisonOffer[]>([]);
+	const [askedQuestions, setAskedQuestions] = useState<Array<{
+		question: string;
+		timestamp: Date;
+		responses?: { [insurerId: string]: { hasAnswer: boolean; details: string } };
+	}>>([]);
 	const [filters, setFilters] = useState({
 		priceRange: [0, 100],
 		insurers: [] as string[],
@@ -178,15 +183,15 @@ const ComparateurModule = () => {
 	// Memoize filtered results to prevent unnecessary recalculations
 	const filteredResults = useMemo(() => {
 		return comparisonResults.filter((offer) => {
-			if (filters.rating > 0 && offer.rating < filters.rating) return false;
-			if (filters.insurers.length > 0 && !filters.insurers.includes(offer.insurer)) return false;
+		if (filters.rating > 0 && offer.rating < filters.rating) return false;
+		if (filters.insurers.length > 0 && !filters.insurers.includes(offer.insurer)) return false;
 			if (
 				offer.price.monthly < filters.priceRange[0] ||
 				offer.price.monthly > filters.priceRange[1]
 			)
-				return false;
-			return true;
-		});
+			return false;
+		return true;
+	});
 	}, [comparisonResults, filters.rating, filters.insurers, filters.priceRange]);
 
 	// Separate current contracts from other offers for pagination
@@ -284,18 +289,18 @@ const ComparateurModule = () => {
 
 	const handleTypeSelection = useCallback(
 		(type: InsuranceType) => {
-			setSelectedType(type);
+		setSelectedType(type);
 
-			// Prefill from existing contracts
-			const existingContract = contracts.find((c) => c.type === type && c.status === 'active');
-			if (existingContract) {
-				setFormData((prev) => ({
-					...prev,
-					monthlyBudget: Math.round(existingContract.premium / 12).toString(),
+		// Prefill from existing contracts
+		const existingContract = contracts.find((c) => c.type === type && c.status === 'active');
+		if (existingContract) {
+			setFormData((prev) => ({
+				...prev,
+				monthlyBudget: Math.round(existingContract.premium / 12).toString(),
 					vehicleType: type === 'auto' ? 'car' : '',
 					coverageLevel: type === 'auto' ? 'tous_risques' : 'standard',
-				}));
-			}
+			}));
+		}
 
 			setCurrentStep('form');
 		},
@@ -347,7 +352,7 @@ const ComparateurModule = () => {
 				ComparisonService.getComparisons(selectedType, serviceFormData, existingContract)
 					.then((results) => {
 						setComparisonResults(results);
-						setCurrentStep('results');
+		setCurrentStep('results');
 
 						// Save this comparison to history using Redux
 						const comparisonData = {
@@ -384,10 +389,58 @@ const ComparateurModule = () => {
 		}
 	}, [selectedType, saveComparison]);
 
+	// Function to analyze how insurers respond to specific questions
+	const analyzeQuestionResponses = useCallback((question: string, offers: ComparisonOffer[]) => {
+		const responses: { [insurerId: string]: { hasAnswer: boolean; details: string } } = {};
+		
+		offers.forEach(offer => {
+			const lowerQuestion = question.toLowerCase();
+			let hasAnswer = false;
+			let details = '';
+
+			// Analysis logic based on question content and offer coverages
+			if (lowerQuestion.includes('vol') && lowerQuestion.includes('étranger')) {
+				hasAnswer = offer.coverages['Vol'] && offer.coverages['Vol'].included;
+				details = hasAnswer ? 'Couverture vol à l\'étranger incluse' : 'Vol à l\'étranger non couvert';
+			} else if (lowerQuestion.includes('assistance') && lowerQuestion.includes('24')) {
+				hasAnswer = offer.coverages['Assistance'] && offer.coverages['Assistance'].included;
+				details = hasAnswer ? 'Assistance 24h/24 disponible' : 'Assistance limitée';
+			} else if (lowerQuestion.includes('juridique')) {
+				hasAnswer = offer.coverages['Protection juridique'] && offer.coverages['Protection juridique'].included;
+				details = hasAnswer ? 'Protection juridique incluse' : 'Protection juridique en option';
+			} else if (lowerQuestion.includes('franchise') && lowerQuestion.includes('glace')) {
+				hasAnswer = Math.random() > 0.4; // Mock logic
+				details = hasAnswer ? 'Franchise bris de glace réduite' : 'Franchise standard';
+			} else if (lowerQuestion.includes('remplacement')) {
+				hasAnswer = offer.coverages['Véhicule de remplacement'] && offer.coverages['Véhicule de remplacement'].included;
+				details = hasAnswer ? 'Véhicule de remplacement garanti' : 'Véhicule de remplacement non inclus';
+			} else {
+				// Generic analysis for other questions
+				hasAnswer = Math.random() > 0.3; // Mock logic for demo
+				details = hasAnswer ? 'Critère satisfait' : 'Critère non satisfait';
+			}
+
+			responses[offer.id] = { hasAnswer, details };
+		});
+
+		return responses;
+	}, []);
+
 	const handleAiQuestion = useCallback(async () => {
 		if (!aiQuestion.trim()) return;
 
 		setIsAiLoading(true);
+		
+		// Add the question to our tracking array
+		const questionResponses = analyzeQuestionResponses(aiQuestion, comparisonResults);
+		const newQuestion = {
+			question: aiQuestion,
+			timestamp: new Date(),
+			responses: questionResponses
+		};
+		
+		setAskedQuestions(prev => [...prev, newQuestion]);
+
 		// Simulate AI processing
 		setTimeout(() => {
 			// Generate AI response based on question
@@ -439,11 +492,12 @@ Cette offre correspond parfaitement à vos critères et vous offre le meilleur r
 			}
 
 			setAiResponse(response);
+			setAiQuestion(''); // Clear the input after asking
 			setIsAiLoading(false);
 		}, 1500);
-	}, [aiQuestion, comparisonResults]);
+	}, [aiQuestion, comparisonResults, analyzeQuestionResponses]);
 
-	return (
+					return (
 		<div className="space-y-8">
 			{currentStep === 'history' && (
 				<PastComparisonsView
@@ -498,6 +552,7 @@ Cette offre correspond parfaitement à vos critères et vous offre le meilleur r
 					setCurrentPage={setCurrentPage}
 					currentContractsCount={currentContracts.length}
 					otherOffersCount={otherOffers.length}
+					askedQuestions={askedQuestions}
 				/>
 			)}
 		</div>

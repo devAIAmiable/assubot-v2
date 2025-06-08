@@ -21,6 +21,12 @@ interface Filters {
 	coverages: string[];
 }
 
+interface AskedQuestion {
+	question: string;
+	timestamp: Date;
+	responses?: { [insurerId: string]: { hasAnswer: boolean; details: string } };
+}
+
 interface ResultsViewProps {
 	selectedType: InsuranceType | null;
 	filteredResults: ComparisonOffer[];
@@ -42,6 +48,7 @@ interface ResultsViewProps {
 	setCurrentPage: (page: number) => void;
 	currentContractsCount: number;
 	otherOffersCount: number;
+	askedQuestions: AskedQuestion[];
 }
 
 const ResultsView: React.FC<ResultsViewProps> = ({
@@ -65,6 +72,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 	setCurrentPage,
 	currentContractsCount,
 	otherOffersCount,
+	askedQuestions,
 }) => {
 	// Helper function to get insurer logo
 	const getInsurerLogo = (insurerName: string) => {
@@ -171,26 +179,29 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 						<FaBrain className="h-4 w-4 mr-2 text-[#1e51ab]" />
 						Analyse automatique de votre profil
 					</h4>
-					<p className="text-gray-700 text-sm">
-						{(() => {
-							const recommendedOffer = filteredResults.find((offer) => offer.recommended);
-							const currentContract = filteredResults.find((offer) => offer.isCurrentContract);
+					<p 
+						className="text-gray-700 text-sm"
+						dangerouslySetInnerHTML={{
+							__html: (() => {
+								const recommendedOffer = filteredResults.find((offer) => offer.recommended);
+								const currentContract = filteredResults.find((offer) => offer.isCurrentContract);
 
-							if (recommendedOffer && currentContract) {
-								const savings = currentContract.price.monthly - recommendedOffer.price.monthly;
-								if (recommendedOffer.isCurrentContract) {
-									return `Excellente nouvelle ! Votre contrat actuel avec <strong>${currentContract.insurer}</strong> à ${currentContract.price.monthly}€/mois est déjà le meilleur choix disponible.`;
-								} else if (savings > 0) {
-									return `Je recommande <strong>${recommendedOffer.insurer}</strong> à ${recommendedOffer.price.monthly}€/mois. Cela vous ferait économiser <strong>${savings}€/mois</strong> par rapport à votre contrat actuel (${currentContract.insurer} - ${currentContract.price.monthly}€/mois).`;
-								} else {
-									return `Je recommande <strong>${recommendedOffer.insurer}</strong> à ${recommendedOffer.price.monthly}€/mois pour un meilleur rapport qualité-prix, même si votre contrat actuel avec ${currentContract.insurer} est moins cher.`;
+								if (recommendedOffer && currentContract) {
+									const savings = currentContract.price.monthly - recommendedOffer.price.monthly;
+									if (recommendedOffer.isCurrentContract) {
+										return `Excellente nouvelle ! Votre contrat actuel avec <strong>${currentContract.insurer}</strong> à ${currentContract.price.monthly}€/mois est déjà le meilleur choix disponible.`;
+									} else if (savings > 0) {
+										return `Je recommande <strong>${recommendedOffer.insurer}</strong> à ${recommendedOffer.price.monthly}€/mois. Cela vous ferait économiser <strong>${savings}€/mois</strong> par rapport à votre contrat actuel (${currentContract.insurer} - ${currentContract.price.monthly}€/mois).`;
+									} else {
+										return `Je recommande <strong>${recommendedOffer.insurer}</strong> à ${recommendedOffer.price.monthly}€/mois pour un meilleur rapport qualité-prix, même si votre contrat actuel avec ${currentContract.insurer} est moins cher.`;
+									}
+								} else if (recommendedOffer) {
+									return `Basé sur votre profil et budget, je recommande <strong>${recommendedOffer.insurer}</strong> à ${recommendedOffer.price.monthly}€/mois.`;
 								}
-							} else if (recommendedOffer) {
-								return `Basé sur votre profil et budget, je recommande <strong>${recommendedOffer.insurer}</strong> à ${recommendedOffer.price.monthly}€/mois.`;
-							}
-							return 'Analysez les offres ci-dessous pour trouver la meilleure assurance selon vos critères.';
-						})()}
-					</p>
+								return 'Analysez les offres ci-dessous pour trouver la meilleure assurance selon vos critères.';
+							})()
+						}}
+					></p>
 				</div>
 
 				{/* AI Response */}
@@ -204,7 +215,10 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 							<FaRobot className="h-4 w-4 mr-2 text-[#1e51ab]" />
 							Réponse de l'IA
 						</h4>
-						<div className="text-gray-700 text-sm whitespace-pre-line">{aiResponse}</div>
+						<div 
+							className="text-gray-700 text-sm whitespace-pre-line"
+							dangerouslySetInnerHTML={{ __html: aiResponse }}
+						></div>
 					</motion.div>
 				)}
 
@@ -509,6 +523,216 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 								</div>
 							</div>
 						</motion.div>
+					)}
+
+					{/* Question-Response Summary Table - Only show if questions have been asked */}
+					{askedQuestions.length > 0 && (
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ delay: 0.3 }}
+							className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+						>
+						<div className="bg-gradient-to-r from-[#1e51ab] to-[#163d82] px-6 py-4">
+							<h3 className="text-lg font-semibold text-white flex items-center">
+								<FaBrain className="mr-2" />
+								Réponses aux Questions Spécifiques
+							</h3>
+							<p className="text-blue-100 text-sm">
+								Analyse détaillée des réponses par assureur selon vos critères personnalisés
+							</p>
+						</div>
+
+						<div className="p-6">
+							{/* Summary Table */}
+							<div className="overflow-x-auto">
+								<table className="w-full border-collapse">
+									<thead>
+										<tr className="border-b-2 border-gray-200">
+											<th className="text-left py-4 px-4 font-semibold text-gray-900 bg-gray-50">
+												Questions Posées
+											</th>
+											{paginatedResults
+												.filter(offer => !offer.isCurrentContract)
+												.map((offer) => (
+													<th key={offer.id} className="text-center py-4 px-3 font-semibold text-gray-900 bg-gray-50 min-w-[100px]">
+														<div className="flex flex-col items-center space-y-2">
+															<div className="w-8 h-8 bg-white rounded-full flex items-center justify-center p-1 border border-gray-200 shadow-sm">
+																{getInsurerLogo(offer.insurer) ? (
+																	<img
+																		src={getInsurerLogo(offer.insurer)!}
+																		alt={offer.insurer}
+																		className="w-full h-full object-contain"
+																	/>
+																) : (
+																	<span className="text-xs font-medium text-gray-600">
+																		{offer.insurer.charAt(0)}
+																	</span>
+																)}
+															</div>
+															<span className="text-xs font-medium text-gray-700">
+																{offer.insurer}
+															</span>
+														</div>
+													</th>
+												))}
+										</tr>
+									</thead>
+									<tbody>
+										{askedQuestions.length > 0 ? askedQuestions.map((askedQuestion, questionIndex) => {
+											const availableInsurers = paginatedResults.filter(offer => !offer.isCurrentContract);
+											return (
+												<tr key={questionIndex} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+													<td className="py-4 px-4 text-sm font-medium text-gray-900 bg-gray-25">
+														{askedQuestion.question}
+													</td>
+													{availableInsurers.map((offer, insurerIndex) => {
+														const response = askedQuestion.responses?.[offer.id];
+														return (
+															<td key={insurerIndex} className="py-4 px-3 text-center">
+																<div className="flex justify-center">
+																	{response?.hasAnswer ? (
+																		<div className="group relative">
+																			<div className="w-8 h-8 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform cursor-help">
+																				<span className="text-white font-bold text-sm">✓</span>
+																			</div>
+																			{/* Tooltip */}
+																			<div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+																				{response?.details || 'Critère satisfait'}
+																				<div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+																			</div>
+																		</div>
+																	) : (
+																		<div className="group relative">
+																			<div className="w-8 h-8 bg-gradient-to-r from-red-400 to-red-600 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform cursor-help">
+																				<span className="text-white font-bold text-sm">✗</span>
+																			</div>
+																			{/* Tooltip */}
+																			<div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+																				{response?.details || 'Critère non satisfait'}
+																				<div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+																			</div>
+																		</div>
+																	)}
+																</div>
+															</td>
+														);
+													})}
+												</tr>
+											);
+										}) : (
+											<tr>
+												<td colSpan={99} className="py-8 px-4 text-center text-gray-500">
+													Posez des questions dans l'assistant IA pour voir l'analyse des réponses par assureur
+												</td>
+											</tr>
+										)}
+									</tbody>
+								</table>
+							</div>
+
+							{/* Final Scores Section */}
+							<div className="mt-8 pt-6 border-t-2 border-gray-200">
+								<h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+									<FaStar className="mr-2 text-yellow-500" />
+									Score Final par Assureur
+								</h4>
+								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+									{paginatedResults
+										.filter(offer => !offer.isCurrentContract)
+										.map((offer, index) => {
+											// Calculate actual score based on asked questions
+											const totalQuestions = askedQuestions.length;
+											const score = askedQuestions.reduce((count, question) => {
+												const response = question.responses?.[offer.id];
+												return count + (response?.hasAnswer ? 1 : 0);
+											}, 0);
+											const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
+											
+											return (
+												<motion.div 
+													key={offer.id}
+													initial={{ opacity: 0, scale: 0.9 }}
+													animate={{ opacity: 1, scale: 1 }}
+													transition={{ delay: index * 0.1 }}
+													className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all"
+												>
+													<div className="flex flex-col items-center text-center">
+														{/* Logo */}
+														<div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2 border-2 border-gray-200 shadow-sm mb-3">
+															{getInsurerLogo(offer.insurer) ? (
+																<img
+																	src={getInsurerLogo(offer.insurer)!}
+																	alt={offer.insurer}
+																	className="w-full h-full object-contain"
+																/>
+															) : (
+																<span className="text-sm font-bold text-gray-600">
+																	{offer.insurer.charAt(0)}
+																</span>
+															)}
+														</div>
+														
+														{/* Insurer Name */}
+														<h5 className="font-semibold text-gray-900 mb-2">
+															{offer.insurer}
+														</h5>
+														
+														{/* Score */}
+														<div className="flex items-center space-x-2 mb-3">
+															<span className={`text-3xl font-bold ${
+																score >= 4 ? 'text-green-600' : 
+																score >= 3 ? 'text-yellow-600' : 
+																score >= 2 ? 'text-orange-600' : 'text-red-600'
+															}`}>
+																{score}
+															</span>
+															<span className="text-gray-500 text-lg">/{totalQuestions}</span>
+														</div>
+														
+														{/* Progress Bar */}
+														<div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+															<div 
+																className={`h-3 rounded-full transition-all duration-500 ${
+																	score >= 4 ? 'bg-gradient-to-r from-green-400 to-green-600' : 
+																	score >= 3 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 
+																	score >= 2 ? 'bg-gradient-to-r from-orange-400 to-orange-600' : 'bg-gradient-to-r from-red-400 to-red-600'
+																}`}
+																style={{ width: `${percentage}%` }}
+															></div>
+														</div>
+														
+														{/* Percentage */}
+														<span className="text-sm text-gray-600 font-medium">
+															{Math.round(percentage)}% de compatibilité
+														</span>
+													</div>
+												</motion.div>
+											);
+										})}
+								</div>
+							</div>
+
+							{/* Legend */}
+							<div className="mt-6 pt-4 border-t border-gray-200 bg-gray-50 rounded-lg p-4">
+								<h5 className="text-sm font-semibold text-gray-900 mb-2">Légende :</h5>
+								<div className="flex flex-wrap gap-4 text-xs text-gray-600">
+									<div className="flex items-center space-x-2">
+										<div className="w-4 h-4 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center">
+											<span className="text-white text-xs">✓</span>
+										</div>
+										<span>Critère satisfait par l'assureur</span>
+									</div>
+									<div className="flex items-center space-x-2">
+										<div className="w-4 h-4 bg-gradient-to-r from-red-400 to-red-600 rounded-full flex items-center justify-center">
+											<span className="text-white text-xs">✗</span>
+										</div>
+										<span>Critère non couvert ou insuffisant</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</motion.div>
 					)}
 
 					{/* Pagination */}
