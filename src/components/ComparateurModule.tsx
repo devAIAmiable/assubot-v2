@@ -189,14 +189,23 @@ const ComparateurModule = () => {
 		});
 	}, [comparisonResults, filters.rating, filters.insurers, filters.priceRange]);
 
-	// Memoize pagination calculations
+	// Separate current contracts from other offers for pagination
+	const { currentContracts, otherOffers } = useMemo(() => {
+		const current = filteredResults.filter(offer => offer.isCurrentContract);
+		const others = filteredResults.filter(offer => !offer.isCurrentContract);
+		return { currentContracts: current, otherOffers: others };
+	}, [filteredResults]);
+
+	// Memoize pagination calculations (only for non-current contracts)
 	const paginatedResults = useMemo(() => {
-		return filteredResults.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-	}, [filteredResults, currentPage, itemsPerPage]);
+		const paginatedOthers = otherOffers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+		// Always include current contracts at the top
+		return [...currentContracts, ...paginatedOthers];
+	}, [currentContracts, otherOffers, currentPage, itemsPerPage]);
 
 	const totalPages = useMemo(() => {
-		return Math.ceil(filteredResults.length / itemsPerPage);
-	}, [filteredResults.length, itemsPerPage]);
+		return Math.ceil(otherOffers.length / itemsPerPage);
+	}, [otherOffers.length, itemsPerPage]);
 
 	// Debounce timer ref
 	const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -331,8 +340,11 @@ const ComparateurModule = () => {
 					}),
 				} as Parameters<typeof ComparisonService.getComparisons>[1];
 
+				// Find existing contract for this insurance type
+				const existingContract = contracts.find((c) => c.type === selectedType && c.status === 'active');
+				
 				// Process comparison asynchronously
-				ComparisonService.getComparisons(selectedType, serviceFormData)
+				ComparisonService.getComparisons(selectedType, serviceFormData, existingContract)
 					.then((results) => {
 						setComparisonResults(results);
 						setCurrentStep('results');
@@ -484,6 +496,8 @@ Cette offre correspond parfaitement à vos critères et vous offre le meilleur r
 					handleInsurerChange={handleInsurerChange}
 					handleFilterReset={handleFilterReset}
 					setCurrentPage={setCurrentPage}
+					currentContractsCount={currentContracts.length}
+					otherOffersCount={otherOffers.length}
 				/>
 			)}
 		</div>

@@ -6,7 +6,7 @@ import {
 	FaRobot,
 	FaStar,
 	FaThumbsUp,
-	FaTimes
+	FaTimes,
 } from 'react-icons/fa';
 
 import type { ComparisonOffer } from '../../services/comparisonService';
@@ -40,6 +40,8 @@ interface ResultsViewProps {
 	handleInsurerChange: (insurer: string, checked: boolean) => void;
 	handleFilterReset: () => void;
 	setCurrentPage: (page: number) => void;
+	currentContractsCount: number;
+	otherOffersCount: number;
 }
 
 const ResultsView: React.FC<ResultsViewProps> = ({
@@ -61,17 +63,19 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 	handleInsurerChange,
 	handleFilterReset,
 	setCurrentPage,
+	currentContractsCount,
+	otherOffersCount,
 }) => {
 	// Helper function to get insurer logo
 	const getInsurerLogo = (insurerName: string) => {
 		const logoMap: { [key: string]: string } = {
 			'Direct Assurance': '/insurances/direct.png',
-			'Allianz': '/insurances/allianz.png',
-			'MAIF': '/insurances/maif.png',
-			'AXA': '/insurances/axa.png',
-			'Generali': '/insurances/generali.png',
-			'Groupama': '/insurances/groupama.png',
-			'MACIF': '/insurances/macif.png',
+			Allianz: '/insurances/allianz.png',
+			MAIF: '/insurances/maif.png',
+			AXA: '/insurances/axa.png',
+			Generali: '/insurances/generali.png',
+			Groupama: '/insurances/groupama.png',
+			MACIF: '/insurances/macif.png',
 		};
 		return logoMap[insurerName] || null;
 	};
@@ -88,7 +92,13 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 					<h1 className="text-3xl font-bold text-gray-900 mb-2">
 						Offres d'assurance {selectedType}
 					</h1>
-					<p className="text-gray-600">{filteredResults.length} offres trouvées</p>
+					<p className="text-gray-600">
+						{currentContractsCount > 0 && `${currentContractsCount} contrat actuel`}
+						{currentContractsCount > 0 && otherOffersCount > 0 && ' + '}
+						{otherOffersCount > 0 &&
+							`${otherOffersCount} offre${otherOffersCount > 1 ? 's' : ''} trouvée${otherOffersCount > 1 ? 's' : ''}`}
+						{currentContractsCount === 0 && otherOffersCount === 0 && 'Aucune offre trouvée'}
+					</p>
 				</div>
 				<div className="flex items-center space-x-4">
 					<button
@@ -163,16 +173,22 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 					</h4>
 					<p className="text-gray-700 text-sm">
 						{(() => {
-							const recommendedOffer = filteredResults.find(offer => offer.recommended);
-							if (recommendedOffer) {
-								return (
-									<>
-										Basé sur votre profil et budget, je recommande <strong>{recommendedOffer.insurer}</strong> qui
-										offre le meilleur équilibre prix-couverture pour vos besoins spécifiques à <strong>{recommendedOffer.price.monthly}€/mois</strong>.
-									</>
-								);
+							const recommendedOffer = filteredResults.find((offer) => offer.recommended);
+							const currentContract = filteredResults.find((offer) => offer.isCurrentContract);
+
+							if (recommendedOffer && currentContract) {
+								const savings = currentContract.price.monthly - recommendedOffer.price.monthly;
+								if (recommendedOffer.isCurrentContract) {
+									return `Excellente nouvelle ! Votre contrat actuel avec <strong>${currentContract.insurer}</strong> à ${currentContract.price.monthly}€/mois est déjà le meilleur choix disponible.`;
+								} else if (savings > 0) {
+									return `Je recommande <strong>${recommendedOffer.insurer}</strong> à ${recommendedOffer.price.monthly}€/mois. Cela vous ferait économiser <strong>${savings}€/mois</strong> par rapport à votre contrat actuel (${currentContract.insurer} - ${currentContract.price.monthly}€/mois).`;
+								} else {
+									return `Je recommande <strong>${recommendedOffer.insurer}</strong> à ${recommendedOffer.price.monthly}€/mois pour un meilleur rapport qualité-prix, même si votre contrat actuel avec ${currentContract.insurer} est moins cher.`;
+								}
+							} else if (recommendedOffer) {
+								return `Basé sur votre profil et budget, je recommande <strong>${recommendedOffer.insurer}</strong> à ${recommendedOffer.price.monthly}€/mois.`;
 							}
-							return "Analysez les offres ci-dessous pour trouver la meilleure assurance selon vos critères.";
+							return 'Analysez les offres ci-dessous pour trouver la meilleure assurance selon vos critères.';
 						})()}
 					</p>
 				</div>
@@ -346,7 +362,11 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 										animate={{ opacity: 1, y: 0 }}
 										transition={{ delay: index * 0.1 }}
 										className={`relative grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 ${
-											offer.recommended ? 'bg-blue-50 border-l-4 border-l-[#1e51ab]' : ''
+											offer.recommended
+												? 'bg-blue-50 border-l-4 border-l-[#1e51ab]'
+												: offer.isCurrentContract
+													? 'bg-green-50 border-l-4 border-l-green-500'
+													: ''
 										}`}
 									>
 										{/* Assureur */}
@@ -366,11 +386,19 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 											</div>
 											<div>
 												<div className="font-semibold text-gray-900">{offer.insurer}</div>
-												<div className="text-sm text-gray-600">Assurance Standard</div>
+												<div className="text-sm text-gray-600">
+													{offer.isCurrentContract ? 'Votre contrat actuel' : 'Assurance Standard'}
+												</div>
 												{offer.recommended && (
 													<span className="inline-flex items-center px-2 py-1 text-xs font-medium text-[#1e51ab] bg-blue-100 rounded-full mt-1">
 														<FaThumbsUp className="w-3 h-3 mr-1" />
 														Recommandé
+													</span>
+												)}
+												{offer.isCurrentContract && (
+													<span className="inline-flex items-center px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full mt-1">
+														<FaThumbsUp className="w-3 h-3 mr-1" />
+														Contrat actuel
 													</span>
 												)}
 											</div>
@@ -409,9 +437,14 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 															✓ {coverage}
 														</span>
 													))}
-												{Object.keys(offer.coverages).filter(key => offer.coverages[key].included).length > 3 && (
+												{Object.keys(offer.coverages).filter((key) => offer.coverages[key].included)
+													.length > 3 && (
 													<span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
-														+{Object.keys(offer.coverages).filter(key => offer.coverages[key].included).length - 3} autres
+														+
+														{Object.keys(offer.coverages).filter(
+															(key) => offer.coverages[key].included
+														).length - 3}{' '}
+														autres
 													</span>
 												)}
 											</div>
@@ -420,23 +453,23 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 										{/* Franchise */}
 										<div className="col-span-1">
 											<div className="text-sm">
-												<div className="text-gray-900 font-medium">
-													150€
-												</div>
-												<div className="text-gray-600 text-xs">
-													Bris: 50€
-												</div>
+												<div className="text-gray-900 font-medium">150€</div>
+												<div className="text-gray-600 text-xs">Bris: 50€</div>
 											</div>
 										</div>
 
 										{/* Actions */}
 										<div className="col-span-2 flex flex-col space-y-1">
-											<button className="px-3 py-1.5 bg-[#1e51ab] text-white rounded text-xs hover:bg-[#163d82] transition-colors whitespace-nowrap">
-												Souscrire
-											</button>
-											<button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded text-xs hover:bg-gray-50 transition-colors whitespace-nowrap">
-												Voir détails
-											</button>
+											{!offer.isCurrentContract && (
+												<>
+													<button className="px-3 py-1.5 bg-[#1e51ab] text-white rounded text-xs hover:bg-[#163d82] transition-colors whitespace-nowrap">
+														Souscrire
+													</button>
+													<button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded text-xs hover:bg-gray-50 transition-colors whitespace-nowrap">
+														Voir détails
+													</button>
+												</>
+											)}
 										</div>
 									</motion.div>
 								))}
@@ -446,11 +479,32 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 							<div className="bg-gray-50 border-t border-gray-200 px-6 py-3">
 								<div className="flex justify-between items-center text-sm text-gray-600">
 									<div>
-										{filteredResults.length} offre{filteredResults.length > 1 ? 's' : ''} trouvée{filteredResults.length > 1 ? 's' : ''}
+										{currentContractsCount > 0 && `${currentContractsCount} contrat actuel`}
+										{currentContractsCount > 0 && otherOffersCount > 0 && ' + '}
+										{otherOffersCount > 0 &&
+											`${otherOffersCount} offre${otherOffersCount > 1 ? 's' : ''}`}
 									</div>
 									<div className="flex items-center space-x-4">
-										<div>Prix moyen: {Math.round(filteredResults.reduce((sum, offer) => sum + offer.price.monthly, 0) / filteredResults.length)}€/mois</div>
-										<div>Note moyenne: {(filteredResults.reduce((sum, offer) => sum + offer.rating, 0) / filteredResults.length).toFixed(1)}/5</div>
+										<div>
+											Prix moyen:{' '}
+											{filteredResults.length > 0
+												? Math.round(
+														filteredResults.reduce((sum, offer) => sum + offer.price.monthly, 0) /
+															filteredResults.length
+													)
+												: 0}
+											€/mois
+										</div>
+										<div>
+											Note moyenne:{' '}
+											{filteredResults.length > 0
+												? (
+														filteredResults.reduce((sum, offer) => sum + offer.rating, 0) /
+														filteredResults.length
+													).toFixed(1)
+												: '0.0'}
+											/5
+										</div>
 									</div>
 								</div>
 							</div>
@@ -501,4 +555,4 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 	);
 };
 
-export default ResultsView; 
+export default ResultsView;

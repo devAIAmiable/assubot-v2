@@ -11,6 +11,7 @@ export interface ComparisonOffer {
 	cons: string[];
 	score: number;
 	recommended?: boolean;
+	isCurrentContract?: boolean;
 }
 
 // Mock data for different insurance types
@@ -245,15 +246,78 @@ export class ComparisonService {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
+	// Convert a contract to a ComparisonOffer format
+	private static contractToOffer(contract: { id: string; insurer: string; premium: number }, insuranceType: InsuranceType): ComparisonOffer {
+		// Generate basic coverages based on insurance type
+		let coverages: { [key: string]: { included: boolean; value?: string } } = {};
+		
+		switch (insuranceType) {
+			case 'auto':
+				coverages = {
+					'Responsabilité civile': { included: true },
+					'Vol': { included: true },
+					'Bris de glace': { included: true },
+					'Assistance 0km': { included: true },
+				};
+				break;
+			case 'habitation':
+				coverages = {
+					'Incendie': { included: true },
+					'Dégâts des eaux': { included: true },
+					'Vol': { included: true },
+					'Responsabilité civile': { included: true },
+				};
+				break;
+			case 'sante':
+				coverages = {
+					'Soins courants': { included: true, value: '100%' },
+					'Hospitalisation': { included: true, value: '100%' },
+					'Dentaire': { included: true, value: '125%' },
+					'Optique': { included: true, value: '150€' },
+				};
+				break;
+			case 'moto':
+				coverages = {
+					'Responsabilité civile': { included: true },
+					'Vol': { included: true },
+					'Incendie': { included: true },
+					'Équipements': { included: true },
+				};
+				break;
+		}
+
+		return {
+			id: `current-${contract.id}`,
+			insurer: contract.insurer,
+			price: {
+				monthly: Math.round(contract.premium / 12),
+				yearly: contract.premium,
+			},
+			rating: 4.0, // Default rating for existing contracts
+			coverages,
+			pros: ['Votre contrat actuel', 'Familier avec les conditions'],
+			cons: [], // Will be determined by comparison
+			score: 70, // Base score for current contract
+			isCurrentContract: true,
+		};
+	}
+
 	// Get comparison results for a specific insurance type
 	static async getComparisons(
 		insuranceType: InsuranceType,
-		formData: FormData
+		formData: FormData,
+		existingContract?: { id: string; insurer: string; premium: number }
 	): Promise<ComparisonOffer[]> {
 		// Simulate API call delay
 		await this.delay(1500 + Math.random() * 1000);
 
 		let results = [...mockData[insuranceType]];
+
+		// Add existing contract to comparison if provided
+		if (existingContract) {
+			const contractOffer = this.contractToOffer(existingContract, insuranceType);
+			results.unshift(contractOffer); // Add at the beginning
+		}
 
 		// Apply some basic filtering/scoring based on form data
 		const budget = parseInt(formData.monthlyBudget) || 100;
