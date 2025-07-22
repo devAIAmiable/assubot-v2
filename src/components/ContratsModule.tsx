@@ -356,7 +356,7 @@ const ContratsModule = () => {
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Échéance</span>
 											<span className="text-sm font-medium text-gray-900">
-												{new Date(contract.endDate).toLocaleDateString('fr-FR')}
+												{new Date(contract.overview.endDate).toLocaleDateString('fr-FR')}
 											</span>
 										</div>
 									</div>

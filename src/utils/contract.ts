@@ -2,7 +2,7 @@ import { FaFileAlt, FaFileContract } from 'react-icons/fa';
 
 import type { Contract } from '../types';
 
-export const isExpired = (contract: Contract) => new Date(contract.endDate) < new Date();
+export const isExpired = (contract: Contract) => new Date(contract.overview.endDate) < new Date();
 
 export const getTypeIcon = (type: string) => {
 	switch (type) {

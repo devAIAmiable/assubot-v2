@@ -187,20 +187,20 @@ const ContractDetailsPage = () => {
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Début de contrat</span>
 													<span className="font-semibold text-gray-900">
-														{contract.overview.startDate}
+														{new Date(contract.overview.startDate).toLocaleDateString('fr-FR')}
 													</span>
 												</div>
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Fin de contrat</span>
 													<span className="font-semibold text-gray-900">
-														{contract.overview.endDate}
+														{new Date(contract.overview.endDate).toLocaleDateString('fr-FR')}
 													</span>
 												</div>
 											</div>
 											<div className="space-y-4">
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Prime annuelle</span>
-													<span className="font-bold text-[#1e51ab] text-xl">
+													<span className="font-semibold text-[#1e51ab]">
 														{contract.overview.annualPremium}
 													</span>
 												</div>
@@ -216,7 +216,7 @@ const ContractDetailsPage = () => {
 															Date limite de résiliation
 														</span>
 														<span className="font-semibold text-gray-900">
-															{contract.overview.tacitRenewalDeadline}
+															{new Date(contract.overview.tacitRenewalDeadline).toLocaleDateString('fr-FR')}
 														</span>
 													</div>
 												)}

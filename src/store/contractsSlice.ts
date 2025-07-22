@@ -135,11 +135,11 @@ const axaContract: Contract = {
 	},
 	// --- Mon contrat en un coup d'œil ---
 	overview: {
-		startDate: '23-07-2025',
-		endDate: '22-07-2026',
+		startDate: '07-23-2025',
+		endDate: '07-22-2026',
 		annualPremium: '225.00 €',
 		hasTacitRenewal: true,
-		tacitRenewalDeadline: '22-05-2026',
+		tacitRenewalDeadline: '05-22-2026',
 		planType: 'Essentielle',
 		subscribedCoverages: [
 			'Hospitalisation',
