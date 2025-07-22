@@ -504,25 +504,6 @@ const ContractDetailsPage = () => {
 						<Tab.Panel className="p-6">
 							<div className="max-w-7xl mx-auto">
 								<div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
-									{/* World map SVG illustration */}
-									<div className="flex justify-center mb-6">
-										<svg
-											viewBox="0 0 800 400"
-											fill="none"
-											xmlns="http://www.w3.org/2000/svg"
-											className="w-full max-w-2xl h-48 opacity-70"
-											aria-label="Carte du monde illustrant la couverture géographique"
-										>
-											<g stroke="#3b82f6" strokeWidth="1.2" opacity="0.5">
-												<path d="M100 200 Q120 180 140 200 T180 200 Q200 220 220 200 T260 200 Q280 180 300 200 T340 200 Q360 220 380 200 T420 200 Q440 180 460 200 T500 200 Q520 220 540 200 T580 200 Q600 180 620 200 T660 200 Q680 220 700 200" />
-												<ellipse cx="400" cy="200" rx="320" ry="120" />
-												<ellipse cx="200" cy="180" rx="40" ry="18" />
-												<ellipse cx="600" cy="220" rx="50" ry="20" />
-												<ellipse cx="400" cy="120" rx="60" ry="22" />
-												<ellipse cx="400" cy="320" rx="80" ry="18" />
-											</g>
-										</svg>
-									</div>
 									<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
 										<FaGlobe className="h-6 w-6 text-blue-600 mr-3" />
 										Zone de couverture géographique
