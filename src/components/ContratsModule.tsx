@@ -1,14 +1,23 @@
 import {
 	FaCalendarAlt,
+	FaCheck,
 	FaChevronDown,
+	FaClipboardList,
+	FaClock,
 	FaEdit,
+	FaEnvelope,
 	FaEuroSign,
+	FaExclamationTriangle,
 	FaEye,
 	FaFileAlt,
 	FaFileContract,
+	FaGlobe,
+	FaPhone,
 	FaPlus,
 	FaSearch,
+	FaShieldAlt,
 	FaTimes,
+	FaTimes as FaTimesIcon,
 	FaTrash,
 	FaUpload,
 } from 'react-icons/fa';
@@ -44,6 +53,7 @@ const ContratsModule = () => {
 	const [editingContract, setEditingContract] = useState<Contract | null>(null);
 	const [viewingContract, setViewingContract] = useState<Contract | null>(null);
 	const [dragOver, setDragOver] = useState(false);
+	const [activeTab, setActiveTab] = useState(0);
 
 	// Filter contracts based on search and filters
 	const filteredContracts = contracts.filter((contract) => {
@@ -110,6 +120,50 @@ const ContratsModule = () => {
 					status: 'pending',
 					description: 'Contrat ajouté via upload de fichier',
 					documents: [document],
+					overview: {
+						startDate: new Date().toLocaleDateString('fr-FR'),
+						endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
+						annualPremium: '0,00€',
+						hasTacitRenewal: true,
+						tacitRenewalDeadline: new Date(Date.now() + 335 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
+						planType: 'À définir',
+						subscribedCoverages: []
+					},
+					coverages: [],
+					generalExclusions: [],
+					geographicCoverage: {
+						countries: ['France']
+					},
+					obligations: {
+						atSubscription: [],
+						duringContract: [],
+						inCaseOfClaim: []
+					},
+					cancellation: {
+						procedures: 'À définir',
+						deadlines: 'À définir',
+						usefulContacts: []
+					},
+					contacts: {
+						contractManagement: {
+							name: 'À définir',
+							phone: 'À définir',
+							email: 'À définir',
+							hours: 'À définir'
+						},
+						assistance: {
+							name: 'À définir',
+							phone: 'À définir',
+							email: 'À définir',
+							availability: 'À définir'
+						},
+						emergency: {
+							name: 'À définir',
+							phone: 'À définir',
+							email: 'À définir',
+							availability: 'À définir'
+						}
+					}
 				};
 				dispatch(addContract(newContract));
 			}
@@ -534,7 +588,7 @@ const ContratsModule = () => {
 					<motion.div
 						initial={{ opacity: 0, scale: 0.95 }}
 						animate={{ opacity: 1, scale: 1 }}
-						className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+						className="bg-white rounded-2xl max-w-6xl w-full max-h-[95vh] overflow-y-auto"
 					>
 						<div className="p-6">
 							{/* Header */}
@@ -561,151 +615,441 @@ const ContratsModule = () => {
 								</button>
 							</div>
 
-							{/* Content */}
-							<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-								{/* Left Column - Basic Info */}
-								<div className="space-y-6">
-									<div>
-										<h3 className="text-lg font-semibold text-gray-900 mb-4">
-											Informations générales
-										</h3>
-										<div className="space-y-3">
-											<div className="flex items-center justify-between py-2 border-b border-gray-100">
-												<span className="text-gray-600">Statut</span>
-												<span
-													className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(viewingContract.status)}`}
-												>
-													{getStatusLabel(viewingContract.status)}
-												</span>
-											</div>
-											<div className="flex items-center justify-between py-2 border-b border-gray-100">
-												<span className="text-gray-600">Assureur</span>
-												<span className="font-medium text-gray-900">{viewingContract.insurer}</span>
-											</div>
-											<div className="flex items-center justify-between py-2 border-b border-gray-100">
-												<span className="text-gray-600">Type de contrat</span>
-												<span className="font-medium text-gray-900">
-													{getTypeLabel(viewingContract.type)}
-												</span>
-											</div>
-											<div className="flex items-center justify-between py-2 border-b border-gray-100">
-												<span className="text-gray-600">Prime annuelle</span>
-												<span className="font-bold text-[#1e51ab] text-lg">
-													{viewingContract.premium.toLocaleString()}€
-												</span>
-											</div>
-											<div className="flex items-center justify-between py-2 border-b border-gray-100">
-												<span className="text-gray-600">Prime mensuelle</span>
-												<span className="font-medium text-gray-900">
-													{Math.round(viewingContract.premium / 12).toLocaleString()}€
-												</span>
-											</div>
-										</div>
-									</div>
+							{/* Tabs */}
+							<div className="border-b border-gray-200 mb-6">
+								<nav className="-mb-px flex space-x-8">
+									{['Vue d\'ensemble', 'Garanties', 'Exclusions', 'Obligations', 'Résiliation', 'Contacts'].map((tab, index) => (
+										<button
+											key={tab}
+											onClick={() => setActiveTab(index)}
+											className={`py-2 px-1 border-b-2 font-medium text-sm ${
+												activeTab === index
+													? 'border-[#1e51ab] text-[#1e51ab]'
+													: 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+											}`}
+										>
+											{tab}
+										</button>
+									))}
+								</nav>
+							</div>
 
-									<div>
-										<h3 className="text-lg font-semibold text-gray-900 mb-4">Dates importantes</h3>
-										<div className="space-y-3">
-											<div className="flex items-center justify-between py-2 border-b border-gray-100">
-												<span className="text-gray-600">Date de début</span>
-												<span className="font-medium text-gray-900">
-													{new Date(viewingContract.startDate).toLocaleDateString('fr-FR')}
-												</span>
-											</div>
-											<div className="flex items-center justify-between py-2 border-b border-gray-100">
-												<span className="text-gray-600">Date de fin</span>
-												<span className="font-medium text-gray-900">
-													{new Date(viewingContract.endDate).toLocaleDateString('fr-FR')}
-												</span>
-											</div>
-											<div className="flex items-center justify-between py-2">
-												<span className="text-gray-600">Durée restante</span>
-												<span className="font-medium text-gray-900">
-													{(() => {
-														const endDate = new Date(viewingContract.endDate);
-														const today = new Date();
-														const diffTime = endDate.getTime() - today.getTime();
-														const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-														if (diffDays < 0) return 'Expiré';
-														if (diffDays === 0) return "Expire aujourd'hui";
-														if (diffDays === 1) return '1 jour';
-														if (diffDays < 30) return `${diffDays} jours`;
-														if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`;
-														return `${Math.floor(diffDays / 365)} an(s)`;
-													})()}
-												</span>
-											</div>
-										</div>
-									</div>
-
-									{viewingContract.coverageAmount && (
-										<div>
-											<h3 className="text-lg font-semibold text-gray-900 mb-4">Couverture</h3>
-											<div className="space-y-3">
-												<div className="flex items-center justify-between py-2 border-b border-gray-100">
-													<span className="text-gray-600">Montant de couverture</span>
-													<span className="font-medium text-gray-900">
-														{viewingContract.coverageAmount.toLocaleString()}€
-													</span>
-												</div>
-												{viewingContract.deductible && (
-													<div className="flex items-center justify-between py-2">
-														<span className="text-gray-600">Franchise</span>
+							{/* Tab Content */}
+							<div className="min-h-[60vh]">
+								{/* Vue d'ensemble */}
+								{activeTab === 0 && (
+									<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+										{/* Mon contrat en un coup d'œil */}
+										<div className="space-y-6">
+											<div className="bg-blue-50 p-6 rounded-xl">
+												<h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+													<FaShieldAlt className="h-5 w-5 text-[#1e51ab] mr-2" />
+													Mon contrat en un coup d'œil
+												</h3>
+												<div className="space-y-3">
+													<div className="flex items-center justify-between py-2 border-b border-blue-100">
+														<span className="text-gray-600">Formule</span>
+														<span className="font-medium text-gray-900">{viewingContract.overview.planType}</span>
+													</div>
+													<div className="flex items-center justify-between py-2 border-b border-blue-100">
+														<span className="text-gray-600">Début de contrat</span>
+														<span className="font-medium text-gray-900">{viewingContract.overview.startDate}</span>
+													</div>
+													<div className="flex items-center justify-between py-2 border-b border-blue-100">
+														<span className="text-gray-600">Fin de contrat</span>
+														<span className="font-medium text-gray-900">{viewingContract.overview.endDate}</span>
+													</div>
+													<div className="flex items-center justify-between py-2 border-b border-blue-100">
+														<span className="text-gray-600">Prime annuelle</span>
+														<span className="font-bold text-[#1e51ab] text-lg">{viewingContract.overview.annualPremium}</span>
+													</div>
+													<div className="flex items-center justify-between py-2 border-b border-blue-100">
+														<span className="text-gray-600">Renouvellement tacite</span>
 														<span className="font-medium text-gray-900">
-															{viewingContract.deductible.toLocaleString()}€
+															{viewingContract.overview.hasTacitRenewal ? 'Oui' : 'Non'}
 														</span>
+													</div>
+													{viewingContract.overview.hasTacitRenewal && (
+														<div className="flex items-center justify-between py-2">
+															<span className="text-gray-600">Date limite de résiliation</span>
+															<span className="font-medium text-gray-900">{viewingContract.overview.tacitRenewalDeadline}</span>
+														</div>
+													)}
+												</div>
+											</div>
+
+											<div>
+												<h3 className="text-lg font-semibold text-gray-900 mb-4">Garanties souscrites</h3>
+												<div className="grid grid-cols-2 gap-2">
+													{viewingContract.overview.subscribedCoverages.map((garantie, index) => (
+														<div key={index} className="flex items-center space-x-2 p-2 bg-green-50 rounded-lg">
+															<FaCheck className="h-4 w-4 text-green-600" />
+															<span className="text-sm text-gray-700">{garantie}</span>
+														</div>
+													))}
+												</div>
+											</div>
+										</div>
+
+										{/* Informations générales */}
+										<div className="space-y-6">
+											<div>
+												<h3 className="text-lg font-semibold text-gray-900 mb-4">Informations générales</h3>
+												<div className="space-y-3">
+													<div className="flex items-center justify-between py-2 border-b border-gray-100">
+														<span className="text-gray-600">Statut</span>
+														<span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(viewingContract.status)}`}>
+															{getStatusLabel(viewingContract.status)}
+														</span>
+													</div>
+													<div className="flex items-center justify-between py-2 border-b border-gray-100">
+														<span className="text-gray-600">Assureur</span>
+														<span className="font-medium text-gray-900">{viewingContract.insurer}</span>
+													</div>
+													<div className="flex items-center justify-between py-2 border-b border-gray-100">
+														<span className="text-gray-600">Type de contrat</span>
+														<span className="font-medium text-gray-900">{getTypeLabel(viewingContract.type)}</span>
+													</div>
+													{viewingContract.coverageAmount && (
+														<div className="flex items-center justify-between py-2 border-b border-gray-100">
+															<span className="text-gray-600">Montant de couverture</span>
+															<span className="font-medium text-gray-900">{viewingContract.coverageAmount.toLocaleString()}€</span>
+														</div>
+													)}
+													{viewingContract.deductible && (
+														<div className="flex items-center justify-between py-2">
+															<span className="text-gray-600">Franchise</span>
+															<span className="font-medium text-gray-900">{viewingContract.deductible.toLocaleString()}€</span>
+														</div>
+													)}
+												</div>
+											</div>
+
+											{viewingContract.description && (
+												<div>
+													<h3 className="text-lg font-semibold text-gray-900 mb-4">Description</h3>
+													<p className="text-gray-700 bg-gray-50 p-4 rounded-xl">{viewingContract.description}</p>
+												</div>
+											)}
+
+											{viewingContract.documents && viewingContract.documents.length > 0 && (
+												<div>
+													<h3 className="text-lg font-semibold text-gray-900 mb-4">Documents ({viewingContract.documents.length})</h3>
+													<div className="space-y-3">
+														{viewingContract.documents.map((doc, index) => (
+															<div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+																<div className="flex items-center space-x-3">
+																	<FaFileAlt className="h-5 w-5 text-gray-400" />
+																	<div>
+																		<p className="font-medium text-gray-900">{doc.name}</p>
+																		<p className="text-sm text-gray-600">
+																			Ajouté le {new Date(doc.uploadDate).toLocaleDateString('fr-FR')}
+																		</p>
+																	</div>
+																</div>
+																<a
+																	href={doc.url}
+																	target="_blank"
+																	rel="noopener noreferrer"
+																	className="text-[#1e51ab] hover:text-[#163d82] font-medium text-sm"
+																>
+																	Ouvrir
+																</a>
+															</div>
+														))}
+													</div>
+												</div>
+											)}
+										</div>
+									</div>
+								)}
+
+								{/* Garanties */}
+								{activeTab === 1 && (
+									<div className="space-y-6">
+										{viewingContract.coverages.map((garantie, index) => (
+											<div key={index} className="bg-white border border-gray-200 rounded-xl p-6">
+												<h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+													<FaShieldAlt className="h-5 w-5 text-[#1e51ab] mr-2" />
+													{garantie.name}
+												</h3>
+												
+												{/* Détails des prestations */}
+												{garantie.details && garantie.details.length > 0 && (
+													<div className="mb-6">
+														<h4 className="text-lg font-medium text-gray-900 mb-3">Détails des prestations</h4>
+														<div className="space-y-4">
+															{garantie.details.map((detail, detailIndex) => (
+																<div key={detailIndex} className="bg-gray-50 p-4 rounded-lg">
+																	<h5 className="font-medium text-gray-900 mb-2">{detail.service}</h5>
+																	<div className="grid grid-cols-2 gap-4 text-sm">
+																		<div>
+																			<span className="text-gray-600">Plafond:</span>
+																			<span className="ml-2 font-medium">{detail.limit}</span>
+																		</div>
+																		<div>
+																			<span className="text-gray-600">Franchise:</span>
+																			<span className="ml-2 font-medium">{detail.deductible}</span>
+																		</div>
+																		<div>
+																			<span className="text-gray-600">Limite:</span>
+																			<span className="ml-2 font-medium">{detail.restrictions}</span>
+																		</div>
+																	</div>
+																</div>
+															))}
+														</div>
+													</div>
+												)}
+
+												{/* Ce qui est couvert */}
+												{garantie.coveredItems && garantie.coveredItems.length > 0 && (
+													<div className="mb-6">
+														<h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+															<FaCheck className="h-4 w-4 text-green-600 mr-2" />
+															Ce qui est couvert
+														</h4>
+														<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+															{garantie.coveredItems.map((item, itemIndex) => (
+																<div key={itemIndex} className="flex items-center space-x-2 p-2 bg-green-50 rounded-lg">
+																	<FaCheck className="h-4 w-4 text-green-600" />
+																	<span className="text-sm text-gray-700">{item}</span>
+																</div>
+															))}
+														</div>
+													</div>
+												)}
+
+												{/* Non couvert */}
+												{garantie.excludedItems && garantie.excludedItems.length > 0 && (
+													<div>
+														<h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+															<FaTimesIcon className="h-4 w-4 text-red-600 mr-2" />
+															Non couvert
+														</h4>
+														<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+															{garantie.excludedItems.map((item, itemIndex) => (
+																<div key={itemIndex} className="flex items-center space-x-2 p-2 bg-red-50 rounded-lg">
+																	<FaTimesIcon className="h-4 w-4 text-red-600" />
+																	<span className="text-sm text-gray-700">{item}</span>
+																</div>
+															))}
+														</div>
 													</div>
 												)}
 											</div>
-										</div>
-									)}
-								</div>
+										))}
+									</div>
+								)}
 
-								{/* Right Column - Documents & Description */}
-								<div className="space-y-6">
-									{viewingContract.description && (
+								{/* Exclusions */}
+								{activeTab === 2 && (
+									<div className="space-y-6">
 										<div>
-											<h3 className="text-lg font-semibold text-gray-900 mb-4">Description</h3>
-											<p className="text-gray-700 bg-gray-50 p-4 rounded-xl">
-												{viewingContract.description}
-											</p>
-										</div>
-									)}
-
-									{viewingContract.documents && viewingContract.documents.length > 0 && (
-										<div>
-											<h3 className="text-lg font-semibold text-gray-900 mb-4">
-												Documents ({viewingContract.documents.length})
+											<h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+												<FaExclamationTriangle className="h-5 w-5 text-red-600 mr-2" />
+												Exclusions générales
 											</h3>
 											<div className="space-y-3">
-												{viewingContract.documents.map((doc, index) => (
-													<div
-														key={index}
-														className="flex items-center justify-between p-3 bg-gray-50 rounded-xl"
-													>
-														<div className="flex items-center space-x-3">
-															<FaFileAlt className="h-5 w-5 text-gray-400" />
-															<div>
-																<p className="font-medium text-gray-900">{doc.name}</p>
-																<p className="text-sm text-gray-600">
-																	Ajouté le {new Date(doc.uploadDate).toLocaleDateString('fr-FR')}
-																</p>
-															</div>
-														</div>
-														<a
-															href={doc.url}
-															target="_blank"
-															rel="noopener noreferrer"
-															className="text-[#1e51ab] hover:text-[#163d82] font-medium text-sm"
-														>
-															Ouvrir
-														</a>
+												{viewingContract.generalExclusions.map((exclusion, index) => (
+													<div key={index} className="flex items-start space-x-3 p-4 bg-red-50 rounded-xl">
+														<FaTimesIcon className="h-4 w-4 text-red-600 mt-0.5" />
+														<span className="text-gray-700">{exclusion}</span>
 													</div>
 												))}
 											</div>
 										</div>
-									)}
-								</div>
+
+										<div>
+											<h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+												<FaGlobe className="h-5 w-5 text-blue-600 mr-2" />
+												Zone de couverture géographique
+											</h3>
+											<div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+												{viewingContract.geographicCoverage.countries.map((pays, index) => (
+													<div key={index} className="p-3 bg-blue-50 rounded-lg text-center">
+														<span className="text-sm font-medium text-gray-700">{pays}</span>
+													</div>
+												))}
+											</div>
+										</div>
+									</div>
+								)}
+
+								{/* Obligations */}
+								{activeTab === 3 && (
+									<div className="space-y-8">
+										<div>
+											<h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+												<FaClipboardList className="h-5 w-5 text-[#1e51ab] mr-2" />
+												Mes obligations
+											</h3>
+											
+											<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+												<div className="bg-blue-50 p-6 rounded-xl">
+													<h4 className="text-lg font-medium text-gray-900 mb-4">À la souscription</h4>
+													<div className="space-y-2">
+														{viewingContract.obligations.atSubscription.map((obligation, index) => (
+															<div key={index} className="flex items-start space-x-2">
+																<FaCheck className="h-4 w-4 text-blue-600 mt-0.5" />
+																<span className="text-sm text-gray-700">{obligation}</span>
+															</div>
+														))}
+													</div>
+												</div>
+
+												<div className="bg-green-50 p-6 rounded-xl">
+													<h4 className="text-lg font-medium text-gray-900 mb-4">En cours de contrat</h4>
+													<div className="space-y-2">
+														{viewingContract.obligations.duringContract.map((obligation, index) => (
+															<div key={index} className="flex items-start space-x-2">
+																<FaCheck className="h-4 w-4 text-green-600 mt-0.5" />
+																<span className="text-sm text-gray-700">{obligation}</span>
+															</div>
+														))}
+													</div>
+												</div>
+
+												<div className="bg-orange-50 p-6 rounded-xl">
+													<h4 className="text-lg font-medium text-gray-900 mb-4">En cas de sinistre</h4>
+													<div className="space-y-2">
+														{viewingContract.obligations.inCaseOfClaim.map((obligation, index) => (
+															<div key={index} className="flex items-start space-x-2">
+																<FaCheck className="h-4 w-4 text-orange-600 mt-0.5" />
+																<span className="text-sm text-gray-700">{obligation}</span>
+															</div>
+														))}
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								)}
+
+								{/* Résiliation */}
+								{activeTab === 4 && (
+									<div className="space-y-6">
+										<div className="bg-yellow-50 p-6 rounded-xl">
+											<h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+												<FaExclamationTriangle className="h-5 w-5 text-yellow-600 mr-2" />
+												Comment résilier mon contrat
+											</h3>
+											
+											<div className="space-y-4">
+												<div>
+													<h4 className="text-lg font-medium text-gray-900 mb-2">Modalités</h4>
+													<p className="text-gray-700 bg-white p-4 rounded-lg">{viewingContract.cancellation.procedures}</p>
+												</div>
+												
+												<div>
+													<h4 className="text-lg font-medium text-gray-900 mb-2">Délais</h4>
+													<p className="text-gray-700 bg-white p-4 rounded-lg">{viewingContract.cancellation.deadlines}</p>
+												</div>
+												
+												<div>
+													<h4 className="text-lg font-medium text-gray-900 mb-2">Contacts utiles</h4>
+													<div className="space-y-2">
+														{viewingContract.cancellation.usefulContacts.map((contact, index) => (
+															<div key={index} className="bg-white p-3 rounded-lg">
+																<span className="text-sm font-medium text-gray-700">{contact}</span>
+															</div>
+														))}
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								)}
+
+								{/* Contacts */}
+								{activeTab === 5 && (
+									<div className="space-y-6">
+										<h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+											<FaPhone className="h-5 w-5 text-[#1e51ab] mr-2" />
+											Qui contacter
+										</h3>
+										
+										<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+											{/* Gestion contrat */}
+											<div className="bg-blue-50 p-6 rounded-xl">
+												<h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+													<FaClipboardList className="h-4 w-4 text-blue-600 mr-2" />
+													Gestion contrat
+												</h4>
+												<div className="space-y-3">
+													<div>
+														<span className="text-sm text-gray-600">Nom</span>
+														<p className="font-medium text-gray-900">{viewingContract.contacts.contractManagement.name}</p>
+													</div>
+													<div className="flex items-center space-x-2">
+														<FaPhone className="h-4 w-4 text-gray-400" />
+														<span className="text-sm text-gray-700">{viewingContract.contacts.contractManagement.phone}</span>
+													</div>
+													<div className="flex items-center space-x-2">
+														<FaEnvelope className="h-4 w-4 text-gray-400" />
+														<span className="text-sm text-gray-700">{viewingContract.contacts.contractManagement.email}</span>
+													</div>
+													<div className="flex items-center space-x-2">
+														<FaClock className="h-4 w-4 text-gray-400" />
+														<span className="text-sm text-gray-700">{viewingContract.contacts.contractManagement.hours}</span>
+													</div>
+												</div>
+											</div>
+
+											{/* Assistance */}
+											<div className="bg-green-50 p-6 rounded-xl">
+												<h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+													<FaShieldAlt className="h-4 w-4 text-green-600 mr-2" />
+													Assistance
+												</h4>
+												<div className="space-y-3">
+													<div>
+														<span className="text-sm text-gray-600">Nom</span>
+														<p className="font-medium text-gray-900">{viewingContract.contacts.assistance.name}</p>
+													</div>
+													<div className="flex items-center space-x-2">
+														<FaPhone className="h-4 w-4 text-gray-400" />
+														<span className="text-sm text-gray-700">{viewingContract.contacts.assistance.phone}</span>
+													</div>
+													<div className="flex items-center space-x-2">
+														<FaEnvelope className="h-4 w-4 text-gray-400" />
+														<span className="text-sm text-gray-700">{viewingContract.contacts.assistance.email}</span>
+													</div>
+													<div className="flex items-center space-x-2">
+														<FaClock className="h-4 w-4 text-gray-400" />
+														<span className="text-sm text-gray-700">{viewingContract.contacts.assistance.availability}</span>
+													</div>
+												</div>
+											</div>
+
+											{/* Urgences */}
+											<div className="bg-red-50 p-6 rounded-xl">
+												<h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+													<FaExclamationTriangle className="h-4 w-4 text-red-600 mr-2" />
+													Urgences
+												</h4>
+												<div className="space-y-3">
+													<div>
+														<span className="text-sm text-gray-600">Nom</span>
+														<p className="font-medium text-gray-900">{viewingContract.contacts.emergency.name}</p>
+													</div>
+													<div className="flex items-center space-x-2">
+														<FaPhone className="h-4 w-4 text-gray-400" />
+														<span className="text-sm text-gray-700">{viewingContract.contacts.emergency.phone}</span>
+													</div>
+													<div className="flex items-center space-x-2">
+														<FaEnvelope className="h-4 w-4 text-gray-400" />
+														<span className="text-sm text-gray-700">{viewingContract.contacts.emergency.email}</span>
+													</div>
+													<div className="flex items-center space-x-2">
+														<FaClock className="h-4 w-4 text-gray-400" />
+														<span className="text-sm text-gray-700">{viewingContract.contacts.emergency.availability}</span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								)}
 							</div>
 
 							{/* Actions */}
