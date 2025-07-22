@@ -299,33 +299,103 @@ const ContractDetailsPage = () => {
 											</div>
 										</div>
 
-										{/* Documents */}
-										{contract.documents && contract.documents.length > 0 && (
-											<div className="bg-white border border-gray-200 rounded-2xl p-6">
-												<h3 className="text-lg font-semibold text-gray-900 mb-4">Documents</h3>
-												<div className="space-y-3">
-													{contract.documents.map((doc, index) => (
-														<div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-															<div className="flex items-center space-x-3">
-																<FaFileAlt className="h-5 w-5 text-gray-400" />
-																<div>
-																	<p className="text-sm font-medium text-gray-900">{doc.name}</p>
-																	<p className="text-xs text-gray-500">Ajouté le {doc.uploadDate}</p>
-																</div>
-															</div>
-															<a
-																href={doc.url}
-																target="_blank"
-																rel="noopener noreferrer"
-																className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
-															>
-																Voir
-															</a>
-														</div>
-													))}
+																			{/* Documents */}
+									<div className="bg-white border border-gray-200 rounded-2xl p-6">
+										<h3 className="text-lg font-semibold text-gray-900 mb-4">Documents</h3>
+										<div className="space-y-3">
+											{/* Conditions Générales */}
+											<div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl border border-blue-100">
+												<div className="flex items-center space-x-3">
+													<FaFileAlt className="h-5 w-5 text-blue-600" />
+													<div>
+														<p className="text-sm font-medium text-gray-900">{contract.documents.generalConditions.name}</p>
+														<p className="text-xs text-gray-500">Ajouté le {contract.documents.generalConditions.uploadDate}</p>
+													</div>
+												</div>
+												<div className="flex items-center space-x-2">
+													<span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Obligatoire</span>
+													<a
+														href={contract.documents.generalConditions.url}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
+													>
+														Voir
+													</a>
+													<a
+														href={contract.documents.generalConditions.url}
+														download={contract.documents.generalConditions.name}
+														className="text-gray-500 hover:text-[#1e51ab] text-sm font-medium"
+														title="Télécharger"
+													>
+														<FaDownload className="inline h-4 w-4" />
+													</a>
 												</div>
 											</div>
-										)}
+
+											{/* Conditions Particulières */}
+											<div className="flex items-center justify-between p-3 bg-green-50 rounded-xl border border-green-100">
+												<div className="flex items-center space-x-3">
+													<FaFileAlt className="h-5 w-5 text-green-600" />
+													<div>
+														<p className="text-sm font-medium text-gray-900">{contract.documents.particularConditions.name}</p>
+														<p className="text-xs text-gray-500">Ajouté le {contract.documents.particularConditions.uploadDate}</p>
+													</div>
+												</div>
+												<div className="flex items-center space-x-2">
+													<span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Obligatoire</span>
+													<a
+														href={contract.documents.particularConditions.url}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
+													>
+														Voir
+													</a>
+													<a
+														href={contract.documents.particularConditions.url}
+														download={contract.documents.particularConditions.name}
+														className="text-gray-500 hover:text-[#1e51ab] text-sm font-medium"
+														title="Télécharger"
+													>
+														<FaDownload className="inline h-4 w-4" />
+													</a>
+												</div>
+											</div>
+
+											{/* Autres Documents */}
+											{contract.documents.otherDocs && contract.documents.otherDocs.map((doc, index) => (
+												<div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+													<div className="flex items-center space-x-3">
+														<FaFileAlt className="h-5 w-5 text-gray-400" />
+														<div>
+															<p className="text-sm font-medium text-gray-900">{doc.name}</p>
+															<p className="text-xs text-gray-500">Ajouté le {doc.uploadDate}</p>
+														</div>
+													</div>
+													<div className="flex items-center space-x-2">
+														<span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">Optionnel</span>
+														<a
+															href={doc.url}
+															target="_blank"
+															rel="noopener noreferrer"
+															className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
+														>
+															Voir
+														</a>
+														<a
+															href={doc.url}
+															download={doc.name}
+															className="text-gray-500 hover:text-[#1e51ab] text-sm font-medium"
+															title="Télécharger"
+														>
+															<FaDownload className="inline h-4 w-4" />
+														</a>
+													</div>
+												</div>
+											))}
+										</div>
+									</div>
 									</div>
 								</div>
 							</div>

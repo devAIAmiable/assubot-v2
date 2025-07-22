@@ -97,7 +97,12 @@ const ContratsModule = () => {
 			};
 
 			if (contractId) {
-				dispatch(addDocument({ contractId, document }));
+				// For existing contracts, add as other document
+				dispatch(addDocument({ 
+					contractId, 
+					documentType: 'otherDocs',
+					document 
+				}));
 			} else {
 				// Create new contract from uploaded file
 				const newContract: Omit<Contract, 'id'> = {
@@ -109,7 +114,24 @@ const ContratsModule = () => {
 					endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
 					status: 'pending',
 					description: 'Contrat ajouté via upload de fichier',
-					documents: [document],
+					documents: {
+						generalConditions: {
+							name: 'Conditions Générales à définir.pdf',
+							url: '',
+							uploadDate: new Date().toISOString().split('T')[0],
+							required: true,
+						},
+						particularConditions: {
+							name: 'Conditions Particulières à définir.pdf',
+							url: '',
+							uploadDate: new Date().toISOString().split('T')[0],
+							required: true,
+						},
+						otherDocs: [{
+							...document,
+							required: false,
+						}],
+					},
 					overview: {
 						startDate: new Date().toLocaleDateString('fr-FR'),
 						endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
@@ -514,29 +536,38 @@ const ContratsModule = () => {
 									</div>
 
 									{/* Documents */}
-									{contract.documents && contract.documents.length > 0 && (
-										<div className="mb-4">
-											<p className="text-xs text-gray-600 mb-2">
-												Documents ({contract.documents.length})
-											</p>
-											<div className="flex flex-wrap gap-1">
-												{contract.documents.slice(0, 2).map((doc, docIndex) => (
-													<span
-														key={docIndex}
-														className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg"
-													>
-														<FaFileAlt className="h-3 w-3 mr-1" />
-														{doc.name.length > 15 ? `${doc.name.substring(0, 15)}...` : doc.name}
-													</span>
-												))}
-												{contract.documents.length > 2 && (
-													<span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg">
-														+{contract.documents.length - 2}
-													</span>
-												)}
-											</div>
+									<div className="mb-4">
+										<p className="text-xs text-gray-600 mb-2">
+											Documents ({contract.documents.otherDocs ? contract.documents.otherDocs.length + 2 : 2})
+										</p>
+										<div className="flex flex-wrap gap-1">
+											{/* Conditions Générales */}
+											<span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-lg">
+												<FaFileAlt className="h-3 w-3 mr-1" />
+												Conditions Générales
+											</span>
+											{/* Conditions Particulières */}
+											<span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs rounded-lg">
+												<FaFileAlt className="h-3 w-3 mr-1" />
+												Conditions Particulières
+											</span>
+											{/* Autres Documents */}
+											{contract.documents.otherDocs && contract.documents.otherDocs.slice(0, 1).map((doc, docIndex) => (
+												<span
+													key={docIndex}
+													className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg"
+												>
+													<FaFileAlt className="h-3 w-3 mr-1" />
+													{doc.name.length > 15 ? `${doc.name.substring(0, 15)}...` : doc.name}
+												</span>
+											))}
+											{contract.documents.otherDocs && contract.documents.otherDocs.length > 1 && (
+												<span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg">
+													+{contract.documents.otherDocs.length - 1}
+												</span>
+											)}
 										</div>
-									)}
+									</div>
 
 									{/* Actions */}
 									<div className="flex items-center justify-between pt-4 border-t border-gray-100">
