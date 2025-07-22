@@ -39,3 +39,15 @@ export const selectIsAuthenticated = (state: PersistedRootState) =>
 
 export const selectContractsList = (state: PersistedRootState) => 
 	selectContracts(state).contracts; 
+
+// Replace the old cancellation type
+type CancellationQA = {
+  question: string;
+  answer: string;
+};
+
+export interface Contract {
+  // ...existing fields...
+  cancellation: CancellationQA[];
+  // ...rest unchanged...
+} 

@@ -70,11 +70,7 @@ export interface Contract {
 		inCaseOfClaim: string[];
 	};
 	// Cancellation information
-	cancellation: {
-		procedures: string;
-		deadlines: string;
-		usefulContacts: string[];
-	};
+	cancellation: { question: string; answer: string }[];
 	// Contact information
 	contacts: {
 		contractManagement: {
@@ -328,11 +324,32 @@ const axaContract: Contract = {
 		},
 	],
 	// --- Résiliation ---
-	cancellation: {
-		procedures: `\nQ : Puis-je résilier mon contrat à l’échéance ?\nR : Oui. Vous pouvez résilier à la date d’échéance principale du contrat, avec un préavis de 2 mois.\nModalité : par lettre recommandée\nJustificatif : aucun n’est nécessaire\nPrise d’effet : à la date d’échéance\n\nQ : Puis-je résilier si ma situation change ?\nR : Oui, dans plusieurs cas précis, avec justificatif et lettre recommandée :\n 1- Changement de régime obligatoire (ex : passage au régime Alsace-Moselle)\nPreuve : attestation du nouveau régime\nEffet : 1 mois après réception du courrier ou justificatif\n\n 2- Obtention de la CMU-C\nPreuve : attestation CMU-C\nEffet : à la date de prise d’effet de la CMU-C\n\n 3- Obtention de l’ACS (Aide à l'acquisition d'une complémentaire santé)\nPreuve : attestation d’un organisme habilité\nEffet : le 1er jour du 2ᵉ mois suivant\n\n 4- Déménagement à l’étranger hors fiscalité française\nPreuve : justificatif de déménagement\nEffet : 1 mois après réception\n\n 5- Adhésion à un contrat collectif obligatoire par l’employeur\nPreuve : attestation de l’employeur\nEffet : 1 mois après réception\n\nQ : Que se passe-t-il si j’ai un désaccord sur une augmentation tarifaire ?\nR : Vous pouvez résilier en cas de hausse de tarif, sauf si elle découle d’une obligation légale/réglementaire.\nDélai : dans les 30 jours suivant la réception de l’avis de hausse\nModalité : lettre recommandée, sans justificatif\nEffet : à la prochaine échéance principale (si respect du délai)\n\nQ : Dans quels autres cas mon contrait peut être résilier ?\nR : L’assureur peut résilier si :\n1- Vous ne réglez pas vos cotisations (après une mise en demeure de 40 jours)\n2- Vous avez fait une fausse déclaration ou omission\n3- Vous ne remplissez plus les conditions d’adhésion\n\nQ : Que se passe-t-il en cas de décès de l’assuré ?\nR : Le contrat ou l’adhésion prend fin automatiquement au décès du souscripteur ou de l’adhérent.`,
-		deadlines: '',
-		usefulContacts: [],
-	},
+	cancellation: [
+		{
+			question: 'Puis-je résilier mon contrat à l’échéance ?',
+			answer:
+				'Oui. Vous pouvez résilier à la date d’échéance principale du contrat, avec un préavis de 2 mois. \nModalité : par lettre recommandée. \nJustificatif : aucun n’est nécessaire. \nPrise d’effet : à la date d’échéance.',
+		},
+		{
+			question: 'Puis-je résilier si ma situation change ?',
+			answer: `Oui, dans plusieurs cas précis, avec justificatif et lettre recommandée :\n1- Changement de régime obligatoire (ex : passage au régime Alsace-Moselle)\nPreuve : attestation du nouveau régime\nEffet : 1 mois après réception du courrier ou justificatif\n2- Obtention de la CMU-C\nPreuve : attestation CMU-C\nEffet : à la date de prise d’effet de la CMU-C\n3- Obtention de l’ACS (Aide à l'acquisition d'une complémentaire santé)\nPreuve : attestation d’un organisme habilité\nEffet : le 1er jour du 2ᵉ mois suivant\n4- Déménagement à l’étranger hors fiscalité française\nPreuve : justificatif de déménagement\nEffet : 1 mois après réception\n5- Adhésion à un contrat collectif obligatoire par l’employeur\nPreuve : attestation de l’employeur\nEffet : 1 mois après réception`,
+		},
+		{
+			question: 'Que se passe-t-il si j’ai un désaccord sur une augmentation tarifaire ?',
+			answer:
+				'Vous pouvez résilier en cas de hausse de tarif, sauf si elle découle d’une obligation légale/réglementaire. \nDélai : dans les 30 jours suivant la réception de l’avis de hausse. \nModalité : lettre recommandée, sans justificatif. \nEffet : à la prochaine échéance principale (si respect du délai).',
+		},
+		{
+			question: 'Dans quels autres cas mon contrat peut être résilié ?',
+			answer:
+				'L’assureur peut résilier si : \n1- Vous ne réglez pas vos cotisations (après une mise en demeure de 40 jours) \n2- Vous avez fait une fausse déclaration ou omission \n3- Vous ne remplissez plus les conditions d’adhésion.',
+		},
+		{
+			question: 'Que se passe-t-il en cas de décès de l’assuré ?',
+			answer:
+				'Le contrat ou l’adhésion prend fin automatiquement au décès du souscripteur ou de l’adhérent.',
+		},
+	],
 	contacts: {
 		contractManagement: {
 			name: 'AXA Service Client',
@@ -479,11 +496,24 @@ const initialState: ContractsState = {
 					'Conserver les preuves',
 				],
 			},
-			cancellation: {
-				procedures: 'Lettre recommandée avec AR ou en ligne sur le site MAIF',
-				deadlines: "2 mois avant la date d'échéance",
-				usefulContacts: ['Service client MAIF', 'Agence locale', 'Site web MAIF'],
-			},
+			cancellation: [
+				{
+					question: 'Comment résilier mon contrat auto à l’échéance ?',
+					answer: 'Vous pouvez résilier à la date d’échéance annuelle, en envoyant une lettre recommandée au moins 2 mois avant la date. La résiliation prend effet à l’échéance.'
+				},
+				{
+					question: 'Puis-je résilier après la vente de mon véhicule ?',
+					answer: 'Oui, la vente du véhicule permet la résiliation immédiate du contrat. Envoyez un justificatif de cession à votre assureur. Le contrat prend fin 10 jours après notification.'
+				},
+				{
+					question: 'Que faire en cas de changement de situation ?',
+					answer: 'Un déménagement, un changement de situation matrimoniale ou professionnelle peut justifier une résiliation. Prévenez l’assureur sous 3 mois.'
+				},
+				{
+					question: 'L’assureur peut-il résilier mon contrat ?',
+					answer: 'Oui, en cas de non-paiement, sinistre responsable ou fausse déclaration, l’assureur peut résilier le contrat.'
+				},
+			],
 			contacts: {
 				contractManagement: {
 					name: 'Service Client MAIF',
@@ -613,11 +643,24 @@ const initialState: ContractsState = {
 					'Conserver les preuves',
 				],
 			},
-			cancellation: {
-				procedures: 'Lettre recommandée avec AR ou en ligne',
-				deadlines: "2 mois avant la date d'échéance",
-				usefulContacts: ['Service client Groupama', 'Agence locale', 'Site web Groupama'],
-			},
+			cancellation: [
+				{
+					question: 'Comment résilier mon assurance habitation ?',
+					answer: 'Vous pouvez résilier à l’échéance annuelle avec un préavis de 2 mois par lettre recommandée. La résiliation prend effet à la date d’échéance.'
+				},
+				{
+					question: 'Puis-je résilier en cas de déménagement ?',
+					answer: 'Oui, un déménagement permet de résilier le contrat. Prévenez l’assureur dans les 3 mois suivant le changement.'
+				},
+				{
+					question: 'Que faire si je vends mon logement ?',
+					answer: 'La vente du bien entraîne la résiliation automatique du contrat. Informez l’assureur avec un justificatif.'
+				},
+				{
+					question: 'L’assureur peut-il résilier ?',
+					answer: 'Oui, en cas de non-paiement, sinistre grave ou fausse déclaration.'
+				},
+			],
 			contacts: {
 				contractManagement: {
 					name: 'Service Client Groupama',
@@ -753,11 +796,24 @@ const initialState: ContractsState = {
 					'Conserver les justificatifs',
 				],
 			},
-			cancellation: {
-				procedures: 'Lettre recommandée avec AR ou en ligne',
-				deadlines: "2 mois avant la date d'échéance",
-				usefulContacts: ['Service client Harmonie', 'Agence locale', 'Site web Harmonie'],
-			},
+			cancellation: [
+				{
+					question: 'Comment résilier ma mutuelle santé ?',
+					answer: 'Vous pouvez résilier à l’échéance annuelle avec un préavis de 2 mois par lettre recommandée. La résiliation prend effet à la date d’échéance.'
+				},
+				{
+					question: 'Puis-je résilier en cas d’adhésion à une mutuelle obligatoire ?',
+					answer: 'Oui, l’adhésion à une mutuelle d’entreprise permet de résilier votre contrat individuel. Fournissez l’attestation de l’employeur.'
+				},
+				{
+					question: 'Que faire en cas de changement de situation ?',
+					answer: 'Un changement de régime social, déménagement ou mariage peut justifier une résiliation. Prévenez l’assureur sous 3 mois.'
+				},
+				{
+					question: 'L’assureur peut-il résilier ?',
+					answer: 'Oui, en cas de non-paiement, fraude ou fausse déclaration.'
+				},
+			],
 			contacts: {
 				contractManagement: {
 					name: 'Service Client Harmonie',

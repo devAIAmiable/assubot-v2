@@ -20,11 +20,24 @@ import {
 import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel, isExpired } from '../utils/contract';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import React from 'react';
 import { Tab } from '@headlessui/react';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { useAppSelector } from '../store/hooks';
 import { useState } from 'react';
+
+function highlightKeywords(text: string) {
+	const keywords = [
+		'Modalité', 'Justificatif', 'Preuve', 'Effet', 'Délai', 'Prise d’effet', 'Contact',
+		'Oui', 'Non', 'R :', 'Q :'
+	];
+	const regex = new RegExp(`(${keywords.map(k => k.replace(/([.*+?^=!:${}()|[\]\\])/g, "\\$1")).join('|')})`, 'g');
+	const parts = text.split(regex);
+	return parts.map((part, i) =>
+		keywords.includes(part) ? <strong key={i}>{part}</strong> : part
+	);
+}
 
 const ContractDetailsPage = () => {
 	const { contractId } = useParams<{ contractId: string }>();
@@ -517,43 +530,102 @@ const ContractDetailsPage = () => {
 								<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 									<div className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
 										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-											À la souscription
+											<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
+											Gestion contrat
 										</h4>
 										<div className="space-y-4">
-											{contract.obligations.atSubscription.map((obligation, index) => (
-												<div key={index} className="flex items-start space-x-3">
-													<FaCheck className="h-5 w-5 text-blue-600 mt-0.5" />
-													<span className="text-gray-900">{capitalizeFirst(obligation)}</span>
-												</div>
-											))}
+											<div>
+												<span className="text-gray-600 text-sm">Nom</span>
+												<p className="font-semibold text-gray-900">
+													{capitalizeFirst(contract.contacts.contractManagement.name)}
+												</p>
+											</div>
+											<div className="flex items-center space-x-3">
+												<FaPhone className="h-4 w-4 text-gray-400" />
+												<span className="font-medium text-gray-900">
+													{capitalizeFirst(contract.contacts.contractManagement.phone)}
+												</span>
+											</div>
+											<div className="flex items-center space-x-3">
+												<FaEnvelope className="h-4 w-4 text-gray-400" />
+												<span className="font-medium text-gray-900">
+													{capitalizeFirst(contract.contacts.contractManagement.email)}
+												</span>
+											</div>
+											<div className="flex items-center space-x-3">
+												<FaClock className="h-4 w-4 text-gray-400" />
+												<span className="font-medium text-gray-900">
+													{capitalizeFirst(contract.contacts.contractManagement.hours)}
+												</span>
+											</div>
 										</div>
 									</div>
 
+									{/* Assistance */}
 									<div className="bg-green-50 p-8 rounded-2xl border border-green-100">
 										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-											En cours de contrat
+											<FaShieldAlt className="h-5 w-5 text-green-600 mr-2" />
+											Assistance
 										</h4>
 										<div className="space-y-4">
-											{contract.obligations.duringContract.map((obligation, index) => (
-												<div key={index} className="flex items-start space-x-3">
-													<FaCheck className="h-5 w-5 text-green-600 mt-0.5" />
-													<span className="text-gray-900">{capitalizeFirst(obligation)}</span>
-												</div>
-											))}
+											<div>
+												<span className="text-gray-600 text-sm">Nom</span>
+												<p className="font-semibold text-gray-900">
+													{capitalizeFirst(contract.contacts.assistance.name)}
+												</p>
+											</div>
+											<div className="flex items-center space-x-3">
+												<FaPhone className="h-4 w-4 text-gray-400" />
+												<span className="font-medium text-gray-900">
+													{capitalizeFirst(contract.contacts.assistance.phone)}
+												</span>
+											</div>
+											<div className="flex items-center space-x-3">
+												<FaEnvelope className="h-4 w-4 text-gray-400" />
+												<span className="font-medium text-gray-900">
+													{capitalizeFirst(contract.contacts.assistance.email)}
+												</span>
+											</div>
+											<div className="flex items-center space-x-3">
+												<FaClock className="h-4 w-4 text-gray-400" />
+												<span className="font-medium text-gray-900">
+													{capitalizeFirst(contract.contacts.assistance.availability)}
+												</span>
+											</div>
 										</div>
 									</div>
 
-									<div className="bg-orange-50 p-8 rounded-2xl border border-orange-100">
+									{/* Urgences */}
+									<div className="bg-red-50 p-8 rounded-2xl border border-red-100">
 										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-											En cas de sinistre
+											<FaExclamationTriangle className="h-5 w-5 text-red-600 mr-2" />
+											Urgences
 										</h4>
 										<div className="space-y-4">
-											{contract.obligations.inCaseOfClaim.map((obligation, index) => (
-												<div key={index} className="flex items-start space-x-3">
-													<FaCheck className="h-5 w-5 text-orange-600 mt-0.5" />
-													<span className="text-gray-900">{capitalizeFirst(obligation)}</span>
-												</div>
-											))}
+											<div>
+												<span className="text-gray-600 text-sm">Nom</span>
+												<p className="font-semibold text-gray-900">
+													{capitalizeFirst(contract.contacts.emergency.name)}
+												</p>
+											</div>
+											<div className="flex items-center space-x-3">
+												<FaPhone className="h-4 w-4 text-gray-400" />
+												<span className="font-medium text-gray-900">
+													{capitalizeFirst(contract.contacts.emergency.phone)}
+												</span>
+											</div>
+											<div className="flex items-center space-x-3">
+												<FaEnvelope className="h-4 w-4 text-gray-400" />
+												<span className="font-medium text-gray-900">
+													{capitalizeFirst(contract.contacts.emergency.email)}
+												</span>
+											</div>
+											<div className="flex items-center space-x-3">
+												<FaClock className="h-4 w-4 text-gray-400" />
+												<span className="font-medium text-gray-900">
+													{capitalizeFirst(contract.contacts.emergency.availability)}
+												</span>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -562,43 +634,76 @@ const ContractDetailsPage = () => {
 
 						{/* Résiliation */}
 						<Tab.Panel className="p-6">
-							<div className="max-w-4xl mx-auto">
+							<div className="max-w-7xl mx-auto">
 								<div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-8 rounded-2xl border border-yellow-100">
 									<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
 										<FaExclamationTriangle className="h-6 w-6 text-yellow-600 mr-3" />
 										Comment résilier mon contrat
 									</h3>
-
 									<div className="space-y-8">
-										<div>
-											<h4 className="text-xl font-semibold text-gray-900 mb-4">Modalités</h4>
-											<p className="text-gray-900 bg-white p-6 rounded-xl border border-yellow-200 text-lg">
-												{capitalizeFirst(contract.cancellation.procedures)}
-											</p>
-										</div>
-
-										<div>
-											<h4 className="text-xl font-semibold text-gray-900 mb-4">Délais</h4>
-											<p className="text-gray-900 bg-white p-6 rounded-xl border border-yellow-200 text-lg">
-												{capitalizeFirst(contract.cancellation.deadlines)}
-											</p>
-										</div>
-
-										<div>
-											<h4 className="text-xl font-semibold text-gray-900 mb-4">Contacts utiles</h4>
-											<div className="space-y-3">
-												{contract.cancellation.usefulContacts.map((contact, index) => (
-													<div
-														key={index}
-														className="bg-white p-4 rounded-xl border border-yellow-200"
-													>
-														<span className="font-medium text-gray-900">
-															{capitalizeFirst(contact)}
-														</span>
-													</div>
-												))}
+										{contract.cancellation.map((qa, idx) => (
+											<div key={idx} className="bg-white p-6 rounded-xl border border-yellow-200">
+												<h4 className="text-xl font-semibold text-gray-900 mb-2">{qa.question}</h4>
+												{/* Improved Q&A formatting */}
+												{(() => {
+													// Split answer into lines
+													const lines: string[] = qa.answer.split('\n').map(l => l.trim()).filter(Boolean);
+													// Detect if this answer contains a numbered list (e.g., '1- ...')
+													const numberedListIndices: number[] = lines
+														.map((line: string, i: number) => (/^\d+- /.test(line) ? i : -1))
+														.filter((i: number) => i !== -1);
+													if (numberedListIndices.length > 0) {
+														// Find the intro (before the list)
+														const intro: string[] = lines.slice(0, numberedListIndices[0]);
+														// Group list items and their sub-lines
+														type Item = { main: string; sub: string[] };
+														const items: Item[] = [];
+														let currentItem: Item | null = null;
+														lines.slice(numberedListIndices[0]).forEach((line: string) => {
+															if (/^\d+- /.test(line)) {
+																if (currentItem) items.push(currentItem);
+																currentItem = { main: line.replace(/^\d+- /, ''), sub: [] };
+															} else if (currentItem) {
+																currentItem.sub.push(line);
+															}
+														});
+														if (currentItem) items.push(currentItem);
+														return (
+															<div className="space-y-2">
+																{intro.map((line: string, i: number) => (
+																	<p key={i} className="text-gray-900 text-lg">
+																		{highlightKeywords(line)}
+																	</p>
+																))}
+																<ul className="list-decimal list-inside ml-4 space-y-2">
+																	{items.map((item: Item, i: number) => (
+																		<li key={i} className="text-gray-900 text-lg">
+																			{highlightKeywords(item.main)}
+																			{item.sub.length > 0 && (
+																				<ul className="ml-4 list-none space-y-1">
+																					{item.sub.map((sub: string, j: number) => (
+																						<li key={j} className="text-gray-900 text-base">
+																							{highlightKeywords(sub)}
+																						</li>
+																					))}
+																				</ul>
+																			)}
+																		</li>
+																	))}
+																</ul>
+															</div>
+														);
+													} else {
+														// No numbered list, just paragraphs
+														return lines.map((line: string, i: number) => (
+															<p key={i} className="text-gray-900 text-lg">
+																{highlightKeywords(line)}
+															</p>
+														));
+													}
+												})()}
 											</div>
-										</div>
+										))}
 									</div>
 								</div>
 							</div>
