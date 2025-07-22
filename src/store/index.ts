@@ -10,7 +10,7 @@ import userReducer from './userSlice';
 const persistConfig = {
 	key: 'root',
 	storage,
-	whitelist: ['contracts', 'user', 'chat', 'comparisons'], // Persist contracts, user, chat history, and comparisons
+	whitelist: ['user', 'chat', 'comparisons'], // Persist contracts, user, chat history, and comparisons
 };
 
 const rootReducer = combineReducers({
