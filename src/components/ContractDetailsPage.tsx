@@ -425,47 +425,55 @@ const ContractDetailsPage = () => {
 												</div>
 											)}
 
+											{/* Non couvert */}
+											{garantie.details && garantie.details.some(detail => detail.excludedItems && detail.excludedItems.length > 0) && (
+												<div className="mb-8">
+													<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+														Non couvert
+													</h4>
+													<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+														{garantie.details.map((detail, detailIndex) =>
+															detail.excludedItems && detail.excludedItems.length > 0
+																? detail.excludedItems.map((item: string, index: number) => (
+																	<div
+																		key={`${detailIndex}-${index}`}
+																		className="flex items-center space-x-3 p-4 bg-red-50 rounded-xl border border-red-100"
+																	>
+																		<FaTimesIcon className="h-5 w-5 text-red-600" />
+																		<span className="font-medium text-gray-900">
+																			{capitalizeFirst(item)}
+																		</span>
+																	</div>
+																))
+																: null
+														)}
+													</div>
+												</div>
+											)}
+
 											<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 												{/* Ce qui est couvert */}
-												{garantie.coveredItems && garantie.coveredItems.length > 0 && (
+												{garantie.details && garantie.details.some(detail => detail.coveredItems && detail.coveredItems.length > 0) && (
 													<div>
 														<h4 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
 															Ce qui est couvert
 														</h4>
 														<div className="space-y-3">
-															{garantie.coveredItems.map((item, index) => (
-																<div
-																	key={index}
-																	className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-100"
-																>
-																	<FaCheck className="h-5 w-5 text-green-600" />
-																	<span className="font-medium text-gray-900">
-																		{capitalizeFirst(item)}
-																	</span>
-																</div>
-															))}
-														</div>
-													</div>
-												)}
-
-												{/* Non couvert */}
-												{garantie.excludedItems && garantie.excludedItems.length > 0 && (
-													<div>
-														<h4 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-															Non couvert
-														</h4>
-														<div className="space-y-3">
-															{garantie.excludedItems.map((item, index) => (
-																<div
-																	key={index}
-																	className="flex items-center space-x-3 p-4 bg-red-50 rounded-xl border border-red-100"
-																>
-																	<FaTimesIcon className="h-5 w-5 text-red-600" />
-																	<span className="font-medium text-gray-900">
-																		{capitalizeFirst(item)}
-																	</span>
-																</div>
-															))}
+															{garantie.details.map((detail, detailIndex) =>
+																detail.coveredItems && detail.coveredItems.length > 0
+																	? detail.coveredItems.map((item: string, index: number) => (
+																		<div
+																			key={`${detailIndex}-${index}`}
+																			className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-100"
+																		>
+																			<FaCheck className="h-5 w-5 text-green-600" />
+																			<span className="font-medium text-gray-900">
+																				{capitalizeFirst(item)}
+																			</span>
+																		</div>
+																	))
+																	: null
+															)}
 														</div>
 													</div>
 												)}
