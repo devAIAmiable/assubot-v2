@@ -21,6 +21,7 @@ import {
 	setSelectedType,
 	updateContract,
 } from '../store/contractsSlice';
+import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../utils/contract';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 import type { Contract } from '../types';
@@ -212,64 +213,12 @@ const ContratsModule = () => {
 		}
 	};
 
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case 'active':
-				return 'bg-green-100 text-green-800';
-			case 'expired':
-				return 'bg-red-100 text-red-800';
-			case 'pending':
-				return 'bg-yellow-100 text-yellow-800';
-			default:
-				return 'bg-gray-100 text-gray-800';
-		}
-	};
-
-	const getTypeIcon = (type: string) => {
-		switch (type) {
-			case 'auto':
-				return FaFileContract;
-			case 'habitation':
-				return FaFileContract;
-			case 'sante':
-				return FaFileAlt;
-			default:
-				return FaFileContract;
-		}
-	};
-
-	const getTypeLabel = (type: string) => {
-		switch (type) {
-			case 'auto':
-				return 'Automobile';
-			case 'habitation':
-				return 'Habitation';
-			case 'sante':
-				return 'Santé';
-			case 'autre':
-				return 'Autre';
-			default:
-				return type;
-		}
-	};
-
-	const getStatusLabel = (status: string) => {
-		switch (status) {
-			case 'active':
-				return 'Actif';
-			case 'expired':
-				return 'Expiré';
-			case 'pending':
-				return 'En attente';
-			default:
-				return status;
-		}
-	};
-
+	const today = new Date();
+	const isExpired = (contract: Contract) => new Date(contract.endDate) < today;
 	const contractStats = {
 		total: contracts.length,
 		active: contracts.filter((c) => c.status === 'active').length,
-		expired: contracts.filter((c) => c.status === 'expired').length,
+		expired: contracts.filter((c) => isExpired(c)).length,
 		totalPremium: contracts
 			.filter((c) => c.status === 'active')
 			.reduce((sum, c) => sum + c.premium, 0),
@@ -495,6 +444,7 @@ const ContratsModule = () => {
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{filteredContracts.map((contract, index) => {
 							const TypeIcon = getTypeIcon(contract.type);
+							const isContractExpired = isExpired(contract);
 							return (
 								<motion.div
 									key={contract.id}
@@ -527,9 +477,9 @@ const ContratsModule = () => {
 											</div>
 										</div>
 										<span
-											className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(contract.status)}`}
+											className={`px-2 py-1 text-xs font-medium rounded-full ${isContractExpired ? 'bg-red-100 text-red-800' : getStatusColor(contract.status)}`}
 										>
-											{getStatusLabel(contract.status)}
+											{isContractExpired ? 'Expiré' : getStatusLabel(contract.status)}
 										</span>
 									</div>
 
