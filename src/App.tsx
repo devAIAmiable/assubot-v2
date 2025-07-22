@@ -6,6 +6,7 @@ import { persistor, store } from './store/index'
 import AppLayout from './components/AppLayout'
 import ChatbotModule from './components/ChatbotModule'
 import ComparateurModule from './components/ComparateurModule'
+import ContractDetailsPage from './components/ContractDetailsPage'
 import ContratsModule from './components/ContratsModule'
 import Dashboard from './components/Dashboard'
 import LandingPage from './components/LandingPage'
@@ -33,6 +34,7 @@ function App() {
 							{/* Module routes */}
 							<Route path="dashboard" element={<Dashboard />} />
 							<Route path="contrats" element={<ContratsModule />} />
+							<Route path="contrats/:contractId" element={<ContractDetailsPage />} />
 							<Route path="chatbot" element={<ChatbotModule />} />
 							<Route path="comparateur" element={<ComparateurModule />} />
 							<Route path="notifications" element={<NotificationsModule />} />

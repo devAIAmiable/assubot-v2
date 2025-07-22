@@ -13,11 +13,26 @@ export interface Contract {
 	description?: string;
 	coverageAmount?: number;
 	deductible?: number;
-	documents?: {
-		name: string;
-		url: string;
-		uploadDate: string;
-	}[];
+	documents: {
+		generalConditions: {
+			name: string;
+			url: string;
+			uploadDate: string;
+			required: true;
+		};
+		particularConditions: {
+			name: string;
+			url: string;
+			uploadDate: string;
+			required: true;
+		};
+		otherDocs?: {
+			name: string;
+			url: string;
+			uploadDate: string;
+			required: false;
+		}[];
+	};
 	// Contract overview and basic details
 	overview: {
 		startDate: string;
