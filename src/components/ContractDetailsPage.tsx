@@ -226,7 +226,7 @@ const ContractDetailsPage = () => {
 												{contract.overview.hasTacitRenewal && (
 													<div className="flex items-center justify-between py-3">
 														<span className="text-gray-600 font-medium">
-															Date limite de résiliation
+														Date limite
 														</span>
 														<span className="font-semibold text-gray-900">
 															{new Date(contract.overview.tacitRenewalDeadline).toLocaleDateString('fr-FR')}
