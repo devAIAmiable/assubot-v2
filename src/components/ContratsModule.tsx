@@ -18,7 +18,7 @@ import {
 	setSelectedType,
 	updateContract,
 } from '../store/contractsSlice';
-import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../utils/contract';
+import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel, isExpired } from '../utils/contract';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 import type { Contract } from '../types';
@@ -110,8 +110,6 @@ const ContratsModule = () => {
 
 	// Remove handleFileUpload if not used
 
-	const today = new Date();
-	const isExpired = (contract: Contract) => new Date(contract.endDate) < today;
 	const contractStats = {
 		total: contracts.length,
 		active: contracts.filter((c) => c.status === 'active').length,

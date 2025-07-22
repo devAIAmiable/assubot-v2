@@ -17,7 +17,7 @@ import {
 	FaTimes,
 	FaTimes as FaTimesIcon,
 } from 'react-icons/fa';
-import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../utils/contract';
+import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel, isExpired } from '../utils/contract';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Tab } from '@headlessui/react';
@@ -34,6 +34,8 @@ const ContractDetailsPage = () => {
 	// Get contract from Redux store
 	const { contracts } = useAppSelector((state) => state.contracts);
 	const contract = contracts.find((c) => c.id === contractId);
+
+	const isContractExpired = isExpired(contract!);
 
 	// Redirect if contract not found
 	if (!contract) {
@@ -104,16 +106,16 @@ const ContractDetailsPage = () => {
 								<div>
 									<h1 className="text-2xl font-bold text-gray-900">{contract.name}</h1>
 									<p className="text-gray-600">
-										{getTypeLabel(contract.type)} - {contract.insurer}
+										{contract.insurer} - {getTypeLabel(contract.type)}
 									</p>
 								</div>
 							</div>
 						</div>
 						<div className="flex items-center space-x-3">
 							<span
-								className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(contract.status)}`}
+								className={`px-3 py-1 rounded-full text-sm font-medium ${isContractExpired ? 'bg-red-100 text-red-800' : getStatusColor(contract.status)}`}
 							>
-								{getStatusLabel(contract.status)}
+								{isContractExpired ? 'Expiré' : getStatusLabel(contract.status)}
 							</span>
 							<div className="flex items-center space-x-2">
 								<button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
