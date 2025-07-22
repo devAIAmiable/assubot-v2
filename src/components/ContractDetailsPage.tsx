@@ -72,6 +72,7 @@ const ContractDetailsPage = () => {
 		{ name: "Vue d'ensemble", icon: FaEye },
 		{ name: 'Garanties', icon: FaShieldAlt },
 		{ name: 'Exclusions', icon: FaExclamationTriangle },
+		{ name: 'Zone géographique', icon: FaGlobe },
 		{ name: 'Obligations', icon: FaClipboardList },
 		{ name: 'Résiliation', icon: FaTimes },
 		{ name: 'Contacts', icon: FaPhone },
@@ -479,41 +480,44 @@ const ContractDetailsPage = () => {
 						{/* Exclusions */}
 						<Tab.Panel className="p-6">
 							<div className="max-w-7xl mx-auto">
-								<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-									<div>
-										<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-											<FaExclamationTriangle className="h-6 w-6 text-red-600 mr-3" />
-											Exclusions générales
-										</h3>
-										<div className="space-y-4">
-											{contract.generalExclusions.map((exclusion, index) => (
-												<div
-													key={index}
-													className="flex items-start space-x-4 p-6 bg-red-50 rounded-2xl border border-red-100"
-												>
-													<span className="text-gray-900 font-medium">
-														{capitalizeFirst(exclusion)}
-													</span>
-												</div>
-											))}
-										</div>
+								<div className="bg-gradient-to-br from-red-50 to-orange-50 p-8 rounded-2xl border border-red-100">
+									<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+										<FaExclamationTriangle className="h-6 w-6 text-red-600 mr-3" />
+										Exclusions générales
+									</h3>
+									<div className="space-y-4">
+										{contract.generalExclusions.map((exclusion, index) => (
+											<div
+												key={index}
+												className="flex items-start space-x-4 p-6 bg-white rounded-2xl border border-red-100"
+											>
+												<span className="text-gray-900 font-medium">
+													{capitalizeFirst(exclusion)}
+												</span>
+											</div>
+										))}
 									</div>
+								</div>
+							</div>
+						</Tab.Panel>
 
-									<div>
-										<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-											<FaGlobe className="h-6 w-6 text-blue-600 mr-3" />
-											Zone de couverture géographique
-										</h3>
-										<div className="grid grid-cols-1 gap-3">
-											{contract.geographicCoverage.countries.map((pays, index) => (
-												<div
-													key={index}
-													className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-center"
-												>
-													<span className="font-medium text-gray-900">{capitalizeFirst(pays)}</span>
-												</div>
-											))}
-										</div>
+						{/* Zone géographique (new tab) */}
+						<Tab.Panel className="p-6">
+							<div className="max-w-7xl mx-auto">
+								<div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
+									<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+										<FaGlobe className="h-6 w-6 text-blue-600 mr-3" />
+										Zone de couverture géographique
+									</h3>
+									<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+										{contract.geographicCoverage.countries.map((pays, index) => (
+											<div
+												key={index}
+												className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-center"
+											>
+												<span className="font-medium text-gray-900">{capitalizeFirst(pays)}</span>
+											</div>
+										))}
 									</div>
 								</div>
 							</div>
