@@ -478,7 +478,6 @@ const ContractDetailsPage = () => {
 													key={index}
 													className="flex items-start space-x-4 p-6 bg-red-50 rounded-2xl border border-red-100"
 												>
-													<FaTimesIcon className="h-5 w-5 text-red-600 mt-0.5" />
 													<span className="text-gray-900 font-medium">
 														{capitalizeFirst(exclusion)}
 													</span>

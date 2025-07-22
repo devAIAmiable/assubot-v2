@@ -133,113 +133,205 @@ const axaContract: Contract = {
 		},
 		otherDocs: [],
 	},
+	// --- Mon contrat en un coup d'œil ---
 	overview: {
-		startDate: '01/01/2019',
-		endDate: '31/12/2024',
-		annualPremium: '780,00€',
+		startDate: '23-07-2025',
+		endDate: '22-07-2026',
+		annualPremium: '225.00 €',
 		hasTacitRenewal: true,
-		tacitRenewalDeadline: '30/11/2024',
-		planType: 'individuel ou groupe à adhésion facultative',
+		tacitRenewalDeadline: '22-05-2026',
+		planType: 'Essentielle',
 		subscribedCoverages: [
 			'Hospitalisation',
 			'Soins courants',
-			'Transport sanitaire',
 			'Optique',
 			'Dentaire',
-			'Aides auditives',
+			'Transport sanitaire',
 			'Cure thermale',
+			'Aides auditives',
 			'Assistance',
 		],
 	},
+	// --- Territorialité ---
+	geographicCoverage: {
+		countries: [
+			'France métropolitaine',
+			'Union Européenne',
+			'Suisse (si option activée)',
+			'DOM-TOM',
+			"Autres pays en cas d'urgence (limité)",
+		],
+	},
+	// --- Exclusions générales ---
+	generalExclusions: [
+		'Les soins antérieurs à la date d’effet du contrat',
+		'Les soins antérieurs de 2 ans à la date de leur présentation',
+		'Les frais pour lesquels les justificatifs demandés ne sont pas fournis (facture, prescription, note d’honoraires)',
+		'La participation forfaitaire et les franchises sur boîtes de médicaments, actes paramédicaux et transport sanitaire',
+		'Les pénalités appliquées par la Sécurité sociale pour non-respect du parcours de soins (majoration du ticket modérateur, augmentation des tarifs conventionnels)',
+		'Les frais d’hospitalisation en long séjour : soins réalisés dans des établissements médico-sociaux ou pour personnes en perte d’autonomie nécessitant une surveillance constante (ex. MAS, EHPAD)',
+	],
+	// --- Garanties (onglet Garanties) ---
 	coverages: [
 		{
 			name: 'Hospitalisation',
 			details: [
 				{
-					service: 'Honoraires médicaux',
-					limit: 'selon DPTAM',
-					deductible: 'non précisé',
-					restrictions: 'consultations sans admission non couvertes',
-					coveredItems: ['honoraires', 'forfait journalier', 'chambre particulière'],
-					excludedItems: [],
-				},
-				{
-					service: 'Chambre particulière',
-					limit: 'si mentionnée dans Conditions personnelles',
-					deductible: 'non précisé',
-					restrictions: 'en cas d’admission uniquement',
-					coveredItems: ['chambre particulière'],
-					excludedItems: [],
+					service: 'Frais de séjour',
+					limit: '1000 €/jour',
+					deductible: '1 jour',
+					restrictions: 'Non pris en charge en ambulatoire',
+					coveredItems: [
+						'Hospitalisation médicale, chirurgicale et obstétricale',
+						'Chambre particulière',
+						'Frais pré- et post-opératoires en lien avec l’intervention',
+					],
+					excludedItems: [
+						'Hospitalisation ambulatoire non incluse dans cette option',
+						"Hospitalisation psychiatrique sans délai d'attente dépassé",
+					],
 				},
 			],
-			coveredItems: ['honoraires', 'chambre particulière', 'lit accompagnant', 'confort', 'HAD'],
-			excludedItems: ['consultations sans admission'],
+			coveredItems: [],
+			excludedItems: [],
 		},
 		{
 			name: 'Soins courants',
 			details: [
 				{
-					service: 'Honoraires médicaux et paramédicaux',
-					limit: 'selon DPTAM',
-					deductible: '',
+					service: 'Consultations & actes médicaux',
+					limit: '150 €/an',
+					deductible: '0 €',
 					restrictions: '',
-					coveredItems: ['consultations', 'imagerie', 'laboratoire'],
-					excludedItems: [],
+					coveredItems: [
+						'Honoraires médicaux (consultations, visites, radiographies, imagerie)',
+						'Médicaments remboursables',
+						'Médecine douce non remboursée (ostéopathie, acupuncture, podologue...)',
+					],
+					excludedItems: [
+						'Actes hors nomenclature sans validation médicale',
+						'Médecins non inscrits dans RPPS/ADELI',
+					],
 				},
 			],
-			coveredItems: ['consultations', 'analyses', 'médicaments', 'médecine douce'],
+			coveredItems: [],
 			excludedItems: [],
 		},
 		{
 			name: 'Optique',
-			details: [],
-			coveredItems: ['lunettes', 'verres', 'lentilles', 'chirurgie'],
+			details: [
+				{
+					service: 'Lunettes (Classe A ou B)',
+					limit: '350 € / 2 ans',
+					deductible: '0 €',
+					restrictions: 'Plafond règlementaire R871-2 sauf formule 400%',
+					coveredItems: [
+						'Verres et montures classe A : remboursement 100%',
+						'Classe B : forfait selon correction visuelle',
+					],
+					excludedItems: ['Implants oculaires', 'Équipements hors grille optique'],
+				},
+			],
+			coveredItems: [],
 			excludedItems: [],
 		},
 		{
 			name: 'Dentaire',
-			details: [],
-			coveredItems: ['soins', 'prothèses', 'orthodontie'],
+			details: [
+				{
+					service: 'Soins & prothèses',
+					limit: '800 €/an',
+					deductible: '50 €',
+					restrictions: '',
+					coveredItems: [
+						'Actes panier 100 % santé',
+						'Implantologie si précisé dans Conditions personnelles',
+						'Parodontologie et orthodontie selon conditions',
+					],
+					excludedItems: ['Implants sans devis accepté', 'Actes hors nomenclature'],
+				},
+			],
+			coveredItems: [],
 			excludedItems: [],
 		},
 		{
-			name: 'Aides auditives',
-			details: [],
-			coveredItems: ['classe I', 'classe II', 'accessoires'],
+			name: 'Transport sanitaire',
+			details: [
+				{
+					service: 'Transport médical',
+					limit: '150 €/trajet',
+					deductible: '0 €',
+					restrictions: 'Uniquement si prescrit et remboursable SS',
+					coveredItems: [
+						'Transport vers hôpital ou consultation',
+						'Ambulance, VSL ou taxi conventionné',
+					],
+					excludedItems: ['Transports non prescrits', 'Non remboursables par la Sécurité sociale'],
+				},
+			],
+			coveredItems: [],
 			excludedItems: [],
 		},
 		{
 			name: 'Cure thermale',
-			details: [],
-			coveredItems: ['forfait thermal', 'frais de transport'],
+			details: [
+				{
+					service: 'Forfait thermal',
+					limit: '300 €/an',
+					deductible: '3 jours',
+					restrictions: '',
+					coveredItems: ['Cures prescrites à visée thérapeutique', 'Soins dans centres agréés'],
+					excludedItems: ['Cures bien-être ou esthétiques', 'Sans prescription médicale'],
+				},
+			],
+			coveredItems: [],
+			excludedItems: [],
+		},
+		{
+			name: 'Aides auditives',
+			details: [
+				{
+					service: 'Appareils auditifs',
+					limit: '600 € par oreille',
+					deductible: '0 €',
+					restrictions: 'Dans la limite de la LPP',
+					coveredItems: ['Appareils prescrits avec devis', 'Classe I remboursée à 100 %'],
+					excludedItems: [
+						'Équipements hors nomenclature LPP',
+						'Accessoires esthétiques non médicaux',
+					],
+				},
+			],
+			coveredItems: [],
 			excludedItems: [],
 		},
 		{
 			name: 'Assistance',
-			details: [],
-			coveredItems: ['aide-ménagère', 'garde-malade', 'soutien scolaire'],
+			details: [
+				{
+					service: 'Aide-ménagère après hospitalisation',
+					limit: '40 heures/an',
+					deductible: '2 heures min / jour',
+					restrictions: '1 intervention / an / assuré après hospitalisation',
+					coveredItems: [
+						'Hospitalisation > 24h',
+						'Intervention après chimiothérapie ou radiothérapie',
+					],
+					excludedItems: [
+						'Demande sans validation d’AXA Assistance',
+						'Dépassement de 40 heures/an',
+					],
+				},
+			],
+			coveredItems: [],
 			excludedItems: [],
 		},
 	],
-	generalExclusions: [
-		'Soins antérieurs à la date d’effet',
-		'Soins non remboursés par le régime obligatoire sauf exceptions',
-		'Pénalités pour non-respect du parcours de soins',
-		'Chirurgie esthétique non remboursée',
-		'Frais en établissements médico-sociaux (EHPAD, MAS)',
-	],
-	geographicCoverage: {
-		countries: ['France', 'Union Européenne', 'Autres pays avec restrictions'],
-	},
-	obligations: {
-		atSubscription: ['Être résident fiscal français', 'Être affilié à un régime obligatoire'],
-		duringContract: ['Être à jour des cotisations', 'Transmettre les documents requis'],
-		inCaseOfClaim: ['Fournir factures, prescriptions et décomptes'],
-	},
+	// --- Résiliation ---
 	cancellation: {
-		procedures: 'Selon conditions personnelles et réglementations',
-		deadlines: 'Délais de renonciation de 14 jours pour vente à distance ou démarchage',
-		usefulContacts: ['ACPR – 4 place de Budapest – CS 92459 – 75436 Paris Cedex 09'],
+		procedures: `\nQ : Puis-je résilier mon contrat à l’échéance ?\nR : Oui. Vous pouvez résilier à la date d’échéance principale du contrat, avec un préavis de 2 mois.\nModalité : par lettre recommandée\nJustificatif : aucun n’est nécessaire\nPrise d’effet : à la date d’échéance\n\nQ : Puis-je résilier si ma situation change ?\nR : Oui, dans plusieurs cas précis, avec justificatif et lettre recommandée :\n 1- Changement de régime obligatoire (ex : passage au régime Alsace-Moselle)\nPreuve : attestation du nouveau régime\nEffet : 1 mois après réception du courrier ou justificatif\n\n 2- Obtention de la CMU-C\nPreuve : attestation CMU-C\nEffet : à la date de prise d’effet de la CMU-C\n\n 3- Obtention de l’ACS (Aide à l'acquisition d'une complémentaire santé)\nPreuve : attestation d’un organisme habilité\nEffet : le 1er jour du 2ᵉ mois suivant\n\n 4- Déménagement à l’étranger hors fiscalité française\nPreuve : justificatif de déménagement\nEffet : 1 mois après réception\n\n 5- Adhésion à un contrat collectif obligatoire par l’employeur\nPreuve : attestation de l’employeur\nEffet : 1 mois après réception\n\nQ : Que se passe-t-il si j’ai un désaccord sur une augmentation tarifaire ?\nR : Vous pouvez résilier en cas de hausse de tarif, sauf si elle découle d’une obligation légale/réglementaire.\nDélai : dans les 30 jours suivant la réception de l’avis de hausse\nModalité : lettre recommandée, sans justificatif\nEffet : à la prochaine échéance principale (si respect du délai)\n\nQ : Dans quels autres cas mon contrait peut être résilier ?\nR : L’assureur peut résilier si :\n1- Vous ne réglez pas vos cotisations (après une mise en demeure de 40 jours)\n2- Vous avez fait une fausse déclaration ou omission\n3- Vous ne remplissez plus les conditions d’adhésion\n\nQ : Que se passe-t-il en cas de décès de l’assuré ?\nR : Le contrat ou l’adhésion prend fin automatiquement au décès du souscripteur ou de l’adhérent.`,
+		deadlines: '',
+		usefulContacts: [],
 	},
 	contacts: {
 		contractManagement: {
@@ -260,6 +352,11 @@ const axaContract: Contract = {
 			email: 'urgence@axa.fr',
 			availability: '24/7',
 		},
+	},
+	obligations: {
+		atSubscription: ['Être résident fiscal français', 'Être affilié à un régime obligatoire'],
+		duringContract: ['Être à jour des cotisations', 'Transmettre les documents requis'],
+		inCaseOfClaim: ['Fournir factures, prescriptions et décomptes'],
 	},
 };
 
