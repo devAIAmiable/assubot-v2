@@ -25,6 +25,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 import type { Contract } from '../types';
 import { Link } from 'react-router-dom';
+import { getInsurerLogo } from '../utils/insurerLogo';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
@@ -98,11 +99,13 @@ const ContratsModule = () => {
 
 			if (contractId) {
 				// For existing contracts, add as other document
-				dispatch(addDocument({ 
-					contractId, 
-					documentType: 'otherDocs',
-					document 
-				}));
+				dispatch(
+					addDocument({
+						contractId,
+						documentType: 'otherDocs',
+						document,
+					})
+				);
 			} else {
 				// Create new contract from uploaded file
 				const newContract: Omit<Contract, 'id'> = {
@@ -127,55 +130,59 @@ const ContratsModule = () => {
 							uploadDate: new Date().toISOString().split('T')[0],
 							required: true,
 						},
-						otherDocs: [{
-							...document,
-							required: false,
-						}],
+						otherDocs: [
+							{
+								...document,
+								required: false,
+							},
+						],
 					},
 					overview: {
 						startDate: new Date().toLocaleDateString('fr-FR'),
 						endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
 						annualPremium: '0,00€',
 						hasTacitRenewal: true,
-						tacitRenewalDeadline: new Date(Date.now() + 335 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
+						tacitRenewalDeadline: new Date(
+							Date.now() + 335 * 24 * 60 * 60 * 1000
+						).toLocaleDateString('fr-FR'),
 						planType: 'À définir',
-						subscribedCoverages: []
+						subscribedCoverages: [],
 					},
 					coverages: [],
 					generalExclusions: [],
 					geographicCoverage: {
-						countries: ['France']
+						countries: ['France'],
 					},
 					obligations: {
 						atSubscription: [],
 						duringContract: [],
-						inCaseOfClaim: []
+						inCaseOfClaim: [],
 					},
 					cancellation: {
 						procedures: 'À définir',
 						deadlines: 'À définir',
-						usefulContacts: []
+						usefulContacts: [],
 					},
 					contacts: {
 						contractManagement: {
 							name: 'À définir',
 							phone: 'À définir',
 							email: 'À définir',
-							hours: 'À définir'
+							hours: 'À définir',
 						},
 						assistance: {
 							name: 'À définir',
 							phone: 'À définir',
 							email: 'À définir',
-							availability: 'À définir'
+							availability: 'À définir',
 						},
 						emergency: {
 							name: 'À définir',
 							phone: 'À définir',
 							email: 'À définir',
-							availability: 'À définir'
-						}
-					}
+							availability: 'À définir',
+						},
+					},
 				};
 				dispatch(addContract(newContract));
 			}
@@ -500,8 +507,19 @@ const ContratsModule = () => {
 									{/* Header */}
 									<div className="flex items-start justify-between mb-4">
 										<div className="flex items-center space-x-3">
-											<div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-												<TypeIcon className="h-5 w-5 text-[#1e51ab]" />
+											<div className="flex items-center gap-1">
+												{getInsurerLogo(contract.insurer) ? (
+													<img
+														src={getInsurerLogo(contract.insurer)}
+														alt={contract.insurer}
+														className="w-8 h-8 object-contain rounded"
+														style={{ background: '#fff' }}
+													/>
+												) : (
+													<div className="w-8 h-8 bg-blue-50 rounded flex items-center justify-center">
+														<TypeIcon className="h-5 w-5 text-[#1e51ab]" />
+													</div>
+												)}
 											</div>
 											<div>
 												<h3 className="font-semibold text-gray-900 text-sm">{contract.name}</h3>
@@ -538,7 +556,8 @@ const ContratsModule = () => {
 									{/* Documents */}
 									<div className="mb-4">
 										<p className="text-xs text-gray-600 mb-2">
-											Documents ({contract.documents.otherDocs ? contract.documents.otherDocs.length + 2 : 2})
+											Documents (
+											{contract.documents.otherDocs ? contract.documents.otherDocs.length + 2 : 2})
 										</p>
 										<div className="flex flex-wrap gap-1">
 											{/* Conditions Générales */}
@@ -552,15 +571,16 @@ const ContratsModule = () => {
 												Conditions Particulières
 											</span>
 											{/* Autres Documents */}
-											{contract.documents.otherDocs && contract.documents.otherDocs.slice(0, 1).map((doc, docIndex) => (
-												<span
-													key={docIndex}
-													className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg"
-												>
-													<FaFileAlt className="h-3 w-3 mr-1" />
-													{doc.name.length > 15 ? `${doc.name.substring(0, 15)}...` : doc.name}
-												</span>
-											))}
+											{contract.documents.otherDocs &&
+												contract.documents.otherDocs.slice(0, 1).map((doc, docIndex) => (
+													<span
+														key={docIndex}
+														className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg"
+													>
+														<FaFileAlt className="h-3 w-3 mr-1" />
+														{doc.name.length > 15 ? `${doc.name.substring(0, 15)}...` : doc.name}
+													</span>
+												))}
 											{contract.documents.otherDocs && contract.documents.otherDocs.length > 1 && (
 												<span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg">
 													+{contract.documents.otherDocs.length - 1}
@@ -602,8 +622,6 @@ const ContratsModule = () => {
 					</div>
 				)}
 			</motion.div>
-
-
 
 			{/* Contract Edit Modal */}
 			{editingContract && (

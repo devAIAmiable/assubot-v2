@@ -22,6 +22,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import type { Contract } from '../types';
 import { Tab } from '@headlessui/react';
+import { getInsurerLogo } from '../utils/insurerLogo';
 import { useAppSelector } from '../store/hooks';
 import { useState } from 'react';
 
@@ -139,12 +140,21 @@ const ContractDetailsPage = () => {
 								<FaArrowLeft className="h-5 w-5" />
 							</button>
 							<div className="flex items-center space-x-3">
-								<div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-									{(() => {
-										const TypeIcon = getTypeIcon(contract.type);
-										return <TypeIcon className="h-6 w-6 text-[#1e51ab]" />;
-									})()}
-								</div>
+								{/* Insurer logo or type icon */}
+								{getInsurerLogo(contract.insurer) ? (
+									<img
+										src={getInsurerLogo(contract.insurer)}
+										alt={contract.insurer}
+										className="w-12 h-12 object-contain rounded bg-white border border-gray-100"
+									/>
+								) : (
+									<div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+										{(() => {
+											const TypeIcon = getTypeIcon(contract.type);
+											return <TypeIcon className="h-6 w-6 text-[#1e51ab]" />;
+										})()}
+									</div>
+								)}
 								<div>
 									<h1 className="text-2xl font-bold text-gray-900">
 										{contract.name}
