@@ -10,11 +10,8 @@ import {
 	FaSearch,
 	FaTimes,
 	FaTrash,
-	FaUpload,
 } from 'react-icons/fa';
 import {
-	addContract,
-	addDocument,
 	deleteContract,
 	setSearchQuery,
 	setSelectedStatus,
@@ -25,6 +22,7 @@ import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../ut
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 import type { Contract } from '../types';
+import CreateContractModal from './CreateContractModal';
 import { Link } from 'react-router-dom';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { motion } from 'framer-motion';
@@ -45,7 +43,31 @@ const ContratsModule = () => {
 	);
 
 	const [editingContract, setEditingContract] = useState<Contract | null>(null);
-	const [dragOver, setDragOver] = useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [createStep, setCreateStep] = useState(1);
+	const [form, setForm] = useState<{
+		coverage: string;
+		type: string;
+		valid_from: string;
+		valid_to: string;
+		prime: string;
+		renouvellement_tacite: string;
+		date_limit: string;
+		conditions_particulieres: File | null;
+		conditions_generales: File | null;
+		autres_documents: File | null;
+	}>({
+		coverage: '',
+		type: '',
+		valid_from: '',
+		valid_to: '',
+		prime: '',
+		renouvellement_tacite: '',
+		date_limit: '',
+		conditions_particulieres: null,
+		conditions_generales: null,
+		autres_documents: null,
+	});
 
 	// Filter contracts based on search and filters
 	const filteredContracts = contracts.filter((contract) => {
@@ -86,132 +108,7 @@ const ContratsModule = () => {
 		}
 	};
 
-	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, contractId?: string) => {
-		const files = event.target.files;
-		if (files && files.length > 0) {
-			const file = files[0];
-
-			// Simulate file upload and add to contract or create new contract
-			const document = {
-				name: file.name,
-				url: URL.createObjectURL(file),
-				uploadDate: new Date().toISOString().split('T')[0],
-			};
-
-			if (contractId) {
-				// For existing contracts, add as other document
-				dispatch(
-					addDocument({
-						contractId,
-						documentType: 'otherDocs',
-						document,
-					})
-				);
-			} else {
-				// Create new contract from uploaded file
-				const newContract: Omit<Contract, 'id'> = {
-					name: `Contrat ${file.name.split('.')[0]}`,
-					insurer: 'À définir',
-					type: 'autre',
-					premium: 0,
-					startDate: new Date().toISOString().split('T')[0],
-					endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-					status: 'pending',
-					description: 'Contrat ajouté via upload de fichier',
-					documents: {
-						generalConditions: {
-							name: 'Conditions Générales à définir.pdf',
-							url: '',
-							uploadDate: new Date().toISOString().split('T')[0],
-							required: true,
-						},
-						particularConditions: {
-							name: 'Conditions Particulières à définir.pdf',
-							url: '',
-							uploadDate: new Date().toISOString().split('T')[0],
-							required: true,
-						},
-						otherDocs: [
-							{
-								...document,
-								required: false,
-							},
-						],
-					},
-					overview: {
-						startDate: new Date().toLocaleDateString('fr-FR'),
-						endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
-						annualPremium: '0,00€',
-						hasTacitRenewal: true,
-						tacitRenewalDeadline: new Date(
-							Date.now() + 335 * 24 * 60 * 60 * 1000
-						).toLocaleDateString('fr-FR'),
-						planType: 'À définir',
-						subscribedCoverages: [],
-					},
-					coverages: [],
-					generalExclusions: [],
-					geographicCoverage: {
-						countries: ['France'],
-					},
-					obligations: {
-						atSubscription: [],
-						duringContract: [],
-						inCaseOfClaim: [],
-					},
-					cancellation: {
-						procedures: 'À définir',
-						deadlines: 'À définir',
-						usefulContacts: [],
-					},
-					contacts: {
-						contractManagement: {
-							name: 'À définir',
-							phone: 'À définir',
-							email: 'À définir',
-							hours: 'À définir',
-						},
-						assistance: {
-							name: 'À définir',
-							phone: 'À définir',
-							email: 'À définir',
-							availability: 'À définir',
-						},
-						emergency: {
-							name: 'À définir',
-							phone: 'À définir',
-							email: 'À définir',
-							availability: 'À définir',
-						},
-					},
-				};
-				dispatch(addContract(newContract));
-			}
-		}
-	};
-
-	const handleDragOver = (e: React.DragEvent) => {
-		e.preventDefault();
-		setDragOver(true);
-	};
-
-	const handleDragLeave = (e: React.DragEvent) => {
-		e.preventDefault();
-		setDragOver(false);
-	};
-
-	const handleDrop = (e: React.DragEvent) => {
-		e.preventDefault();
-		setDragOver(false);
-		const files = e.dataTransfer.files;
-		if (files.length > 0) {
-			// Simulate file input for drag and drop
-			const fakeEvent = {
-				target: { files },
-			} as React.ChangeEvent<HTMLInputElement>;
-			handleFileUpload(fakeEvent);
-		}
-	};
+	// Remove handleFileUpload if not used
 
 	const today = new Date();
 	const isExpired = (contract: Contract) => new Date(contract.endDate) < today;
@@ -256,7 +153,7 @@ const ContratsModule = () => {
 					</p>
 				</div>
 				<motion.button
-					onClick={() => true}
+					onClick={() => setShowCreateModal(true)}
 					className="mt-4 lg:mt-0 bg-[#1e51ab] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#163d82] transition-colors flex items-center space-x-2"
 					whileHover={{ scale: 1.02 }}
 					whileTap={{ scale: 0.98 }}
@@ -325,43 +222,6 @@ const ContratsModule = () => {
 						</div>
 					</div>
 				</div>
-			</motion.div>
-
-			{/* File Upload Area */}
-			<motion.div
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.6, delay: 0.2 }}
-				className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${
-					dragOver ? 'border-[#1e51ab] bg-blue-50' : 'border-gray-300 hover:border-[#1e51ab]'
-				}`}
-				onDragOver={handleDragOver}
-				onDragLeave={handleDragLeave}
-				onDrop={handleDrop}
-			>
-				<input
-					type="file"
-					id="file-upload"
-					multiple
-					accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-					onChange={(e) => handleFileUpload(e)}
-					className="hidden"
-				/>
-				<FaUpload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-				<h3 className="text-lg font-semibold text-gray-900 mb-2">Téléchargez vos contrats</h3>
-				<p className="text-gray-600 mb-4">
-					Glissez-déposez vos fichiers ici ou cliquez pour sélectionner
-				</p>
-				<label
-					htmlFor="file-upload"
-					className="inline-flex items-center px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-semibold hover:bg-[#163d82] transition-colors cursor-pointer"
-				>
-					<FaUpload className="h-4 w-4 mr-2" />
-					Choisir des fichiers
-				</label>
-				<p className="text-sm text-gray-500 mt-2">
-					Formats acceptés: PDF, DOC, DOCX, JPG, PNG (max 10MB)
-				</p>
 			</motion.div>
 
 			{/* Search and Filters */}
@@ -434,7 +294,7 @@ const ContratsModule = () => {
 							Commencez par ajouter vos premiers contrats d'assurance.
 						</p>
 						<button
-							onClick={() => true}
+							onClick={() => setShowCreateModal(true)}
 							className="bg-[#1e51ab] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#163d82] transition-colors"
 						>
 							Ajouter un contrat
@@ -779,6 +639,15 @@ const ContratsModule = () => {
 					</motion.div>
 				</div>
 			)}
+
+			<CreateContractModal
+				open={showCreateModal}
+				onClose={() => setShowCreateModal(false)}
+				createStep={createStep}
+				setCreateStep={setCreateStep}
+				form={form}
+				setForm={setForm}
+			/>
 		</div>
 	);
 };
