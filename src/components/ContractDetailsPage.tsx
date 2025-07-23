@@ -451,33 +451,31 @@ const ContractDetailsPage = () => {
 												</div>
 											)}
 
-											<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-												{/* Ce qui est couvert */}
-												{garantie.details && garantie.details.some(detail => detail.coveredItems && detail.coveredItems.length > 0) && (
-													<div>
-														<h4 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-															Ce qui est couvert
-														</h4>
-														<div className="space-y-3">
-															{garantie.details.map((detail, detailIndex) =>
-																detail.coveredItems && detail.coveredItems.length > 0
-																	? detail.coveredItems.map((item: string, index: number) => (
-																		<div
-																			key={`${detailIndex}-${index}`}
-																			className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-100"
-																		>
-																			<FaCheck className="h-5 w-5 text-green-600" />
-																			<span className="font-medium text-gray-900">
-																				{capitalizeFirst(item)}
-																			</span>
-																		</div>
-																	))
-																	: null
-															)}
-														</div>
+											{/* Ce qui est couvert */}
+											{garantie.details && garantie.details.some(detail => detail.coveredItems && detail.coveredItems.length > 0) && (
+												<div className="mb-8">
+													<h4 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+														Ce qui est couvert
+													</h4>
+													<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+														{garantie.details.map((detail, detailIndex) =>
+															detail.coveredItems && detail.coveredItems.length > 0
+																? detail.coveredItems.map((item: string, index: number) => (
+																	<div
+																		key={`${detailIndex}-${index}`}
+																		className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-100"
+																	>
+																		<FaCheck className="h-5 w-5 text-green-600" />
+																		<span className="font-medium text-gray-900">
+																			{capitalizeFirst(item)}
+																		</span>
+																	</div>
+																))
+																: null
+														)}
 													</div>
-												)}
-											</div>
+												</div>
+											)}
 										</div>
 									))}
 								</div>
