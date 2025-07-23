@@ -537,107 +537,39 @@ const ContractDetailsPage = () => {
 									<FaClipboardList className="h-6 w-6 text-[#1e51ab] mr-3" />
 									Mes obligations
 								</h3>
-
 								<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 									<div className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
 										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
 											<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
-											Gestion contrat
+											Souscription
 										</h4>
-										<div className="space-y-4">
-											<div>
-												<span className="text-gray-600 text-sm">Nom</span>
-												<p className="font-semibold text-gray-900">
-													{capitalizeFirst(contract.contacts.contractManagement.name)}
-												</p>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaPhone className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.contractManagement.phone)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaEnvelope className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.contractManagement.email)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaClock className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.contractManagement.hours)}
-												</span>
-											</div>
-										</div>
+										<ul className="list-disc list-inside space-y-2">
+											{contract.obligations.atSubscription.map((item: string, idx: number) => (
+												<li key={idx} className="text-gray-900 text-base">{capitalizeFirst(item)}</li>
+											))}
+										</ul>
 									</div>
-
-									{/* Assistance */}
 									<div className="bg-green-50 p-8 rounded-2xl border border-green-100">
 										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-											<FaShieldAlt className="h-5 w-5 text-green-600 mr-2" />
-											Assistance
+											<FaClipboardList className="h-5 w-5 text-green-600 mr-2" />
+											Pendant le contrat
 										</h4>
-										<div className="space-y-4">
-											<div>
-												<span className="text-gray-600 text-sm">Nom</span>
-												<p className="font-semibold text-gray-900">
-													{capitalizeFirst(contract.contacts.assistance.name)}
-												</p>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaPhone className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.assistance.phone)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaEnvelope className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.assistance.email)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaClock className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.assistance.availability)}
-												</span>
-											</div>
-										</div>
+										<ul className="list-disc list-inside space-y-2">
+											{contract.obligations.duringContract.map((item: string, idx: number) => (
+												<li key={idx} className="text-gray-900 text-base">{capitalizeFirst(item)}</li>
+											))}
+										</ul>
 									</div>
-
-									{/* Urgences */}
-									<div className="bg-red-50 p-8 rounded-2xl border border-red-100">
+									<div className="bg-yellow-50 p-8 rounded-2xl border border-yellow-100">
 										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-											<FaExclamationTriangle className="h-5 w-5 text-red-600 mr-2" />
-											Urgences
+											<FaClipboardList className="h-5 w-5 text-yellow-600 mr-2" />
+											En cas de sinistre
 										</h4>
-										<div className="space-y-4">
-											<div>
-												<span className="text-gray-600 text-sm">Nom</span>
-												<p className="font-semibold text-gray-900">
-													{capitalizeFirst(contract.contacts.emergency.name)}
-												</p>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaPhone className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.emergency.phone)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaEnvelope className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.emergency.email)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaClock className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.emergency.availability)}
-												</span>
-											</div>
-										</div>
+										<ul className="list-disc list-inside space-y-2">
+											{contract.obligations.inCaseOfClaim.map((item: string, idx: number) => (
+												<li key={idx} className="text-gray-900 text-base">{capitalizeFirst(item)}</li>
+											))}
+										</ul>
 									</div>
 								</div>
 							</div>
