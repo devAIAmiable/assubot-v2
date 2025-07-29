@@ -1,0 +1,66 @@
+---
+alwaysApply: true
+---
+## Tech Stack
+
+- **React** – UI library
+- **TypeScript** – Strict type safety (`no any`)
+- **Tailwind CSS** – Utility-first styling
+- **Headless UI** – Accessible unstyled UI components
+- **Redux** – Global state management
+- **React Hook Form** + **Zod** – Form handling and validation
+- **React Router** – Routing
+- **Fetch** – HTTP client
+- **Vite** – Frontend build tool
+- **PNPM** – Package manager
+- **Framer Motion** – Animation library
+- **Chart.js** – Charting library
+
+---
+
+## Development Rules
+
+### Type Safety & Validation
+
+- Use **TypeScript only**. Avoid `any` at all costs.
+- Use **Zod** for schema validation (e.g., API responses or forms).
+- Centralize schema definitions in a `validators/` or `schemas/` folder.
+
+### Component Structure
+
+- Each component must live in its own folder if it has internal logic, styles, or subcomponents.
+- Keep **components small, focused and composable**.
+- Favor **controlled components** and **React Hook Form** for forms.
+- Use Tailwind **utility classes**, and avoid writing custom CSS unless strictly necessary.
+
+### State & Side Effects
+
+- Use **Redux** for shared state if context becomes too heavy.
+- Use `useEffect` responsibly. Extract side effects into **custom hooks** if reused.
+
+### Styling
+
+- Use **Tailwind CSS** exclusively. If needed, centralize reusable styles via class composition (e.g., `clsx`, `tailwind-variants`).
+- Stick to **Headless UI** for accessible dropdowns, modals, dialogs, etc.
+- Use **Framer Motion** for animations.
+
+### API & Fetching
+
+- Use `services/` folder to define all HTTP clients.
+- Use the **native `fetch` API** via wrappers.
+- Handle loading/error states consistently with reusable UI patterns (e.g., `<Loader />`, `<ErrorMessage />`).
+
+### Testing
+
+- Write **unit tests** for every component and hook using **Vitest**.
+- Prefer **React Testing Library** over Enzyme.
+- Test critical UI flows and forms; test async logic in isolation.
+- Use **React Testing Library** for testing.
+
+## Additional Notes
+
+- Prefer named exports/imports and consistent aliasing (`@/components`, `@/services`, etc.).
+- Co-locate styles, tests, and component files.
+- Ensure keyboard accessibility for all custom interactive components.
+- Keep logic out of JSX; extract handlers and computation above the return statement.
+- Prioritize **readability** and **explicit naming**.
