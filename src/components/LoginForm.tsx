@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 import { loginFailure, loginStart, loginSuccess, type User } from '../store/userSlice';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import GoogleLoginButton from './ui/GoogleLoginButton';
 import Logo from './ui/Logo';
 import { authService } from '../services/coreApi';
 import { useAppDispatch } from '../store/hooks';
+import { useGoogleAuth } from '../hooks/useGoogleAuth';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,6 +26,7 @@ const LoginForm: React.FC = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
+	const { handleGoogleLogin, isLoading: isGoogleLoading } = useGoogleAuth();
 
 	const {
 		register,
@@ -150,6 +153,24 @@ const LoginForm: React.FC = () => {
 							)}
 						</button>
 					</div>
+
+					{/* Divider */}
+					<div className="relative my-6">
+						<div className="absolute inset-0 flex items-center">
+							<div className="w-full border-t border-gray-300" />
+						</div>
+						<div className="relative flex justify-center text-sm">
+							<span className="px-2 bg-gray-50 text-gray-500">Ou</span>
+						</div>
+					</div>
+
+					{/* Google Login Button */}
+					<GoogleLoginButton
+						onClick={handleGoogleLogin}
+						loading={isGoogleLoading}
+						disabled={isSubmitting}
+						isLogin={true}
+					/>
 
 					<div className="text-center">
 						<p className="text-sm text-gray-600">
