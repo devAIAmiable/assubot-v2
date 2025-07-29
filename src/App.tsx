@@ -14,6 +14,7 @@ import NotificationsModule from './components/NotificationsModule'
 import { PersistGate } from 'redux-persist/integration/react'
 import ProfilModule from './components/ProfilModule'
 import { Provider } from 'react-redux'
+import VerifyPage from './components/VerifyPage';
 
 function App() {
 	return (
@@ -43,6 +44,7 @@ function App() {
 						
 						{/* Catch all route - redirect to landing */}
 						<Route path="*" element={<Navigate to="/" replace />} />
+						<Route path="/verify" element={<VerifyPage />} />
 					</Routes>
 				</Router>
 			</PersistGate>
