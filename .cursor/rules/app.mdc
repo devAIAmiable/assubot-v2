@@ -42,7 +42,7 @@ alwaysApply: true
 ### Styling
 
 - Use **Tailwind CSS** exclusively. If needed, centralize reusable styles via class composition (e.g., `clsx`, `tailwind-variants`).
-- Stick to **Headless UI** for accessible dropdowns, modals, dialogs, etc.
+- Always use **Headless UI** for accessible dropdowns, modals, dialogs, etc.
 - Use **Framer Motion** for animations.
 
 ### API & Fetching
