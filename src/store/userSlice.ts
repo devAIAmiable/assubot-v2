@@ -3,9 +3,9 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export interface User {
 	id: string;
-	first_name: string;
-	last_name: string;
-	name: string;
+	firstName: string;
+	lastName: string;
+	name?: string; // Computed from firstName + lastName
 	email: string;
 	password?: string; // Optional in frontend for security
 	avatar?: string;
@@ -14,8 +14,8 @@ export interface User {
 	birth_date?: string;
 	gender?: string;
 	professional_category?: string;
-	is_google_account: boolean;
-	is_first_time_login: boolean;
+	is_google_account?: boolean;
+	isFirstLogin: boolean;
 	email_verification_token?: string;
 	address?: string;
 	city?: string;
@@ -32,29 +32,12 @@ interface UserState {
 }
 
 const initialState: UserState = {
-	currentUser: {
-		id: '1',
-		first_name: 'Mario',
-		last_name: 'Gbokede',
-		name: 'Mario Gbokede',
-		email: 'mario.gbokede@a-lamiable.com',
-		avatar: '/avatars/avatar.png',
-		created_at: '2024-01-15T10:30:00Z',
-		updated_at: '2024-11-20T14:22:00Z',
-		birth_date: '1993-06-15',
-		gender: 'Homme',
-		professional_category: 'Cadre',
-		is_google_account: false,
-		is_first_time_login: false,
-		address: '123 Rue de la République',
-		city: 'Vélizy-Villacoublay',
-		zipcode: '78140',
-	},
-	isAuthenticated: true,
+	currentUser: null,
+	isAuthenticated: false,
 	loading: false,
 	error: null,
 	loginAttempts: 0,
-	lastLoginAt: '2024-11-20T14:22:00Z',
+	lastLoginAt: undefined,
 };
 
 const userSlice = createSlice({
@@ -77,7 +60,7 @@ const userSlice = createSlice({
 			
 			// Update first time login flag
 			if (state.currentUser) {
-				state.currentUser.is_first_time_login = false;
+				state.currentUser.isFirstLogin = false;
 			}
 		},
 		
@@ -165,7 +148,7 @@ const userSlice = createSlice({
 		
 		setFirstTimeLogin: (state, action: PayloadAction<boolean>) => {
 			if (state.currentUser) {
-				state.currentUser.is_first_time_login = action.payload;
+				state.currentUser.isFirstLogin = action.payload;
 				state.currentUser.updated_at = new Date().toISOString();
 			}
 		},

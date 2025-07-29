@@ -1,14 +1,160 @@
+import type { ServiceResponse } from './api';
 import { coreApi } from './api';
 
 // Auth endpoints
 export const authService = {
-	verify: (token: string) => coreApi.get<{ message: string }>(`/auth/verify/${token}`),
-	login: (credentials: { email: string; password: string }) =>
-		coreApi.post<{ user: unknown; token: string }>('/auth/login', credentials),
-	logout: () => coreApi.post('/auth/logout'),
-	refresh: () => coreApi.post<{ token: string }>('/auth/refresh'),
-	register: (userData: { email: string; password: string; name: string }) =>
-		coreApi.post<{ user: unknown }>('/auth/register', userData),
+	verify: async (token: string): Promise<ServiceResponse<{ message: string }>> => {
+		try {
+			const response = await coreApi.get<{ message: string }>(`/auth/verify/${token}`);
+
+			if (response.success && response.status === 'success') {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || 'Verification failed',
+			};
+		} catch (error) {
+			console.error('Auth service error:', error);
+			return {
+				success: false,
+				error: 'Network error occurred',
+			};
+		}
+	},
+
+	login: async (credentials: {
+		email: string;
+		password: string;
+	}): Promise<
+		ServiceResponse<{
+			user: {
+				id: string;
+				email: string;
+				firstName: string;
+				lastName: string;
+				isFirstLogin: boolean;
+			};
+			message: string;
+		}>
+	> => {
+		try {
+			const response = await coreApi.post<{
+				message: string;
+				user: {
+					id: string;
+					email: string;
+					firstName: string;
+					lastName: string;
+					isFirstLogin: boolean;
+				};
+			}>('/auth/login', credentials);
+			console.log('🚀 ~ response:', response);
+
+			if (response.success && response.status === 'success' && response.data?.user) {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || 'Email ou mot de passe incorrect',
+			};
+		} catch (error) {
+			console.error('Login error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
+
+	logout: async (): Promise<ServiceResponse<void>> => {
+		try {
+			const response = await coreApi.post('/auth/logout');
+
+			if (response.success) {
+				return { success: true };
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || 'Logout failed',
+			};
+		} catch (error) {
+			console.error('Logout error:', error);
+			return {
+				success: false,
+				error: 'Network error occurred',
+			};
+		}
+	},
+
+	refresh: async (): Promise<ServiceResponse<{ token: string }>> => {
+		try {
+			const response = await coreApi.post<{ token: string }>('/auth/refresh');
+
+			if (response.success && response.data) {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || 'Token refresh failed',
+			};
+		} catch (error) {
+			console.error('Refresh error:', error);
+			return {
+				success: false,
+				error: 'Network error occurred',
+			};
+		}
+	},
+
+	signup: async (userData: {
+		email: string;
+		password: string;
+		firstName: string;
+		lastName: string;
+		birthDate: string;
+		gender: string;
+		profession: string;
+		acceptedTerms: boolean;
+	}): Promise<ServiceResponse<{ user: unknown; message: string }>> => {
+		try {
+			const response = await coreApi.post<{ user: unknown; message: string }>(
+				'/auth/register',
+				userData
+			);
+
+			if (response.success && response.status === 'success') {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || "Erreur lors de l'inscription",
+			};
+		} catch (error) {
+			console.error('Signup error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
 };
 
 // Contract endpoints

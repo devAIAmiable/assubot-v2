@@ -21,27 +21,22 @@ const VerifyPage: React.FC = () => {
 				return;
 			}
 
-			try {
-				const response = await authService.verify(token);
+			const response = await authService.verify(token);
 
-				if (response.success) {
-					setSuccess(true);
-				} else {
-					setError(response.error?.message || 'Échec de la vérification');
-				}
-			} catch (err) {
-				setError('Erreur de connexion au serveur');
-				console.error('Verification error:', err);
-			} finally {
-				setLoading(false);
+			if (response.success) {
+				setSuccess(true);
+			} else {
+				setError(response.error || 'Échec de la vérification');
 			}
+
+			setLoading(false);
 		};
 
 		verifyToken();
 	}, []); // Empty dependency array to run only once on mount
 
 	const handleRedirect = () => {
-		navigate('/app/contrats');
+		navigate('/login');
 	};
 
 	if (loading) {

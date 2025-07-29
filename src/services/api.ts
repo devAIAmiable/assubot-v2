@@ -6,15 +6,18 @@ interface ApiConfig {
 
 interface ApiResponse<T = unknown> {
 	success: boolean;
-	data?: {
-		message: string;
-		resource: T;
-	};
-	status?: string;
+	status: string;
+	data?: T;
 	error?: {
 		code: string;
 		message: string;
 	};
+}
+
+export interface ServiceResponse<T = unknown> {
+	success: boolean;
+	data?: T;
+	error?: string;
 }
 
 class ApiClient {
@@ -43,7 +46,7 @@ class ApiClient {
 					...this.config.headers,
 					...options.headers,
 				},
-				credentials: 'include', // Include cookies
+				// credentials: 'include', // Include cookies
 				signal: controller.signal,
 			});
 
@@ -64,6 +67,7 @@ class ApiClient {
 
 			return {
 				success: true,
+				status: data.status,
 				data,
 			};
 		} catch (error) {

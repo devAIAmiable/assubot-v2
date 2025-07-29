@@ -25,7 +25,7 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			score: 95,
 			coverages: {
 				'Responsabilité civile': { included: true },
-				'Vol': { included: true },
+				Vol: { included: true },
 				'Bris de glace': { included: true },
 				'Assistance 0km': { included: true },
 			},
@@ -41,7 +41,7 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			score: 88,
 			coverages: {
 				'Responsabilité civile': { included: true },
-				'Vol': { included: true },
+				Vol: { included: true },
 				'Bris de glace': { included: true },
 				'Assistance 0km': { included: true },
 			},
@@ -56,7 +56,7 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			score: 82,
 			coverages: {
 				'Responsabilité civile': { included: true },
-				'Vol': { included: true },
+				Vol: { included: true },
 				'Bris de glace': { included: false },
 				'Assistance 0km': { included: true },
 			},
@@ -71,7 +71,7 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			score: 80,
 			coverages: {
 				'Responsabilité civile': { included: true },
-				'Vol': { included: true },
+				Vol: { included: true },
 				'Bris de glace': { included: true },
 				'Assistance 0km': { included: false },
 			},
@@ -87,9 +87,9 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			rating: 4.4,
 			score: 92,
 			coverages: {
-				'Incendie': { included: true },
+				Incendie: { included: true },
 				'Dégâts des eaux': { included: true },
-				'Vol': { included: true },
+				Vol: { included: true },
 				'Responsabilité civile': { included: true },
 			},
 			pros: ['Mutuelle spécialisée', 'Bon rapport qualité-prix', 'Service réactif'],
@@ -103,9 +103,9 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			rating: 4.2,
 			score: 85,
 			coverages: {
-				'Incendie': { included: true },
+				Incendie: { included: true },
 				'Dégâts des eaux': { included: true },
-				'Vol': { included: true },
+				Vol: { included: true },
 				'Responsabilité civile': { included: true },
 			},
 			pros: ['Assurance locale', 'Conseiller dédié'],
@@ -118,9 +118,9 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			rating: 4.3,
 			score: 88,
 			coverages: {
-				'Incendie': { included: true },
+				Incendie: { included: true },
 				'Dégâts des eaux': { included: true },
-				'Vol': { included: false },
+				Vol: { included: false },
 				'Responsabilité civile': { included: true },
 			},
 			pros: ['Grande compagnie', 'Services numériques'],
@@ -133,9 +133,9 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			rating: 4.0,
 			score: 78,
 			coverages: {
-				'Incendie': { included: true },
+				Incendie: { included: true },
 				'Dégâts des eaux': { included: true },
-				'Vol': { included: true },
+				Vol: { included: true },
 				'Responsabilité civile': { included: true },
 			},
 			pros: ['Prix compétitif', 'Réseau important'],
@@ -151,9 +151,9 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			score: 93,
 			coverages: {
 				'Soins courants': { included: true, value: '100%' },
-				'Hospitalisation': { included: true, value: '100%' },
-				'Dentaire': { included: true, value: '150%' },
-				'Optique': { included: true, value: '200€' },
+				Hospitalisation: { included: true, value: '100%' },
+				Dentaire: { included: true, value: '150%' },
+				Optique: { included: true, value: '200€' },
 			},
 			pros: ['Excellent remboursement', 'Tiers payant étendu', 'Médecines douces'],
 			cons: ['Prix élevé'],
@@ -167,9 +167,9 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			score: 85,
 			coverages: {
 				'Soins courants': { included: true, value: '100%' },
-				'Hospitalisation': { included: true, value: '100%' },
-				'Dentaire': { included: true, value: '125%' },
-				'Optique': { included: true, value: '150€' },
+				Hospitalisation: { included: true, value: '100%' },
+				Dentaire: { included: true, value: '125%' },
+				Optique: { included: true, value: '150€' },
 			},
 			pros: ['Bon rapport qualité-prix', 'Réseau de soins'],
 			cons: ['Délais de carence'],
@@ -182,9 +182,9 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			score: 80,
 			coverages: {
 				'Soins courants': { included: true, value: '100%' },
-				'Hospitalisation': { included: true, value: '100%' },
-				'Dentaire': { included: true, value: '130%' },
-				'Optique': { included: true, value: '180€' },
+				Hospitalisation: { included: true, value: '100%' },
+				Dentaire: { included: true, value: '130%' },
+				Optique: { included: true, value: '180€' },
 			},
 			pros: ['Couverture dentaire', 'Prévention incluse'],
 			cons: ['Réseau limité'],
@@ -199,9 +199,9 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			score: 90,
 			coverages: {
 				'Responsabilité civile': { included: true },
-				'Vol': { included: true },
-				'Incendie': { included: true },
-				'Équipements': { included: true },
+				Vol: { included: true },
+				Incendie: { included: true },
+				Équipements: { included: true },
 			},
 			pros: ['Prix imbattable', 'Assurance équipements', 'Devis rapide'],
 			cons: ['Assistance limitée'],
@@ -215,9 +215,9 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			score: 88,
 			coverages: {
 				'Responsabilité civile': { included: true },
-				'Vol': { included: true },
-				'Incendie': { included: true },
-				'Équipements': { included: false },
+				Vol: { included: true },
+				Incendie: { included: true },
+				Équipements: { included: false },
 			},
 			pros: ['Service de qualité', 'Bonus fidélité'],
 			cons: ['Prix plus élevé', 'Équipements en option'],
@@ -230,9 +230,9 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			score: 85,
 			coverages: {
 				'Responsabilité civile': { included: true },
-				'Vol': { included: true },
-				'Incendie': { included: true },
-				'Équipements': { included: true },
+				Vol: { included: true },
+				Incendie: { included: true },
+				Équipements: { included: true },
 			},
 			pros: ['Couverture complète', 'Assistance 24h/24'],
 			cons: ['Franchise élevée'],
@@ -243,45 +243,48 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 export class ComparisonService {
 	// Simulate API delay
 	private static delay(ms: number): Promise<void> {
-		return new Promise(resolve => setTimeout(resolve, ms));
+		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
 	// Convert a contract to a ComparisonOffer format
-	private static contractToOffer(contract: { id: string; insurer: string; premium: number }, insuranceType: InsuranceType): ComparisonOffer {
+	private static contractToOffer(
+		contract: { id: string; insurer: string; premium: number },
+		insuranceType: InsuranceType
+	): ComparisonOffer {
 		// Generate basic coverages based on insurance type
 		let coverages: { [key: string]: { included: boolean; value?: string } } = {};
-		
+
 		switch (insuranceType) {
 			case 'auto':
 				coverages = {
 					'Responsabilité civile': { included: true },
-					'Vol': { included: true },
+					Vol: { included: true },
 					'Bris de glace': { included: true },
 					'Assistance 0km': { included: true },
 				};
 				break;
 			case 'habitation':
 				coverages = {
-					'Incendie': { included: true },
+					Incendie: { included: true },
 					'Dégâts des eaux': { included: true },
-					'Vol': { included: true },
+					Vol: { included: true },
 					'Responsabilité civile': { included: true },
 				};
 				break;
 			case 'sante':
 				coverages = {
 					'Soins courants': { included: true, value: '100%' },
-					'Hospitalisation': { included: true, value: '100%' },
-					'Dentaire': { included: true, value: '125%' },
-					'Optique': { included: true, value: '150€' },
+					Hospitalisation: { included: true, value: '100%' },
+					Dentaire: { included: true, value: '125%' },
+					Optique: { included: true, value: '150€' },
 				};
 				break;
 			case 'moto':
 				coverages = {
 					'Responsabilité civile': { included: true },
-					'Vol': { included: true },
-					'Incendie': { included: true },
-					'Équipements': { included: true },
+					Vol: { included: true },
+					Incendie: { included: true },
+					Équipements: { included: true },
 				};
 				break;
 		}
@@ -323,10 +326,10 @@ export class ComparisonService {
 		const budget = parseInt(formData.monthlyBudget) || 100;
 
 		// Adjust prices based on comprehensive form data
-		results = results.map(offer => {
+		results = results.map((offer) => {
 			let priceMultiplier = 1;
 			let scoreBonus = 0;
-			
+
 			// Age factor (younger = higher prices for auto/moto)
 			const age = parseInt(formData.age) || 25;
 			if (insuranceType === 'auto' || insuranceType === 'moto') {
@@ -351,13 +354,13 @@ export class ComparisonService {
 				// Vehicle type factor
 				if (formData.vehicleType === 'motorcycle') priceMultiplier *= 1.2;
 				if (formData.vehicleType === 'van') priceMultiplier *= 1.1;
-				
+
 				// Energy type factor
 				if (formData.energyType === 'electric') {
 					priceMultiplier *= 0.9;
 					scoreBonus += 10; // Electric vehicles often get better offers
 				}
-				
+
 				// Parking security
 				if (formData.parkingLocation === 'private_garage') {
 					priceMultiplier *= 0.95;
@@ -365,7 +368,7 @@ export class ComparisonService {
 				} else if (formData.parkingLocation === 'public_street') {
 					priceMultiplier *= 1.05;
 				}
-				
+
 				// Claims history
 				if (formData.claimsHistory === 'none') {
 					priceMultiplier *= 0.9;
@@ -378,10 +381,14 @@ export class ComparisonService {
 			if (insuranceType === 'habitation' && 'propertyType' in formData) {
 				// Property type factor
 				if (formData.propertyType === 'house') priceMultiplier *= 1.1;
-				if (formData.propertyType === 'apartment' && formData.floorLevel && parseInt(formData.floorLevel) > 3) {
+				if (
+					formData.propertyType === 'apartment' &&
+					formData.floorLevel &&
+					parseInt(formData.floorLevel) > 3
+				) {
 					priceMultiplier *= 0.95; // Higher floors = less theft risk
 				}
-				
+
 				// Security features
 				if (formData.hasAlarm) scoreBonus += 5;
 				if (formData.securityLevel === 'advanced') {
@@ -394,12 +401,12 @@ export class ComparisonService {
 				// Motorcycle type factor
 				if (formData.motorcycleType === 'sport') priceMultiplier *= 1.3;
 				if (formData.motorcycleType === 'scooter') priceMultiplier *= 0.9;
-				
+
 				// Engine size factor
 				const engineSize = parseInt(formData.engineSize) || 125;
 				if (engineSize > 600) priceMultiplier *= 1.2;
 				if (engineSize <= 125) priceMultiplier *= 0.8;
-				
+
 				// Anti-theft
 				if (formData.hasAntiTheft) {
 					priceMultiplier *= 0.95;
@@ -410,14 +417,14 @@ export class ComparisonService {
 			if (insuranceType === 'sante' && 'familyStatus' in formData) {
 				// Family status factor
 				if (formData.familyStatus === 'family') priceMultiplier *= 1.2;
-				
+
 				// Health habits
 				if (formData.practicesSport) scoreBonus += 5;
 				if (formData.hasChronicCondition) priceMultiplier *= 1.1;
 			}
 
 			const adjustedMonthly = Math.round(offer.price.monthly * priceMultiplier);
-			
+
 			return {
 				...offer,
 				price: {
@@ -425,9 +432,10 @@ export class ComparisonService {
 					yearly: adjustedMonthly * 12,
 				},
 				// Adjust score based on how close to budget + bonuses
-				score: budget > 0 
-					? Math.max(50, offer.score - Math.abs(adjustedMonthly - budget) * 2 + scoreBonus)
-					: offer.score + scoreBonus,
+				score:
+					budget > 0
+						? Math.max(50, offer.score - Math.abs(adjustedMonthly - budget) * 2 + scoreBonus)
+						: offer.score + scoreBonus,
 			};
 		});
 
@@ -455,4 +463,4 @@ export class ComparisonService {
 		const offers = mockData[insuranceType];
 		return offers.length > 0 ? offers[0] : null;
 	}
-} 
+}
