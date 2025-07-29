@@ -1,6 +1,7 @@
 ---
 alwaysApply: true
 ---
+
 ## Tech Stack
 
 - **React** – UI library
@@ -49,6 +50,29 @@ alwaysApply: true
 - Use `services/` folder to define all HTTP clients.
 - Use the **native `fetch` API** via wrappers.
 - Handle loading/error states consistently with reusable UI patterns (e.g., `<Loader />`, `<ErrorMessage />`).
+- The core API response format is:
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "string",
+    "resource": "any"
+  }
+}
+```
+
+- The core API error format is:
+
+```json
+{
+  "status": "error",
+  "error": {
+    "code": "string",
+    "message": "string"
+  }
+}
+```
 
 ### Testing
 
