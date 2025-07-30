@@ -4,6 +4,7 @@ import {
 	FaChartLine,
 	FaCog,
 	FaFolder,
+	FaPlay,
 	FaQuestionCircle,
 	FaRobot,
 	FaSignOutAlt,
@@ -14,9 +15,11 @@ import { Menu, Transition } from '@headlessui/react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
+import VideoModal from './ui/VideoModal';
 import { getUserState } from '../utils/stateHelpers';
 import { logout } from '../store/userSlice';
 import { motion } from 'framer-motion';
+import { useVideoModal } from '../hooks/useVideoModal';
 
 const AppLayout = () => {
 	const navigate = useNavigate();
@@ -25,6 +28,9 @@ const AppLayout = () => {
 
 	// Get user from Redux store
 	const { currentUser, isAuthenticated } = useAppSelector(getUserState);
+
+	// Video modal hook
+	const { isVideoModalOpen, closeVideoModal, openVideoModal } = useVideoModal();
 
 	const [notifications] = useState([
 		{ id: 1, message: 'Votre contrat santé expire dans 45 jours', time: '2h', unread: true },
@@ -309,6 +315,19 @@ const AppLayout = () => {
 												</button>
 											)}
 										</Menu.Item>
+										<Menu.Item>
+											{({ active }) => (
+												<button
+													onClick={openVideoModal}
+													className={`flex items-center w-full px-4 py-2 text-sm text-gray-700 ${
+														active ? 'bg-gray-50' : ''
+													}`}
+												>
+													<FaPlay className="h-4 w-4 mr-3" />
+													Voir la vidéo AssuBot
+												</button>
+											)}
+										</Menu.Item>
 										<div className="border-t border-gray-100 my-1"></div>
 
 										{/* Logout vs Return to Landing based on auth status */}
@@ -376,6 +395,14 @@ const AppLayout = () => {
 			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				<Outlet />
 			</main>
+
+			{/* Video Modal */}
+			<VideoModal
+				isOpen={isVideoModalOpen}
+				onClose={closeVideoModal}
+				videoSrc="/src/assets/video/assubot-video.mp4"
+				title="Bienvenue sur AssuBot"
+			/>
 		</div>
 	);
 };
