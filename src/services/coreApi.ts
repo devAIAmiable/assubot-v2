@@ -265,50 +265,6 @@ export const authService = {
 			};
 		}
 	},
-
-	checkSession: async (): Promise<
-		ServiceResponse<{
-			user: {
-				id: string;
-				email: string;
-				firstName: string;
-				lastName: string;
-				isFirstLogin: boolean;
-			};
-			message: string;
-		}>
-	> => {
-		try {
-			const response = await coreApi.get<{
-				message: string;
-				user: {
-					id: string;
-					email: string;
-					firstName: string;
-					lastName: string;
-					isFirstLogin: boolean;
-				};
-			}>('/auth/session');
-
-			if (response.success && response.status === 'success' && response.data?.user) {
-				return {
-					success: true,
-					data: response.data,
-				};
-			}
-
-			return {
-				success: false,
-				error: response.error?.message || 'Session non valide',
-			};
-		} catch (error) {
-			console.error('Session check error:', error);
-			return {
-				success: false,
-				error: 'Erreur de connexion au serveur',
-			};
-		}
-	},
 };
 
 // Contract endpoints

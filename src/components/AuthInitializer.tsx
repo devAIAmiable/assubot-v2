@@ -17,11 +17,7 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
 		const initializeAuth = async () => {
 			try {
 				if (!isAuthenticated) {
-					let response = await authService.checkSession();
-
-					if (!response.success) {
-						response = await authService.checkAuthStatus();
-					}
+					const response = await authService.checkAuthStatus();
 
 					if (response.success && response.data?.user) {
 						// Prepare user data with computed name
