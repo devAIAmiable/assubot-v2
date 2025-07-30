@@ -44,6 +44,7 @@ alwaysApply: true
 - Use **Tailwind CSS** exclusively. If needed, centralize reusable styles via class composition (e.g., `clsx`, `tailwind-variants`).
 - Always use **Headless UI** for accessible dropdowns, modals, dialogs, etc.
 - Use **Framer Motion** for animations.
+- Default color is #1e51ab
 
 ### API & Fetching
 
