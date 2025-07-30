@@ -82,8 +82,8 @@ const AppLayout = () => {
 	// Get user initials for avatar
 	const getUserInitials = () => {
 		if (currentUser) {
-			const firstInitial = currentUser.first_name?.charAt(0) || '';
-			const lastInitial = currentUser.last_name?.charAt(0) || '';
+			const firstInitial = currentUser.firstName?.charAt(0) || '';
+			const lastInitial = currentUser.lastName?.charAt(0) || '';
 			return (firstInitial + lastInitial).toUpperCase() || 'U';
 		}
 		return 'U';
@@ -94,7 +94,7 @@ const AppLayout = () => {
 		if (currentUser) {
 			return (
 				currentUser.name ||
-				`${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() ||
+				`${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() ||
 				'Utilisateur'
 			);
 		}
@@ -262,9 +262,9 @@ const AppLayout = () => {
 															{getUserDisplayName()}
 														</p>
 														<p className="text-xs text-gray-500 truncate">{currentUser.email}</p>
-														{currentUser.professional_category && (
+														{currentUser.professionalCategory && (
 															<p className="text-xs text-gray-400">
-																{currentUser.professional_category}
+																{currentUser.professionalCategory}
 															</p>
 														)}
 													</div>

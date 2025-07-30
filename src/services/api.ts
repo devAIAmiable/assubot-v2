@@ -46,7 +46,7 @@ class ApiClient {
 					...this.config.headers,
 					...options.headers,
 				},
-				// credentials: 'include', // Include cookies
+				credentials: 'include', // Include cookies
 				signal: controller.signal,
 			});
 

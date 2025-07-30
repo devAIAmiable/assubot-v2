@@ -1,4 +1,5 @@
 import type { ServiceResponse } from './api';
+import config from '../config/env';
 import { coreApi } from './api';
 
 // Auth endpoints
@@ -96,6 +97,51 @@ export const authService = {
 		}
 	},
 
+	// Alternative session check endpoint (if /auth/session doesn't work)
+	checkAuthStatus: async (): Promise<
+		ServiceResponse<{
+			user: {
+				id: string;
+				email: string;
+				firstName: string;
+				lastName: string;
+				isFirstLogin: boolean;
+			};
+			message: string;
+		}>
+	> => {
+		try {
+			const response = await coreApi.get<{
+				message: string;
+				user: {
+					id: string;
+					email: string;
+					firstName: string;
+					lastName: string;
+					isFirstLogin: boolean;
+				};
+			}>('/auth/me');
+
+			if (response.success && response.status === 'success' && response.data?.user) {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || 'Session non valide',
+			};
+		} catch (error) {
+			console.error('Auth status check error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
+
 	refresh: async (): Promise<ServiceResponse<{ token: string }>> => {
 		try {
 			const response = await coreApi.post<{ token: string }>('/auth/refresh');
@@ -149,6 +195,114 @@ export const authService = {
 			};
 		} catch (error) {
 			console.error('Signup error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
+
+	googleSignup: async (): Promise<ServiceResponse<{ redirectUrl: string }>> => {
+		try {
+			// Use window.location.href to directly redirect to the backend endpoint
+			// This avoids CORS issues since it's a full page navigation
+			window.location.href = `${config.coreApiUrl}/auth/google`;
+
+			// This return statement won't be reached due to the redirect
+			return {
+				success: false,
+				error: 'Redirecting...',
+			};
+		} catch (error) {
+			console.error('Google signup init error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
+
+	checkGoogleAuthStatus: async (): Promise<
+		ServiceResponse<{
+			user: {
+				id: string;
+				email: string;
+				firstName: string;
+				lastName: string;
+				isFirstLogin: boolean;
+			};
+			message: string;
+		}>
+	> => {
+		try {
+			const response = await coreApi.get<{
+				message: string;
+				user: {
+					id: string;
+					email: string;
+					firstName: string;
+					lastName: string;
+					isFirstLogin: boolean;
+				};
+			}>('/auth/google/status');
+
+			if (response.success && response.status === 'success' && response.data?.user) {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || 'Échec de la vérification Google',
+			};
+		} catch (error) {
+			console.error('Google auth status check error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
+
+	checkSession: async (): Promise<
+		ServiceResponse<{
+			user: {
+				id: string;
+				email: string;
+				firstName: string;
+				lastName: string;
+				isFirstLogin: boolean;
+			};
+			message: string;
+		}>
+	> => {
+		try {
+			const response = await coreApi.get<{
+				message: string;
+				user: {
+					id: string;
+					email: string;
+					firstName: string;
+					lastName: string;
+					isFirstLogin: boolean;
+				};
+			}>('/auth/session');
+
+			if (response.success && response.status === 'success' && response.data?.user) {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || 'Session non valide',
+			};
+		} catch (error) {
+			console.error('Session check error:', error);
 			return {
 				success: false,
 				error: 'Erreur de connexion au serveur',

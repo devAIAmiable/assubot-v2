@@ -9,14 +9,13 @@ export interface User {
 	email: string;
 	password?: string; // Optional in frontend for security
 	avatar?: string;
-	created_at?: string;
-	updated_at?: string;
-	birth_date?: string;
+	createdAt?: string;
+	updatedAt?: string;
+	birthDate?: string;
 	gender?: string;
-	professional_category?: string;
+	professionalCategory?: string;
 	is_google_account?: boolean;
 	isFirstLogin: boolean;
-	email_verification_token?: string;
 	address?: string;
 	city?: string;
 	zipcode?: string;
@@ -49,7 +48,7 @@ const userSlice = createSlice({
 			state.loading = true;
 			state.error = null;
 		},
-		
+
 		loginSuccess: (state, action: PayloadAction<{ user: User; lastLoginAt: string }>) => {
 			state.loading = false;
 			state.currentUser = action.payload.user;
@@ -57,20 +56,20 @@ const userSlice = createSlice({
 			state.error = null;
 			state.loginAttempts = 0;
 			state.lastLoginAt = action.payload.lastLoginAt;
-			
+
 			// Update first time login flag
 			if (state.currentUser) {
 				state.currentUser.isFirstLogin = false;
 			}
 		},
-		
+
 		loginFailure: (state, action: PayloadAction<string>) => {
 			state.loading = false;
 			state.error = action.payload;
 			state.loginAttempts += 1;
 			state.isAuthenticated = false;
 		},
-		
+
 		logout: (state) => {
 			state.currentUser = null;
 			state.isAuthenticated = false;
@@ -78,117 +77,123 @@ const userSlice = createSlice({
 			state.loginAttempts = 0;
 			state.lastLoginAt = undefined;
 		},
-		
+
 		// User profile actions
 		updateProfile: (state, action: PayloadAction<Partial<User>>) => {
 			if (state.currentUser) {
 				state.currentUser = {
 					...state.currentUser,
 					...action.payload,
-					updated_at: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
 				};
 			}
 		},
-		
-		updatePersonalInfo: (state, action: PayloadAction<{
-			first_name?: string;
-			last_name?: string;
-			birth_date?: string;
-			gender?: string;
-			professional_category?: string;
-		}>) => {
+
+		updatePersonalInfo: (
+			state,
+			action: PayloadAction<{
+				firstName?: string;
+				lastName?: string;
+				birthDate?: string;
+				gender?: string;
+				professionalCategory?: string;
+			}>
+		) => {
 			if (state.currentUser) {
 				const updates = action.payload;
 				state.currentUser = {
 					...state.currentUser,
 					...updates,
-					name: updates.first_name && updates.last_name 
-						? `${updates.first_name} ${updates.last_name}`
-						: state.currentUser.name,
-					updated_at: new Date().toISOString(),
+					name:
+						updates.firstName && updates.lastName
+							? `${updates.firstName} ${updates.lastName}`
+							: state.currentUser.name,
+					updatedAt: new Date().toISOString(),
 				};
 			}
 		},
-		
-		updateAddress: (state, action: PayloadAction<{
-			address?: string;
-			city?: string;
-			zipcode?: string;
-		}>) => {
+
+		updateAddress: (
+			state,
+			action: PayloadAction<{
+				address?: string;
+				city?: string;
+				zipcode?: string;
+			}>
+		) => {
 			if (state.currentUser) {
 				state.currentUser = {
 					...state.currentUser,
 					...action.payload,
-					updated_at: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
 				};
 			}
 		},
-		
+
 		updateAvatar: (state, action: PayloadAction<string>) => {
 			if (state.currentUser) {
 				state.currentUser.avatar = action.payload;
-				state.currentUser.updated_at = new Date().toISOString();
+				state.currentUser.updatedAt = new Date().toISOString();
 			}
 		},
-		
+
 		updateEmail: (state, action: PayloadAction<string>) => {
 			if (state.currentUser) {
 				state.currentUser.email = action.payload;
-				state.currentUser.updated_at = new Date().toISOString();
+				state.currentUser.updatedAt = new Date().toISOString();
 			}
 		},
-		
+
 		// Account management
 		markEmailVerified: (state) => {
 			if (state.currentUser) {
-				state.currentUser.email_verification_token = undefined;
-				state.currentUser.updated_at = new Date().toISOString();
+				state.currentUser.updatedAt = new Date().toISOString();
 			}
 		},
-		
+
 		setFirstTimeLogin: (state, action: PayloadAction<boolean>) => {
 			if (state.currentUser) {
 				state.currentUser.isFirstLogin = action.payload;
-				state.currentUser.updated_at = new Date().toISOString();
+				state.currentUser.updatedAt = new Date().toISOString();
 			}
 		},
-		
+
 		// Error handling
 		clearError: (state) => {
 			state.error = null;
 		},
-		
+
 		setLoading: (state, action: PayloadAction<boolean>) => {
 			state.loading = action.payload;
 		},
-		
+
 		// Password management (for local state only, never store actual passwords)
 		changePasswordSuccess: (state) => {
 			if (state.currentUser) {
-				state.currentUser.updated_at = new Date().toISOString();
+				state.currentUser.updatedAt = new Date().toISOString();
 			}
 			state.error = null;
 		},
-		
+
 		changePasswordFailure: (state, action: PayloadAction<string>) => {
 			state.error = action.payload;
 		},
-		
+
 		// Google account integration
 		linkGoogleAccount: (state) => {
 			if (state.currentUser) {
 				state.currentUser.is_google_account = true;
-				state.currentUser.updated_at = new Date().toISOString();
+				state.currentUser.updatedAt = new Date().toISOString();
 			}
 		},
-		
+
 		unlinkGoogleAccount: (state) => {
 			if (state.currentUser) {
 				state.currentUser.is_google_account = false;
-				state.currentUser.updated_at = new Date().toISOString();
+				state.currentUser.updatedAt = new Date().toISOString();
 			}
 		},
-		
+
 		// Reset login attempts (for security)
 		resetLoginAttempts: (state) => {
 			state.loginAttempts = 0;
@@ -217,4 +222,4 @@ export const {
 	resetLoginAttempts,
 } = userSlice.actions;
 
-export default userSlice.reducer; 
+export default userSlice.reducer;

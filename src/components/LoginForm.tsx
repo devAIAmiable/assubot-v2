@@ -26,6 +26,9 @@ const LoginForm: React.FC = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
+	const [submitSuccess, setSubmitSuccess] = useState<string | null>(
+		location.state?.message || null
+	);
 	const { handleGoogleLogin, isLoading: isGoogleLoading } = useGoogleAuth();
 
 	const {
@@ -40,6 +43,7 @@ const LoginForm: React.FC = () => {
 		dispatch(loginStart());
 		setIsSubmitting(true);
 		setSubmitError(null);
+		setSubmitSuccess(null);
 
 		const response = await authService.login(data);
 
@@ -80,6 +84,11 @@ const LoginForm: React.FC = () => {
 				</div>
 
 				<form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+					{submitSuccess && (
+						<div className="bg-green-50 border border-green-200 rounded-md p-4">
+							<p className="text-sm text-green-600">{submitSuccess}</p>
+						</div>
+					)}
 					{submitError && (
 						<div className="bg-red-50 border border-red-200 rounded-md p-4">
 							<p className="text-sm text-red-600">{submitError}</p>

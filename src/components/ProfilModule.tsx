@@ -37,11 +37,11 @@ const ProfilModule = () => {
 
 	// Form states
 	const [personalForm, setPersonalForm] = useState({
-		first_name: currentUser?.first_name || '',
-		last_name: currentUser?.last_name || '',
-		birth_date: currentUser?.birth_date || '',
+		firstName: currentUser?.firstName || '',
+		lastName: currentUser?.lastName || '',
+		birthDate: currentUser?.birthDate || '',
 		gender: currentUser?.gender || '',
-		professional_category: currentUser?.professional_category || '',
+		professionalCategory: currentUser?.professionalCategory || '',
 	});
 
 	const [addressForm, setAddressForm] = useState({
@@ -108,8 +108,8 @@ const ProfilModule = () => {
 
 	const getUserInitials = () => {
 		if (currentUser) {
-			const firstInitial = currentUser.first_name?.charAt(0) || '';
-			const lastInitial = currentUser.last_name?.charAt(0) || '';
+			const firstInitial = currentUser.firstName?.charAt(0) || '';
+			const lastInitial = currentUser.lastName?.charAt(0) || '';
 			return (firstInitial + lastInitial).toUpperCase() || 'U';
 		}
 		return 'U';
@@ -132,12 +132,8 @@ const ProfilModule = () => {
 			<div className="flex items-center justify-center min-h-96">
 				<div className="text-center">
 					<FaUser className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-					<h3 className="text-lg font-semibold text-gray-900 mb-2">
-						Aucun utilisateur connecté
-					</h3>
-					<p className="text-gray-600">
-						Veuillez vous connecter pour accéder à votre profil.
-					</p>
+					<h3 className="text-lg font-semibold text-gray-900 mb-2">Aucun utilisateur connecté</h3>
+					<p className="text-gray-600">Veuillez vous connecter pour accéder à votre profil.</p>
 				</div>
 			</div>
 		);
@@ -168,9 +164,9 @@ const ProfilModule = () => {
 					{/* Avatar */}
 					<div className="relative">
 						{currentUser.avatar ? (
-							<img 
-								src={currentUser.avatar} 
-								alt="Avatar" 
+							<img
+								src={currentUser.avatar}
+								alt="Avatar"
 								className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
 							/>
 						) : (
@@ -180,9 +176,9 @@ const ProfilModule = () => {
 						)}
 						<label className="absolute bottom-0 right-0 w-8 h-8 bg-[#1e51ab] rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-[#163d82] transition-colors shadow-lg">
 							<FaCamera className="h-4 w-4" />
-							<input 
-								type="file" 
-								accept="image/*" 
+							<input
+								type="file"
+								accept="image/*"
 								onChange={handleAvatarUpload}
 								className="hidden"
 							/>
@@ -192,18 +188,18 @@ const ProfilModule = () => {
 					{/* User Info */}
 					<div className="flex-1 text-center md:text-left">
 						<h2 className="text-2xl font-bold text-gray-900 mb-2">
-							{currentUser.name || `${currentUser.first_name} ${currentUser.last_name}`}
+							{currentUser.name || `${currentUser.firstName} ${currentUser.lastName}`}
 						</h2>
 						<p className="text-gray-600 mb-1">{currentUser.email}</p>
-						{currentUser.professional_category && (
-							<p className="text-gray-500 mb-4">{currentUser.professional_category}</p>
+						{currentUser.professionalCategory && (
+							<p className="text-gray-500 mb-4">{currentUser.professionalCategory}</p>
 						)}
-						
+
 						<div className="flex flex-wrap gap-4 justify-center md:justify-start">
-							{currentUser.birth_date && (
+							{currentUser.birthDate && (
 								<div className="flex items-center text-sm text-gray-600">
 									<FaCalendarAlt className="h-4 w-4 mr-2" />
-									{calculateAge(currentUser.birth_date)} ans
+									{calculateAge(currentUser.birthDate)} ans
 								</div>
 							)}
 							{currentUser.city && (
@@ -266,8 +262,8 @@ const ProfilModule = () => {
 								<label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
 								<input
 									type="text"
-									value={personalForm.first_name}
-									onChange={(e) => setPersonalForm({ ...personalForm, first_name: e.target.value })}
+									value={personalForm.firstName}
+									onChange={(e) => setPersonalForm({ ...personalForm, firstName: e.target.value })}
 									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
 									required
 								/>
@@ -276,18 +272,20 @@ const ProfilModule = () => {
 								<label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
 								<input
 									type="text"
-									value={personalForm.last_name}
-									onChange={(e) => setPersonalForm({ ...personalForm, last_name: e.target.value })}
+									value={personalForm.lastName}
+									onChange={(e) => setPersonalForm({ ...personalForm, lastName: e.target.value })}
 									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
 									required
 								/>
 							</div>
 							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">Date de naissance</label>
+								<label className="block text-sm font-medium text-gray-700 mb-2">
+									Date de naissance
+								</label>
 								<input
 									type="date"
-									value={personalForm.birth_date}
-									onChange={(e) => setPersonalForm({ ...personalForm, birth_date: e.target.value })}
+									value={personalForm.birthDate}
+									onChange={(e) => setPersonalForm({ ...personalForm, birthDate: e.target.value })}
 									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
 								/>
 							</div>
@@ -305,10 +303,14 @@ const ProfilModule = () => {
 								</select>
 							</div>
 							<div className="md:col-span-2">
-								<label className="block text-sm font-medium text-gray-700 mb-2">Catégorie professionnelle</label>
+								<label className="block text-sm font-medium text-gray-700 mb-2">
+									Catégorie professionnelle
+								</label>
 								<select
-									value={personalForm.professional_category}
-									onChange={(e) => setPersonalForm({ ...personalForm, professional_category: e.target.value })}
+									value={personalForm.professionalCategory}
+									onChange={(e) =>
+										setPersonalForm({ ...personalForm, professionalCategory: e.target.value })
+									}
 									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
 								>
 									<option value="">Sélectionner</option>
@@ -347,19 +349,20 @@ const ProfilModule = () => {
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 						<div>
 							<p className="text-sm text-gray-600 mb-1">Prénom</p>
-							<p className="font-medium text-gray-900">{currentUser.first_name || 'Non renseigné'}</p>
+							<p className="font-medium text-gray-900">
+								{currentUser.firstName || 'Non renseigné'}
+							</p>
 						</div>
 						<div>
 							<p className="text-sm text-gray-600 mb-1">Nom</p>
-							<p className="font-medium text-gray-900">{currentUser.last_name || 'Non renseigné'}</p>
+							<p className="font-medium text-gray-900">{currentUser.lastName || 'Non renseigné'}</p>
 						</div>
 						<div>
 							<p className="text-sm text-gray-600 mb-1">Date de naissance</p>
 							<p className="font-medium text-gray-900">
-								{currentUser.birth_date 
-									? new Date(currentUser.birth_date).toLocaleDateString('fr-FR')
-									: 'Non renseigné'
-								}
+								{currentUser.birthDate
+									? new Date(currentUser.birthDate).toLocaleDateString('fr-FR')
+									: 'Non renseigné'}
 							</p>
 						</div>
 						<div>
@@ -368,7 +371,9 @@ const ProfilModule = () => {
 						</div>
 						<div className="md:col-span-2">
 							<p className="text-sm text-gray-600 mb-1">Catégorie professionnelle</p>
-							<p className="font-medium text-gray-900">{currentUser.professional_category || 'Non renseigné'}</p>
+							<p className="font-medium text-gray-900">
+								{currentUser.professionalCategory || 'Non renseigné'}
+							</p>
 						</div>
 					</div>
 				)}
@@ -456,7 +461,8 @@ const ProfilModule = () => {
 							<p className="font-medium text-gray-900">
 								{currentUser.address || 'Non renseignée'}
 								{currentUser.city && currentUser.address && <br />}
-								{currentUser.city && `${currentUser.zipcode ? currentUser.zipcode + ' ' : ''}${currentUser.city}`}
+								{currentUser.city &&
+									`${currentUser.zipcode ? currentUser.zipcode + ' ' : ''}${currentUser.city}`}
 							</p>
 						</div>
 					</div>
@@ -492,7 +498,7 @@ const ProfilModule = () => {
 								</button>
 							)}
 						</div>
-						
+
 						{isEditingEmail ? (
 							<form onSubmit={handleEmailSubmit} className="space-y-4">
 								<input
@@ -532,10 +538,9 @@ const ProfilModule = () => {
 									Compte Google
 								</h4>
 								<p className="text-sm text-gray-600 mt-1">
-									{currentUser.is_google_account 
+									{currentUser.is_google_account
 										? 'Votre compte est lié à Google'
-										: 'Liez votre compte Google pour une connexion rapide'
-									}
+										: 'Liez votre compte Google pour une connexion rapide'}
 								</p>
 							</div>
 							<button
@@ -564,35 +569,47 @@ const ProfilModule = () => {
 								</button>
 							)}
 						</div>
-						
+
 						{isChangingPassword ? (
 							<form onSubmit={handlePasswordSubmit} className="space-y-4">
 								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel</label>
+									<label className="block text-sm font-medium text-gray-700 mb-2">
+										Mot de passe actuel
+									</label>
 									<input
 										type="password"
 										value={passwordForm.currentPassword}
-										onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+										onChange={(e) =>
+											setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
+										}
 										className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
 										required
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe</label>
+									<label className="block text-sm font-medium text-gray-700 mb-2">
+										Nouveau mot de passe
+									</label>
 									<input
 										type="password"
 										value={passwordForm.newPassword}
-										onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+										onChange={(e) =>
+											setPasswordForm({ ...passwordForm, newPassword: e.target.value })
+										}
 										className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
 										required
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe</label>
+									<label className="block text-sm font-medium text-gray-700 mb-2">
+										Confirmer le mot de passe
+									</label>
 									<input
 										type="password"
 										value={passwordForm.confirmPassword}
-										onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+										onChange={(e) =>
+											setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
+										}
 										className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
 										required
 									/>
@@ -632,19 +649,17 @@ const ProfilModule = () => {
 					<div>
 						<p className="text-gray-600 mb-1">Membre depuis</p>
 						<p className="font-medium text-gray-900">
-							{currentUser.created_at 
-								? new Date(currentUser.created_at).toLocaleDateString('fr-FR')
-								: 'Non disponible'
-							}
+							{currentUser.createdAt
+								? new Date(currentUser.createdAt).toLocaleDateString('fr-FR')
+								: 'Non disponible'}
 						</p>
 					</div>
 					<div>
 						<p className="text-gray-600 mb-1">Dernière modification</p>
 						<p className="font-medium text-gray-900">
-							{currentUser.updated_at 
-								? new Date(currentUser.updated_at).toLocaleDateString('fr-FR')
-								: 'Non disponible'
-							}
+							{currentUser.updatedAt
+								? new Date(currentUser.updatedAt).toLocaleDateString('fr-FR')
+								: 'Non disponible'}
 						</p>
 					</div>
 					{/* <div>
@@ -663,4 +678,4 @@ const ProfilModule = () => {
 	);
 };
 
-export default ProfilModule; 
+export default ProfilModule;

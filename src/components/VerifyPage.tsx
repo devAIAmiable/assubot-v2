@@ -1,7 +1,8 @@
-import { FaCheckCircle, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
+import { FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+import Spinner from './ui/Spinner';
 import { authService } from '../services/coreApi';
 
 const VerifyPage: React.FC = () => {
@@ -43,7 +44,7 @@ const VerifyPage: React.FC = () => {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-gray-50">
 				<div className="text-center">
-					<FaSpinner className="h-12 w-12 text-blue-600 animate-spin mx-auto mb-4" />
+					<Spinner size="lg" color="blue" className="mx-auto mb-4" />
 					<h1 className="text-2xl font-bold text-gray-900 mb-2">Vérification en cours...</h1>
 					<p className="text-gray-600">
 						Veuillez patienter pendant la vérification de votre token.

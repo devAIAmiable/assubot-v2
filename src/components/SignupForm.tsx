@@ -8,6 +8,7 @@ import Logo from './ui/Logo';
 import Spinner from './ui/Spinner';
 import { authService } from '../services/coreApi';
 import { useForm } from 'react-hook-form';
+import { useGoogleAuth } from '../hooks/useGoogleAuth';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -54,7 +55,7 @@ const SignupForm: React.FC = () => {
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [currentStep, setCurrentStep] = useState(1);
 	const [countdown, setCountdown] = useState(30);
-	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+	const { handleGoogleSignup, isLoading: isGoogleLoading } = useGoogleAuth();
 
 	const genderOptions: DropdownOption[] = [
 		{ value: 'homme', label: 'Homme' },
@@ -123,10 +124,6 @@ const SignupForm: React.FC = () => {
 		}
 
 		setIsSubmitting(false);
-	};
-
-	const handleGoogleLogin = async () => {
-		setIsGoogleLoading(true);
 	};
 
 	// Countdown effect for success page
@@ -457,9 +454,10 @@ const SignupForm: React.FC = () => {
 
 					{/* Google Signup Button */}
 					<GoogleLoginButton
-						onClick={handleGoogleLogin}
+						onClick={handleGoogleSignup}
 						loading={isGoogleLoading}
 						disabled={isSubmitting}
+						isLogin={false}
 					/>
 
 					{/* Signin Redirect Button */}
