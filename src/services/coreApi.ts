@@ -536,5 +536,75 @@ export const userService = {
 			};
 		}
 	},
+
+	// Avatar upload endpoints
+	getAvatarUploadUrl: async (
+		contentType: string
+	): Promise<
+		ServiceResponse<{
+			uploadUrl: string;
+			blobName: string;
+		}>
+	> => {
+		try {
+			const response = await coreApi.post<{
+				uploadUrl: string;
+				blobName: string;
+			}>('/users/avatar/upload-url', { contentType });
+
+			if (response.success && response.status === 'success') {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || "Erreur lors de la génération de l'URL d'upload",
+			};
+		} catch (error) {
+			console.error('Avatar upload URL error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
+
+	confirmAvatarUpload: async (
+		blobName: string
+	): Promise<
+		ServiceResponse<{
+			message: string;
+			avatarUrl: string;
+		}>
+	> => {
+		try {
+			const response = await coreApi.post<{
+				message: string;
+				avatarUrl: string;
+			}>('/users/avatar/confirm', { blobName });
+
+			if (response.success && response.status === 'success') {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || "Erreur lors de la confirmation de l'upload",
+			};
+		} catch (error) {
+			console.error('Avatar confirm error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
+
 	deleteAccount: () => coreApi.delete('/user/account'),
 };

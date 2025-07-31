@@ -11,8 +11,7 @@ import {
 	FaTimes,
 	FaUser,
 } from 'react-icons/fa';
-import { linkGoogleAccount, unlinkGoogleAccount, updateAvatar } from '../store/userSlice';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { useAppSelector } from '../store/hooks';
 
 import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
@@ -22,17 +21,19 @@ import Input from './ui/Input';
 import Dropdown, { type DropdownOption } from './ui/Dropdown';
 import { useProfileUpdate } from '../hooks/useProfileUpdate';
 import { usePasswordChange } from '../hooks/usePasswordChange';
+import { useAvatarUpload } from '../hooks/useAvatarUpload';
 import { formatDateForAPI, formatDateForInput } from '../utils/dateHelpers';
 
 const ProfileModule = () => {
-	const dispatch = useAppDispatch();
 	const { currentUser } = useAppSelector(getUserState);
 	const { updateProfile, loading: profileLoading, error: profileError } = useProfileUpdate();
 	const { changePassword, loading: passwordLoading, error: passwordError } = usePasswordChange();
+	const { uploadAvatar, loading: avatarLoading, error: avatarError } = useAvatarUpload();
 
 	const [isEditingPersonal, setIsEditingPersonal] = useState(false);
 	const [isEditingAddress, setIsEditingAddress] = useState(false);
 	const [isChangingPassword, setIsChangingPassword] = useState(false);
+	const [avatarSuccessMessage, setAvatarSuccessMessage] = useState<string | null>(null);
 
 	// Form states
 	const [personalForm, setPersonalForm] = useState({
@@ -148,19 +149,29 @@ const ProfileModule = () => {
 		}
 	};
 
-	const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
-			const avatarUrl = URL.createObjectURL(file);
-			dispatch(updateAvatar(avatarUrl));
-		}
-	};
+			// Validate file type
+			if (!file.type.startsWith('image/')) {
+				alert('Veuillez sélectionner un fichier image valide.');
+				return;
+			}
 
-	const handleGoogleToggle = () => {
-		if (currentUser?.is_google_account) {
-			dispatch(unlinkGoogleAccount());
-		} else {
-			dispatch(linkGoogleAccount());
+			// Validate file size (max 5MB)
+			if (file.size > 5 * 1024 * 1024) {
+				alert('Le fichier est trop volumineux. Taille maximum : 5MB.');
+				return;
+			}
+
+			const result = await uploadAvatar(file);
+			if (result.success) {
+				// Clear the input
+				e.target.value = '';
+				setAvatarSuccessMessage(result.message || 'Avatar mis à jour avec succès');
+				// Clear success message after 3 seconds
+				setTimeout(() => setAvatarSuccessMessage(null), 3000);
+			}
 		}
 	};
 
@@ -223,6 +234,7 @@ const ProfileModule = () => {
 					<div className="relative">
 						{currentUser.avatar ? (
 							<img
+								key={currentUser.avatar} // Force re-render when avatar changes
 								src={currentUser.avatar}
 								alt="Avatar"
 								className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
@@ -232,15 +244,28 @@ const ProfileModule = () => {
 								{getUserInitials()}
 							</div>
 						)}
-						<label className="absolute bottom-0 right-0 w-8 h-8 bg-[#1e51ab] rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-[#163d82] transition-colors shadow-lg">
-							<FaCamera className="h-4 w-4" />
+						<label
+							className={`absolute bottom-0 right-0 w-8 h-8 bg-[#1e51ab] rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-[#163d82] transition-colors shadow-lg ${avatarLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+						>
+							{avatarLoading ? (
+								<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+							) : (
+								<FaCamera className="h-4 w-4" />
+							)}
 							<input
 								type="file"
 								accept="image/*"
 								onChange={handleAvatarUpload}
 								className="hidden"
+								disabled={avatarLoading}
 							/>
 						</label>
+						{avatarError && (
+							<div className="mt-2 text-sm text-red-600 text-center">{avatarError}</div>
+						)}
+						{avatarSuccessMessage && (
+							<div className="mt-2 text-sm text-green-600 text-center">{avatarSuccessMessage}</div>
+						)}
 					</div>
 
 					{/* User Info */}

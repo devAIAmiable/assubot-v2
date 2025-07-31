@@ -216,6 +216,31 @@ const userSlice = createSlice({
 			}
 		},
 
+		// Avatar upload actions
+		uploadAvatarStart: (state) => {
+			state.loading = true;
+			state.error = null;
+		},
+
+		uploadAvatarSuccess: (state, action: PayloadAction<{ avatarUrl: string }>) => {
+			state.loading = false;
+			if (state.currentUser) {
+				// Add cache-busting parameter to force image refresh
+				const avatarUrl = action.payload.avatarUrl.includes('?')
+					? `${action.payload.avatarUrl}&t=${Date.now()}`
+					: `${action.payload.avatarUrl}?t=${Date.now()}`;
+
+				state.currentUser.avatar = avatarUrl;
+				state.currentUser.updatedAt = new Date().toISOString();
+			}
+			state.error = null;
+		},
+
+		uploadAvatarFailure: (state, action: PayloadAction<string>) => {
+			state.loading = false;
+			state.error = action.payload;
+		},
+
 		updateEmail: (state, action: PayloadAction<string>) => {
 			if (state.currentUser) {
 				state.currentUser.email = action.payload;
@@ -240,6 +265,12 @@ const userSlice = createSlice({
 		// Error handling
 		clearError: (state) => {
 			state.error = null;
+		},
+
+		// Clear all errors and loading states
+		clearAllErrors: (state) => {
+			state.error = null;
+			state.loading = false;
 		},
 
 		setLoading: (state, action: PayloadAction<boolean>) => {
@@ -302,10 +333,14 @@ export const {
 	updatePersonalInfo,
 	updateAddress,
 	updateAvatar,
+	uploadAvatarStart,
+	uploadAvatarSuccess,
+	uploadAvatarFailure,
 	updateEmail,
 	markEmailVerified,
 	setFirstTimeLogin,
 	clearError,
+	clearAllErrors,
 	setLoading,
 	changePasswordStart,
 	changePasswordSuccess,

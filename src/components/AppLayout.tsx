@@ -219,6 +219,7 @@ const AppLayout = () => {
 								<Menu.Button className="flex items-center space-x-2 p-2 text-gray-600 hover:text-[#1e51ab] hover:bg-gray-50 rounded-lg transition-colors">
 									{currentUser?.avatar ? (
 										<img
+											key={currentUser.avatar} // Force re-render when avatar changes
 											src={currentUser.avatar}
 											alt="Avatar"
 											className="w-8 h-8 rounded-full object-cover"
@@ -252,6 +253,7 @@ const AppLayout = () => {
 												<div className="flex items-center space-x-3">
 													{currentUser.avatar ? (
 														<img
+															key={currentUser.avatar} // Force re-render when avatar changes
 															src={currentUser.avatar}
 															alt="Avatar"
 															className="w-10 h-10 rounded-full object-cover"

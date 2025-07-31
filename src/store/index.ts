@@ -7,15 +7,22 @@ import contractsReducer from './contractsSlice';
 import storage from 'redux-persist/lib/storage';
 import userReducer from './userSlice';
 
+// Custom persist config for user slice that excludes error and loading states
+const userPersistConfig = {
+	key: 'user',
+	storage,
+	whitelist: ['currentUser', 'isAuthenticated', 'loginAttempts', 'lastLoginAt'], // Don't persist error and loading
+};
+
 const persistConfig = {
 	key: 'root',
 	storage,
-	whitelist: ['user', 'chat', 'comparisons'], // Persist contracts, user, chat history, and comparisons
+	whitelist: ['chat', 'comparisons'], // Persist chat history and comparisons
 };
 
 const rootReducer = combineReducers({
 	contracts: contractsReducer,
-	user: userReducer,
+	user: persistReducer(userPersistConfig, userReducer),
 	chat: chatReducer,
 	comparisons: comparisonsReducer,
 });
@@ -37,4 +44,4 @@ export const persistor = persistStore(store);
 // Export types
 export type RootState = ReturnType<typeof rootReducer>;
 export type PersistedRootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch; 
+export type AppDispatch = typeof store.dispatch;
