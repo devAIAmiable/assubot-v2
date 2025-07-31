@@ -541,7 +541,7 @@ const ProfileModule = () => {
 					</div>
 
 					{/* Google Account */}
-					<div className="border-b border-gray-100 pb-6">
+					{/* <div className="border-b border-gray-100 pb-6">
 						<div className="flex items-center justify-between">
 							<div>
 								<h4 className="font-medium text-gray-900 flex items-center">
@@ -562,7 +562,7 @@ const ProfileModule = () => {
 								{currentUser.is_google_account ? 'Dissocier' : 'Associer'}
 							</Button>
 						</div>
-					</div>
+					</div> */}
 
 					{/* Password */}
 					<div>
