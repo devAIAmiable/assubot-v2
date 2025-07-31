@@ -23,17 +23,17 @@ import { useProfileUpdate } from '../hooks/useProfileUpdate';
 import { usePasswordChange } from '../hooks/usePasswordChange';
 import { useAvatarUpload } from '../hooks/useAvatarUpload';
 import { formatDateForAPI, formatDateForInput } from '../utils/dateHelpers';
+import { showToast } from './ui/Toast';
 
 const ProfileModule = () => {
 	const { currentUser } = useAppSelector(getUserState);
-	const { updateProfile, loading: profileLoading, error: profileError } = useProfileUpdate();
-	const { changePassword, loading: passwordLoading, error: passwordError } = usePasswordChange();
+	const { updateProfile, loading: profileLoading } = useProfileUpdate();
+	const { changePassword, loading: passwordLoading } = usePasswordChange();
 	const { uploadAvatar, loading: avatarLoading, error: avatarError } = useAvatarUpload();
 
 	const [isEditingPersonal, setIsEditingPersonal] = useState(false);
 	const [isEditingAddress, setIsEditingAddress] = useState(false);
 	const [isChangingPassword, setIsChangingPassword] = useState(false);
-	const [avatarSuccessMessage, setAvatarSuccessMessage] = useState<string | null>(null);
 
 	// Form states
 	const [personalForm, setPersonalForm] = useState({
@@ -107,7 +107,10 @@ const ProfileModule = () => {
 		});
 
 		if (result.success) {
+			showToast.success('Informations personnelles mises à jour avec succès');
 			setIsEditingPersonal(false);
+		} else {
+			showToast.error('Erreur lors de la mise à jour des informations personnelles');
 		}
 	};
 
@@ -121,7 +124,10 @@ const ProfileModule = () => {
 		});
 
 		if (result.success) {
+			showToast.success('Adresse mise à jour avec succès');
 			setIsEditingAddress(false);
+		} else {
+			showToast.error("Erreur lors de la mise à jour de l'adresse");
 		}
 	};
 
@@ -130,11 +136,13 @@ const ProfileModule = () => {
 
 		// Validate passwords match
 		if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+			showToast.error('Les mots de passe ne correspondent pas');
 			return;
 		}
 
 		// Validate password strength
 		if (passwordForm.newPassword.length < 8) {
+			showToast.error('Le mot de passe doit contenir au moins 8 caractères');
 			return;
 		}
 
@@ -144,8 +152,11 @@ const ProfileModule = () => {
 		});
 
 		if (result.success) {
+			showToast.success('Mot de passe changé avec succès');
 			setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
 			setIsChangingPassword(false);
+		} else {
+			showToast.error('Erreur lors du changement de mot de passe');
 		}
 	};
 
@@ -168,9 +179,9 @@ const ProfileModule = () => {
 			if (result.success) {
 				// Clear the input
 				e.target.value = '';
-				setAvatarSuccessMessage(result.message || 'Avatar mis à jour avec succès');
-				// Clear success message after 3 seconds
-				setTimeout(() => setAvatarSuccessMessage(null), 3000);
+				showToast.success('Avatar mis à jour avec succès');
+			} else {
+				showToast.error("Erreur lors de la mise à jour de l'avatar");
 			}
 		}
 	};
@@ -263,9 +274,6 @@ const ProfileModule = () => {
 						{avatarError && (
 							<div className="mt-2 text-sm text-red-600 text-center">{avatarError}</div>
 						)}
-						{avatarSuccessMessage && (
-							<div className="mt-2 text-sm text-green-600 text-center">{avatarSuccessMessage}</div>
-						)}
 					</div>
 
 					{/* User Info */}
@@ -337,11 +345,6 @@ const ProfileModule = () => {
 
 				{isEditingPersonal ? (
 					<form onSubmit={handlePersonalSubmit} className="space-y-4">
-						{profileError && (
-							<div className="bg-red-50 border border-red-200 rounded-lg p-4">
-								<p className="text-red-600 text-sm">{profileError}</p>
-							</div>
-						)}
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<Input
 								label="Prénom"
@@ -469,11 +472,6 @@ const ProfileModule = () => {
 
 				{isEditingAddress ? (
 					<form onSubmit={handleAddressSubmit} className="space-y-4">
-						{profileError && (
-							<div className="bg-red-50 border border-red-200 rounded-lg p-4">
-								<p className="text-red-600 text-sm">{profileError}</p>
-							</div>
-						)}
 						<Input
 							label="Adresse"
 							type="text"
@@ -602,11 +600,6 @@ const ProfileModule = () => {
 
 						{isChangingPassword ? (
 							<form onSubmit={handlePasswordSubmit} className="space-y-4">
-								{passwordError && (
-									<div className="bg-red-50 border border-red-200 rounded-lg p-4">
-										<p className="text-red-600 text-sm">{passwordError}</p>
-									</div>
-								)}
 								<Input
 									label="Mot de passe actuel"
 									type="password"

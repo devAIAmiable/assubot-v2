@@ -22,6 +22,7 @@ import { Provider } from 'react-redux';
 import ResetPasswordForm from './components/ResetPasswordForm';
 import SignupForm from './components/SignupForm';
 import Spinner from './components/ui/Spinner';
+import ToastContainer from './components/ui/Toast';
 import VerifyPage from './components/VerifyPage';
 
 function App() {
@@ -74,6 +75,7 @@ function App() {
 						</Routes>
 					</Router>
 				</AuthInitializer>
+				<ToastContainer />
 			</PersistGate>
 		</Provider>
 	);
