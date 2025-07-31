@@ -16,7 +16,7 @@ interface ApiResponse<T = unknown> {
 
 export interface ServiceResponse<T = unknown> {
 	success: boolean;
-	data?: T;
+	data?: T | null;
 	error?: string;
 }
 

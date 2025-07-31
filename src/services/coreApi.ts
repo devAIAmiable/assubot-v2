@@ -56,10 +56,10 @@ export const authService = {
 			}>('/auth/login', credentials);
 			console.log('🚀 ~ response:', response);
 
-			if (response.success && response.status === 'success' && response.data?.user) {
+			if (response.success && response.status === 'success') {
 				return {
 					success: true,
-					data: response.data,
+					data: null,
 				};
 			}
 
@@ -93,6 +93,77 @@ export const authService = {
 			return {
 				success: false,
 				error: 'Network error occurred',
+			};
+		}
+	},
+
+	// Get full user profile after login
+	getUserProfile: async (): Promise<
+		ServiceResponse<{
+			user: {
+				id: string;
+				email: string;
+				firstName: string;
+				lastName: string;
+				birthDate?: string;
+				gender?: string;
+				profession?: string;
+				provider: string;
+				isFirstLogin: boolean;
+				isActive: boolean;
+				isVerified: boolean;
+				acceptedTerms: boolean;
+				termsAcceptedAt?: string;
+				createdAt: string;
+				updatedAt: string;
+				address?: string;
+				city?: string;
+				zip?: string;
+			};
+			message: string;
+		}>
+	> => {
+		try {
+			const response = await coreApi.get<{
+				message: string;
+				user: {
+					id: string;
+					email: string;
+					firstName: string;
+					lastName: string;
+					birthDate?: string;
+					gender?: string;
+					profession?: string;
+					provider: string;
+					isFirstLogin: boolean;
+					isActive: boolean;
+					isVerified: boolean;
+					acceptedTerms: boolean;
+					termsAcceptedAt?: string;
+					createdAt: string;
+					updatedAt: string;
+					address?: string;
+					city?: string;
+					zip?: string;
+				};
+			}>('/auth/me');
+
+			if (response.success && response.status === 'success' && response.data?.user) {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || 'Impossible de récupérer le profil utilisateur',
+			};
+		} catch (error) {
+			console.error('Get user profile error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
 			};
 		}
 	},
@@ -155,7 +226,7 @@ export const authService = {
 
 			return {
 				success: false,
-				error: response.error?.message || 'Erreur lors de l\'envoi de l\'email',
+				error: response.error?.message || "Erreur lors de l'envoi de l'email",
 			};
 		} catch (error) {
 			console.error('Forgot password error:', error);
@@ -166,12 +237,10 @@ export const authService = {
 		}
 	},
 
-	resetPassword: async (token: string, password: string): Promise<ServiceResponse<{ message: string }>> => {
-		console.log('🔧 resetPassword service called');
-		console.log('🔧 Token:', token);
-		console.log('🔧 Password:', password);
-		console.log('🔧 Request body:', { token, password });
-
+	resetPassword: async (
+		token: string,
+		password: string
+	): Promise<ServiceResponse<{ message: string }>> => {
 		try {
 			const response = await coreApi.post<{ message: string }>('/auth/reset-password', {
 				token,
@@ -360,8 +429,106 @@ export const notificationsService = {
 // User profile endpoints
 export const userService = {
 	getProfile: () => coreApi.get<unknown>('/user/profile'),
-	updateProfile: (profileData: unknown) => coreApi.put<unknown>('/user/profile', profileData),
-	changePassword: (passwordData: { currentPassword: string; newPassword: string }) =>
-		coreApi.put<unknown>('/user/password', passwordData),
+	updateProfile: async (profileData: {
+		firstName?: string;
+		lastName?: string;
+		birthDate?: string;
+		gender?: string;
+		profession?: string;
+		address?: string;
+		zip?: string;
+		city?: string;
+	}): Promise<
+		ServiceResponse<{
+			message: string;
+			user: {
+				id: string;
+				email: string;
+				firstName: string;
+				lastName: string;
+				birthDate: string;
+				gender: string;
+				profession: string;
+				provider: string;
+				isFirstLogin: boolean;
+				isActive: boolean;
+				isVerified: boolean;
+				acceptedTerms: boolean;
+				termsAcceptedAt: string;
+				createdAt: string;
+				updatedAt: string;
+			};
+		}>
+	> => {
+		try {
+			const response = await coreApi.patch<{
+				message: string;
+				user: {
+					id: string;
+					email: string;
+					firstName: string;
+					lastName: string;
+					birthDate: string;
+					gender: string;
+					profession: string;
+					provider: string;
+					isFirstLogin: boolean;
+					isActive: boolean;
+					isVerified: boolean;
+					acceptedTerms: boolean;
+					termsAcceptedAt: string;
+					createdAt: string;
+					updatedAt: string;
+				};
+			}>('/users/profile', profileData);
+
+			if (response.success && response.status === 'success') {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || 'Erreur lors de la mise à jour du profil',
+			};
+		} catch (error) {
+			console.error('Profile update error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
+	changePassword: async (passwordData: {
+		currentPassword: string;
+		newPassword: string;
+	}): Promise<ServiceResponse<{ message: string }>> => {
+		try {
+			const response = await coreApi.patch<{ message: string }>(
+				'/users/change-password',
+				passwordData
+			);
+
+			if (response.success && response.status === 'success') {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || 'Erreur lors du changement de mot de passe',
+			};
+		} catch (error) {
+			console.error('Change password error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
 	deleteAccount: () => coreApi.delete('/user/account'),
 };

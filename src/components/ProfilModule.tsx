@@ -12,34 +12,37 @@ import {
 	FaUser,
 } from 'react-icons/fa';
 import {
-	changePasswordSuccess,
 	linkGoogleAccount,
 	unlinkGoogleAccount,
-	updateAddress,
 	updateAvatar,
-	updateEmail,
-	updatePersonalInfo,
 } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Button from './ui/Button';
+import Input from './ui/Input';
+import Dropdown, { type DropdownOption } from './ui/Dropdown';
+import { useProfileUpdate } from '../hooks/useProfileUpdate';
+import { usePasswordChange } from '../hooks/usePasswordChange';
+import { formatDateForAPI, formatDateForInput } from '../utils/dateHelpers';
 
 const ProfilModule = () => {
 	const dispatch = useAppDispatch();
 	const { currentUser } = useAppSelector(getUserState);
+	const { updateProfile, loading: profileLoading, error: profileError } = useProfileUpdate();
+	const { changePassword, loading: passwordLoading, error: passwordError } = usePasswordChange();
 
 	const [isEditingPersonal, setIsEditingPersonal] = useState(false);
 	const [isEditingAddress, setIsEditingAddress] = useState(false);
-	const [isEditingEmail, setIsEditingEmail] = useState(false);
 	const [isChangingPassword, setIsChangingPassword] = useState(false);
 
 	// Form states
 	const [personalForm, setPersonalForm] = useState({
 		firstName: currentUser?.firstName || '',
 		lastName: currentUser?.lastName || '',
-		birthDate: currentUser?.birthDate || '',
+		birthDate: formatDateForInput(currentUser?.birthDate),
 		gender: currentUser?.gender || '',
 		professionalCategory: currentUser?.professionalCategory || '',
 	});
@@ -47,11 +50,7 @@ const ProfilModule = () => {
 	const [addressForm, setAddressForm] = useState({
 		address: currentUser?.address || '',
 		city: currentUser?.city || '',
-		zipcode: currentUser?.zipcode || '',
-	});
-
-	const [emailForm, setEmailForm] = useState({
-		email: currentUser?.email || '',
+		zip: currentUser?.zip || '',
 	});
 
 	const [passwordForm, setPasswordForm] = useState({
@@ -60,31 +59,94 @@ const ProfilModule = () => {
 		confirmPassword: '',
 	});
 
-	const handlePersonalSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		dispatch(updatePersonalInfo(personalForm));
-		setIsEditingPersonal(false);
-	};
+	// Update form state when currentUser changes
+	useEffect(() => {
+		if (currentUser) {
+			setPersonalForm({
+				firstName: currentUser.firstName || '',
+				lastName: currentUser.lastName || '',
+				birthDate: formatDateForInput(currentUser.birthDate),
+				gender: currentUser.gender || '',
+				professionalCategory: currentUser.professionalCategory || '',
+			});
 
-	const handleAddressSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		dispatch(updateAddress(addressForm));
-		setIsEditingAddress(false);
-	};
-
-	const handleEmailSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (emailForm.email !== currentUser?.email) {
-			dispatch(updateEmail(emailForm.email));
+			setAddressForm({
+				address: currentUser.address || '',
+				city: currentUser.city || '',
+				zip: currentUser.zip || '',
+			});
 		}
-		setIsEditingEmail(false);
+	}, [currentUser]);
+
+	// Dropdown options
+	const genderOptions: DropdownOption[] = [
+		{ value: 'Homme', label: 'Homme' },
+		{ value: 'Femme', label: 'Femme' },
+		{ value: 'Autre', label: 'Autre' },
+	];
+
+	const professionalCategoryOptions: DropdownOption[] = [
+		{ value: 'Cadre', label: 'Cadre' },
+		{ value: 'Employé', label: 'Employé' },
+		{ value: 'Ouvrier', label: 'Ouvrier' },
+		{ value: 'Profession libérale', label: 'Profession libérale' },
+		{ value: 'Artisan', label: 'Artisan' },
+		{ value: 'Commerçant', label: 'Commerçant' },
+		{ value: 'Étudiant', label: 'Étudiant' },
+		{ value: 'Retraité', label: 'Retraité' },
+		{ value: 'Sans emploi', label: 'Sans emploi' },
+		{ value: 'Autre', label: 'Autre' },
+	];
+
+	const handlePersonalSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+
+		const result = await updateProfile({
+			firstName: personalForm.firstName,
+			lastName: personalForm.lastName,
+			birthDate: formatDateForAPI(personalForm.birthDate),
+			gender: personalForm.gender,
+			profession: personalForm.professionalCategory,
+		});
+
+		if (result.success) {
+			setIsEditingPersonal(false);
+		}
 	};
 
-	const handlePasswordSubmit = (e: React.FormEvent) => {
+	const handleAddressSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (passwordForm.newPassword === passwordForm.confirmPassword) {
-			// In a real app, this would call an API
-			dispatch(changePasswordSuccess());
+
+		const result = await updateProfile({
+			address: addressForm.address,
+			city: addressForm.city,
+			zip: addressForm.zip,
+		});
+
+		if (result.success) {
+			setIsEditingAddress(false);
+		}
+	};
+
+	const handlePasswordSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		
+		// Validate passwords match
+		if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+			return;
+		}
+
+		// Validate password strength
+		if (passwordForm.newPassword.length < 8) {
+			return;
+		}
+
+		const result = await changePassword({
+			currentPassword: passwordForm.currentPassword,
+			newPassword: passwordForm.newPassword,
+		});
+
+		if (result.success) {
 			setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
 			setIsChangingPassword(false);
 		}
@@ -223,11 +285,6 @@ const ProfilModule = () => {
 							<FaCheck className="h-3 w-3 mr-1" />
 							Compte vérifié
 						</span>
-						{currentUser.is_first_time_login && (
-							<span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-								Première connexion
-							</span>
-						)}
 					</div>
 				</div>
 			</motion.div>
@@ -245,104 +302,89 @@ const ProfilModule = () => {
 						Informations personnelles
 					</h3>
 					{!isEditingPersonal && (
-						<button
+						<Button
+							variant="ghost"
+							size="sm"
 							onClick={() => setIsEditingPersonal(true)}
-							className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium flex items-center"
+							className="flex items-center"
 						>
 							<FaEdit className="h-4 w-4 mr-1" />
 							Modifier
-						</button>
+						</Button>
 					)}
 				</div>
 
 				{isEditingPersonal ? (
 					<form onSubmit={handlePersonalSubmit} className="space-y-4">
+						{profileError && (
+							<div className="bg-red-50 border border-red-200 rounded-lg p-4">
+								<p className="text-red-600 text-sm">{profileError}</p>
+							</div>
+						)}
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
-								<input
-									type="text"
-									value={personalForm.firstName}
-									onChange={(e) => setPersonalForm({ ...personalForm, firstName: e.target.value })}
-									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-									required
-								/>
-							</div>
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
-								<input
-									type="text"
-									value={personalForm.lastName}
-									onChange={(e) => setPersonalForm({ ...personalForm, lastName: e.target.value })}
-									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-									required
-								/>
-							</div>
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">
-									Date de naissance
-								</label>
-								<input
-									type="date"
-									value={personalForm.birthDate}
-									onChange={(e) => setPersonalForm({ ...personalForm, birthDate: e.target.value })}
-									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-								/>
-							</div>
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">Genre</label>
-								<select
-									value={personalForm.gender}
-									onChange={(e) => setPersonalForm({ ...personalForm, gender: e.target.value })}
-									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-								>
-									<option value="">Sélectionner</option>
-									<option value="Homme">Homme</option>
-									<option value="Femme">Femme</option>
-									<option value="Autre">Autre</option>
-								</select>
-							</div>
+							<Input
+								label="Prénom"
+								type="text"
+								value={personalForm.firstName}
+								onChange={(e) => setPersonalForm({ ...personalForm, firstName: e.target.value })}
+								required
+							/>
+							<Input
+								label="Nom"
+								type="text"
+								value={personalForm.lastName}
+								onChange={(e) => setPersonalForm({ ...personalForm, lastName: e.target.value })}
+								required
+							/>
+							<Input
+								label="Date de naissance"
+								type="date"
+								value={personalForm.birthDate}
+								onChange={(e) => setPersonalForm({ ...personalForm, birthDate: e.target.value })}
+							/>
+							<Dropdown
+								label="Genre"
+								options={genderOptions}
+								value={personalForm.gender}
+								onChange={(value) => setPersonalForm({ ...personalForm, gender: value })}
+								placeholder="Sélectionner"
+							/>
 							<div className="md:col-span-2">
-								<label className="block text-sm font-medium text-gray-700 mb-2">
-									Catégorie professionnelle
-								</label>
-								<select
+								<Dropdown
+									label="Catégorie professionnelle"
+									options={professionalCategoryOptions}
 									value={personalForm.professionalCategory}
-									onChange={(e) =>
-										setPersonalForm({ ...personalForm, professionalCategory: e.target.value })
+									onChange={(value) =>
+										setPersonalForm({ ...personalForm, professionalCategory: value })
 									}
-									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-								>
-									<option value="">Sélectionner</option>
-									<option value="Cadre">Cadre</option>
-									<option value="Employé">Employé</option>
-									<option value="Ouvrier">Ouvrier</option>
-									<option value="Profession libérale">Profession libérale</option>
-									<option value="Artisan">Artisan</option>
-									<option value="Commerçant">Commerçant</option>
-									<option value="Étudiant">Étudiant</option>
-									<option value="Retraité">Retraité</option>
-									<option value="Sans emploi">Sans emploi</option>
-									<option value="Autre">Autre</option>
-								</select>
+									placeholder="Sélectionner"
+								/>
 							</div>
 						</div>
 						<div className="flex space-x-3">
-							<button
-								type="submit"
-								className="bg-[#1e51ab] text-white px-6 py-2 rounded-xl font-medium hover:bg-[#163d82] transition-colors flex items-center"
-							>
-								<FaSave className="h-4 w-4 mr-2" />
-								Enregistrer
-							</button>
-							<button
+							<Button type="submit" className="flex items-center" disabled={profileLoading}>
+								{profileLoading ? (
+									<>
+										<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+										Enregistrement...
+									</>
+								) : (
+									<>
+										<FaSave className="h-4 w-4 mr-2" />
+										Enregistrer
+									</>
+								)}
+							</Button>
+							<Button
+								variant="secondary"
 								type="button"
 								onClick={() => setIsEditingPersonal(false)}
-								className="bg-gray-100 text-gray-700 px-6 py-2 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center"
+								className="flex items-center"
+								disabled={profileLoading}
 							>
 								<FaTimes className="h-4 w-4 mr-2" />
 								Annuler
-							</button>
+							</Button>
 						</div>
 					</form>
 				) : (
@@ -392,66 +434,72 @@ const ProfilModule = () => {
 						Adresse
 					</h3>
 					{!isEditingAddress && (
-						<button
+						<Button
+							variant="ghost"
+							size="sm"
 							onClick={() => setIsEditingAddress(true)}
-							className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium flex items-center"
+							className="flex items-center"
 						>
 							<FaEdit className="h-4 w-4 mr-1" />
 							Modifier
-						</button>
+						</Button>
 					)}
 				</div>
 
 				{isEditingAddress ? (
 					<form onSubmit={handleAddressSubmit} className="space-y-4">
-						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
-							<input
+						{profileError && (
+							<div className="bg-red-50 border border-red-200 rounded-lg p-4">
+								<p className="text-red-600 text-sm">{profileError}</p>
+							</div>
+						)}
+						<Input
+							label="Adresse"
+							type="text"
+							value={addressForm.address}
+							onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
+							placeholder="123 Rue de la République"
+						/>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<Input
+								label="Ville"
 								type="text"
-								value={addressForm.address}
-								onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
-								className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-								placeholder="123 Rue de la République"
+								value={addressForm.city}
+								onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+								placeholder="Paris"
+							/>
+							<Input
+								label="Code postal"
+								type="text"
+								value={addressForm.zip}
+								onChange={(e) => setAddressForm({ ...addressForm, zip: e.target.value })}
+								placeholder="75001"
 							/>
 						</div>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">Ville</label>
-								<input
-									type="text"
-									value={addressForm.city}
-									onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-									placeholder="Paris"
-								/>
-							</div>
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">Code postal</label>
-								<input
-									type="text"
-									value={addressForm.zipcode}
-									onChange={(e) => setAddressForm({ ...addressForm, zipcode: e.target.value })}
-									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-									placeholder="75001"
-								/>
-							</div>
-						</div>
 						<div className="flex space-x-3">
-							<button
-								type="submit"
-								className="bg-[#1e51ab] text-white px-6 py-2 rounded-xl font-medium hover:bg-[#163d82] transition-colors flex items-center"
-							>
-								<FaSave className="h-4 w-4 mr-2" />
-								Enregistrer
-							</button>
-							<button
+							<Button type="submit" className="flex items-center" disabled={profileLoading}>
+								{profileLoading ? (
+									<>
+										<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+										Enregistrement...
+									</>
+								) : (
+									<>
+										<FaSave className="h-4 w-4 mr-2" />
+										Enregistrer
+									</>
+								)}
+							</Button>
+							<Button
+								variant="secondary"
 								type="button"
 								onClick={() => setIsEditingAddress(false)}
-								className="bg-gray-100 text-gray-700 px-6 py-2 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center"
+								className="flex items-center"
+								disabled={profileLoading}
 							>
 								<FaTimes className="h-4 w-4 mr-2" />
 								Annuler
-							</button>
+							</Button>
 						</div>
 					</form>
 				) : (
@@ -462,7 +510,7 @@ const ProfilModule = () => {
 								{currentUser.address || 'Non renseignée'}
 								{currentUser.city && currentUser.address && <br />}
 								{currentUser.city &&
-									`${currentUser.zipcode ? currentUser.zipcode + ' ' : ''}${currentUser.city}`}
+									`${currentUser.zip ? currentUser.zip + ' ' : ''}${currentUser.city}`}
 							</p>
 						</div>
 					</div>
@@ -482,51 +530,18 @@ const ProfilModule = () => {
 				</h3>
 
 				<div className="space-y-6">
-					{/* Email */}
+					{/* Email - Read Only */}
 					<div className="border-b border-gray-100 pb-6">
 						<div className="flex items-center justify-between mb-4">
 							<h4 className="font-medium text-gray-900 flex items-center">
 								<FaEnvelope className="h-4 w-4 mr-2" />
 								Adresse email
 							</h4>
-							{!isEditingEmail && (
-								<button
-									onClick={() => setIsEditingEmail(true)}
-									className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
-								>
-									Modifier
-								</button>
-							)}
 						</div>
-
-						{isEditingEmail ? (
-							<form onSubmit={handleEmailSubmit} className="space-y-4">
-								<input
-									type="email"
-									value={emailForm.email}
-									onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
-									className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-									required
-								/>
-								<div className="flex space-x-3">
-									<button
-										type="submit"
-										className="bg-[#1e51ab] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#163d82] transition-colors text-sm"
-									>
-										Enregistrer
-									</button>
-									<button
-										type="button"
-										onClick={() => setIsEditingEmail(false)}
-										className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
-									>
-										Annuler
-									</button>
-								</div>
-							</form>
-						) : (
-							<p className="text-gray-900">{currentUser.email}</p>
-						)}
+						<p className="text-gray-900">{currentUser.email}</p>
+						<p className="text-sm text-gray-500 mt-1">
+							L'adresse email ne peut pas être modifiée pour des raisons de sécurité.
+						</p>
 					</div>
 
 					{/* Google Account */}
@@ -543,16 +558,13 @@ const ProfilModule = () => {
 										: 'Liez votre compte Google pour une connexion rapide'}
 								</p>
 							</div>
-							<button
+							<Button
+								variant={currentUser.is_google_account ? 'danger' : 'secondary'}
+								size="sm"
 								onClick={handleGoogleToggle}
-								className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
-									currentUser.is_google_account
-										? 'bg-red-100 text-red-700 hover:bg-red-200'
-										: 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-								}`}
 							>
 								{currentUser.is_google_account ? 'Dissocier' : 'Associer'}
-							</button>
+							</Button>
 						</div>
 					</div>
 
@@ -561,73 +573,75 @@ const ProfilModule = () => {
 						<div className="flex items-center justify-between mb-4">
 							<h4 className="font-medium text-gray-900">Mot de passe</h4>
 							{!isChangingPassword && (
-								<button
-									onClick={() => setIsChangingPassword(true)}
-									className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
-								>
+								<Button variant="ghost" size="sm" onClick={() => setIsChangingPassword(true)}>
 									Changer
-								</button>
+								</Button>
 							)}
 						</div>
 
 						{isChangingPassword ? (
 							<form onSubmit={handlePasswordSubmit} className="space-y-4">
-								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-2">
-										Mot de passe actuel
-									</label>
-									<input
-										type="password"
-										value={passwordForm.currentPassword}
-										onChange={(e) =>
-											setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
-										}
-										className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										required
-									/>
-								</div>
-								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-2">
-										Nouveau mot de passe
-									</label>
-									<input
-										type="password"
-										value={passwordForm.newPassword}
-										onChange={(e) =>
-											setPasswordForm({ ...passwordForm, newPassword: e.target.value })
-										}
-										className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										required
-									/>
-								</div>
-								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-2">
-										Confirmer le mot de passe
-									</label>
-									<input
-										type="password"
-										value={passwordForm.confirmPassword}
-										onChange={(e) =>
-											setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
-										}
-										className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										required
-									/>
-								</div>
+								{passwordError && (
+									<div className="bg-red-50 border border-red-200 rounded-lg p-4">
+										<p className="text-red-600 text-sm">{passwordError}</p>
+									</div>
+								)}
+								<Input
+									label="Mot de passe actuel"
+									type="password"
+									value={passwordForm.currentPassword}
+									onChange={(e) =>
+										setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
+									}
+									required
+									disabled={passwordLoading}
+								/>
+								<Input
+									label="Nouveau mot de passe"
+									type="password"
+									value={passwordForm.newPassword}
+									onChange={(e) =>
+										setPasswordForm({ ...passwordForm, newPassword: e.target.value })
+									}
+									required
+									disabled={passwordLoading}
+									helperText="Le mot de passe doit contenir au moins 8 caractères"
+								/>
+								<Input
+									label="Confirmer le mot de passe"
+									type="password"
+									value={passwordForm.confirmPassword}
+									onChange={(e) =>
+										setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
+									}
+									required
+									disabled={passwordLoading}
+									error={passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword ? "Les mots de passe ne correspondent pas" : undefined}
+								/>
 								<div className="flex space-x-3">
-									<button
-										type="submit"
-										className="bg-[#1e51ab] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#163d82] transition-colors text-sm"
+									<Button 
+										type="submit" 
+										size="sm"
+										disabled={passwordLoading || passwordForm.newPassword !== passwordForm.confirmPassword || passwordForm.newPassword.length < 8}
 									>
-										Changer le mot de passe
-									</button>
-									<button
+										{passwordLoading ? (
+											<>
+												<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+												Changement...
+											</>
+										) : (
+											'Changer le mot de passe'
+										)}
+									</Button>
+									<Button
+										variant="secondary"
+										size="sm"
 										type="button"
 										onClick={() => setIsChangingPassword(false)}
-										className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+										disabled={passwordLoading}
 									>
 										Annuler
-									</button>
+									</Button>
 								</div>
 							</form>
 						) : (
@@ -660,16 +674,6 @@ const ProfilModule = () => {
 							{currentUser.updatedAt
 								? new Date(currentUser.updatedAt).toLocaleDateString('fr-FR')
 								: 'Non disponible'}
-						</p>
-					</div>
-					{/* <div>
-						<p className="text-gray-600 mb-1">ID utilisateur</p>
-						<p className="font-mono text-xs bg-white px-2 py-1 rounded border">{currentUser.id}</p>
-					</div> */}
-					<div>
-						<p className="text-gray-600 mb-1">Type de compte</p>
-						<p className="font-medium text-gray-900">
-							{currentUser.is_google_account ? 'Google' : 'Standard'}
 						</p>
 					</div>
 				</div>

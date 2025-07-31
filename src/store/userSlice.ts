@@ -18,7 +18,7 @@ export interface User {
 	isFirstLogin: boolean;
 	address?: string;
 	city?: string;
-	zipcode?: string;
+	zip?: string;
 }
 
 interface UserState {
@@ -78,6 +78,25 @@ const userSlice = createSlice({
 			state.lastLoginAt = undefined;
 		},
 
+		logoutStart: (state) => {
+			state.loading = true;
+			state.error = null;
+		},
+
+		logoutSuccess: (state) => {
+			state.currentUser = null;
+			state.isAuthenticated = false;
+			state.error = null;
+			state.loginAttempts = 0;
+			state.lastLoginAt = undefined;
+			state.loading = false;
+		},
+
+		logoutFailure: (state, action: PayloadAction<string>) => {
+			state.loading = false;
+			state.error = action.payload;
+		},
+
 		// User profile actions
 		updateProfile: (state, action: PayloadAction<Partial<User>>) => {
 			if (state.currentUser) {
@@ -87,6 +106,52 @@ const userSlice = createSlice({
 					updatedAt: new Date().toISOString(),
 				};
 			}
+		},
+
+		updateProfileStart: (state) => {
+			state.loading = true;
+			state.error = null;
+		},
+
+		updateProfileSuccess: (
+			state,
+			action: PayloadAction<{
+				user: {
+					id: string;
+					email: string;
+					firstName: string;
+					lastName: string;
+					birthDate: string;
+					gender: string;
+					profession: string;
+					provider: string;
+					isFirstLogin: boolean;
+					isActive: boolean;
+					isVerified: boolean;
+					acceptedTerms: boolean;
+					termsAcceptedAt: string;
+					createdAt: string;
+					updatedAt: string;
+				};
+			}>
+		) => {
+			state.loading = false;
+			if (state.currentUser) {
+				state.currentUser = {
+					...state.currentUser,
+					...action.payload.user,
+					professionalCategory: action.payload.user.profession, // Map profession to professionalCategory
+					updatedAt: action.payload.user.updatedAt,
+					// Ensure birthDate is properly formatted for display
+					birthDate: action.payload.user.birthDate,
+				};
+			}
+			state.error = null;
+		},
+
+		updateProfileFailure: (state, action: PayloadAction<string>) => {
+			state.loading = false;
+			state.error = action.payload;
 		},
 
 		updatePersonalInfo: (
@@ -118,7 +183,7 @@ const userSlice = createSlice({
 			action: PayloadAction<{
 				address?: string;
 				city?: string;
-				zipcode?: string;
+				zip?: string;
 			}>
 		) => {
 			if (state.currentUser) {
@@ -168,7 +233,13 @@ const userSlice = createSlice({
 		},
 
 		// Password management (for local state only, never store actual passwords)
+		changePasswordStart: (state) => {
+			state.loading = true;
+			state.error = null;
+		},
+
 		changePasswordSuccess: (state) => {
+			state.loading = false;
 			if (state.currentUser) {
 				state.currentUser.updatedAt = new Date().toISOString();
 			}
@@ -176,6 +247,7 @@ const userSlice = createSlice({
 		},
 
 		changePasswordFailure: (state, action: PayloadAction<string>) => {
+			state.loading = false;
 			state.error = action.payload;
 		},
 
@@ -206,7 +278,13 @@ export const {
 	loginSuccess,
 	loginFailure,
 	logout,
+	logoutStart,
+	logoutSuccess,
+	logoutFailure,
 	updateProfile,
+	updateProfileStart,
+	updateProfileSuccess,
+	updateProfileFailure,
 	updatePersonalInfo,
 	updateAddress,
 	updateAvatar,
@@ -215,6 +293,7 @@ export const {
 	setFirstTimeLogin,
 	clearError,
 	setLoading,
+	changePasswordStart,
 	changePasswordSuccess,
 	changePasswordFailure,
 	linkGoogleAccount,
