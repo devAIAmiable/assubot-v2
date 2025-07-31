@@ -1,7 +1,7 @@
 import { FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 import React, { useState } from 'react';
 import { loginFailure, loginStart, loginSuccess, type User } from '../store/userSlice';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import GoogleLoginButton from './ui/GoogleLoginButton';
 import Logo from './ui/Logo';
@@ -143,6 +143,14 @@ const LoginForm: React.FC = () => {
 							{errors.password && (
 								<p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
 							)}
+							<div className="mt-2 text-right">
+								<Link
+									to="/forgot-password"
+									className="text-sm text-blue-600 hover:text-blue-500 transition-colors"
+								>
+									Mot de passe oublié ?
+								</Link>
+							</div>
 						</div>
 					</div>
 

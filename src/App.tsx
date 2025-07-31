@@ -10,6 +10,7 @@ import ComparateurModule from './components/ComparateurModule';
 import ContractDetailsPage from './components/ContractDetailsPage';
 import ContratsModule from './components/ContratsModule';
 import Dashboard from './components/Dashboard';
+import ForgotPasswordForm from './components/ForgotPasswordForm';
 import GoogleCallbackPage from './components/GoogleCallbackPage';
 import LandingPage from './components/LandingPage';
 import LoginForm from './components/LoginForm';
@@ -18,6 +19,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import ProfilModule from './components/ProfilModule';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Provider } from 'react-redux';
+import ResetPasswordForm from './components/ResetPasswordForm';
 import SignupForm from './components/SignupForm';
 import Spinner from './components/ui/Spinner';
 import VerifyPage from './components/VerifyPage';
@@ -66,6 +68,8 @@ function App() {
 							<Route path="/verify" element={<VerifyPage />} />
 							<Route path="/signup" element={<SignupForm />} />
 							<Route path="/login" element={<LoginForm />} />
+							<Route path="/forgot-password" element={<ForgotPasswordForm />} />
+							<Route path="/reset-password" element={<ResetPasswordForm />} />
 							<Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
 						</Routes>
 					</Router>

@@ -142,6 +142,66 @@ export const authService = {
 		}
 	},
 
+	forgotPassword: async (email: string): Promise<ServiceResponse<{ message: string }>> => {
+		try {
+			const response = await coreApi.post<{ message: string }>('/auth/forgot-password', { email });
+
+			if (response.success && response.status === 'success') {
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			return {
+				success: false,
+				error: response.error?.message || 'Erreur lors de l\'envoi de l\'email',
+			};
+		} catch (error) {
+			console.error('Forgot password error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
+
+	resetPassword: async (token: string, password: string): Promise<ServiceResponse<{ message: string }>> => {
+		console.log('🔧 resetPassword service called');
+		console.log('🔧 Token:', token);
+		console.log('🔧 Password:', password);
+		console.log('🔧 Request body:', { token, password });
+
+		try {
+			const response = await coreApi.post<{ message: string }>('/auth/reset-password', {
+				token,
+				password,
+			});
+
+			console.log('🔧 Raw API response:', response);
+
+			if (response.success && response.status === 'success') {
+				console.log('✅ Service response success');
+				return {
+					success: true,
+					data: response.data,
+				};
+			}
+
+			console.log('❌ Service response failed:', response.error);
+			return {
+				success: false,
+				error: response.error?.message || 'Erreur lors de la réinitialisation du mot de passe',
+			};
+		} catch (error) {
+			console.error('🚨 Reset password service error:', error);
+			return {
+				success: false,
+				error: 'Erreur de connexion au serveur',
+			};
+		}
+	},
+
 	refresh: async (): Promise<ServiceResponse<{ token: string }>> => {
 		try {
 			const response = await coreApi.post<{ token: string }>('/auth/refresh');
