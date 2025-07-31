@@ -1,6 +1,5 @@
 import {
 	FaCalendarAlt,
-	FaCamera,
 	FaCheck,
 	FaEdit,
 	FaEnvelope,
@@ -19,6 +18,7 @@ import { useState, useEffect } from 'react';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Dropdown, { type DropdownOption } from './ui/Dropdown';
+import Avatar from './ui/Avatar';
 import { useProfileUpdate } from '../hooks/useProfileUpdate';
 import { usePasswordChange } from '../hooks/usePasswordChange';
 import { useAvatarUpload } from '../hooks/useAvatarUpload';
@@ -29,7 +29,7 @@ const ProfileModule = () => {
 	const { currentUser } = useAppSelector(getUserState);
 	const { updateProfile, loading: profileLoading } = useProfileUpdate();
 	const { changePassword, loading: passwordLoading } = usePasswordChange();
-	const { uploadAvatar, loading: avatarLoading, error: avatarError } = useAvatarUpload();
+	const { uploadAvatar, loading: avatarLoading } = useAvatarUpload();
 
 	const [isEditingPersonal, setIsEditingPersonal] = useState(false);
 	const [isEditingAddress, setIsEditingAddress] = useState(false);
@@ -160,40 +160,28 @@ const ProfileModule = () => {
 		}
 	};
 
-	const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (file) {
-			// Validate file type
-			if (!file.type.startsWith('image/')) {
-				alert('Veuillez sélectionner un fichier image valide.');
-				return;
-			}
+	const handleAvatarUpload = async (file: File) => {
+		// Validate file type
+		if (!file.type.startsWith('image/')) {
+			showToast.error('Veuillez sélectionner un fichier image valide.');
+			return;
+		}
 
-			// Validate file size (max 5MB)
-			if (file.size > 5 * 1024 * 1024) {
-				alert('Le fichier est trop volumineux. Taille maximum : 5MB.');
-				return;
-			}
+		// Validate file size (max 5MB)
+		if (file.size > 5 * 1024 * 1024) {
+			showToast.error('Le fichier est trop volumineux. Taille maximum : 5MB.');
+			return;
+		}
 
-			const result = await uploadAvatar(file);
-			if (result.success) {
-				// Clear the input
-				e.target.value = '';
-				showToast.success('Avatar mis à jour avec succès');
-			} else {
-				showToast.error("Erreur lors de la mise à jour de l'avatar");
-			}
+		const result = await uploadAvatar(file);
+		if (result.success) {
+			showToast.success('Avatar mis à jour avec succès');
+		} else {
+			showToast.error("Erreur lors de la mise à jour de l'avatar");
 		}
 	};
 
-	const getUserInitials = () => {
-		if (currentUser) {
-			const firstInitial = currentUser.firstName?.charAt(0) || '';
-			const lastInitial = currentUser.lastName?.charAt(0) || '';
-			return (firstInitial + lastInitial).toUpperCase() || 'U';
-		}
-		return 'U';
-	};
+
 
 	const calculateAge = (birthDate: string) => {
 		if (!birthDate) return null;
@@ -242,39 +230,13 @@ const ProfileModule = () => {
 			>
 				<div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
 					{/* Avatar */}
-					<div className="relative">
-						{currentUser.avatar ? (
-							<img
-								key={currentUser.avatar} // Force re-render when avatar changes
-								src={currentUser.avatar}
-								alt="Avatar"
-								className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
-							/>
-						) : (
-							<div className="w-24 h-24 bg-gradient-to-br from-[#1e51ab] to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold border-4 border-white shadow-lg">
-								{getUserInitials()}
-							</div>
-						)}
-						<label
-							className={`absolute bottom-0 right-0 w-8 h-8 bg-[#1e51ab] rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-[#163d82] transition-colors shadow-lg ${avatarLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-						>
-							{avatarLoading ? (
-								<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-							) : (
-								<FaCamera className="h-4 w-4" />
-							)}
-							<input
-								type="file"
-								accept="image/*"
-								onChange={handleAvatarUpload}
-								className="hidden"
-								disabled={avatarLoading}
-							/>
-						</label>
-						{avatarError && (
-							<div className="mt-2 text-sm text-red-600 text-center">{avatarError}</div>
-						)}
-					</div>
+					<Avatar
+						user={currentUser}
+						size="xl"
+						onAvatarUpload={handleAvatarUpload}
+						loading={avatarLoading}
+						showUploadButton={true}
+					/>
 
 					{/* User Info */}
 					<div className="flex-1 text-center md:text-left">

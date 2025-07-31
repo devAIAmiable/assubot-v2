@@ -14,6 +14,7 @@ import { Fragment, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
+import Avatar from './ui/Avatar';
 import VideoModal from './ui/VideoModal';
 import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
@@ -87,15 +88,7 @@ const AppLayout = () => {
 		navigate('/');
 	};
 
-	// Get user initials for avatar
-	const getUserInitials = () => {
-		if (currentUser) {
-			const firstInitial = currentUser.firstName?.charAt(0) || '';
-			const lastInitial = currentUser.lastName?.charAt(0) || '';
-			return (firstInitial + lastInitial).toUpperCase() || 'U';
-		}
-		return 'U';
-	};
+
 
 	// Get user display name
 	const getUserDisplayName = () => {
@@ -217,18 +210,7 @@ const AppLayout = () => {
 							{/* User Menu */}
 							<Menu as="div" className="relative">
 								<Menu.Button className="flex items-center space-x-2 p-2 text-gray-600 hover:text-[#1e51ab] hover:bg-gray-50 rounded-lg transition-colors">
-									{currentUser?.avatar ? (
-										<img
-											key={currentUser.avatar} // Force re-render when avatar changes
-											src={currentUser.avatar}
-											alt="Avatar"
-											className="w-8 h-8 rounded-full object-cover"
-										/>
-									) : (
-										<div className="w-8 h-8 bg-gradient-to-br from-[#1e51ab] to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-											{getUserInitials()}
-										</div>
-									)}
+									<Avatar user={currentUser || undefined} size="sm" />
 									<div className="hidden sm:block text-left">
 										<p className="text-sm font-medium text-gray-900">{getUserDisplayName()}</p>
 										{currentUser?.email && (
@@ -251,18 +233,7 @@ const AppLayout = () => {
 										{currentUser && (
 											<div className="px-4 py-3 border-b border-gray-100">
 												<div className="flex items-center space-x-3">
-													{currentUser.avatar ? (
-														<img
-															key={currentUser.avatar} // Force re-render when avatar changes
-															src={currentUser.avatar}
-															alt="Avatar"
-															className="w-10 h-10 rounded-full object-cover"
-														/>
-													) : (
-														<div className="w-10 h-10 bg-gradient-to-br from-[#1e51ab] to-blue-600 rounded-full flex items-center justify-center text-white font-medium">
-															{getUserInitials()}
-														</div>
-													)}
+													<Avatar user={currentUser} size="md" />
 													<div className="flex-1 min-w-0">
 														<p className="text-sm font-medium text-gray-900 truncate">
 															{getUserDisplayName()}
