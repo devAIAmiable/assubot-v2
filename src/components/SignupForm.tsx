@@ -33,7 +33,7 @@ const signupSchema = z
 			const age = today.getFullYear() - birthDate.getFullYear();
 			return age >= 18;
 		}, 'Vous devez avoir minimum 18 ans'),
-		gender: z.enum(['homme', 'femme', 'autre']),
+		gender: z.enum(['male', 'female', 'other']),
 		profession: z.enum(['student', 'unemployed', 'executive', 'non-executive', 'entrepreneur']),
 		acceptedTerms: z.boolean().refine((val: boolean) => val === true, {
 			message: "Vous devez accepter les conditions d'utilisation",
@@ -58,9 +58,9 @@ const SignupForm: React.FC = () => {
 	const { handleGoogleSignup, isLoading: isGoogleLoading } = useGoogleAuth();
 
 	const genderOptions: DropdownOption[] = [
-		{ value: 'homme', label: 'Homme' },
-		{ value: 'femme', label: 'Femme' },
-		{ value: 'autre', label: 'Autre' },
+		{ value: 'male', label: 'Homme' },
+		{ value: 'female', label: 'Femme' },
+		{ value: 'other', label: 'Autre' },
 	];
 
 	const professionOptions: DropdownOption[] = [
@@ -81,7 +81,7 @@ const SignupForm: React.FC = () => {
 	} = useForm<SignupFormData>({
 		resolver: zodResolver(signupSchema),
 		defaultValues: {
-			gender: 'homme',
+			gender: 'male',
 			profession: 'student',
 			acceptedTerms: false,
 		},
@@ -381,7 +381,7 @@ const SignupForm: React.FC = () => {
 							<Dropdown
 								options={genderOptions}
 								value={watch('gender')}
-								onChange={(value) => setValue('gender', value as 'homme' | 'femme' | 'autre')}
+								onChange={(value) => setValue('gender', value as 'male' | 'female' | 'other')}
 								label="Genre"
 								placeholder="Sélectionner un genre"
 								error={errors.gender?.message}
