@@ -446,17 +446,20 @@ export const userService = {
 				email: string;
 				firstName: string;
 				lastName: string;
-				birthDate: string;
-				gender: string;
-				profession: string;
+				birthDate?: string;
+				gender?: string;
+				profession?: string;
 				provider: string;
 				isFirstLogin: boolean;
 				isActive: boolean;
 				isVerified: boolean;
 				acceptedTerms: boolean;
-				termsAcceptedAt: string;
+				termsAcceptedAt?: string;
 				createdAt: string;
 				updatedAt: string;
+				address?: string;
+				city?: string;
+				zip?: string;
 			};
 		}>
 	> => {
@@ -468,17 +471,20 @@ export const userService = {
 					email: string;
 					firstName: string;
 					lastName: string;
-					birthDate: string;
-					gender: string;
-					profession: string;
+					birthDate?: string;
+					gender?: string;
+					profession?: string;
 					provider: string;
 					isFirstLogin: boolean;
 					isActive: boolean;
 					isVerified: boolean;
 					acceptedTerms: boolean;
-					termsAcceptedAt: string;
+					termsAcceptedAt?: string;
 					createdAt: string;
 					updatedAt: string;
+					address?: string;
+					city?: string;
+					zip?: string;
 				};
 			}>('/users/profile', profileData);
 

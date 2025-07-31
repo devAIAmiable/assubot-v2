@@ -16,7 +16,7 @@ import LandingPage from './components/LandingPage';
 import LoginForm from './components/LoginForm';
 import NotificationsModule from './components/NotificationsModule';
 import { PersistGate } from 'redux-persist/integration/react';
-import ProfilModule from './components/ProfilModule';
+import ProfileModule from './components/ProfileModule';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Provider } from 'react-redux';
 import ResetPasswordForm from './components/ResetPasswordForm';
@@ -60,7 +60,7 @@ function App() {
 								<Route path="chatbot" element={<ChatbotModule />} />
 								<Route path="comparateur" element={<ComparateurModule />} />
 								<Route path="notifications" element={<NotificationsModule />} />
-								<Route path="profil" element={<ProfilModule />} />
+								<Route path="profil" element={<ProfileModule />} />
 							</Route>
 
 							{/* Catch all route - redirect to landing */}

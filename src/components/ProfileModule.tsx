@@ -11,11 +11,7 @@ import {
 	FaTimes,
 	FaUser,
 } from 'react-icons/fa';
-import {
-	linkGoogleAccount,
-	unlinkGoogleAccount,
-	updateAvatar,
-} from '../store/userSlice';
+import { linkGoogleAccount, unlinkGoogleAccount, updateAvatar } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 import { getUserState } from '../utils/stateHelpers';
@@ -28,7 +24,7 @@ import { useProfileUpdate } from '../hooks/useProfileUpdate';
 import { usePasswordChange } from '../hooks/usePasswordChange';
 import { formatDateForAPI, formatDateForInput } from '../utils/dateHelpers';
 
-const ProfilModule = () => {
+const ProfileModule = () => {
 	const dispatch = useAppDispatch();
 	const { currentUser } = useAppSelector(getUserState);
 	const { updateProfile, loading: profileLoading, error: profileError } = useProfileUpdate();
@@ -130,7 +126,7 @@ const ProfilModule = () => {
 
 	const handlePasswordSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		
+
 		// Validate passwords match
 		if (passwordForm.newPassword !== passwordForm.confirmPassword) {
 			return;
@@ -250,7 +246,7 @@ const ProfilModule = () => {
 					{/* User Info */}
 					<div className="flex-1 text-center md:text-left">
 						<h2 className="text-2xl font-bold text-gray-900 mb-2">
-							{currentUser.name || `${currentUser.firstName} ${currentUser.lastName}`}
+							{`${currentUser.firstName} ${currentUser.lastName}`}
 						</h2>
 						<p className="text-gray-600 mb-1">{currentUser.email}</p>
 						{currentUser.professionalCategory && (
@@ -616,13 +612,23 @@ const ProfilModule = () => {
 									}
 									required
 									disabled={passwordLoading}
-									error={passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword ? "Les mots de passe ne correspondent pas" : undefined}
+									error={
+										passwordForm.newPassword &&
+										passwordForm.confirmPassword &&
+										passwordForm.newPassword !== passwordForm.confirmPassword
+											? 'Les mots de passe ne correspondent pas'
+											: undefined
+									}
 								/>
 								<div className="flex space-x-3">
-									<Button 
-										type="submit" 
+									<Button
+										type="submit"
 										size="sm"
-										disabled={passwordLoading || passwordForm.newPassword !== passwordForm.confirmPassword || passwordForm.newPassword.length < 8}
+										disabled={
+											passwordLoading ||
+											passwordForm.newPassword !== passwordForm.confirmPassword ||
+											passwordForm.newPassword.length < 8
+										}
 									>
 										{passwordLoading ? (
 											<>
@@ -682,4 +688,4 @@ const ProfilModule = () => {
 	);
 };
 
-export default ProfilModule;
+export default ProfileModule;

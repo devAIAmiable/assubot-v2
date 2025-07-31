@@ -121,30 +121,44 @@ const userSlice = createSlice({
 					email: string;
 					firstName: string;
 					lastName: string;
-					birthDate: string;
-					gender: string;
-					profession: string;
+					birthDate?: string;
+					gender?: string;
+					profession?: string;
 					provider: string;
 					isFirstLogin: boolean;
 					isActive: boolean;
 					isVerified: boolean;
 					acceptedTerms: boolean;
-					termsAcceptedAt: string;
+					termsAcceptedAt?: string;
 					createdAt: string;
 					updatedAt: string;
+					address?: string;
+					city?: string;
+					zip?: string;
 				};
 			}>
 		) => {
 			state.loading = false;
 			if (state.currentUser) {
-				state.currentUser = {
+				const updatedUser = {
 					...state.currentUser,
 					...action.payload.user,
-					professionalCategory: action.payload.user.profession, // Map profession to professionalCategory
+					// Map profession to professionalCategory for frontend compatibility
+					professionalCategory:
+						action.payload.user.profession || state.currentUser.professionalCategory,
+					// Ensure all address fields are properly mapped
+					address: action.payload.user.address || state.currentUser.address,
+					city: action.payload.user.city || state.currentUser.city,
+					zip: action.payload.user.zip || state.currentUser.zip,
+					// Ensure other fields are properly mapped
+					firstName: action.payload.user.firstName || state.currentUser.firstName,
+					lastName: action.payload.user.lastName || state.currentUser.lastName,
+					birthDate: action.payload.user.birthDate || state.currentUser.birthDate,
+					gender: action.payload.user.gender || state.currentUser.gender,
 					updatedAt: action.payload.user.updatedAt,
-					// Ensure birthDate is properly formatted for display
-					birthDate: action.payload.user.birthDate,
 				};
+				console.log('Updated user state:', updatedUser);
+				state.currentUser = updatedUser;
 			}
 			state.error = null;
 		},
