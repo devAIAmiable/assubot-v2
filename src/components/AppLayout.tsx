@@ -13,24 +13,26 @@ import {
 import { Fragment, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 import VideoModal from './ui/VideoModal';
 import { getUserState } from '../utils/stateHelpers';
-import { logout } from '../store/userSlice';
 import { motion } from 'framer-motion';
+import { useAppSelector } from '../store/hooks';
+import { useLogout } from '../hooks/useLogout';
 import { useVideoModal } from '../hooks/useVideoModal';
 
 const AppLayout = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const dispatch = useAppDispatch();
 
 	// Get user from Redux store
 	const { currentUser, isAuthenticated } = useAppSelector(getUserState);
 
 	// Video modal hook
 	const { isVideoModalOpen, closeVideoModal, openVideoModal } = useVideoModal();
+
+	// Logout hook
+	const { logout, loading: logoutLoading } = useLogout();
 
 	const [notifications] = useState([
 		{ id: 1, message: 'Votre contrat santé expire dans 45 jours', time: '2h', unread: true },
@@ -76,8 +78,8 @@ const AppLayout = () => {
 		navigate(path);
 	};
 
-	const handleLogout = () => {
-		dispatch(logout());
+	const handleLogout = async () => {
+		await logout();
 		navigate('/');
 	};
 
@@ -336,12 +338,22 @@ const AppLayout = () => {
 												{({ active }) => (
 													<button
 														onClick={handleLogout}
+														disabled={logoutLoading}
 														className={`flex items-center w-full px-4 py-2 text-sm text-red-600 ${
 															active ? 'bg-red-50' : ''
-														}`}
+														} ${logoutLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
 													>
-														<FaSignOutAlt className="h-4 w-4 mr-3" />
-														Se déconnecter
+														{logoutLoading ? (
+															<>
+																<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-3"></div>
+																Déconnexion...
+															</>
+														) : (
+															<>
+																<FaSignOutAlt className="h-4 w-4 mr-3" />
+																Se déconnecter
+															</>
+														)}
 													</button>
 												)}
 											</Menu.Item>
