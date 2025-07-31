@@ -84,6 +84,7 @@ alwaysApply: true
 
 ## Additional Notes
 
+- Frensh is the main language of the project. Use it for all the text in the project.
 - Prefer named exports/imports and consistent aliasing (`@/components`, `@/services`, etc.).
 - Co-locate styles, tests, and component files.
 - Ensure keyboard accessibility for all custom interactive components.
