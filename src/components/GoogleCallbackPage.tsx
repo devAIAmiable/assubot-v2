@@ -57,27 +57,49 @@ const GoogleCallbackPage: React.FC = () => {
 				dispatch(loginStart());
 
 				try {
-					const response = await authService.checkGoogleAuthStatus();
+					const authResponse = await authService.checkGoogleAuthStatus();
 
-					if (response.success && response.data?.user) {
-						// Prepare user data with computed name
-						const userData = {
-							...response.data.user,
-							name: `${response.data.user.firstName} ${response.data.user.lastName}`,
-						};
+					if (authResponse.success && authResponse.data?.user) {
+						// Get the full user profile
+						const profileResponse = await authService.getUserProfile();
 
-						// Update Redux state with user data
-						dispatch(
-							loginSuccess({
-								user: userData as User,
-								lastLoginAt: new Date().toISOString(),
-							})
-						);
+						if (profileResponse.success && profileResponse.data?.user) {
+							// Prepare user data with computed name and map profession to professionalCategory
+							const userData = {
+								...profileResponse.data.user,
+								name: `${profileResponse.data.user.firstName} ${profileResponse.data.user.lastName}`,
+								professionalCategory: profileResponse.data.user.profession, // Map profession to professionalCategory
+							};
 
-						// Redirect to dashboard
-						navigate('/app', { replace: true });
+							// Update Redux state with complete user data
+							dispatch(
+								loginSuccess({
+									user: userData as User,
+									lastLoginAt: new Date().toISOString(),
+								})
+							);
+
+							// Redirect to dashboard
+							navigate('/app', { replace: true });
+						} else {
+							// Fallback to basic auth data if profile fetch fails
+							const userData = {
+								...authResponse.data.user,
+								name: `${authResponse.data.user.firstName} ${authResponse.data.user.lastName}`,
+							};
+
+							dispatch(
+								loginSuccess({
+									user: userData as User,
+									lastLoginAt: new Date().toISOString(),
+								})
+							);
+
+							// Redirect to dashboard
+							navigate('/app', { replace: true });
+						}
 					} else {
-						const errorMessage = response.error || 'Échec de l\'authentification Google';
+						const errorMessage = authResponse.error || 'Échec de l\'authentification Google';
 						dispatch(loginFailure(errorMessage));
 						setError(errorMessage);
 					}

@@ -17,22 +17,42 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
 		const initializeAuth = async () => {
 			try {
 				if (!isAuthenticated) {
-					const response = await authService.checkAuthStatus();
+					// First check if user is authenticated
+					const authResponse = await authService.checkAuthStatus();
 
-					if (response.success && response.data?.user) {
-						// Prepare user data with computed name
-						const userData = {
-							...response.data.user,
-							name: `${response.data.user.firstName} ${response.data.user.lastName}`,
-						};
+					if (authResponse.success && authResponse.data?.user) {
+						// If authenticated, get the full user profile
+						const profileResponse = await authService.getUserProfile();
 
-						// Update Redux state with user data
-						dispatch(
-							loginSuccess({
-								user: userData as User,
-								lastLoginAt: new Date().toISOString(),
-							})
-						);
+						if (profileResponse.success && profileResponse.data?.user) {
+							// Prepare user data with computed name and map profession to professionalCategory
+							const userData = {
+								...profileResponse.data.user,
+								name: `${profileResponse.data.user.firstName} ${profileResponse.data.user.lastName}`,
+								professionalCategory: profileResponse.data.user.profession, // Map profession to professionalCategory
+							};
+
+							// Update Redux state with complete user data
+							dispatch(
+								loginSuccess({
+									user: userData as User,
+									lastLoginAt: new Date().toISOString(),
+								})
+							);
+						} else {
+							// Fallback to basic auth data if profile fetch fails
+							const userData = {
+								...authResponse.data.user,
+								name: `${authResponse.data.user.firstName} ${authResponse.data.user.lastName}`,
+							};
+
+							dispatch(
+								loginSuccess({
+									user: userData as User,
+									lastLoginAt: new Date().toISOString(),
+								})
+							);
+						}
 					}
 				}
 			} catch (error) {

@@ -45,28 +45,51 @@ const LoginForm: React.FC = () => {
 		setSubmitError(null);
 		setSubmitSuccess(null);
 
-		const response = await authService.login(data);
+		const loginResponse = await authService.login(data);
+		console.log("🚀 ~ onSubmit ~ loginResponse:", loginResponse)
 
-		if (response.success && response.data?.user) {
-			// Prepare user data with computed name
-			const userData = {
-				...response.data.user,
-				name: `${response.data.user.firstName} ${response.data.user.lastName}`,
-			};
+		if (loginResponse.success) {
+			// After successful login, get the full user profile
+			const profileResponse = await authService.getUserProfile();
 
-			// Update Redux state with user data
-			dispatch(
-				loginSuccess({
-					user: userData as User,
-					lastLoginAt: new Date().toISOString(),
-				})
-			);
+			if (profileResponse.success && profileResponse.data?.user) {
+				// Prepare user data with computed name and map profession to professionalCategory
+				const userData = {
+					...profileResponse.data.user,
+					name: `${profileResponse.data.user.firstName} ${profileResponse.data.user.lastName}`,
+					professionalCategory: profileResponse.data.user.profession, // Map profession to professionalCategory
+				};
 
-			// Redirect to the original intended page or dashboard
-			const from = location.state?.from?.pathname || '/app';
-			navigate(from, { replace: true });
+				// Update Redux state with complete user data
+				dispatch(
+					loginSuccess({
+						user: userData as User,
+						lastLoginAt: new Date().toISOString(),
+					})
+				);
+
+				// Redirect to the original intended page or dashboard
+				const from = location.state?.from?.pathname || '/app';
+				navigate(from, { replace: true });
+			} else {
+				// If we can't get the full profile, use the basic login data
+				const userData = {
+					...loginResponse.data?.user,
+					name: `${loginResponse.data?.user?.firstName} ${loginResponse.data?.user?.lastName}`,
+				};
+
+				dispatch(
+					loginSuccess({
+						user: userData as User,
+						lastLoginAt: new Date().toISOString(),
+					})
+				);
+
+				const from = location.state?.from?.pathname || '/app';
+				navigate(from, { replace: true });
+			}
 		} else {
-			const errorMessage = response.error || 'Email ou mot de passe incorrect';
+			const errorMessage = loginResponse.error || 'Email ou mot de passe incorrect';
 			dispatch(loginFailure(errorMessage));
 			setSubmitError(errorMessage);
 		}
