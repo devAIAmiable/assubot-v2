@@ -100,11 +100,7 @@ const AppLayout = () => {
 	// Get user display name
 	const getUserDisplayName = () => {
 		if (currentUser) {
-			return (
-				currentUser.name ||
-				`${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() ||
-				'Utilisateur'
-			);
+			return `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || 'Utilisateur';
 		}
 		return 'Utilisateur';
 	};
