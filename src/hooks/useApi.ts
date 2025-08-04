@@ -31,7 +31,7 @@ export function useApi<T = unknown>(
 
 				if (response.success && response.data) {
 					setState({
-						data: response.data.resource,
+						data: response.data,
 						loading: false,
 						error: null,
 					});
