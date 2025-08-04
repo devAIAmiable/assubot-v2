@@ -24,6 +24,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import type { Contract } from '../types';
 import CreateContractModal from './CreateContractModal';
 import { Link } from 'react-router-dom';
+import Spinner from './ui/Spinner';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
@@ -122,7 +123,7 @@ const ContratsModule = () => {
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center min-h-96">
-				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e51ab]"></div>
+				<Spinner size="lg" color="blue" className="mx-auto mb-4" />
 			</div>
 		);
 	}

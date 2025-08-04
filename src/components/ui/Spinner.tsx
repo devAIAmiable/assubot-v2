@@ -20,7 +20,7 @@ const Spinner: React.FC<SpinnerProps> = ({
   };
 
   const colorClasses = {
-    blue: 'text-blue-600',
+    blue: 'text-[#1e51ab]',
     white: 'text-white',
     gray: 'text-gray-400',
   };

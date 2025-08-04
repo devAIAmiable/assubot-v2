@@ -87,8 +87,8 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({
 					<div>
 						<h1 className="text-3xl font-bold text-gray-900 mb-2">Mes comparaisons d'assurances</h1>
 						<p className="text-gray-600 text-lg">
-							{user?.first_name
-								? `${user.first_name}, retrouvez vos comparaisons précédentes ou lancez-en une nouvelle.`
+							{user?.firstName
+								? `${user.firstName}, retrouvez vos comparaisons précédentes ou lancez-en une nouvelle.`
 								: "Retrouvez vos comparaisons précédentes ou lancez-en une nouvelle."}
 						</p>
 					</div>

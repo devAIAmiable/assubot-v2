@@ -505,8 +505,8 @@ const ChatbotModule = () => {
 									</p>
 								) : (
 									<p className="text-white/80 text-sm">
-										{user?.first_name 
-											? `Salut ${user.first_name} ! Je suis votre assistant assurance.` 
+										{user?.firstName 
+											? `Salut ${user.firstName} ! Je suis votre assistant assurance.` 
 											: 'Votre assistant assurance virtuel'
 										}
 									</p>

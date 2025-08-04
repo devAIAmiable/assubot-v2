@@ -278,7 +278,7 @@ const Dashboard = () => {
 					{(() => {
 						const hour = new Date().getHours();
 						const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
-						return `${greeting} ${user?.first_name || 'Utilisateur'} ! Voici un aperçu de votre situation d'assurance.`;
+						return `${greeting} ${user?.firstName || 'Utilisateur'} ! Voici un aperçu de votre situation d'assurance.`;
 					})()}
 				</p>
 			</motion.div>
@@ -501,7 +501,7 @@ const Dashboard = () => {
 					</h2>
 					<span className="text-sm text-gray-500">
 						Adaptées à votre profil
-						{user?.professional_category ? ` (${user.professional_category})` : ''}
+						{user?.professionalCategory ? ` (${user.professionalCategory})` : ''}
 					</span>
 				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

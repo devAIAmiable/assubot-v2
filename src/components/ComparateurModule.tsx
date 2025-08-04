@@ -69,7 +69,7 @@ const ComparateurModule = () => {
 		null
 	);
 
-	// Calculate age from birth_date
+	// Calculate age from birthDate
 	const calculateAge = (birthDate: string) => {
 		if (!birthDate) return '';
 		const birth = new Date(birthDate);
@@ -83,10 +83,10 @@ const ComparateurModule = () => {
 	};
 
 	const [formData, setFormData] = useState<SimpleFormData>({
-		age: calculateAge(user?.birth_date || '') || '',
-		profession: user?.professional_category || '',
+		age: calculateAge(user?.birthDate || '') || '',
+		profession: user?.professionalCategory || '',
 		location: user?.city || '',
-		postalCode: user?.zipcode || '',
+		postalCode: user?.zip || '',
 		monthlyBudget: '',
 
 		// Auto specific

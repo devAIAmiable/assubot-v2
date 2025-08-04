@@ -34,8 +34,8 @@ const TypeSelectionView: React.FC<TypeSelectionViewProps> = ({
 				<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
 					<h1 className="text-3xl font-bold text-gray-900 mb-2">Comparateur d'assurances</h1>
 					<p className="text-gray-600 text-lg">
-						{user?.first_name
-							? `${user.first_name}, choisissez le type d'assurance à comparer.`
+						{user?.firstName
+							? `${user.firstName}, choisissez le type d'assurance à comparer.`
 							: "Choisissez le type d'assurance à comparer."}
 					</p>
 				</motion.div>

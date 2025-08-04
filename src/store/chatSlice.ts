@@ -238,6 +238,19 @@ const chatSlice = createSlice({
 				session.updatedAt = new Date().toISOString();
 			}
 		},
+
+		// Clear all chat data
+		clearChat: (state) => {
+			state.sessions = [];
+			state.currentSessionId = null;
+			state.selectedContractIds = [];
+			state.isTyping = false;
+			state.isConnected = true;
+			state.quickReplies = [];
+			state.error = null;
+			state.searchQuery = '';
+			state.searchResults = [];
+		},
 	},
 	extraReducers: (builder) => {
 		builder
@@ -330,6 +343,7 @@ export const {
 	clearError,
 	setQuickReplies,
 	updateSessionTitle,
+	clearChat,
 } = chatSlice.actions;
 
 export default chatSlice.reducer; 

@@ -954,6 +954,16 @@ const contractsSlice = createSlice({
 				}
 			}
 		},
+
+		// Clear all contracts
+		clearContracts: (state) => {
+			state.contracts = [];
+			state.searchQuery = '';
+			state.selectedType = '';
+			state.selectedStatus = '';
+			state.loading = false;
+			state.error = null;
+		},
 	},
 });
 
@@ -968,6 +978,7 @@ export const {
 	setError,
 	addDocument,
 	removeDocument,
+	clearContracts,
 } = contractsSlice.actions;
 
 export default contractsSlice.reducer;
