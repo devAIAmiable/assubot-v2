@@ -19,6 +19,7 @@ export interface User {
 	address?: string;
 	city?: string;
 	zip?: string;
+	creditBalance?: number;
 }
 
 interface UserState {

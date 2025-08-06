@@ -9,6 +9,7 @@ import ChatbotModule from './components/ChatbotModule';
 import ComparateurModule from './components/ComparateurModule';
 import ContractDetailsPage from './components/ContractDetailsPage';
 import ContratsModule from './components/ContratsModule';
+import CreditPage from './components/CreditPage';
 import Dashboard from './components/Dashboard';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
 import GoogleCallbackPage from './components/GoogleCallbackPage';
@@ -60,6 +61,7 @@ function App() {
 								<Route path="contrats/:contractId" element={<ContractDetailsPage />} />
 								<Route path="chatbot" element={<ChatbotModule />} />
 								<Route path="comparateur" element={<ComparateurModule />} />
+								<Route path="credits" element={<CreditPage />} />
 								<Route path="notifications" element={<NotificationsModule />} />
 								<Route path="profil" element={<ProfileModule />} />
 							</Route>

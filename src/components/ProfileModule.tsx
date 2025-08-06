@@ -637,6 +637,8 @@ const ProfileModule = () => {
 				</div>
 			</motion.div>
 
+
+
 			{/* Account Info */}
 			<motion.div
 				initial={{ opacity: 0, y: 20 }}
