@@ -1,45 +1,67 @@
-import {
-	FaArrowLeft,
-	FaCoins,
-	FaCreditCard,
-	FaHistory,
-	FaInfoCircle,
-	FaMinus,
-	FaPlus,
-} from 'react-icons/fa';
+import { FaCoins, FaCreditCard, FaHistory, FaInfoCircle, FaMinus, FaPlus } from 'react-icons/fa';
 
 import Button from './ui/Button';
 import { creditService } from '../services/creditService';
 import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
+import { paymentService } from '../services/paymentService';
 import { showToast } from './ui/Toast';
 import { useAppSelector } from '../store/hooks';
 import { useCreditPacks } from '../hooks/useCreditPacks';
-import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 const CreditPage = () => {
-	const navigate = useNavigate();
 	const { currentUser } = useAppSelector(getUserState);
 	const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 	const { creditPacks, loading, error, refetch } = useCreditPacks();
 
 	// Sample usage history
 	const usageHistory = [
-		{ id: 1, action: 'Comparaison d\'assurance', credits: -2, date: 'Il y a 2 jours', type: 'usage' },
+		{
+			id: 1,
+			action: "Comparaison d'assurance",
+			credits: -2,
+			date: 'Il y a 2 jours',
+			type: 'usage',
+		},
 		{ id: 2, action: 'Achat de crédits', credits: 10, date: 'Il y a 1 semaine', type: 'purchase' },
-		{ id: 3, action: 'Consultation IA (3 questions)', credits: -3, date: 'Il y a 1 semaine', type: 'usage' },
-		{ id: 4, action: 'Recommandations personnalisées', credits: -1, date: 'Il y a 2 semaines', type: 'usage' },
+		{
+			id: 3,
+			action: 'Consultation IA (3 questions)',
+			credits: -3,
+			date: 'Il y a 1 semaine',
+			type: 'usage',
+		},
+		{
+			id: 4,
+			action: 'Recommandations personnalisées',
+			credits: -1,
+			date: 'Il y a 2 semaines',
+			type: 'usage',
+		},
 		{ id: 5, action: 'Achat de crédits', credits: 25, date: 'Il y a 1 mois', type: 'purchase' },
 	];
 
-	const handlePurchase = (packageId: string) => {
-		setSelectedPackage(packageId);
-		showToast.info('Fonctionnalité d\'achat de crédits à venir');
-	};
+	const handlePurchase = async (packageId: string) => {
+		try {
+			setSelectedPackage(packageId);
 
-	const handleBack = () => {
-		navigate('/app/dashboard');
+			const response = await paymentService.createCheckout(packageId);
+
+			if (response.success && response.data) {
+				// Store the credit pack ID in sessionStorage for use on success page
+				sessionStorage.setItem('selectedCreditPackId', packageId);
+				
+				// Redirect to Stripe Checkout
+				window.location.href = response.data.url;
+			} else {
+				showToast.error(response.error || 'Erreur lors de la création du paiement');
+				setSelectedPackage(null);
+			}
+		} catch {
+			showToast.error('Erreur lors de la création du paiement');
+			setSelectedPackage(null);
+		}
 	};
 
 	if (!currentUser) {
@@ -64,13 +86,6 @@ const CreditPage = () => {
 				className="flex items-center justify-between"
 			>
 				<div>
-					<button
-						onClick={handleBack}
-						className="flex items-center text-gray-600 hover:text-[#1e51ab] mb-4 transition-colors"
-					>
-						<FaArrowLeft className="h-4 w-4 mr-2" />
-						Retour
-					</button>
 					<h1 className="text-3xl font-bold text-gray-900 mb-2">Mes Crédits</h1>
 					<p className="text-gray-600 text-lg">
 						Gérez votre solde de crédits et accédez aux fonctionnalités premium
@@ -83,18 +98,25 @@ const CreditPage = () => {
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.6, delay: 0.1 }}
-				className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-8 text-white"
+				className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm"
 			>
 				<div className="flex items-center justify-between">
-					<div>
-						<h2 className="text-2xl font-semibold mb-2">Solde actuel</h2>
-						<p className="text-4xl font-bold mb-2">{currentUser.creditBalance || 0} crédits</p>
-						<p className="text-blue-100">
-							Utilisez vos crédits pour accéder aux fonctionnalités premium d'AssuBot
-						</p>
+					<div className="flex items-center space-x-4">
+						<div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg p-3">
+							<FaCoins className="h-6 w-6 text-white" />
+						</div>
+						<div>
+							<p className="text-sm text-gray-600 mb-1">Solde de crédits</p>
+							<p className="text-2xl font-bold text-gray-900">
+								{currentUser.creditBalance || 0} crédits
+							</p>
+						</div>
 					</div>
 					<div className="text-right">
-						<FaCoins className="h-16 w-16 text-blue-200" />
+						<p className="text-xs text-gray-500 mb-1">Disponible</p>
+						<p className="text-sm font-medium text-green-600">
+							{currentUser.creditBalance || 0 > 0 ? 'Actif' : 'Épuisé'}
+						</p>
 					</div>
 				</div>
 			</motion.div>
@@ -205,7 +227,8 @@ const CreditPage = () => {
 									item.type === 'purchase' ? 'text-green-600' : 'text-red-600'
 								}`}
 							>
-								{item.type === 'purchase' ? '+' : ''}{item.credits} crédits
+								{item.type === 'purchase' ? '+' : ''}
+								{item.credits} crédits
 							</span>
 						</motion.div>
 					))}
@@ -229,20 +252,15 @@ const CreditPage = () => {
 							<div>
 								<h4 className="font-medium mb-2">Fonctionnalités premium :</h4>
 								<ul className="space-y-1">
-									<li>• Comparaison d'assurance : 2 crédits</li>
-									<li>• Consultation IA : 1 question = 1 crédit</li>
-									<li>• Analyse détaillée : 3 crédits</li>
+									<li>• 1 question = 1 crédit (ex: 3 questions = 3 crédits)</li>
 									<li>• Recommandations personnalisées : 1 crédit</li>
 								</ul>
 							</div>
 							<div>
 								<h4 className="font-medium mb-2">Informations importantes :</h4>
 								<ul className="space-y-1">
-									<li>• 1 question = 1 crédit (ex: 3 questions = 3 crédits)</li>
 									<li>• Crédits valables 1 an après achat</li>
-									<li>• Pas de remboursement possible</li>
 									<li>• Paiement sécurisé par carte bancaire</li>
-									<li>• Support client disponible 24/7</li>
 								</ul>
 							</div>
 						</div>
@@ -253,4 +271,4 @@ const CreditPage = () => {
 	);
 };
 
-export default CreditPage; 
+export default CreditPage;

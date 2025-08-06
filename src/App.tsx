@@ -16,6 +16,8 @@ import GoogleCallbackPage from './components/GoogleCallbackPage';
 import LandingPage from './components/LandingPage';
 import LoginForm from './components/LoginForm';
 import NotificationsModule from './components/NotificationsModule';
+import PaymentCancelPage from './components/PaymentCancelPage';
+import PaymentSuccessPage from './components/PaymentSuccessPage';
 import { PersistGate } from 'redux-persist/integration/react';
 import ProfileModule from './components/ProfileModule';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -74,6 +76,8 @@ function App() {
 							<Route path="/forgot-password" element={<ForgotPasswordForm />} />
 							<Route path="/reset-password" element={<ResetPasswordForm />} />
 							<Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
+							<Route path="/payment/success" element={<PaymentSuccessPage />} />
+							<Route path="/payment/cancel" element={<PaymentCancelPage />} />
 						</Routes>
 					</Router>
 				</AuthInitializer>

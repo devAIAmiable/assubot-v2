@@ -89,8 +89,6 @@ const AppLayout = () => {
 		navigate('/');
 	};
 
-
-
 	// Get user display name
 	const getUserDisplayName = () => {
 		if (currentUser) {
@@ -151,13 +149,13 @@ const AppLayout = () => {
 									onClick={() => handleNavigate('/app/credits')}
 									className="hidden sm:flex items-center space-x-2 px-3 py-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
 								>
-									<FaCoins className="h-4 w-4 text-[#1e51ab]" />
 									<span className="text-sm font-medium text-[#1e51ab]">
-										{currentUser.creditBalance} crédits
+										{currentUser.creditBalance}
 									</span>
+									<FaCoins className="h-4 w-4 text-[#1e51ab]" />
 								</button>
 							)}
-							
+
 							{/* Notifications */}
 							<Menu as="div" className="relative">
 								<Menu.Button className="relative p-2 text-gray-600 hover:text-[#1e51ab] hover:bg-gray-50 rounded-lg transition-colors">
