@@ -1,46 +1,30 @@
 import { FaCoins, FaCreditCard, FaHistory, FaInfoCircle, FaMinus, FaPlus } from 'react-icons/fa';
 
 import Button from './ui/Button';
+import TransactionHistoryModal from './TransactionHistoryModal';
 import { creditService } from '../services/creditService';
 import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
 import { paymentService } from '../services/paymentService';
 import { showToast } from './ui/Toast';
+import { transactionService } from '../services/transactionService';
 import { useAppSelector } from '../store/hooks';
-import { useCreditPacks } from '../hooks/useCreditPacks';
+import { useGetCreditPacksQuery } from '../store/creditPacksApi';
+import { useRecentTransactions } from '../hooks/useTransactions';
 import { useState } from 'react';
 
 const CreditPage = () => {
 	const { currentUser } = useAppSelector(getUserState);
 	const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-	const { creditPacks, loading, error, refetch } = useCreditPacks();
-
-	// Sample usage history
-	const usageHistory = [
-		{
-			id: 1,
-			action: "Comparaison d'assurance",
-			credits: -2,
-			date: 'Il y a 2 jours',
-			type: 'usage',
-		},
-		{ id: 2, action: 'Achat de crédits', credits: 10, date: 'Il y a 1 semaine', type: 'purchase' },
-		{
-			id: 3,
-			action: 'Consultation IA (3 questions)',
-			credits: -3,
-			date: 'Il y a 1 semaine',
-			type: 'usage',
-		},
-		{
-			id: 4,
-			action: 'Recommandations personnalisées',
-			credits: -1,
-			date: 'Il y a 2 semaines',
-			type: 'usage',
-		},
-		{ id: 5, action: 'Achat de crédits', credits: 25, date: 'Il y a 1 mois', type: 'purchase' },
-	];
+	const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+	
+	const { data: creditPacks = [], isLoading: loading, error, refetch } = useGetCreditPacksQuery();
+	const { 
+		transactions: recentTransactions, 
+		loading: transactionsLoading, 
+		error: transactionsError,
+		refetch: refetchTransactions 
+	} = useRecentTransactions();
 
 	const handlePurchase = async (packageId: string) => {
 		try {
@@ -142,7 +126,11 @@ const CreditPage = () => {
 					</div>
 				) : error ? (
 					<div className="text-center py-8">
-						<p className="text-red-600 mb-4">{error}</p>
+						<p className="text-red-600 mb-4">
+							{('data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) 
+								? (error.data as { message: string }).message 
+								: 'Erreur lors du chargement des packs de crédits'}
+						</p>
 						<Button onClick={refetch} variant="secondary">
 							Réessayer
 						</Button>
@@ -203,36 +191,80 @@ const CreditPage = () => {
 					</h3>
 				</div>
 
-				<div className="space-y-3">
-					{usageHistory.map((item) => (
-						<motion.div
-							key={item.id}
-							initial={{ opacity: 0, x: -20 }}
-							animate={{ opacity: 1, x: 0 }}
-							className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-						>
-							<div className="flex items-center">
-								{item.type === 'purchase' ? (
-									<FaPlus className="h-4 w-4 text-green-500 mr-3" />
-								) : (
-									<FaMinus className="h-4 w-4 text-red-500 mr-3" />
-								)}
-								<div>
-									<p className="text-sm font-medium text-gray-900">{item.action}</p>
-									<p className="text-xs text-gray-500">{item.date}</p>
+				{transactionsLoading ? (
+					<div className="space-y-3">
+						{Array.from({ length: 3 }).map((_, index) => (
+							<div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg animate-pulse">
+								<div className="flex items-center">
+									<div className="w-4 h-4 bg-gray-200 rounded mr-3"></div>
+									<div>
+										<div className="w-32 h-4 bg-gray-200 rounded mb-1"></div>
+										<div className="w-20 h-3 bg-gray-200 rounded"></div>
+									</div>
 								</div>
+								<div className="w-16 h-4 bg-gray-200 rounded"></div>
 							</div>
-							<span
-								className={`text-sm font-medium ${
-									item.type === 'purchase' ? 'text-green-600' : 'text-red-600'
-								}`}
+						))}
+					</div>
+				) : transactionsError ? (
+					<div className="text-center py-8">
+						<p className="text-red-600 mb-4">{transactionsError}</p>
+						<Button variant="secondary" size="sm" onClick={refetchTransactions}>
+							Réessayer
+						</Button>
+					</div>
+				) : recentTransactions.length === 0 ? (
+					<div className="text-center py-8">
+						<FaHistory className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+						<p className="text-gray-500">Aucune transaction récente</p>
+					</div>
+				) : (
+					<div className="space-y-3">
+						{recentTransactions.map((transaction, index) => (
+							<motion.div
+								key={transaction.id}
+								initial={{ opacity: 0, x: -20 }}
+								animate={{ opacity: 1, x: 0 }}
+								transition={{ delay: index * 0.1 }}
+								className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
 							>
-								{item.type === 'purchase' ? '+' : ''}
-								{item.credits} crédits
-							</span>
-						</motion.div>
-					))}
-				</div>
+								<div className="flex items-center">
+									{transaction.type === 'purchase' ? (
+										<FaPlus className="h-4 w-4 text-green-500 mr-3" />
+									) : (
+										<FaMinus className="h-4 w-4 text-red-500 mr-3" />
+									)}
+									<div>
+										<p className="text-sm font-medium text-gray-900">{transaction.action}</p>
+										<p className="text-xs text-gray-500">
+											{transactionService.formatDate(transaction.date)}
+										</p>
+									</div>
+								</div>
+								<span
+									className={`text-sm font-medium ${
+										transaction.type === 'purchase' ? 'text-green-600' : 'text-red-600'
+									}`}
+								>
+									{transaction.type === 'purchase' ? '+' : ''}
+									{transaction.credits} crédits
+								</span>
+							</motion.div>
+						))}
+						{recentTransactions.length >= 5 && (
+							<div className="text-center pt-4">
+								<Button 
+									variant="ghost" 
+									size="sm" 
+									onClick={() => setIsHistoryModalOpen(true)}
+									className="text-[#1e51ab]"
+								>
+									Voir plus
+								</Button>
+							</div>
+						)}
+					</div>
+				)}
 			</motion.div>
 
 			{/* Credit Information */}
@@ -267,6 +299,12 @@ const CreditPage = () => {
 					</div>
 				</div>
 			</motion.div>
+
+			{/* Transaction History Modal */}
+			<TransactionHistoryModal 
+				isOpen={isHistoryModalOpen} 
+				onClose={() => setIsHistoryModalOpen(false)} 
+			/>
 		</div>
 	);
 };

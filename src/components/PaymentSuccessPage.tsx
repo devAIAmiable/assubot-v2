@@ -7,7 +7,7 @@ import Button from './ui/Button';
 import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
 import { updateProfile } from '../store/userSlice';
-import { useCreditPacks } from '../hooks/useCreditPacks';
+import { useGetCreditPacksQuery } from '../store/creditPacksApi';
 
 const PaymentSuccessPage = () => {
 	const navigate = useNavigate();
@@ -18,7 +18,7 @@ const PaymentSuccessPage = () => {
 	const sessionId = searchParams.get('session_id');
 	const creditPackId = sessionStorage.getItem('selectedCreditPackId');
 
-	const { creditPacks } = useCreditPacks();
+	const { data: creditPacks = [] } = useGetCreditPacksQuery();
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [creditsAdded, setCreditsAdded] = useState<number>(0);
