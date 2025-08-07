@@ -140,6 +140,12 @@ const LandingPage = () => {
 								Contact
 							</a>
 							<button 
+								onClick={() => navigate('/faq')}
+								className="text-gray-700 hover:text-[#1e51ab] transition-colors"
+							>
+								FAQ
+							</button>
+							<button 
 								className="bg-[#1e51ab] text-white px-4 py-2 rounded-lg hover:bg-[#163d82] transition-colors"
 								onClick={navigateToApp}
 							>
@@ -175,6 +181,12 @@ const LandingPage = () => {
 								<a href="#contact" className="block px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
 									Contact
 								</a>
+								<button 
+									onClick={() => navigate('/faq')}
+									className="block w-full text-left px-3 py-2 text-gray-700 hover:text-[#1e51ab]"
+								>
+									Aide
+								</button>
 								<button 
 									className="w-full text-left bg-[#1e51ab] text-white px-3 py-2 rounded-lg hover:bg-[#163d82] transition-colors"
 									onClick={navigateToApp}
@@ -820,9 +832,12 @@ const LandingPage = () => {
 							<h3 className="text-white font-semibold mb-4">Support</h3>
 							<ul className="space-y-2">
 								<li>
-									<a href="#" className="hover:text-white transition-colors">
+									<button 
+										onClick={() => navigate('/faq')}
+										className="hover:text-white transition-colors text-left"
+									>
 										Centre d'Aide
-									</a>
+									</button>
 								</li>
 								<li>
 									<a href="#" className="hover:text-white transition-colors">

@@ -11,6 +11,7 @@ import ContractDetailsPage from './components/ContractDetailsPage';
 import ContratsModule from './components/ContratsModule';
 import CreditPage from './components/CreditPage';
 import Dashboard from './components/Dashboard';
+import FAQPage from './components/FAQPage';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
 import GoogleCallbackPage from './components/GoogleCallbackPage';
 import LandingPage from './components/LandingPage';
@@ -44,6 +45,9 @@ function App() {
 						<Routes>
 							{/* Landing page route */}
 							<Route path="/" element={<LandingPage />} />
+
+							{/* FAQ page - Public */}
+							<Route path="/faq" element={<FAQPage />} />
 
 							{/* App routes with layout - Protected */}
 							<Route

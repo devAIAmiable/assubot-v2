@@ -147,7 +147,7 @@ const AppLayout = () => {
 							{currentUser?.creditBalance !== undefined && (
 								<button
 									onClick={() => handleNavigate('/app/credits')}
-									className="hidden sm:flex items-center space-x-2 px-3 py-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+									className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
 								>
 									<span className="text-sm font-medium text-[#1e51ab]">
 										{currentUser.creditBalance}
@@ -289,12 +289,13 @@ const AppLayout = () => {
 										<Menu.Item>
 											{({ active }) => (
 												<button
+													onClick={() => handleNavigate('/faq')}
 													className={`flex items-center w-full px-4 py-2 text-sm text-gray-700 ${
 														active ? 'bg-gray-50' : ''
 													}`}
 												>
 													<FaQuestionCircle className="h-4 w-4 mr-3" />
-													Aide
+													FAQ
 												</button>
 											)}
 										</Menu.Item>
