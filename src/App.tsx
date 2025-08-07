@@ -13,6 +13,7 @@ import CreditPage from './components/CreditPage';
 import Dashboard from './components/Dashboard';
 import FAQPage from './components/FAQPage';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
+import GeneralTermsPage from './components/GeneralTermsPage';
 import GoogleCallbackPage from './components/GoogleCallbackPage';
 import LandingPage from './components/LandingPage';
 import LoginForm from './components/LoginForm';
@@ -48,6 +49,9 @@ function App() {
 
 							{/* FAQ page - Public */}
 							<Route path="/faq" element={<FAQPage />} />
+
+							{/* General Terms page - Public */}
+							<Route path="/general-terms" element={<GeneralTermsPage />} />
 
 							{/* App routes with layout - Protected */}
 							<Route

@@ -831,23 +831,34 @@ const LandingPage = () => {
 						<div>
 							<h3 className="text-white font-semibold mb-4">Support</h3>
 							<ul className="space-y-2">
-								<li>
-									<button 
-										onClick={() => navigate('/faq')}
-										className="hover:text-white transition-colors text-left"
-									>
-										Centre d'Aide
-									</button>
-								</li>
+														<li>
+							<button
+								onClick={() => navigate('/faq')}
+								className="hover:text-white transition-colors text-left"
+							>
+								Centre d'Aide
+							</button>
+						</li>
+						<li>
+							<button
+								onClick={() => navigate('/general-terms')}
+								className="hover:text-white transition-colors text-left"
+							>
+								Conditions Générales
+							</button>
+						</li>
 								<li>
 									<a href="#" className="hover:text-white transition-colors">
 										Documentation API
 									</a>
 								</li>
 								<li>
-									<a href="#" className="hover:text-white transition-colors">
+									<button
+										onClick={() => navigate('/general-terms')}
+										className="hover:text-white transition-colors text-left"
+									>
 										Politique de Confidentialité
-									</a>
+									</button>
 								</li>
 							</ul>
 						</div>

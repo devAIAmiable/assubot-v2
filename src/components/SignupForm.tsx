@@ -299,18 +299,23 @@ const SignupForm: React.FC = () => {
 									/>
 								</button>
 								<div className="flex-1 text-sm">
-									<label
-										className="text-gray-700 cursor-pointer"
-										onClick={() => setValue('acceptedTerms', !watch('acceptedTerms'))}
-									>
+									<label className="text-gray-700">
 										J'accepte les{' '}
-										<a href="#" className="text-blue-600 hover:text-blue-500 underline">
+										<button
+											type="button"
+											onClick={() => window.open('/general-terms', '_blank')}
+											className="text-blue-600 hover:text-blue-500 underline"
+										>
 											conditions d'utilisation
-										</a>{' '}
+										</button>{' '}
 										et la{' '}
-										<a href="#" className="text-blue-600 hover:text-blue-500 underline">
+										<button
+											type="button"
+											onClick={() => window.open('/general-terms', '_blank')}
+											className="text-blue-600 hover:text-blue-500 underline"
+										>
 											politique de confidentialité
-										</a>
+										</button>
 									</label>
 									{errors.acceptedTerms && (
 										<p className="mt-1 text-sm text-red-600">{errors.acceptedTerms.message}</p>
