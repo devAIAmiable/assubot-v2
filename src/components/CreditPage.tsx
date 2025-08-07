@@ -35,8 +35,8 @@ const getTransactionLabel = (type: string, source: string) => {
 
 const CreditPage = () => {
 	const { currentUser } = useAppSelector(getUserState);
-	const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 	const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+	const [purchaseLoading, setPurchaseLoading] = useState<string | null>(null);
 
 	const { data: creditPacks = [], isLoading: loading, error, refetch } = useGetCreditPacksQuery();
 	const {
@@ -48,7 +48,7 @@ const CreditPage = () => {
 
 	const handlePurchase = async (packageId: string) => {
 		try {
-			setSelectedPackage(packageId);
+			setPurchaseLoading(packageId);
 
 			const response = await paymentService.createCheckout(packageId);
 
@@ -60,11 +60,11 @@ const CreditPage = () => {
 				window.location.href = response.data.url;
 			} else {
 				showToast.error(response.error || 'Erreur lors de la création du paiement');
-				setSelectedPackage(null);
+				setPurchaseLoading(null);
 			}
 		} catch {
 			showToast.error('Erreur lors de la création du paiement');
-			setSelectedPackage(null);
+			setPurchaseLoading(null);
 		}
 	};
 
@@ -165,7 +165,7 @@ const CreditPage = () => {
 								key={pkg.id}
 								whileHover={{ scale: 1.02 }}
 								className={`relative border rounded-xl p-6 cursor-pointer transition-all ${
-									selectedPackage === pkg.id
+									purchaseLoading === pkg.id
 										? 'border-[#1e51ab] bg-blue-50'
 										: 'border-gray-200 hover:border-[#1e51ab]'
 								} ${pkg.isFeatured ? 'ring-2 ring-[#1e51ab]' : ''}`}
@@ -186,13 +186,20 @@ const CreditPage = () => {
 									<div className="text-2xl font-bold text-gray-900 mb-4">
 										{creditService.formatPrice(pkg.priceCents)}€
 									</div>
-									<Button
-										variant={selectedPackage === pkg.id ? 'primary' : 'secondary'}
-										size="sm"
-										className="w-full"
-									>
-										Sélectionner
-									</Button>
+									{purchaseLoading === pkg.id ? (
+										<div className="flex items-center justify-center space-x-2 py-2">
+											<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1e51ab]"></div>
+											<span className="text-sm text-[#1e51ab]">Chargement...</span>
+										</div>
+									) : (
+										<Button
+											variant="secondary"
+											size="sm"
+											className="w-full"
+										>
+											Sélectionner
+										</Button>
+									)}
 								</div>
 							</motion.div>
 						))}
