@@ -78,18 +78,8 @@ export const creditTransactionsApi = createApi({
 			providesTags: ['CreditTransactions'],
 			transformResponse: (response: CreditTransactionsResponse) => response,
 		}),
-		getCreditTransactionById: build.query<CreditTransaction, string>({
-			query: (id) => `/credit-transactions/${id}`,
-			// Configuration for this specific endpoint
-			keepUnusedDataFor: 5 * 60, // 5 minutes
-			providesTags: (result, error, id) => [{ type: 'CreditTransactions', id }],
-			transformResponse: (response: CreditTransactionResponse) => response.data,
-		}),
 	}),
 });
 
-export const {
-	useGetCreditTransactionsQuery,
-	useGetCreditTransactionByIdQuery,
-	useLazyGetCreditTransactionsQuery,
-} = creditTransactionsApi;
+export const { useGetCreditTransactionsQuery, useLazyGetCreditTransactionsQuery } =
+	creditTransactionsApi;

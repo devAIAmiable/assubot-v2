@@ -12,17 +12,38 @@ import { useCreditTransactions } from '../hooks/useCreditTransactions';
 import { useGetCreditPacksQuery } from '../store/creditPacksApi';
 import { useState } from 'react';
 
+// Helper function to get French label for transaction type
+const getTransactionLabel = (type: string, source: string) => {
+	switch (type) {
+		case 'purchase':
+			return 'Achat de crédits';
+		case 'usage':
+			switch (source) {
+				case 'chatbot':
+					return 'Utilisation du chatbot';
+				case 'comparator':
+					return "Comparaison d'assurances";
+				default:
+					return 'Utilisation de crédits';
+			}
+		case 'adjustment':
+			return 'Ajustement de crédits';
+		default:
+			return 'Transaction';
+	}
+};
+
 const CreditPage = () => {
 	const { currentUser } = useAppSelector(getUserState);
 	const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 	const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-	
+
 	const { data: creditPacks = [], isLoading: loading, error, refetch } = useGetCreditPacksQuery();
-	const { 
-		transactions: recentTransactions, 
-		loading: transactionsLoading, 
+	const {
+		transactions: recentTransactions,
+		loading: transactionsLoading,
 		error: transactionsError,
-		refetch: refetchTransactions 
+		refetch: refetchTransactions,
 	} = useCreditTransactions({ limit: 5 });
 
 	const handlePurchase = async (packageId: string) => {
@@ -34,7 +55,7 @@ const CreditPage = () => {
 			if (response.success && response.data) {
 				// Store the credit pack ID in sessionStorage for use on success page
 				sessionStorage.setItem('selectedCreditPackId', packageId);
-				
+
 				// Redirect to Stripe Checkout
 				window.location.href = response.data.url;
 			} else {
@@ -126,8 +147,11 @@ const CreditPage = () => {
 				) : error ? (
 					<div className="text-center py-8">
 						<p className="text-red-600 mb-4">
-							{('data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) 
-								? (error.data as { message: string }).message 
+							{'data' in error &&
+							error.data &&
+							typeof error.data === 'object' &&
+							'message' in error.data
+								? (error.data as { message: string }).message
 								: 'Erreur lors du chargement des packs de crédits'}
 						</p>
 						<Button onClick={refetch} variant="secondary">
@@ -193,7 +217,10 @@ const CreditPage = () => {
 				{transactionsLoading ? (
 					<div className="space-y-3">
 						{Array.from({ length: 3 }).map((_, index) => (
-							<div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg animate-pulse">
+							<div
+								key={index}
+								className="flex items-center justify-between p-4 bg-gray-50 rounded-lg animate-pulse"
+							>
 								<div className="flex items-center">
 									<div className="w-4 h-4 bg-gray-200 rounded mr-3"></div>
 									<div>
@@ -234,14 +261,16 @@ const CreditPage = () => {
 										<FaMinus className="h-4 w-4 text-red-500 mr-3" />
 									)}
 									<div>
-										<p className="text-sm font-medium text-gray-900">{transaction.description}</p>
+										<p className="text-sm font-medium text-gray-900">
+											{getTransactionLabel(transaction.type, transaction.source)}
+										</p>
 										<p className="text-xs text-gray-500">
 											{new Date(transaction.createdAt).toLocaleDateString('fr-FR', {
 												day: '2-digit',
 												month: '2-digit',
 												year: 'numeric',
 												hour: '2-digit',
-												minute: '2-digit'
+												minute: '2-digit',
 											})}
 										</p>
 									</div>
@@ -258,9 +287,9 @@ const CreditPage = () => {
 						))}
 						{recentTransactions.length >= 5 && (
 							<div className="text-center pt-4">
-								<Button 
-									variant="ghost" 
-									size="sm" 
+								<Button
+									variant="ghost"
+									size="sm"
 									onClick={() => setIsHistoryModalOpen(true)}
 									className="text-[#1e51ab]"
 								>
@@ -306,9 +335,9 @@ const CreditPage = () => {
 			</motion.div>
 
 			{/* Transaction History Modal */}
-			<TransactionHistoryModal 
-				isOpen={isHistoryModalOpen} 
-				onClose={() => setIsHistoryModalOpen(false)} 
+			<TransactionHistoryModal
+				isOpen={isHistoryModalOpen}
+				onClose={() => setIsHistoryModalOpen(false)}
 			/>
 		</div>
 	);

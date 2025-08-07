@@ -1,7 +1,5 @@
 import {
 	FaTimes,
-	FaFilter,
-	FaChevronLeft,
 	FaChevronRight,
 	FaPlus,
 	FaMinus,
@@ -10,12 +8,10 @@ import {
 } from 'react-icons/fa';
 import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useTransactions } from '../hooks/useTransactions';
-import { transactionService, type TransactionFilters, type Transaction } from '../services/transactionService';
+import { motion } from 'framer-motion';
+import { useCreditTransactions } from '../hooks/useCreditTransactions';
+import { type CreditTransactionsFilters, type CreditTransaction } from '../store/creditTransactionsApi';
 import Button from './ui/Button';
-import Input from './ui/Input';
-import Dropdown, { type DropdownOption } from './ui/Dropdown';
 
 interface TransactionHistoryModalProps {
 	isOpen: boolean;
@@ -23,95 +19,48 @@ interface TransactionHistoryModalProps {
 }
 
 const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalProps) => {
-	const [showFilters, setShowFilters] = useState(false);
-	const [filters, setFilters] = useState<TransactionFilters>({
-		type: 'all',
-		dateFrom: '',
-		dateTo: '',
+	const [filters, setFilters] = useState<CreditTransactionsFilters>({
+		type: undefined,
+		startDate: '',
+		endDate: '',
 	});
+	const [selectedTransaction, setSelectedTransaction] = useState<CreditTransaction | null>(null);
 
-	const { transactions, pagination, loading, error, fetchPage, updateFilters, refetch } = useTransactions({
+	const { transactions, pagination, loading, error, refetch } = useCreditTransactions({
 		limit: 10,
-		autoFetch: isOpen,
+		type: filters.type,
+		startDate: filters.startDate || undefined,
+		endDate: filters.endDate || undefined,
 	});
 
-	const typeOptions: DropdownOption[] = [
-		{ value: 'all', label: 'Tous les types' },
-		{ value: 'purchase', label: 'Achats de crédits' },
-		{ value: 'usage', label: 'Utilisation de crédits' },
-	];
-
-	const handleFilterChange = (field: keyof TransactionFilters, value: string) => {
+	const handleFilterChange = (field: keyof CreditTransactionsFilters, value: string) => {
 		const newFilters = { ...filters, [field]: value };
 		setFilters(newFilters);
 	};
 
-	const applyFilters = () => {
-		updateFilters(filters);
-		setShowFilters(false);
-	};
-
 	const clearFilters = () => {
-		const clearedFilters = { type: 'all' as const, dateFrom: '', dateTo: '' };
+		const clearedFilters = { type: undefined, startDate: '', endDate: '' };
 		setFilters(clearedFilters);
-		updateFilters(clearedFilters);
-		setShowFilters(false);
-	};
-
-	const handlePageChange = (page: number) => {
-		fetchPage(page);
 	};
 
 	const renderPagination = () => {
-		if (!pagination || pagination.totalPages <= 1) return null;
-
-		const pages = [];
-		const maxVisiblePages = 5;
-		const startPage = Math.max(1, pagination.page - Math.floor(maxVisiblePages / 2));
-		const endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
-
-		for (let i = startPage; i <= endPage; i++) {
-			pages.push(i);
-		}
+		if (!pagination || !pagination.hasMore) return null;
 
 		return (
-			<div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
+			<div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 flex-shrink-0">
 				<div className="text-sm text-gray-600">
-					Affichage de {((pagination.page - 1) * pagination.limit) + 1} à{' '}
-					{Math.min(pagination.page * pagination.limit, pagination.total)} sur {pagination.total} transactions
+					Affichage de {pagination.offset + 1} à {pagination.offset + transactions.length} sur {pagination.total}{' '}
+					transactions
 				</div>
 				<div className="flex items-center space-x-2">
 					<Button
 						variant="ghost"
 						size="sm"
-						onClick={() => handlePageChange(pagination.page - 1)}
-						disabled={pagination.page <= 1}
+						onClick={() => refetch()}
+						disabled={!pagination.hasMore}
 						className="flex items-center"
 					>
-						<FaChevronLeft className="h-3 w-3 mr-1" />
-						Précédent
-					</Button>
-					
-					{pages.map((page) => (
-						<Button
-							key={page}
-							variant={page === pagination.page ? 'primary' : 'ghost'}
-							size="sm"
-							onClick={() => handlePageChange(page)}
-							className="w-8 h-8 p-0"
-						>
-							{page}
-						</Button>
-					))}
-					
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => handlePageChange(pagination.page + 1)}
-						disabled={pagination.page >= pagination.totalPages}
-						className="flex items-center"
-					>
-						Suivant
+						Charger plus
 						<FaChevronRight className="h-3 w-3 ml-1" />
 					</Button>
 				</div>
@@ -119,13 +68,35 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 		);
 	};
 
-	const renderTransactionItem = (transaction: Transaction, index: number) => (
+	// Helper function to get French label for transaction type
+	const getTransactionLabel = (type: string, source: string) => {
+		switch (type) {
+			case 'purchase':
+				return 'Achat de crédits';
+			case 'usage':
+				switch (source) {
+					case 'chatbot':
+						return 'Utilisation du chatbot';
+					case 'comparator':
+						return "Comparaison d'assurances";
+					default:
+						return 'Utilisation de crédits';
+				}
+			case 'adjustment':
+				return 'Ajustement de crédits';
+			default:
+				return 'Transaction';
+		}
+	};
+
+	const renderTransactionItem = (transaction: CreditTransaction, index: number) => (
 		<motion.div
 			key={transaction.id}
 			initial={{ opacity: 0, y: 10 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.3, delay: index * 0.05 }}
-			className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+			className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+			onClick={() => setSelectedTransaction(transaction)}
 		>
 			<div className="flex items-center">
 				{transaction.type === 'purchase' ? (
@@ -134,9 +105,17 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 					<FaMinus className="h-4 w-4 text-red-500 mr-3" />
 				)}
 				<div>
-					<p className="text-sm font-medium text-gray-900">{transaction.action}</p>
+					<p className="text-sm font-medium text-gray-900">
+						{getTransactionLabel(transaction.type, transaction.source)}
+					</p>
 					<p className="text-xs text-gray-500">
-						{transactionService.formatDate(transaction.date)}
+						{new Date(transaction.createdAt).toLocaleDateString('fr-FR', {
+							day: '2-digit',
+							month: '2-digit',
+							year: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit',
+						})}
 					</p>
 				</div>
 			</div>
@@ -145,7 +124,8 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 					transaction.type === 'purchase' ? 'text-green-600' : 'text-red-600'
 				}`}
 			>
-				{transaction.type === 'purchase' ? '+' : ''}{transaction.credits} crédits
+				{transaction.type === 'purchase' ? '+' : ''}
+				{transaction.amount} crédits
 			</span>
 		</motion.div>
 	);
@@ -157,7 +137,7 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 			<p className="text-gray-500 text-center">
 				Aucune transaction ne correspond à vos critères de recherche.
 			</p>
-			{(filters.type !== 'all' || filters.dateFrom || filters.dateTo) && (
+			{(filters.type || filters.startDate || filters.endDate) && (
 				<Button variant="secondary" size="sm" onClick={clearFilters} className="mt-4">
 					Effacer les filtres
 				</Button>
@@ -205,11 +185,11 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 					leaveFrom="opacity-100"
 					leaveTo="opacity-0"
 				>
-					<div className="fixed inset-0 bg-black bg-opacity-25" />
+					<div className="fixed inset-0 bg-black/30 backdrop-blur-md" />
 				</Transition.Child>
 
 				<div className="fixed inset-0 overflow-y-auto">
-					<div className="flex min-h-full items-center justify-center p-4">
+					<div className="flex min-h-full items-center justify-center p-4 h-screen">
 						<Transition.Child
 							as={Fragment}
 							enter="ease-out duration-300"
@@ -219,9 +199,9 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 							leaveFrom="opacity-100 scale-100"
 							leaveTo="opacity-0 scale-95"
 						>
-							<Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+							<Dialog.Panel className="w-full max-w-6xl h-3/4 transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all flex flex-col max-h-[75vh]">
 								{/* Header */}
-								<div className="flex items-center justify-between p-6 border-b border-gray-200">
+								<div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
 									<div>
 										<Dialog.Title className="text-xl font-semibold text-gray-900">
 											Historique des transactions
@@ -231,15 +211,6 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 										</p>
 									</div>
 									<div className="flex items-center space-x-2">
-										<Button
-											variant="ghost"
-											size="sm"
-											onClick={() => setShowFilters(!showFilters)}
-											className="flex items-center"
-										>
-											<FaFilter className="h-4 w-4 mr-2" />
-											Filtres
-										</Button>
 										<button
 											onClick={onClose}
 											className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -249,60 +220,239 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 									</div>
 								</div>
 
-								{/* Filters */}
-								<AnimatePresence>
-									{showFilters && (
-										<motion.div
-											initial={{ height: 0, opacity: 0 }}
-											animate={{ height: 'auto', opacity: 1 }}
-											exit={{ height: 0, opacity: 0 }}
-											transition={{ duration: 0.3 }}
-											className="border-b border-gray-200 overflow-hidden"
-										>
-											<div className="p-6 bg-gray-50">
-												<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-													<Dropdown
-														label="Type de transaction"
-														options={typeOptions}
-														value={filters.type || 'all'}
-														onChange={(value) => handleFilterChange('type', value)}
-													/>
-													<Input
-														label="Date de début"
-														type="date"
-														value={filters.dateFrom || ''}
-														onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-													/>
-													<Input
-														label="Date de fin"
-														type="date"
-														value={filters.dateTo || ''}
-														onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-													/>
+								{/* Filters - Modern UI (Hidden when showing details) */}
+								{!selectedTransaction && (
+									<div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
+										<div className="px-6 py-4">
+											<div className="flex items-center justify-between">
+												<div className="flex items-center space-x-6">
+													{/* Type Filter */}
+													<div className="flex items-center space-x-3">
+														<div className="flex space-x-1">
+															{[
+																{ value: 'all', label: 'Tous', active: !filters.type },
+																{ value: 'purchase', label: 'Achats', active: filters.type === 'purchase' },
+																{ value: 'usage', label: 'Usage', active: filters.type === 'usage' },
+																{ value: 'adjustment', label: 'Ajustements', active: filters.type === 'adjustment' }
+															].map((option) => (
+																<button
+																	key={option.value}
+																	onClick={() => handleFilterChange('type', option.value === 'all' ? '' : option.value)}
+																	className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ${
+																		option.active
+																			? 'bg-[#1e51ab] text-white shadow-sm'
+																			: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+																	}`}
+																>
+																	{option.label}
+																</button>
+															))}
+														</div>
+													</div>
+
+													{/* Date Range */}
+													<div className="flex items-center space-x-3">
+														<div className="flex items-center space-x-2">
+															<span className="text-sm font-medium text-gray-700">Période:</span>
+															<input
+																type="date"
+																value={filters.startDate || ''}
+																onChange={(e) => handleFilterChange('startDate', e.target.value)}
+																className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:ring-2 focus:ring-[#1e51ab] focus:border-[#1e51ab] transition-colors bg-white"
+																placeholder="De"
+															/>
+															<span className="text-gray-400">à</span>
+															<input
+																type="date"
+																value={filters.endDate || ''}
+																onChange={(e) => handleFilterChange('endDate', e.target.value)}
+																className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:ring-2 focus:ring-[#1e51ab] focus:border-[#1e51ab] transition-colors bg-white"
+																placeholder="À"
+															/>
+														</div>
+													</div>
 												</div>
-												<div className="flex justify-end space-x-3 mt-4">
-													<Button variant="secondary" size="sm" onClick={clearFilters}>
-														Effacer
-													</Button>
-													<Button size="sm" onClick={applyFilters}>
-														Appliquer les filtres
-													</Button>
+
+												{/* Actions and Counter */}
+												<div className="flex items-center space-x-4">
+													{(filters.type || filters.startDate || filters.endDate) && (
+														<button
+															onClick={clearFilters}
+															className="text-sm text-gray-500 hover:text-gray-700 transition-colors flex items-center space-x-1"
+														>
+															<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+															</svg>
+															<span>Effacer</span>
+														</button>
+													)}
+													<div className="flex items-center space-x-2 px-3 py-1 bg-gray-100 rounded-full">
+														<span className="text-xs font-medium text-gray-600">
+															{transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
+														</span>
+													</div>
 												</div>
 											</div>
-										</motion.div>
-									)}
-								</AnimatePresence>
+										</div>
+									</div>
+								)}
 
 								{/* Content */}
-								<div className="min-h-96 max-h-96 overflow-y-auto">
-									{loading ? (
+								<div className="flex-1 overflow-y-auto bg-gray-50">
+									{selectedTransaction ? (
+										<div className="p-6">
+											{/* Header with Back Button */}
+											<div className="flex items-center mb-6">
+												<button
+													onClick={() => setSelectedTransaction(null)}
+													className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors mr-4"
+												>
+													<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+													</svg>
+													<span className="text-sm font-medium">Retour</span>
+												</button>
+												<h3 className="text-xl font-semibold text-gray-900">
+													Détails de la transaction
+												</h3>
+											</div>
+
+											{/* Transaction Card */}
+											<div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+												{/* Header Section */}
+												<div className={`px-6 py-4 ${
+													selectedTransaction.type === 'purchase' 
+														? 'bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100' 
+														: 'bg-gradient-to-r from-red-50 to-rose-50 border-b border-red-100'
+												}`}>
+													<div className="flex items-center justify-between">
+														<div className="flex items-center space-x-4">
+															<div className={`p-3 rounded-full ${
+																selectedTransaction.type === 'purchase' 
+																	? 'bg-green-100 text-green-600' 
+																	: 'bg-red-100 text-red-600'
+															}`}>
+																{selectedTransaction.type === 'purchase' ? (
+																	<FaPlus className="h-6 w-6" />
+																) : (
+																	<FaMinus className="h-6 w-6" />
+																)}
+															</div>
+															<div>
+																<h4 className="text-lg font-semibold text-gray-900">
+																	{getTransactionLabel(selectedTransaction.type, selectedTransaction.source)}
+																</h4>
+																<p className="text-sm text-gray-600">
+																	{new Date(selectedTransaction.createdAt).toLocaleDateString('fr-FR', {
+																		day: '2-digit',
+																		month: 'long',
+																		year: 'numeric',
+																		hour: '2-digit',
+																		minute: '2-digit'
+																	})}
+																</p>
+															</div>
+														</div>
+														<div className="text-right">
+															<div className={`text-2xl font-bold ${
+																selectedTransaction.type === 'purchase' ? 'text-green-600' : 'text-red-600'
+															}`}>
+																{selectedTransaction.type === 'purchase' ? '+' : ''}
+																{selectedTransaction.amount} crédits
+															</div>
+															<p className="text-sm text-gray-500 mt-1">
+																{selectedTransaction.type === 'purchase' ? 'Ajouté' : 'Utilisé'}
+															</p>
+														</div>
+													</div>
+												</div>
+
+												{/* Details Section */}
+												<div className="p-6">
+													<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+														{/* Transaction Info */}
+														<div className="space-y-4">
+															<h5 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+																Informations de transaction
+															</h5>
+															<div className="space-y-3">
+																<div className="flex justify-between items-center py-2 border-b border-gray-100">
+																	<span className="text-sm text-gray-600">ID Transaction</span>
+																	<span className="text-sm font-medium text-gray-900 font-mono">
+																		{selectedTransaction.id}
+																	</span>
+																</div>
+																<div className="flex justify-between items-center py-2 border-b border-gray-100">
+																	<span className="text-sm text-gray-600">Type</span>
+																	<span className={`px-2 py-1 text-xs font-medium rounded-full ${
+																		selectedTransaction.type === 'purchase' 
+																			? 'bg-green-100 text-green-700' 
+																			: selectedTransaction.type === 'usage'
+																			? 'bg-blue-100 text-blue-700'
+																			: 'bg-yellow-100 text-yellow-700'
+																	}`}>
+																		{selectedTransaction.type === 'purchase' ? 'Achat' : 
+																		 selectedTransaction.type === 'usage' ? 'Utilisation' : 'Ajustement'}
+																	</span>
+																</div>
+																<div className="flex justify-between items-center py-2 border-b border-gray-100">
+																	<span className="text-sm text-gray-600">Source</span>
+																	<span className="text-sm font-medium text-gray-900 capitalize">
+																		{selectedTransaction.source || 'Système'}
+																	</span>
+																</div>
+															</div>
+														</div>
+
+														{/* Timing Info */}
+														<div className="space-y-4">
+															<h5 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+																Horodatage
+															</h5>
+															<div className="space-y-3">
+																<div className="flex justify-between items-center py-2 border-b border-gray-100">
+																	<span className="text-sm text-gray-600">Date</span>
+																	<span className="text-sm font-medium text-gray-900">
+																		{new Date(selectedTransaction.createdAt).toLocaleDateString('fr-FR', {
+																			weekday: 'long',
+																			day: '2-digit',
+																			month: 'long',
+																			year: 'numeric'
+																		})}
+																	</span>
+																</div>
+																<div className="flex justify-between items-center py-2 border-b border-gray-100">
+																	<span className="text-sm text-gray-600">Heure</span>
+																	<span className="text-sm font-medium text-gray-900">
+																		{new Date(selectedTransaction.createdAt).toLocaleTimeString('fr-FR', {
+																			hour: '2-digit',
+																			minute: '2-digit'
+																		})}
+																	</span>
+																</div>
+																<div className="flex justify-between items-center py-2 border-b border-gray-100">
+																	<span className="text-sm text-gray-600">Montant</span>
+																	<span className={`text-sm font-bold ${
+																		selectedTransaction.type === 'purchase' ? 'text-green-600' : 'text-red-600'
+																	}`}>
+																		{selectedTransaction.type === 'purchase' ? '+' : ''}
+																		{selectedTransaction.amount} crédits
+																	</span>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									) : loading ? (
 										renderLoadingState()
 									) : error ? (
 										renderErrorState()
 									) : transactions.length === 0 ? (
 										renderEmptyState()
 									) : (
-										<div className="divide-y divide-gray-100">
+										<div className="p-6 space-y-3">
 											{transactions.map(renderTransactionItem)}
 										</div>
 									)}
@@ -319,4 +469,4 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 	);
 };
 
-export default TransactionHistoryModal; 
+export default TransactionHistoryModal;
