@@ -1,6 +1,5 @@
-import { FaArrowLeft, FaCoins, FaTimesCircle } from 'react-icons/fa';
-
 import Button from './ui/Button';
+import { FaTimesCircle } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,9 +10,6 @@ const PaymentCancelPage = () => {
 		navigate('/app/credits');
 	};
 
-	const handleBackToDashboard = () => {
-		navigate('/app/dashboard');
-	};
 
 	return (
 		<div className="min-h-screen bg-gray-50 flex items-center justify-center">
