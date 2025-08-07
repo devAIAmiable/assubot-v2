@@ -7,10 +7,9 @@ import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
 import { paymentService } from '../services/paymentService';
 import { showToast } from './ui/Toast';
-import { transactionService } from '../services/transactionService';
 import { useAppSelector } from '../store/hooks';
+import { useCreditTransactions } from '../hooks/useCreditTransactions';
 import { useGetCreditPacksQuery } from '../store/creditPacksApi';
-import { useRecentTransactions } from '../hooks/useTransactions';
 import { useState } from 'react';
 
 const CreditPage = () => {
@@ -24,7 +23,7 @@ const CreditPage = () => {
 		loading: transactionsLoading, 
 		error: transactionsError,
 		refetch: refetchTransactions 
-	} = useRecentTransactions();
+	} = useCreditTransactions({ limit: 5 });
 
 	const handlePurchase = async (packageId: string) => {
 		try {
@@ -235,9 +234,15 @@ const CreditPage = () => {
 										<FaMinus className="h-4 w-4 text-red-500 mr-3" />
 									)}
 									<div>
-										<p className="text-sm font-medium text-gray-900">{transaction.action}</p>
+										<p className="text-sm font-medium text-gray-900">{transaction.description}</p>
 										<p className="text-xs text-gray-500">
-											{transactionService.formatDate(transaction.date)}
+											{new Date(transaction.createdAt).toLocaleDateString('fr-FR', {
+												day: '2-digit',
+												month: '2-digit',
+												year: 'numeric',
+												hour: '2-digit',
+												minute: '2-digit'
+											})}
 										</p>
 									</div>
 								</div>
@@ -247,7 +252,7 @@ const CreditPage = () => {
 									}`}
 								>
 									{transaction.type === 'purchase' ? '+' : ''}
-									{transaction.credits} crédits
+									{transaction.amount} crédits
 								</span>
 							</motion.div>
 						))}

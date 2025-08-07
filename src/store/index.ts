@@ -5,6 +5,7 @@ import chatReducer from './chatSlice';
 import comparisonsReducer from './comparisonsSlice';
 import contractsReducer from './contractsSlice';
 import { creditPacksApi } from './creditPacksApi';
+import { creditTransactionsApi } from './creditTransactionsApi';
 import storage from 'redux-persist/lib/storage';
 import userReducer from './userSlice';
 
@@ -27,6 +28,7 @@ const rootReducer = combineReducers({
 	chat: chatReducer,
 	comparisons: comparisonsReducer,
 	[creditPacksApi.reducerPath]: creditPacksApi.reducer,
+	[creditTransactionsApi.reducerPath]: creditTransactionsApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -38,7 +40,7 @@ export const store = configureStore({
 			serializableCheck: {
 				ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
 			},
-		}).concat(creditPacksApi.middleware),
+		}).concat(creditPacksApi.middleware, creditTransactionsApi.middleware),
 });
 
 export const persistor = persistStore(store);
