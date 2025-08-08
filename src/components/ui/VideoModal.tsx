@@ -22,6 +22,8 @@ const VideoModal: React.FC<VideoModalProps> = ({
 	const [isMuted, setIsMuted] = React.useState(false);
 	const [currentTime, setCurrentTime] = React.useState(0);
 	const [duration, setDuration] = React.useState(0);
+	const [isLoading, setIsLoading] = React.useState(true);
+	const [hasError, setHasError] = React.useState(false);
 
 	// Reset video when modal opens
 	useEffect(() => {
@@ -29,6 +31,8 @@ const VideoModal: React.FC<VideoModalProps> = ({
 			videoRef.current.currentTime = 0;
 			setCurrentTime(0);
 			setIsPlaying(false);
+			setIsLoading(true);
+			setHasError(false);
 		}
 	}, [isOpen]);
 
@@ -43,7 +47,15 @@ const VideoModal: React.FC<VideoModalProps> = ({
 	const handleLoadedMetadata = () => {
 		if (videoRef.current) {
 			setDuration(videoRef.current.duration);
+			setIsLoading(false);
+			setHasError(false);
 		}
+	};
+
+	// Handle video error
+	const handleVideoError = () => {
+		setIsLoading(false);
+		setHasError(true);
 	};
 
 	// Toggle play/pause
@@ -141,6 +153,7 @@ const VideoModal: React.FC<VideoModalProps> = ({
 										className="w-full h-auto max-h-[70vh]"
 										onTimeUpdate={handleTimeUpdate}
 										onLoadedMetadata={handleLoadedMetadata}
+										onError={handleVideoError}
 										onEnded={handleVideoEnd}
 										onPlay={() => setIsPlaying(true)}
 										onPause={() => setIsPlaying(false)}
@@ -149,8 +162,29 @@ const VideoModal: React.FC<VideoModalProps> = ({
 										Votre navigateur ne supporte pas la lecture de vidéos.
 									</video>
 
+									{/* Loading State */}
+									{isLoading && (
+										<div className="absolute inset-0 flex items-center justify-center bg-black/50">
+											<div className="text-white text-center">
+												<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+												<p>Chargement de la vidéo...</p>
+											</div>
+										</div>
+									)}
+
+									{/* Error State */}
+									{hasError && (
+										<div className="absolute inset-0 flex items-center justify-center bg-black/50">
+											<div className="text-white text-center">
+												<p className="text-lg font-semibold mb-2">Erreur de chargement</p>
+												<p className="text-sm opacity-75">Impossible de charger la vidéo</p>
+											</div>
+										</div>
+									)}
+
 									{/* Video Controls Overlay */}
-									<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+									{!isLoading && !hasError && (
+										<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
 										{/* Progress Bar */}
 										<div
 											className="w-full h-2 bg-gray-600 rounded-full cursor-pointer mb-3"
@@ -191,6 +225,7 @@ const VideoModal: React.FC<VideoModalProps> = ({
 											</div>
 										</div>
 									</div>
+									)}
 								</div>
 
 								{/* Footer */}
