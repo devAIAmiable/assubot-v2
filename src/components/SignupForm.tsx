@@ -1,19 +1,21 @@
 import { FaCheckCircle, FaEye, FaEyeSlash } from 'react-icons/fa';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import Dropdown from './ui/Dropdown';
-import type { DropdownOption } from './ui/Dropdown';
+// Dropdown components removed for simplicity
 import GoogleLoginButton from './ui/GoogleLoginButton';
 import Logo from './ui/Logo';
+import PasswordStrengthMeter from './ui/PasswordStrengthMeter';
 import Spinner from './ui/Spinner';
 import { authService } from '../services/coreApi';
+import { calculateAge } from '../utils/ageValidation';
 import { useForm } from 'react-hook-form';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-const signupSchema = z
+// Schema pour l'étape 1
+const step1Schema = z
 	.object({
 		email: z.string().trim().email('Adresse email invalide'),
 		password: z
@@ -21,118 +23,134 @@ const signupSchema = z
 			.trim()
 			.min(8, 'Le mot de passe doit contenir au moins 8 caractères')
 			.regex(
-				/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
 				'Le mot de passe doit contenir au moins: une majuscule, une minuscule, un chiffre et un caractère spécial'
 			),
 		confirmPassword: z.string().trim().min(1, 'La confirmation du mot de passe est requise'),
-		firstName: z.string().trim().min(2, 'Le prénom doit contenir au moins 2 caractères'),
-		lastName: z.string().trim().min(2, 'Le nom doit contenir au moins 2 caractères'),
-		birthDate: z.string().refine((date) => {
-			const birthDate = new Date(date);
-			const today = new Date();
-			const age = today.getFullYear() - birthDate.getFullYear();
-			return age >= 18;
-		}, 'Vous devez avoir minimum 18 ans'),
-		gender: z.enum(['male', 'female', 'other']),
-		profession: z.enum(['student', 'unemployed', 'executive', 'non-executive', 'entrepreneur']),
 		acceptedTerms: z.boolean().refine((val: boolean) => val === true, {
 			message: "Vous devez accepter les conditions d'utilisation",
 		}),
 	})
-	.refine((data) => data.password === data.confirmPassword, {
-		message: 'Les mots de passe ne correspondent pas',
-		path: ['confirmPassword'],
+	.superRefine(({ password, confirmPassword }, ctx) => {
+		if (password !== confirmPassword) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Les mots de passe ne correspondent pas',
+				path: ['confirmPassword'],
+			});
+		}
 	});
 
-type SignupFormData = z.infer<typeof signupSchema>;
+// Schema pour l'étape 2
+const step2Schema = z.object({
+	firstName: z.string().trim().min(2, 'Le prénom doit contenir au moins 2 caractères'),
+	lastName: z.string().trim().min(2, 'Le nom doit contenir au moins 2 caractères'),
+	birthDate: z.string().refine((date) => {
+		const age = calculateAge(date);
+		return age >= 18;
+	}, 'Vous devez avoir au moins 18 ans pour créer un compte'),
+	gender: z.enum(['male', 'female', 'other']),
+	profession: z.enum(['student', 'unemployed', 'executive', 'non-executive', 'entrepreneur']),
+});
+
+type Step1Data = z.infer<typeof step1Schema>;
+type Step2Data = z.infer<typeof step2Schema>;
 
 const SignupForm: React.FC = () => {
 	const navigate = useNavigate();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
+	const [step1Error, setStep1Error] = useState<string | null>(null);
 	const [currentStep, setCurrentStep] = useState(1);
 	const [countdown, setCountdown] = useState(30);
 	const { handleGoogleSignup, isLoading: isGoogleLoading } = useGoogleAuth();
 
-	const genderOptions: DropdownOption[] = [
-		{ value: 'male', label: 'Homme' },
-		{ value: 'female', label: 'Femme' },
-		{ value: 'other', label: 'Autre' },
-	];
+	// Options removed for simplicity - will be added back when step 2 is implemented
 
-	const professionOptions: DropdownOption[] = [
-		{ value: 'student', label: 'Étudiant' },
-		{ value: 'unemployed', label: 'Sans emploi' },
-		{ value: 'executive', label: 'Employé cadre' },
-		{ value: 'non-executive', label: 'Employé non cadre' },
-		{ value: 'entrepreneur', label: 'Entrepreneur' },
-	];
-
-	const {
-		register,
-		handleSubmit,
-		watch,
-		setValue,
-		trigger,
-		formState: { errors },
-	} = useForm<SignupFormData>({
-		resolver: zodResolver(signupSchema),
+	// Form pour l'étape 1
+	const step1Form = useForm<Step1Data>({
+		resolver: zodResolver(step1Schema),
+		mode: 'onSubmit',
 		defaultValues: {
-			gender: 'male',
-			profession: 'student',
 			acceptedTerms: false,
 		},
 	});
 
-	const handleNextStep = async () => {
-		const step1Fields = ['email', 'password', 'confirmPassword', 'acceptedTerms'] as const;
-		const isValid = await trigger(step1Fields);
+	// Form pour l'étape 2
+	const step2Form = useForm<Step2Data>({
+		resolver: zodResolver(step2Schema),
+		mode: 'onSubmit',
+		defaultValues: {
+			gender: 'male',
+			profession: 'student',
+		},
+	});
 
-		if (isValid) {
+	// Watch password for PasswordStrengthMeter
+	const password = step1Form.watch('password');
+
+	const handleNextStep = async () => {
+		setStep1Error(null);
+		const ok = await step1Form.trigger();
+
+		if (ok) {
 			setCurrentStep(2);
+		} else {
+			const { errors } = step1Form.formState;
+			// Check for specific errors
+			if (errors.confirmPassword) {
+				setStep1Error('Les mots de passe ne correspondent pas');
+			} else if (errors.acceptedTerms) {
+				setStep1Error("Vous devez accepter les conditions d'utilisation");
+			} else {
+				setStep1Error('Veuillez corriger les erreurs ci-dessus');
+			}
 		}
 	};
 
 	const handlePreviousStep = () => {
 		setCurrentStep(1);
+		setStep1Error(null);
 	};
 
-	const onSubmit = async (data: SignupFormData) => {
-		setIsSubmitting(true);
+	const onSubmit = async (step2Data: Step2Data) => {
+		if (!step1Form.formState.isValid) return;
+
 		setSubmitError(null);
+		try {
+			// Fusion des données des deux étapes
+			const step1Data = step1Form.getValues();
+			const completeData = {
+				...step1Data,
+				...step2Data,
+			};
 
-		// Remove confirmPassword from the data sent to API
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { confirmPassword, ...signupData } = data;
-
-		// Convert birthDate to ISO string format for backend
-		const payload = {
-			...signupData,
-			birthDate: new Date(signupData.birthDate).toISOString(),
-		};
-
-		const response = await authService.signup(payload);
-
-		if (response.success) {
-			setSubmitSuccess(true);
-			// Don't redirect automatically - let user know about email verification
-		} else {
-			setSubmitError(response.error || "Erreur lors de l'inscription");
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { confirmPassword, ...signupData } = completeData;
+			const payload = {
+				...signupData,
+				email: signupData.email.trim().toLowerCase(),
+				birthDate: new Date(`${signupData.birthDate}T00:00:00Z`).toISOString(),
+			};
+			const response = await authService.signup(payload);
+			if (response.success) {
+				setSubmitSuccess(true);
+			} else {
+				setSubmitError("Une erreur s'est produite. Veuillez réessayer ou contacter le support.");
+			}
+		} catch (e: unknown) {
+			const errorMessage = e instanceof Error ? e.message : 'Erreur réseau';
+			setSubmitError(errorMessage);
 		}
-
-		setIsSubmitting(false);
 	};
 
-	// Countdown effect for success page
-	React.useEffect(() => {
+	// Countdown redirect
+	useEffect(() => {
 		if (submitSuccess && countdown > 0) {
-			const timer = setTimeout(() => {
-				setCountdown(countdown - 1);
-			}, 1000);
-			return () => clearTimeout(timer);
+			const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
+			return () => clearTimeout(t);
 		} else if (submitSuccess && countdown === 0) {
 			navigate('/login');
 		}
@@ -143,16 +161,14 @@ const SignupForm: React.FC = () => {
 			<div className="min-h-screen flex items-center justify-center bg-gray-50">
 				<div className="text-center max-w-lg mx-auto p-8">
 					<FaCheckCircle className="h-16 w-16 text-green-600 mx-auto mb-6" />
-					<h1 className="text-3xl font-bold text-gray-900 mb-4">
-						Votre compte a été créé avec succès !
-					</h1>
+					<h1 className="text-2xl font-bold text-gray-900 mb-4">Demande d'inscription envoyée !</h1>
 					<div className="text-gray-600 mb-8 space-y-4">
 						<p>
-							Veuillez vérifier votre boîte de réception et cliquer sur le lien de confirmation pour
-							activer votre compte.
+							Si l'adresse email est valide, vous recevrez un email de confirmation dans votre boîte
+							de réception.
 						</p>
 						<p className="font-medium text-gray-800">
-							Vous pourrez vous connecter une fois votre compte vérifié.
+							Veuillez cliquer sur le lien de confirmation pour activer votre compte.
 						</p>
 						<div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
 							<p className="text-sm text-blue-800">
@@ -188,13 +204,7 @@ const SignupForm: React.FC = () => {
 					</p>
 				</div>
 
-				<form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-					{submitError && (
-						<div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-sm">
-							<p className="text-sm text-red-600 font-medium">{submitError}</p>
-						</div>
-					)}
-
+				<form className="mt-8 space-y-6" onSubmit={step2Form.handleSubmit(onSubmit)}>
 					{currentStep === 1 ? (
 						<div className="space-y-4">
 							{/* Email */}
@@ -203,16 +213,19 @@ const SignupForm: React.FC = () => {
 									Adresse email
 								</label>
 								<input
-									{...register('email')}
+									{...step1Form.register('email')}
 									type="email"
 									id="email"
+									autoComplete="email"
 									className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-										errors.email ? 'border-red-300' : 'border-gray-300'
+										step1Form.formState.errors.email ? 'border-red-300' : 'border-gray-300'
 									}`}
 									placeholder="user@example.com"
 								/>
-								{errors.email && (
-									<p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+								{step1Form.formState.errors.email && (
+									<p className="mt-1 text-sm text-red-600">
+										{step1Form.formState.errors.email.message}
+									</p>
 								)}
 							</div>
 
@@ -223,11 +236,12 @@ const SignupForm: React.FC = () => {
 								</label>
 								<div className="relative">
 									<input
-										{...register('password')}
+										{...step1Form.register('password')}
 										type={showPassword ? 'text' : 'password'}
 										id="password"
+										autoComplete="new-password"
 										className={`mt-1 block w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-											errors.password ? 'border-red-300' : 'border-gray-300'
+											step1Form.formState.errors.password ? 'border-red-300' : 'border-gray-300'
 										}`}
 										placeholder="••••••••"
 									/>
@@ -235,6 +249,9 @@ const SignupForm: React.FC = () => {
 										type="button"
 										className="absolute inset-y-0 right-0 pr-3 flex items-center"
 										onClick={() => setShowPassword(!showPassword)}
+										aria-label={
+											showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+										}
 									>
 										{showPassword ? (
 											<FaEyeSlash className="h-5 w-5 text-gray-400" />
@@ -243,8 +260,11 @@ const SignupForm: React.FC = () => {
 										)}
 									</button>
 								</div>
-								{errors.password && (
-									<p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+								<PasswordStrengthMeter password={password || ''} />
+								{step1Form.formState.errors.password && (
+									<p className="mt-1 text-sm text-red-600">
+										{step1Form.formState.errors.password.message}
+									</p>
 								)}
 							</div>
 
@@ -258,11 +278,14 @@ const SignupForm: React.FC = () => {
 								</label>
 								<div className="relative">
 									<input
-										{...register('confirmPassword')}
+										{...step1Form.register('confirmPassword')}
 										type={showConfirmPassword ? 'text' : 'password'}
 										id="confirmPassword"
+										autoComplete="new-password"
 										className={`mt-1 block w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-											errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+											step1Form.formState.errors.confirmPassword
+												? 'border-red-300'
+												: 'border-gray-300'
 										}`}
 										placeholder="••••••••"
 									/>
@@ -270,6 +293,9 @@ const SignupForm: React.FC = () => {
 										type="button"
 										className="absolute inset-y-0 right-0 pr-3 flex items-center"
 										onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+										aria-label={
+											showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+										}
 									>
 										{showConfirmPassword ? (
 											<FaEyeSlash className="h-5 w-5 text-gray-400" />
@@ -278,23 +304,28 @@ const SignupForm: React.FC = () => {
 										)}
 									</button>
 								</div>
-								{errors.confirmPassword && (
-									<p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+								{step1Form.formState.errors.confirmPassword && (
+									<p className="mt-1 text-sm text-red-600">
+										{step1Form.formState.errors.confirmPassword.message}
+									</p>
 								)}
 							</div>
 
-							{/* Terms and Conditions */}
+							{/* Terms */}
 							<div className="flex items-start space-x-3">
 								<button
 									type="button"
-									onClick={() => setValue('acceptedTerms', !watch('acceptedTerms'))}
+									data-testid="terms-toggle"
+									onClick={() =>
+										step1Form.setValue('acceptedTerms', !step1Form.watch('acceptedTerms'))
+									}
 									className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-										watch('acceptedTerms') ? 'bg-blue-600' : 'bg-gray-200'
+										step1Form.watch('acceptedTerms') ? 'bg-blue-600' : 'bg-gray-200'
 									}`}
 								>
 									<span
 										className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-											watch('acceptedTerms') ? 'translate-x-6' : 'translate-x-1'
+											step1Form.watch('acceptedTerms') ? 'translate-x-6' : 'translate-x-1'
 										}`}
 									/>
 								</button>
@@ -317,31 +348,36 @@ const SignupForm: React.FC = () => {
 											politique de confidentialité
 										</button>
 									</label>
-									{errors.acceptedTerms && (
-										<p className="mt-1 text-sm text-red-600">{errors.acceptedTerms.message}</p>
+									{step1Form.formState.errors.acceptedTerms && (
+										<p className="mt-1 text-sm text-red-600">
+											{step1Form.formState.errors.acceptedTerms.message}
+										</p>
 									)}
 								</div>
 							</div>
 						</div>
 					) : (
 						<div className="space-y-4">
-							{/* First Name and Last Name */}
+							{/* Names */}
 							<div className="grid grid-cols-2 gap-4">
 								<div>
 									<label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
 										Prénom
 									</label>
 									<input
-										{...register('firstName')}
+										{...step2Form.register('firstName')}
 										type="text"
 										id="firstName"
+										autoComplete="given-name"
 										className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-											errors.firstName ? 'border-red-300' : 'border-gray-300'
+											step2Form.formState.errors.firstName ? 'border-red-300' : 'border-gray-300'
 										}`}
 										placeholder="Jean"
 									/>
-									{errors.firstName && (
-										<p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
+									{step2Form.formState.errors.firstName && (
+										<p className="mt-1 text-sm text-red-600">
+											{step2Form.formState.errors.firstName.message}
+										</p>
 									)}
 								</div>
 
@@ -350,16 +386,19 @@ const SignupForm: React.FC = () => {
 										Nom
 									</label>
 									<input
-										{...register('lastName')}
+										{...step2Form.register('lastName')}
 										type="text"
 										id="lastName"
+										autoComplete="family-name"
 										className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-											errors.lastName ? 'border-red-300' : 'border-gray-300'
+											step2Form.formState.errors.lastName ? 'border-red-300' : 'border-gray-300'
 										}`}
 										placeholder="Dupont"
 									/>
-									{errors.lastName && (
-										<p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
+									{step2Form.formState.errors.lastName && (
+										<p className="mt-1 text-sm text-red-600">
+											{step2Form.formState.errors.lastName.message}
+										</p>
 									)}
 								</div>
 							</div>
@@ -370,47 +409,68 @@ const SignupForm: React.FC = () => {
 									Date de naissance
 								</label>
 								<input
-									{...register('birthDate')}
+									{...step2Form.register('birthDate')}
 									type="date"
 									id="birthDate"
+									autoComplete="bday"
 									className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-										errors.birthDate ? 'border-red-300' : 'border-gray-300'
+										step2Form.formState.errors.birthDate ? 'border-red-300' : 'border-gray-300'
 									}`}
 								/>
-								{errors.birthDate && (
-									<p className="mt-1 text-sm text-red-600">{errors.birthDate.message}</p>
+								{step2Form.formState.errors.birthDate && (
+									<p className="mt-1 text-sm text-red-600">
+										{step2Form.formState.errors.birthDate.message}
+									</p>
 								)}
 							</div>
 
 							{/* Gender */}
-							<Dropdown
-								options={genderOptions}
-								value={watch('gender')}
-								onChange={(value) => setValue('gender', value as 'male' | 'female' | 'other')}
-								label="Genre"
-								placeholder="Sélectionner un genre"
-								error={errors.gender?.message}
-							/>
+							<div>
+								<label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+									Genre
+								</label>
+								<select
+									{...step2Form.register('gender')}
+									id="gender"
+									className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+										step2Form.formState.errors.gender ? 'border-red-300' : 'border-gray-300'
+									}`}
+								>
+									<option value="male">Homme</option>
+									<option value="female">Femme</option>
+									<option value="other">Autre</option>
+								</select>
+								{step2Form.formState.errors.gender && (
+									<p className="mt-1 text-sm text-red-600">
+										{step2Form.formState.errors.gender.message}
+									</p>
+								)}
+							</div>
 
 							{/* Profession */}
-							<Dropdown
-								options={professionOptions}
-								value={watch('profession')}
-								onChange={(value) =>
-									setValue(
-										'profession',
-										value as
-											| 'student'
-											| 'unemployed'
-											| 'executive'
-											| 'non-executive'
-											| 'entrepreneur'
-									)
-								}
-								label="Catégorie professionnelle"
-								placeholder="Sélectionner une catégorie"
-								error={errors.profession?.message}
-							/>
+							<div>
+								<label htmlFor="profession" className="block text-sm font-medium text-gray-700">
+									Catégorie professionnelle
+								</label>
+								<select
+									{...step2Form.register('profession')}
+									id="profession"
+									className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+										step2Form.formState.errors.profession ? 'border-red-300' : 'border-gray-300'
+									}`}
+								>
+									<option value="student">Étudiant</option>
+									<option value="unemployed">Sans emploi</option>
+									<option value="executive">Employé cadre</option>
+									<option value="non-executive">Employé non cadre</option>
+									<option value="entrepreneur">Entrepreneur</option>
+								</select>
+								{step2Form.formState.errors.profession && (
+									<p className="mt-1 text-sm text-red-600">
+										{step2Form.formState.errors.profession.message}
+									</p>
+								)}
+							</div>
 						</div>
 					)}
 
@@ -426,14 +486,13 @@ const SignupForm: React.FC = () => {
 						</div>
 					) : (
 						<>
-							{/* Submit Button */}
 							<div>
 								<button
 									type="submit"
-									disabled={isSubmitting}
+									disabled={step2Form.formState.isSubmitting}
 									className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
 								>
-									{isSubmitting ? (
+									{step2Form.formState.isSubmitting ? (
 										<>
 											<Spinner size="sm" color="white" className="mr-2" />
 											Création du compte...
@@ -443,8 +502,6 @@ const SignupForm: React.FC = () => {
 									)}
 								</button>
 							</div>
-
-							{/* Previous Step Button */}
 							<div>
 								<button
 									type="button"
@@ -457,22 +514,28 @@ const SignupForm: React.FC = () => {
 						</>
 					)}
 
-					{/* Google Signup Button */}
 					<GoogleLoginButton
 						onClick={handleGoogleSignup}
 						loading={isGoogleLoading}
-						disabled={isSubmitting}
+						disabled={step2Form.formState.isSubmitting || !step1Form.watch('acceptedTerms')}
 						isLogin={false}
 					/>
 
-					{/* Signin Redirect Button */}
+					{!step1Form.watch('acceptedTerms') &&
+						step1Error &&
+						step1Error.includes("conditions d'utilisation") && (
+							<p className="mt-2 text-sm text-red-600">
+								Vous devez accepter les conditions d'utilisation pour vous inscrire avec Google
+							</p>
+						)}
+
 					<div className="text-center mt-6">
 						<p className="text-sm text-gray-600">
 							Déjà un compte ?{' '}
 							<button
 								type="button"
 								onClick={() => navigate('/login')}
-								className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200 underline hover:no-underline"
+								className="font-medium text-blue-600 hover:text-blue-500 underline"
 							>
 								Se connecter
 							</button>

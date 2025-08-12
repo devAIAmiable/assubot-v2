@@ -152,6 +152,7 @@ const LoginForm: React.FC = () => {
 								/>
 								<button
 									type="button"
+									aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
 									className="absolute inset-y-0 right-0 pr-3 flex items-center"
 									onClick={() => setShowPassword(!showPassword)}
 								>

@@ -19,20 +19,51 @@ const VideoModal: React.FC<VideoModalProps> = ({
 }) => {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const [isPlaying, setIsPlaying] = React.useState(false);
-	const [isMuted, setIsMuted] = React.useState(false);
+	const [isMuted, setIsMuted] = React.useState(true);
 	const [currentTime, setCurrentTime] = React.useState(0);
 	const [duration, setDuration] = React.useState(0);
 	const [isLoading, setIsLoading] = React.useState(true);
 	const [hasError, setHasError] = React.useState(false);
 
-	// Reset video when modal opens
+	// Reset video when modal opens and start playing automatically
 	useEffect(() => {
 		if (isOpen && videoRef.current) {
 			videoRef.current.currentTime = 0;
 			setCurrentTime(0);
-			setIsPlaying(false);
 			setIsLoading(true);
 			setHasError(false);
+			
+			// Start playing automatically when modal opens
+			const playVideo = async () => {
+				try {
+					await videoRef.current?.play();
+					setIsPlaying(true);
+				} catch (error) {
+					console.log('Auto-play failed:', error);
+					// Auto-play might fail due to browser policies, but that's okay
+					setIsPlaying(false);
+				}
+			};
+			
+			// Wait for video to load metadata before attempting to play
+			const handleCanPlay = () => {
+				playVideo();
+				videoRef.current?.removeEventListener('canplay', handleCanPlay);
+			};
+			
+			videoRef.current.addEventListener('canplay', handleCanPlay);
+			
+			// Fallback: try to play after a short delay
+			const fallbackTimer = setTimeout(() => {
+				if (videoRef.current && !isPlaying) {
+					playVideo();
+				}
+			}, 500);
+			
+			return () => {
+				clearTimeout(fallbackTimer);
+				videoRef.current?.removeEventListener('canplay', handleCanPlay);
+			};
 		}
 	}, [isOpen]);
 
@@ -151,6 +182,7 @@ const VideoModal: React.FC<VideoModalProps> = ({
 									<video
 										ref={videoRef}
 										className="w-full h-auto max-h-[70vh]"
+										muted
 										onTimeUpdate={handleTimeUpdate}
 										onLoadedMetadata={handleLoadedMetadata}
 										onError={handleVideoError}

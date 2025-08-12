@@ -17,13 +17,13 @@ export const authService = {
 
 			return {
 				success: false,
-				error: response.error?.message || 'Verification failed',
+				error: response.error?.message || 'Échec de la vérification',
 			};
 		} catch (error) {
 			console.error('Auth service error:', error);
 			return {
 				success: false,
-				error: 'Network error occurred',
+				error: 'Erreur de connexion réseau',
 			};
 		}
 	},
@@ -85,13 +85,13 @@ export const authService = {
 
 			return {
 				success: false,
-				error: response.error?.message || 'Logout failed',
+				error: response.error?.message || 'Erreur lors de la déconnexion',
 			};
 		} catch (error) {
 			console.error('Logout error:', error);
 			return {
 				success: false,
-				error: 'Network error occurred',
+				error: 'Erreur de connexion réseau',
 			};
 		}
 	},
@@ -279,13 +279,13 @@ export const authService = {
 
 			return {
 				success: false,
-				error: response.error?.message || 'Token refresh failed',
+				error: response.error?.message || 'Échec du renouvellement du token',
 			};
 		} catch (error) {
 			console.error('Refresh error:', error);
 			return {
 				success: false,
-				error: 'Network error occurred',
+				error: 'Erreur de connexion réseau',
 			};
 		}
 	},

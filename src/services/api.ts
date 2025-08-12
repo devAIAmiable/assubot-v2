@@ -80,7 +80,7 @@ class ApiClient {
 						status: 'error',
 						error: {
 							code: 'TIMEOUT',
-							message: 'Request timeout',
+							message: 'Délai d\'attente dépassé',
 						},
 					};
 				}
@@ -91,7 +91,7 @@ class ApiClient {
 				status: 'error',
 				error: {
 					code: 'NETWORK_ERROR',
-					message: 'Network error occurred',
+					message: 'Erreur de connexion réseau',
 				},
 			};
 		}

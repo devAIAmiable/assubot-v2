@@ -55,6 +55,7 @@ const ProfileModule = () => {
 		newPassword: '',
 		confirmPassword: '',
 	});
+	const [hasInteractedWithConfirmPassword, setHasInteractedWithConfirmPassword] = useState(false);
 
 	// Update form state when currentUser changes
 	useEffect(() => {
@@ -155,6 +156,7 @@ const ProfileModule = () => {
 			showToast.success('Mot de passe changé avec succès');
 			setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
 			setIsChangingPassword(false);
+			setHasInteractedWithConfirmPassword(false);
 		} else {
 			showToast.error('Erreur lors du changement de mot de passe');
 		}
@@ -587,12 +589,19 @@ const ProfileModule = () => {
 									label="Confirmer le mot de passe"
 									type="password"
 									value={passwordForm.confirmPassword}
-									onChange={(e) =>
-										setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
-									}
+									onChange={(e) => {
+										setPasswordForm({ ...passwordForm, confirmPassword: e.target.value });
+										setHasInteractedWithConfirmPassword(true);
+									}}
+									onBlur={() => {
+										if (passwordForm.confirmPassword) {
+											setHasInteractedWithConfirmPassword(true);
+										}
+									}}
 									required
 									disabled={passwordLoading}
 									error={
+										hasInteractedWithConfirmPassword &&
 										passwordForm.newPassword &&
 										passwordForm.confirmPassword &&
 										passwordForm.newPassword !== passwordForm.confirmPassword
@@ -623,7 +632,10 @@ const ProfileModule = () => {
 										variant="secondary"
 										size="sm"
 										type="button"
-										onClick={() => setIsChangingPassword(false)}
+										onClick={() => {
+											setIsChangingPassword(false);
+											setHasInteractedWithConfirmPassword(false);
+										}}
 										disabled={passwordLoading}
 									>
 										Annuler
