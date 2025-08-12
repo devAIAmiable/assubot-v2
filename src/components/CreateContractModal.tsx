@@ -1,422 +1,255 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { FaTimes, FaUpload } from 'react-icons/fa';
-import { Fragment, useState } from 'react';
+import { FaBell, FaCheck, FaClock, FaRobot, FaTimes } from 'react-icons/fa';
+import { Fragment, useCallback, useState } from 'react';
 
+import ContractCreationForm from './contract/ContractCreationForm';
+import type { ContractFormData } from '../types';
 import React from 'react';
+import { contractUploadService } from '../services/contractUploadService';
 import { motion } from 'framer-motion';
 
 interface CreateContractModalProps {
-  open: boolean;
-  onClose: () => void;
-  createStep: number;
-  setCreateStep: React.Dispatch<React.SetStateAction<number>>;
-  form: {
-    coverage: string;
-    type: string;
-    valid_from: string;
-    valid_to: string;
-    prime: string;
-    renouvellement_tacite: string;
-    date_limit: string;
-    conditions_particulieres: File | null;
-    conditions_generales: File | null;
-    autres_documents: File | null;
-  };
-  setForm: React.Dispatch<React.SetStateAction<{
-    coverage: string;
-    type: string;
-    valid_from: string;
-    valid_to: string;
-    prime: string;
-    renouvellement_tacite: string;
-    date_limit: string;
-    conditions_particulieres: File | null;
-    conditions_generales: File | null;
-    autres_documents: File | null;
-  }>>;
+  open?: boolean;
+  onClose?: () => void;
 }
 
 const CreateContractModal: React.FC<CreateContractModalProps> = ({
-  open,
-  onClose,
-  createStep,
-  setCreateStep,
-  form,
-  setForm,
+  open: propOpen,
+  onClose: propOnClose,
 }) => {
-  // Drag and drop state for each file input
-  const [dragOver, setDragOver] = useState<{
-    conditions_particulieres: boolean;
-    conditions_generales: boolean;
-    autres_documents: boolean;
-  }>({
-    conditions_particulieres: false,
-    conditions_generales: false,
-    autres_documents: false,
-  });
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  
+  // Use prop if provided, otherwise default to false
+  const open = propOpen !== undefined ? propOpen : false;
+  
+  const handleClose = useCallback(() => {
+    if (propOnClose) {
+      propOnClose();
+    }
+    // Reset form state when closing
+    setShowSuccessMessage(false);
+    setCurrentStep(1);
+    setIsUploading(false);
+    setUploadError(null);
+  }, [propOnClose]);
 
-  // Handlers for drag and drop
-  const handleDragOver = (e: React.DragEvent, field: keyof typeof dragOver) => {
-    e.preventDefault();
-    setDragOver((prev) => ({ ...prev, [field]: true }));
-  };
-  const handleDragLeave = (e: React.DragEvent, field: keyof typeof dragOver) => {
-    e.preventDefault();
-    setDragOver((prev) => ({ ...prev, [field]: false }));
-  };
-  const handleDrop = (e: React.DragEvent, field: keyof typeof dragOver) => {
-    e.preventDefault();
-    setDragOver((prev) => ({ ...prev, [field]: false }));
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      setForm((f) => ({ ...f, [field]: files[0] }));
+  const handleSubmit = useCallback(async (fileObjects: Record<string, File>, formData: ContractFormData) => {
+    try {
+      setIsUploading(true);
+      setUploadError(null);
+      
+      // Validate required documents using the service
+      const validation = contractUploadService.validateRequiredDocuments(fileObjects);
+      if (!validation.valid) {
+        throw new Error(validation.error);
+      }
+
+      // Start the upload process with progress tracking
+      const result = await contractUploadService.uploadContract(
+        formData,
+        fileObjects
+      );
+
+      if (result.success) {
+        // Show success message
+        setShowSuccessMessage(true);
+      } else {
+        throw new Error(result.error || 'Échec de la création du contrat');
+      }
+      
+    } catch (error) {
+      console.error('Contract creation failed:', error);
+      setUploadError(error instanceof Error ? error.message : 'Une erreur est survenue');
+    } finally {
+      setIsUploading(false);
     }
-  };
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: keyof typeof dragOver) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      setForm((f) => ({ ...f, [field]: files[0] }));
-    }
-  };
+  }, []);
+
+  const closeSuccessMessage = useCallback(() => {
+    setShowSuccessMessage(false);
+    handleClose();
+  }, [handleClose]);
+
+  // Success Modal
+  if (showSuccessMessage) {
+    return (
+      <Transition appear show={true} as={Fragment}>
+        <Dialog as="div" className="fixed z-50 inset-0 overflow-y-auto" onClose={() => {}}>
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="fixed inset-0 bg-opacity-50 backdrop-blur-xs transition-opacity" />
+            <Dialog.Panel className="relative bg-white rounded-2xl max-w-md w-full mx-auto shadow-xl">
+              <div className="p-8">
+                <div className="text-center">
+                  <motion.div 
+                    className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-400 rounded-full flex items-center justify-center mx-auto"
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <FaCheck className="text-4xl text-white" />
+                  </motion.div>
+                  <h4 className="text-2xl font-semibold text-green-600 mt-4">
+                    Contrat téléchargé avec succès !
+                  </h4>
+                  <div className="text-left mb-4">
+                    <p className="text-lg font-medium text-gray-800 mb-4 text-center">
+                      Votre contrat est en cours de traitement.
+                    </p>
+                    <div className="bg-gray-50 rounded-lg px-2 py-4 space-y-4">
+                      <div className="flex items-center space-x-3 py-2">
+                        <FaClock className="text-xl text-blue-500 w-5 flex-shrink-0 mx-2" />
+                        <span className="text-gray-700">
+                          Temps de traitement : <strong className="text-gray-900">3 minutes</strong>
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3 py-2">
+                        <FaBell className="text-xl text-blue-500 w-5 flex-shrink-0 mx-2" />
+                        <span className="text-gray-700">
+                          Vous serez notifié dès que votre contrat sera disponible
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <FaRobot className="text-xl text-blue-500 w-5 flex-shrink-0 mx-2" />
+                        <span className="text-gray-700">
+                          AssuBot analysera automatiquement vos documents
+                        </span>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-gray-600 text-sm leading-relaxed">
+                      Une fois le traitement terminé, votre contrat apparaîtra dans votre tableau de bord 
+                      et vous pourrez commencer à poser des questions à AssuBot à son sujet.
+                    </p>
+                  </div>
+                  <button 
+                    className="bg-[#1e51ab] hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg text-lg transition-colors duration-200 flex items-center space-x-2 mx-auto mt-6"
+                    onClick={closeSuccessMessage}
+                  >
+                    <FaCheck />
+                    <span>Compris</span>
+                  </button>
+                </div>
+              </div>
+            </Dialog.Panel>
+          </div>
+        </Dialog>
+      </Transition>
+    );
+  }
 
   return (
     <Transition appear show={open} as={Fragment}>
-      <Dialog as="div" className="fixed z-50 inset-0 overflow-y-auto" open={open} onClose={onClose}>
+      <Dialog as="div" className="fixed z-50 inset-0 overflow-y-auto" onClose={handleClose}>
         <div className="flex items-center justify-center min-h-screen px-4">
-          <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm transition-opacity" />
-          <Dialog.Panel className="relative bg-white rounded-2xl max-w-2xl w-full mx-auto shadow-xl p-0">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Importer un nouveau contrat</h2>
-                <button
-                  onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <FaTimes className="h-6 w-6" />
-                </button>
-              </div>
-              {/* Stepper/Progress Bar */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between w-full mb-2">
-                  {['Informations', 'Détails', 'Documents'].map((label, idx, arr) => (
-                    <div key={label} className="flex items-center w-full">
-                      <div className="flex flex-col items-center">
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center font-bold border-2 ${createStep === idx + 1 ? 'border-[#1e51ab] text-[#1e51ab] bg-white' : 'border-gray-300 text-gray-400 bg-white'} ${createStep > idx + 1 ? 'bg-[#1e51ab] text-white' : ''}`}
-                        >
-                          {idx + 1}
-                        </div>
-                        <span
-                          className={`mt-2 text-xs ${createStep === idx + 1 ? 'text-[#1e51ab] font-semibold' : 'text-gray-400'}`}
-                        >
-                          {label}
-                        </span>
-                      </div>
-                      {idx < arr.length - 1 && (
-                        <div className="flex-1 h-1 bg-gray-200 mx-2 relative">
-                          <div
-                            className={`absolute top-0 left-0 h-1 rounded ${createStep > idx + 1 ? 'bg-[#1e51ab] w-full' : 'bg-gray-200 w-0'}`}
-                            style={{ transition: 'width 0.3s' }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                {/* Step 1: Basic Information */}
-                {createStep === 1 && (
-                  <div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label
-                          htmlFor="contractCoverage"
-                          className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                          Contrat <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="contractCoverage"
-                          name="coverage"
-                          required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                          placeholder="Nom du contrat"
-                          value={form.coverage}
-                          onChange={(e) => setForm((f) => ({ ...f, coverage: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="contractType"
-                          className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                          Catégorie <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                          id="contractType"
-                          name="type"
-                          required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                          value={form.type}
-                          onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
-                        >
-                          <option value="">Sélectionnez une catégorie</option>
-                          <option value="assurances-habitations">Assurances habitations</option>
-                          <option value="assurances-vehicules">Assurances véhicules</option>
-                          <option value="assurances-appareils-electroniques">
-                            Assurances appareils électroniques
-                          </option>
-                          <option value="assurances-vie-sante-prevoyance">
-                            Assurances vie, santé et prévoyance
-                          </option>
-                          <option value="autres-assurances">Autres assurances</option>
-                        </select>
-                      </div>
-                    </div>
-                    <p className="text-gray-500 mt-3 text-sm">
-                      Les champs facultatifs peuvent être renseignés par AssuBot lors du
-                      chargement du contrat
-                    </p>
-                  </div>
-                )}
-                {/* Step 2: Contract Details */}
-                {createStep === 2 && (
-                  <div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label
-                          htmlFor="validFrom"
-                          className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                          Valide à partir du
-                        </label>
-                        <input
-                          type="date"
-                          id="validFrom"
-                          name="valid_from"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                          value={form.valid_from}
-                          onChange={(e) =>
-                            setForm((f) => ({ ...f, valid_from: e.target.value }))
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="validTo"
-                          className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                          Valide jusqu'au
-                        </label>
-                        <input
-                          type="date"
-                          id="validTo"
-                          name="valid_to"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                          value={form.valid_to}
-                          onChange={(e) => setForm((f) => ({ ...f, valid_to: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="prime"
-                          className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                          Prime annuelle
-                        </label>
-                        <input
-                          type="number"
-                          id="prime"
-                          name="prime"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                          placeholder="Prime"
-                          value={form.prime}
-                          onChange={(e) => setForm((f) => ({ ...f, prime: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="renouvellementTacite"
-                          className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                          Renouvellement Tacite
-                        </label>
-                        <select
-                          id="renouvellementTacite"
-                          name="renouvellement_tacite"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                          value={form.renouvellement_tacite}
-                          onChange={(e) =>
-                            setForm((f) => ({ ...f, renouvellement_tacite: e.target.value }))
-                          }
-                        >
-                          <option value="">Sélectionnez une option</option>
-                          <option value="1">Oui</option>
-                          <option value="0">Non</option>
-                        </select>
-                      </div>
-                      <div className="md:col-span-2">
-                        <label
-                          htmlFor="dateLimit"
-                          className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                          Date Limite
-                        </label>
-                        <input
-                          type="date"
-                          id="dateLimit"
-                          name="date_limit"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                          value={form.date_limit}
-                          onChange={(e) =>
-                            setForm((f) => ({ ...f, date_limit: e.target.value }))
-                          }
-                        />
-                      </div>
-                    </div>
-                    <p className="text-gray-500 mt-3 text-sm">
-                      Les champs facultatifs peuvent être renseignés par AssuBot lors du
-                      chargement du contrat
-                    </p>
-                  </div>
-                )}
-                {/* Step 3: Document Upload */}
-                {createStep === 3 && (
-                  <div className="space-y-6">
-                    {/* Conditions Particulières */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.2 }}
-                      className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${dragOver.conditions_particulieres ? 'border-[#1e51ab] bg-blue-50' : 'border-gray-300 hover:border-[#1e51ab]'}`}
-                      onDragOver={(e) => handleDragOver(e, 'conditions_particulieres')}
-                      onDragLeave={(e) => handleDragLeave(e, 'conditions_particulieres')}
-                      onDrop={(e) => handleDrop(e, 'conditions_particulieres')}
-                    >
-                      <input
-                        type="file"
-                        id="file-upload-cp"
-                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                        onChange={(e) => handleFileUpload(e, 'conditions_particulieres')}
-                        className="hidden"
-                      />
-                      <FaUpload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Conditions Particulières <span className="text-red-500">*</span></h3>
-                      <p className="text-gray-600 mb-4">Glissez-déposez votre fichier ici ou cliquez pour sélectionner</p>
-                      <label
-                        htmlFor="file-upload-cp"
-                        className="inline-flex items-center px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-semibold hover:bg-[#163d82] transition-colors cursor-pointer"
-                      >
-                        <FaUpload className="h-4 w-4 mr-2" />
-                        Choisir un fichier
-                      </label>
-                      <p className="text-sm text-gray-500 mt-2">Formats acceptés: PDF, DOC, DOCX, JPG, PNG (max 10MB)</p>
-                      {form.conditions_particulieres && (
-                        <p className="mt-2 text-green-600 text-sm">Fichier sélectionné: {form.conditions_particulieres.name}</p>
-                      )}
-                    </motion.div>
-                    {/* Conditions Générales */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.2 }}
-                      className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${dragOver.conditions_generales ? 'border-[#1e51ab] bg-blue-50' : 'border-gray-300 hover:border-[#1e51ab]'}`}
-                      onDragOver={(e) => handleDragOver(e, 'conditions_generales')}
-                      onDragLeave={(e) => handleDragLeave(e, 'conditions_generales')}
-                      onDrop={(e) => handleDrop(e, 'conditions_generales')}
-                    >
-                      <input
-                        type="file"
-                        id="file-upload-cg"
-                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                        onChange={(e) => handleFileUpload(e, 'conditions_generales')}
-                        className="hidden"
-                      />
-                      <FaUpload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Conditions Générales <span className="text-red-500">*</span></h3>
-                      <p className="text-gray-600 mb-4">Glissez-déposez votre fichier ici ou cliquez pour sélectionner</p>
-                      <label
-                        htmlFor="file-upload-cg"
-                        className="inline-flex items-center px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-semibold hover:bg-[#163d82] transition-colors cursor-pointer"
-                      >
-                        <FaUpload className="h-4 w-4 mr-2" />
-                        Choisir un fichier
-                      </label>
-                      <p className="text-sm text-gray-500 mt-2">Formats acceptés: PDF, DOC, DOCX, JPG, PNG (max 10MB)</p>
-                      {form.conditions_generales && (
-                        <p className="mt-2 text-green-600 text-sm">Fichier sélectionné: {form.conditions_generales.name}</p>
-                      )}
-                    </motion.div>
-                    {/* Autres Documents */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.2 }}
-                      className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${dragOver.autres_documents ? 'border-[#1e51ab] bg-blue-50' : 'border-gray-300 hover:border-[#1e51ab]'}`}
-                      onDragOver={(e) => handleDragOver(e, 'autres_documents')}
-                      onDragLeave={(e) => handleDragLeave(e, 'autres_documents')}
-                      onDrop={(e) => handleDrop(e, 'autres_documents')}
-                    >
-                      <input
-                        type="file"
-                        id="file-upload-autres"
-                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                        onChange={(e) => handleFileUpload(e, 'autres_documents')}
-                        className="hidden"
-                      />
-                      <FaUpload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Autres Documents</h3>
-                      <p className="text-gray-600 mb-4">Glissez-déposez votre fichier ici ou cliquez pour sélectionner</p>
-                      <label
-                        htmlFor="file-upload-autres"
-                        className="inline-flex items-center px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-semibold hover:bg-[#163d82] transition-colors cursor-pointer"
-                      >
-                        <FaUpload className="h-4 w-4 mr-2" />
-                        Choisir un fichier
-                      </label>
-                      <p className="text-sm text-gray-500 mt-2">Formats acceptés: PDF, DOC, DOCX, JPG, PNG (max 10MB)</p>
-                      {form.autres_documents && (
-                        <p className="mt-2 text-green-600 text-sm">Fichier sélectionné: {form.autres_documents.name}</p>
-                      )}
-                    </motion.div>
-                  </div>
-                )}
-                {/* Navigation Buttons */}
-                <div className="flex justify-between mt-8">
+          <div className="fixed inset-0 bg-opacity-50 backdrop-blur-xs transition-opacity" />
+          <Dialog.Panel className={`relative bg-white rounded-2xl mx-auto shadow-xl ${
+            isUploading ? 'max-w-md w-full' : 'max-w-4xl w-full'
+          }`}>
+            <div className={isUploading ? 'p-8' : 'p-6'}>
+              {!isUploading && (
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Créer un nouveau contrat
+                  </h2>
                   <button
-                    type="button"
-                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
-                    onClick={() => {
-                      if (createStep > 1) setCreateStep((s) => Math.max(1, s - 1));
-                      else onClose();
-                    }}
+                    onClick={handleClose}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {createStep > 1 ? 'Précédent' : 'Fermer'}
+                    <FaTimes className="h-6 w-6" />
                   </button>
-                  {createStep < 3 ? (
-                    <button
-                      type="button"
-                      className="px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-medium hover:bg-[#163d82] transition-colors"
-                      onClick={() => setCreateStep((s) => Math.min(3, s + 1))}
-                    >
-                      Suivant
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      className="px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-medium hover:bg-[#163d82] transition-colors"
-                    >
-                      Importer
-                    </button>
-                  )}
                 </div>
-              </form>
+              )}
+
+              {/* Progress Stepper - Only show when not uploading */}
+              {!isUploading && (
+                <div className="mb-8">
+                  <div className="flex items-center justify-center max-w-2xl mx-auto">
+                    <div className="flex items-center w-full justify-between">
+                      {['Catégorie', 'Informations', 'Documents'].map((label, idx) => {
+                        const isActive = currentStep === idx + 1;
+                        const isCompleted = currentStep > idx + 1;
+                        
+                        return (
+                          <div key={label} className="flex items-center">
+                            <div className="flex flex-col items-center">
+                              <motion.div
+                                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-all duration-200 ${
+                                  isCompleted
+                                    ? 'bg-[#1e51ab] border-[#1e51ab] text-white'
+                                    : isActive
+                                    ? 'border-[#1e51ab] text-[#1e51ab] bg-white'
+                                    : 'border-gray-300 text-gray-400 bg-white'
+                                }`}
+                                animate={{ scale: isActive ? 1.1 : 1 }}
+                              >
+                                {idx + 1}
+                              </motion.div>
+                              <span
+                                className={`mt-2 text-sm transition-colors duration-200 ${
+                                  isActive ? 'text-[#1e51ab] font-semibold' : 'text-gray-400'
+                                }`}
+                              >
+                                {label}
+                              </span>
+                            </div>
+                            {idx < 2 && (
+                              <div className="w-20 h-1 bg-gray-200 mx-4 relative overflow-hidden rounded">
+                                <motion.div
+                                  className="absolute top-0 left-0 h-1 bg-[#1e51ab] rounded"
+                                  initial={{ width: '0%' }}
+                                  animate={{ width: isCompleted ? '100%' : '0%' }}
+                                  transition={{ duration: 0.3 }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Upload Progress */}
+              {isUploading && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center"
+                >
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#1e51ab] mx-auto mb-6"></div>
+                  <h4 className="text-xl font-medium text-gray-800 mb-3">Téléchargement en cours...</h4>
+                  <p className="text-gray-600">
+                    Veuillez patienter pendant que nous téléchargeons vos documents et créons votre contrat.
+                  </p>
+                </motion.div>
+              )}
+
+              {/* Upload Error */}
+              {uploadError && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <FaTimes className="h-5 w-5 text-red-500" />
+                    <p className="text-sm text-red-800">{uploadError}</p>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Content */}
+              {!isUploading && (
+                <div className="min-h-[500px]">
+                  <ContractCreationForm 
+                    onSubmit={handleSubmit}
+                    onStepChange={setCurrentStep}
+                    isUploading={isUploading}
+                  />
+                </div>
+              )}
             </div>
           </Dialog.Panel>
         </div>

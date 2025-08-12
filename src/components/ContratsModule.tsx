@@ -18,7 +18,19 @@ import {
 	setSelectedType,
 	updateContract,
 } from '../store/contractsSlice';
-import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel, isExpired } from '../utils/contract';
+import {
+	getContractDocuments,
+	getContractInsurer,
+	getContractPremium,
+	getContractType,
+} from '../utils/contractAdapters';
+import {
+	getStatusColor,
+	getStatusLabel,
+	getTypeIcon,
+	getTypeLabel,
+	isExpired,
+} from '../utils/contract';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 import type { Contract } from '../types';
@@ -27,6 +39,7 @@ import { Link } from 'react-router-dom';
 import Spinner from './ui/Spinner';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { motion } from 'framer-motion';
+import { openModal } from '../store/contractCreationSlice';
 import { useState } from 'react';
 
 const ContratsModule = () => {
@@ -44,38 +57,13 @@ const ContratsModule = () => {
 	);
 
 	const [editingContract, setEditingContract] = useState<Contract | null>(null);
-	const [showCreateModal, setShowCreateModal] = useState(false);
-	const [createStep, setCreateStep] = useState(1);
-	const [form, setForm] = useState<{
-		coverage: string;
-		type: string;
-		valid_from: string;
-		valid_to: string;
-		prime: string;
-		renouvellement_tacite: string;
-		date_limit: string;
-		conditions_particulieres: File | null;
-		conditions_generales: File | null;
-		autres_documents: File | null;
-	}>({
-		coverage: '',
-		type: '',
-		valid_from: '',
-		valid_to: '',
-		prime: '',
-		renouvellement_tacite: '',
-		date_limit: '',
-		conditions_particulieres: null,
-		conditions_generales: null,
-		autres_documents: null,
-	});
-
+	const [isCreateContractModalOpen, setIsCreateContractModalOpen] = useState(false);
 	// Filter contracts based on search and filters
 	const filteredContracts = contracts.filter((contract) => {
 		const matchesSearch =
 			contract.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			contract.insurer.toLowerCase().includes(searchQuery.toLowerCase());
-		const matchesType = selectedType === 'all' || contract.type === selectedType;
+			getContractInsurer(contract).toLowerCase().includes(searchQuery.toLowerCase());
+		const matchesType = selectedType === 'all' || getContractType(contract) === selectedType;
 		const matchesStatus = selectedStatus === 'all' || contract.status === selectedStatus;
 
 		return matchesSearch && matchesType && matchesStatus;
@@ -117,7 +105,7 @@ const ContratsModule = () => {
 		expired: contracts.filter((c) => isExpired(c)).length,
 		totalPremium: contracts
 			.filter((c) => c.status === 'active')
-			.reduce((sum, c) => sum + c.premium, 0),
+			.reduce((sum, c) => sum + getContractPremium(c), 0),
 	};
 
 	if (loading) {
@@ -152,7 +140,7 @@ const ContratsModule = () => {
 					</p>
 				</div>
 				<motion.button
-					onClick={() => setShowCreateModal(true)}
+					onClick={() => setIsCreateContractModalOpen(true)}
 					className="mt-4 lg:mt-0 bg-[#1e51ab] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#163d82] transition-colors flex items-center space-x-2"
 					whileHover={{ scale: 1.02 }}
 					whileTap={{ scale: 0.98 }}
@@ -293,7 +281,7 @@ const ContratsModule = () => {
 							Commencez par ajouter vos premiers contrats d'assurance.
 						</p>
 						<button
-							onClick={() => setShowCreateModal(true)}
+							onClick={() => setIsCreateContractModalOpen(true)}
 							className="bg-[#1e51ab] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#163d82] transition-colors"
 						>
 							Ajouter un contrat
@@ -302,7 +290,7 @@ const ContratsModule = () => {
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{filteredContracts.map((contract, index) => {
-							const TypeIcon = getTypeIcon(contract.type);
+							const TypeIcon = getTypeIcon(getContractType(contract));
 							const isContractExpired = isExpired(contract);
 							return (
 								<motion.div
@@ -317,10 +305,10 @@ const ContratsModule = () => {
 									<div className="flex items-start justify-between mb-4">
 										<div className="flex items-center space-x-3">
 											<div className="flex items-center gap-1">
-												{getInsurerLogo(contract.insurer) ? (
+												{getInsurerLogo(getContractInsurer(contract)) ? (
 													<img
-														src={getInsurerLogo(contract.insurer)}
-														alt={contract.insurer}
+														src={getInsurerLogo(getContractInsurer(contract))}
+														alt={getContractInsurer(contract)}
 														className="w-8 h-8 object-contain rounded"
 														style={{ background: '#fff' }}
 													/>
@@ -332,7 +320,9 @@ const ContratsModule = () => {
 											</div>
 											<div>
 												<h3 className="font-semibold text-gray-900 text-sm">{contract.name}</h3>
-												<p className="text-xs text-gray-600">{getTypeLabel(contract.type)}</p>
+												<p className="text-xs text-gray-600">
+													{getTypeLabel(getContractType(contract))}
+												</p>
 											</div>
 										</div>
 										<span
@@ -346,18 +336,20 @@ const ContratsModule = () => {
 									<div className="space-y-3 mb-4">
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Assureur</span>
-											<span className="text-sm font-medium text-gray-900">{contract.insurer}</span>
+											<span className="text-sm font-medium text-gray-900">
+												{getContractInsurer(contract)}
+											</span>
 										</div>
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Prime annuelle</span>
 											<span className="text-sm font-bold text-[#1e51ab]">
-												{contract.premium.toLocaleString()}€
+												{getContractPremium(contract).toLocaleString()}€
 											</span>
 										</div>
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Échéance</span>
 											<span className="text-sm font-medium text-gray-900">
-												{new Date(contract.overview.endDate).toLocaleDateString('fr-FR')}
+												{new Date(contract.endDate).toLocaleDateString('fr-FR')}
 											</span>
 										</div>
 									</div>
@@ -366,7 +358,10 @@ const ContratsModule = () => {
 									<div className="mb-4">
 										<p className="text-xs text-gray-600 mb-2">
 											Documents (
-											{contract.documents.otherDocs ? contract.documents.otherDocs.length + 2 : 2})
+											{getContractDocuments(contract).otherDocs
+												? getContractDocuments(contract).otherDocs.length + 2
+												: 2}
+											)
 										</p>
 										<div className="flex flex-wrap gap-1">
 											{/* Conditions Générales */}
@@ -380,21 +375,24 @@ const ContratsModule = () => {
 												Conditions Particulières
 											</span>
 											{/* Autres Documents */}
-											{contract.documents.otherDocs &&
-												contract.documents.otherDocs.slice(0, 1).map((doc, docIndex) => (
-													<span
-														key={docIndex}
-														className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg"
-													>
-														<FaFileAlt className="h-3 w-3 mr-1" />
-														{doc.name.length > 15 ? `${doc.name.substring(0, 15)}...` : doc.name}
+											{getContractDocuments(contract).otherDocs &&
+												getContractDocuments(contract)
+													.otherDocs.slice(0, 1)
+													.map((doc, docIndex) => (
+														<span
+															key={docIndex}
+															className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg"
+														>
+															<FaFileAlt className="h-3 w-3 mr-1" />
+															{doc.name.length > 15 ? `${doc.name.substring(0, 15)}...` : doc.name}
+														</span>
+													))}
+											{getContractDocuments(contract).otherDocs &&
+												getContractDocuments(contract).otherDocs.length > 1 && (
+													<span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg">
+														+{getContractDocuments(contract).otherDocs.length - 1}
 													</span>
-												))}
-											{contract.documents.otherDocs && contract.documents.otherDocs.length > 1 && (
-												<span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg">
-													+{contract.documents.otherDocs.length - 1}
-												</span>
-											)}
+												)}
 										</div>
 									</div>
 
@@ -447,19 +445,12 @@ const ContratsModule = () => {
 								const updatedContract: Contract = {
 									...editingContract,
 									name: formData.get('name') as string,
-									insurer: formData.get('insurer') as string,
-									type: formData.get('type') as Contract['type'],
-									premium: parseFloat(formData.get('premium') as string),
+									insurerName: formData.get('insurer') as string,
+									category: formData.get('type') as Contract['category'],
+									annualPremiumCents: parseFloat(formData.get('premium') as string),
 									startDate: formData.get('startDate') as string,
 									endDate: formData.get('endDate') as string,
 									status: formData.get('status') as Contract['status'],
-									description: formData.get('description') as string,
-									coverageAmount: formData.get('coverageAmount')
-										? parseFloat(formData.get('coverageAmount') as string)
-										: undefined,
-									deductible: formData.get('deductible')
-										? parseFloat(formData.get('deductible') as string)
-										: undefined,
 								};
 								handleUpdateContract(updatedContract);
 							}}
@@ -498,7 +489,7 @@ const ContratsModule = () => {
 										<input
 											type="text"
 											name="insurer"
-											defaultValue={editingContract.insurer}
+											defaultValue={editingContract.insurerName}
 											required
 											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
 										/>
@@ -510,7 +501,7 @@ const ContratsModule = () => {
 										</label>
 										<select
 											name="type"
-											defaultValue={editingContract.type}
+											defaultValue={editingContract.category}
 											required
 											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
 										>
@@ -542,7 +533,7 @@ const ContratsModule = () => {
 										<input
 											type="number"
 											name="premium"
-											defaultValue={editingContract.premium}
+											defaultValue={editingContract.annualPremiumCents}
 											min="0"
 											step="0.01"
 											required
@@ -557,7 +548,7 @@ const ContratsModule = () => {
 										<input
 											type="number"
 											name="coverageAmount"
-											defaultValue={editingContract.coverageAmount || ''}
+											defaultValue={editingContract.annualPremiumCents || ''}
 											min="0"
 											step="0.01"
 											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
@@ -597,24 +588,12 @@ const ContratsModule = () => {
 										<input
 											type="number"
 											name="deductible"
-											defaultValue={editingContract.deductible || ''}
+											defaultValue={editingContract.annualPremiumCents || ''}
 											min="0"
 											step="0.01"
 											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
 										/>
 									</div>
-								</div>
-
-								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-2">
-										Description
-									</label>
-									<textarea
-										name="description"
-										defaultValue={editingContract.description || ''}
-										rows={4}
-										className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent resize-none"
-									/>
 								</div>
 							</div>
 
@@ -640,12 +619,8 @@ const ContratsModule = () => {
 			)}
 
 			<CreateContractModal
-				open={showCreateModal}
-				onClose={() => setShowCreateModal(false)}
-				createStep={createStep}
-				setCreateStep={setCreateStep}
-				form={form}
-				setForm={setForm}
+				open={isCreateContractModalOpen}
+				onClose={() => setIsCreateContractModalOpen(false)}
 			/>
 		</div>
 	);

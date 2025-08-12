@@ -95,7 +95,7 @@ export const initializeFormData = (
 				overseas_coverage: false,
 			} as SanteFormData;
 
-		case 'moto':
+		case 'motorcycle':
 			return {
 				...baseData,
 				// Vehicle information
@@ -161,7 +161,7 @@ export const prefillFromContract = (
 				familyStatus: 'single',
 			} as SanteFormData;
 
-		case 'moto':
+		case 'motorcycle':
 			return {
 				...updated,
 				coverageLevel: 'tous_risques',

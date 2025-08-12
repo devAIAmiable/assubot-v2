@@ -24,6 +24,7 @@ import {
 	getSelectedContractIds,
 	getUser
 } from '../utils/stateHelpers';
+import { getContractInsurer, getContractType } from '../utils/contractAdapters';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 const ChatbotModule = () => {
@@ -267,8 +268,8 @@ const ChatbotModule = () => {
 											)}
 										</div>
 										<div className="flex-1">
-											<p className="text-sm font-medium text-gray-900">{contract.type}</p>
-											<p className="text-xs text-gray-500">{contract.insurer} • {contract.status}</p>
+											<p className="text-sm font-medium text-gray-900">{getContractType(contract)}</p>
+											<p className="text-xs text-gray-500">{getContractInsurer(contract)} • {contract.status}</p>
 										</div>
 									</div>
 								</div>
@@ -499,7 +500,7 @@ const ChatbotModule = () => {
 									<p className="text-white/80 text-sm truncate">
 										Contrats: {contracts
 											.filter(c => selectedContractIds.includes(c.id))
-											.map(c => c.type)
+											.map(c => getContractType(c))
 											.join(', ')
 										}
 									</p>

@@ -57,6 +57,7 @@ type ComparateurStep = 'history' | 'type' | 'form' | 'results' | 'loading';
 
 import { useAppSelector } from '../store/hooks';
 import { useComparisons } from '../hooks/useComparisons';
+import { getContractInsurer, getContractType, getContractPremium } from '../utils/contractAdapters';
 
 const ComparateurModule = () => {
 	const user = useAppSelector((state) => state.user?.currentUser);
@@ -65,7 +66,7 @@ const ComparateurModule = () => {
 
 	// State management
 	const [currentStep, setCurrentStep] = useState<ComparateurStep>('history');
-	const [selectedType, setSelectedType] = useState<'auto' | 'habitation' | 'sante' | 'moto' | null>(
+	const [selectedType, setSelectedType] = useState<'auto' | 'habitation' | 'sante' | 'motorcycle' | null>(
 		null
 	);
 
@@ -173,7 +174,7 @@ const ComparateurModule = () => {
 		},
 		{ id: 'sante', name: 'Assurance Santé', icon: FaMedkit, color: 'from-red-500 to-red-600' },
 		{
-			id: 'moto',
+			id: 'motorcycle',
 			name: 'Assurance Moto',
 			icon: FaMotorcycle,
 			color: 'from-purple-500 to-purple-600',
@@ -292,11 +293,11 @@ const ComparateurModule = () => {
 		setSelectedType(type);
 
 		// Prefill from existing contracts
-		const existingContract = contracts.find((c) => c.type === type && c.status === 'active');
+		const existingContract = contracts.find((c) => getContractType(c) === type && c.status === 'active');
 		if (existingContract) {
 			setFormData((prev) => ({
 				...prev,
-				monthlyBudget: Math.round(existingContract.premium / 12).toString(),
+				monthlyBudget: Math.round(getContractPremium(existingContract) / 12).toString(),
 					vehicleType: type === 'auto' ? 'car' : '',
 					coverageLevel: type === 'auto' ? 'tous_risques' : 'standard',
 			}));
@@ -338,7 +339,7 @@ const ComparateurModule = () => {
 						hasChronicCondition: false,
 						practicesSport: false,
 					}),
-					...(selectedType === 'moto' && {
+					...(selectedType === 'motorcycle' && {
 						motorcycleType: currentFormData.vehicleType,
 						engineSize: '125',
 						hasAntiTheft: false,
@@ -346,10 +347,15 @@ const ComparateurModule = () => {
 				} as Parameters<typeof ComparisonService.getComparisons>[1];
 
 				// Find existing contract for this insurance type
-				const existingContract = contracts.find((c) => c.type === selectedType && c.status === 'active');
+				const existingContract = contracts.find((c) => getContractType(c) === selectedType && c.status === 'active');
 				
 				// Process comparison asynchronously
-				ComparisonService.getComparisons(selectedType, serviceFormData, existingContract)
+				const contractForComparison = existingContract ? {
+					id: existingContract.id,
+					insurer: getContractInsurer(existingContract),
+					premium: getContractPremium(existingContract)
+				} : undefined;
+				ComparisonService.getComparisons(selectedType, serviceFormData, contractForComparison)
 					.then((results) => {
 						setComparisonResults(results);
 		setCurrentStep('results');

@@ -1,9 +1,8 @@
-import type { Contract } from '../store/contractsSlice';
 import type React from 'react';
 import type { User } from '../store/userSlice';
 
-// Re-export types for convenience
-export type { User, Contract };
+// Re-export User for compatibility
+export type { User };
 
 // Application State Types
 export interface UserState {
@@ -47,7 +46,7 @@ export interface ModalProps {
 }
 
 // Insurance Types for Comparator
-export type InsuranceType = 'auto' | 'habitation' | 'sante' | 'moto';
+export type InsuranceType = 'auto' | 'habitation' | 'sante' | 'motorcycle';
 
 export interface InsuranceTypeInfo {
 	id: InsuranceType;
@@ -75,20 +74,20 @@ export interface InsuranceFormData {
 	driverAge?: number;
 	licenseYears?: number;
 	previousClaims?: number;
-	
+
 	// Home insurance
 	propertyType?: string;
 	propertySize?: number;
 	propertyValue?: number;
 	location?: string;
 	securityFeatures?: string[];
-	
+
 	// Health insurance
 	age?: number;
 	familySize?: number;
 	healthConditions?: string[];
 	preferredCoverage?: string;
-	
+
 	// Common fields
 	budget?: number;
 	coverageLevel?: string;
@@ -155,6 +154,229 @@ export interface InsuranceStats {
 	icon: React.ComponentType<{ className?: string }>;
 }
 
+// Contract Creation Types - matching Prisma schema
+export type ContractCategory =
+	| 'auto'
+	| 'health'
+	| 'home'
+	| 'motorcycle'
+	| 'electronic_devices'
+	| 'other';
+export type DocumentType = 'CP' | 'CG' | 'OTHER';
+export type ContractStatus = 'active' | 'expired' | 'pending';
+export type ObligationType = 'subscription' | 'during_contract' | 'claim';
+export type ContactType = 'management' | 'assistance' | 'emergency';
+
+// Contract document from database
+export interface ContractDocument {
+	id: string;
+	contractId: string;
+	type: DocumentType;
+	fileUrl: string;
+	createdAt: string;
+}
+
+export interface ContractGuarantee {
+	id: string;
+	contractId: string;
+	title: string;
+	details?: string;
+	covered?: string;
+	notCovered?: string;
+	createdAt: string;
+}
+
+export interface ContractExclusion {
+	id: string;
+	contractId: string;
+	description: string;
+	createdAt: string;
+}
+
+export interface ContractObligation {
+	id: string;
+	contractId: string;
+	type: ObligationType;
+	description: string;
+	createdAt: string;
+}
+
+export interface ContractZone {
+	id: string;
+	contractId: string;
+	label: string;
+	coordinates?: object; // JSON
+	createdAt: string;
+}
+
+export interface ContractTermination {
+	id: string;
+	contractId: string;
+	mode?: string;
+	notice?: string;
+	details?: string;
+	createdAt: string;
+}
+
+export interface ContractContact {
+	id: string;
+	contractId: string;
+	type: ContactType;
+	name?: string;
+	phone?: string;
+	email?: string;
+	openingHours?: string;
+	createdAt: string;
+}
+
+// Updated Contract type to match Prisma schema
+export interface Contract {
+	id: string;
+	userId: string;
+	insurerName: string;
+	name: string;
+	category: ContractCategory;
+	formula?: string;
+	startDate: string;
+	endDate: string;
+	annualPremiumCents: number;
+	monthlyPremiumCents?: number;
+	tacitRenewal: boolean;
+	cancellationDeadline?: string;
+	status: ContractStatus;
+	createdAt: string;
+	updatedAt: string;
+
+	// Relations (optional includes)
+	documents?: ContractDocument[];
+	guarantees?: ContractGuarantee[];
+	exclusions?: ContractExclusion[];
+	obligations?: ContractObligation[];
+	zones?: ContractZone[];
+	termination?: ContractTermination;
+	contacts?: ContractContact[];
+}
+
+export interface ContractFormData {
+	// Step 1: General Information
+	insurerName: string;
+	name: string;
+	category: ContractCategory;
+
+	// Step 2: Details & Specifics
+	formula?: string;
+	startDate: string;
+	endDate: string;
+	annualPremiumCents: number;
+	monthlyPremiumCents?: number;
+	tacitRenewal: boolean;
+	cancellationDeadline?: string;
+
+	// Step 3: Documents
+	documents: ContractDocumentUpload[];
+}
+
+export interface ContractDocumentUpload {
+	type: DocumentType;
+	fileName: string;
+	fileSize: number;
+	fileType: string;
+	blobPath?: string; // Set after upload to Azure
+}
+
+export interface UploadUrlRequest {
+	fileName: string;
+	contentType: string;
+}
+
+export interface UploadUrlResponse {
+	uploadUrl: string;
+	blobPath: string;
+}
+
+export interface ContractInitRequest {
+	insurerName?: string;
+	name: string;
+	category: ContractCategory;
+	formula?: string;
+	startDate?: string;
+	endDate?: string;
+	annualPremiumCents?: number;
+	monthlyPremiumCents?: number;
+	tacitRenewal?: boolean;
+	cancellationDeadline?: string;
+	documents: Array<{
+		blobPath: string;
+		documentType: DocumentType;
+	}>;
+}
+
+export interface ContractInitResponse {
+	contractId: string;
+	taskId: string;
+	status: ContractStatus;
+	message: string;
+}
+
+export interface ContractNotificationRequest {
+	contractId: string;
+	userId: string;
+	status: 'success' | 'error';
+	message?: string;
+}
+
+// Credit system types
+export type TransactionType = 'purchase' | 'usage' | 'adjustment';
+export type TransactionSource = 'stripe' | 'chatbot' | 'comparator' | 'admin' | 'system';
+export type PaymentIntentStatus = 'pending' | 'succeeded' | 'canceled' | 'failed' | 'expired';
+
+export interface UserCredit {
+	id: string;
+	userId: string;
+	balance: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface CreditPack {
+	id: string;
+	name: string;
+	description?: string;
+	creditAmount: number;
+	priceCents: number;
+	currency: string;
+	isActive: boolean;
+	isFeatured: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface CreditTransaction {
+	id: string;
+	userId: string;
+	type: TransactionType;
+	amount: number;
+	source: TransactionSource;
+	referenceId?: string;
+	packId?: string;
+	description?: string;
+	createdAt: string;
+}
+
+export interface PaymentIntent {
+	id: string;
+	externalPaymentIntentId: string;
+	userId: string;
+	creditPackId: string;
+	amount: number;
+	currency: string;
+	status: PaymentIntentStatus;
+	clientSecret?: string;
+	metadata?: any;
+	createdAt: string;
+	updatedAt: string;
+}
+
 // Chat Types
 export interface ChatMessage {
 	id: string;
@@ -198,4 +420,4 @@ export interface ChatResponse {
 	message: string;
 	quickReplies?: QuickReply[];
 	suggestions?: string[];
-} 
+}

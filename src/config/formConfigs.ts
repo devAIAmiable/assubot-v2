@@ -126,7 +126,7 @@ export const motoFormConfig: FormConfig = {
 		},
 		{
 			id: 'motorcycle',
-			title: 'Votre moto',
+			title: 'Votre motorcycle',
 			description: 'Caractéristiques de votre deux-roues',
 			fields: [
 				'motorcycleType', 'engineSize', 'brand', 'model',
@@ -164,7 +164,7 @@ export const getFormConfig = (insuranceType: string): FormConfig => {
 			return habitationFormConfig;
 		case 'sante':
 			return santeFormConfig;
-		case 'moto':
+		case 'motorcycle':
 			return motoFormConfig;
 		default:
 			return autoFormConfig;

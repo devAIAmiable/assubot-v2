@@ -16,6 +16,7 @@ import {
 	FaRobot,
 	FaShieldAlt,
 } from 'react-icons/fa';
+import { getContractInsurer, getContractPremium, getContractType } from '../utils/contractAdapters';
 
 import type { ChartOptions } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
@@ -40,24 +41,24 @@ const Dashboard = () => {
 		{
 			type: 'Santé',
 			amount: contracts
-				.filter((c) => c.type === 'sante' && c.status === 'active')
-				.reduce((sum: number, c) => sum + c.premium, 0),
+				.filter((c) => getContractType(c) === 'sante' && c.status === 'active')
+				.reduce((sum: number, c) => sum + getContractPremium(c), 0),
 			color: '#ef4444',
 			percentage: 0,
 		},
 		{
 			type: 'Automobile',
 			amount: contracts
-				.filter((c) => c.type === 'auto' && c.status === 'active')
-				.reduce((sum: number, c) => sum + c.premium, 0),
+				.filter((c) => getContractType(c) === 'auto' && c.status === 'active')
+				.reduce((sum: number, c) => sum + getContractPremium(c), 0),
 			color: '#3b82f6',
 			percentage: 0,
 		},
 		{
 			type: 'Habitation',
 			amount: contracts
-				.filter((c) => c.type === 'habitation' && c.status === 'active')
-				.reduce((sum: number, c) => sum + c.premium, 0),
+				.filter((c) => getContractType(c) === 'habitation' && c.status === 'active')
+				.reduce((sum: number, c) => sum + getContractPremium(c), 0),
 			color: '#10b981',
 			percentage: 0,
 		},
@@ -262,7 +263,7 @@ const Dashboard = () => {
 		}).length,
 		monthlyPremium: contracts
 			.filter((c) => c.status === 'active')
-			.reduce((sum: number, c) => sum + c.premium / 12, 0),
+			.reduce((sum: number, c) => sum + getContractPremium(c) / 12, 0),
 	};
 
 	return (
@@ -650,10 +651,10 @@ const Dashboard = () => {
 										{contract.status === 'active' ? 'Actif' : contract.status}
 									</span>
 								</div>
-								<p className="text-gray-600 text-sm mb-3">{contract.insurer}</p>
+								<p className="text-gray-600 text-sm mb-3">{getContractInsurer(contract)}</p>
 								<div className="flex items-center justify-between">
 									<span className="text-lg font-bold text-gray-900">
-										{(contract.premium / 12).toFixed(2)}€/mois
+										{(getContractPremium(contract) / 12).toFixed(2)}€/mois
 									</span>
 									<button
 										onClick={() => handleNavigateToModule('contrats')}

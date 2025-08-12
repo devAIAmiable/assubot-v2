@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-export type InsuranceType = 'auto' | 'habitation' | 'sante' | 'moto';
+export type InsuranceType = 'auto' | 'habitation' | 'sante' | 'motorcycle';
 
 export interface PastComparison {
 	id: string;
@@ -95,7 +95,7 @@ const initialState: ComparisonsState = {
 			id: '4',
 			date: '2024-12-08',
 			expiresAt: '2024-12-15', // Expired
-			insuranceType: 'moto',
+			insuranceType: 'motorcycle',
 			criteria: {
 				age: '25',
 				profession: 'Étudiant',

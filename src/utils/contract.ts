@@ -2,7 +2,7 @@ import { FaFileAlt, FaFileContract } from 'react-icons/fa';
 
 import type { Contract } from '../types';
 
-export const isExpired = (contract: Contract) => new Date(contract.overview.endDate) < new Date();
+export const isExpired = (contract: Contract) => new Date(contract.endDate) < new Date();
 
 export const getTypeIcon = (type: string) => {
 	switch (type) {
@@ -25,6 +25,10 @@ export const getTypeLabel = (type: string) => {
 			return 'Habitation';
 		case 'sante':
 			return 'Santé';
+		case 'motorcycle':
+			return 'Moto';
+		case 'electronique':
+			return 'Électronique';
 		case 'autre':
 			return 'Autre';
 		default:
