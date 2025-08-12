@@ -9,16 +9,21 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-const resetPasswordSchema = z.object({
-	password: z
-		.string()
-		.min(8, 'Le mot de passe doit contenir au moins 8 caractères')
-		.regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre'),
-	confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-	message: 'Les mots de passe ne correspondent pas',
-	path: ['confirmPassword'],
-});
+const resetPasswordSchema = z
+	.object({
+		password: z
+			.string()
+			.min(8, 'Le mot de passe doit contenir au moins 8 caractères')
+			.regex(
+				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+				'Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre'
+			),
+		confirmPassword: z.string(),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: 'Les mots de passe ne correspondent pas',
+		path: ['confirmPassword'],
+	});
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
@@ -42,11 +47,6 @@ const ResetPasswordForm: React.FC = () => {
 	});
 
 	const onSubmit = async (data: ResetPasswordFormData) => {
-		console.log('🔍 Reset password form submitted');
-		console.log('🔍 Token:', token);
-		console.log('🔍 Password:', data.password);
-		console.log('🔍 Confirm password:', data.confirmPassword);
-
 		if (!token) {
 			console.error('❌ Token missing');
 			setSubmitError('Token de réinitialisation manquant');
@@ -58,15 +58,12 @@ const ResetPasswordForm: React.FC = () => {
 		setSubmitSuccess(null);
 
 		try {
-			console.log('🚀 Calling resetPassword API...');
 			const response = await authService.resetPassword(token, data.password);
-			console.log('📡 API Response:', response);
 
 			if (response.success) {
-				console.log('✅ Password reset successful');
 				setSubmitSuccess('Votre mot de passe a été réinitialisé avec succès !');
 				reset();
-				
+
 				// Redirect to login after 3 seconds
 				setTimeout(() => {
 					navigate('/login');
@@ -241,4 +238,4 @@ const ResetPasswordForm: React.FC = () => {
 	);
 };
 
-export default ResetPasswordForm; 
+export default ResetPasswordForm;

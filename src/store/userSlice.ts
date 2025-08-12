@@ -158,7 +158,6 @@ const userSlice = createSlice({
 					gender: action.payload.user.gender || state.currentUser.gender,
 					updatedAt: action.payload.user.updatedAt,
 				};
-				console.log('Updated user state:', updatedUser);
 				state.currentUser = updatedUser;
 			}
 			state.error = null;

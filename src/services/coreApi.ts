@@ -54,7 +54,6 @@ export const authService = {
 					isFirstLogin: boolean;
 				};
 			}>('/auth/login', credentials);
-			console.log('🚀 ~ response:', response);
 
 			if (response.success && response.status === 'success') {
 				return {
@@ -247,17 +246,13 @@ export const authService = {
 				password,
 			});
 
-			console.log('🔧 Raw API response:', response);
-
 			if (response.success && response.status === 'success') {
-				console.log('✅ Service response success');
 				return {
 					success: true,
 					data: response.data,
 				};
 			}
 
-			console.log('❌ Service response failed:', response.error);
 			return {
 				success: false,
 				error: response.error?.message || 'Erreur lors de la réinitialisation du mot de passe',

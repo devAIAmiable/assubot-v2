@@ -46,7 +46,6 @@ const LoginForm: React.FC = () => {
 		setSubmitSuccess(null);
 
 		const loginResponse = await authService.login(data);
-		console.log("🚀 ~ onSubmit ~ loginResponse:", loginResponse)
 
 		if (loginResponse.success) {
 			// After successful login, get the full user profile
