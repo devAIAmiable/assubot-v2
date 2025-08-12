@@ -48,7 +48,7 @@ export class ContractUploadService {
 		}));
 
 		try {
-			// Step 1: Generate batch upload URLs
+			// Step 1: Generate batch upload URLs and get contractId
 			const uploadUrlsResponse = await store
 				.dispatch(
 					contractsApi.endpoints.generateBatchUploadUrls.initiate({
@@ -88,8 +88,9 @@ export class ContractUploadService {
 
 			await Promise.all(uploadPromises);
 
-			// Step 3: Initialize contract processing
+			// Step 3: Initialize contract processing with contractId
 			const contractInitData = {
+				contractId: uploadUrlsResponse.contractId,
 				insurerName: formData.insurerName,
 				name: formData.name,
 				category: formData.category,

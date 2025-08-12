@@ -28,6 +28,7 @@ interface BatchUploadUrlRequest {
 }
 
 interface BatchUploadUrlResponse {
+	contractId: string;
 	uploadUrls: Array<{
 		fileName: string;
 		documentType: DocumentType;
@@ -38,6 +39,7 @@ interface BatchUploadUrlResponse {
 
 // Updated contract init request
 interface UpdatedContractInitRequest {
+	contractId: string;
 	insurerName?: string;
 	name: string;
 	category: string;
@@ -111,6 +113,7 @@ export const contractsApi = createApi({
 				return {
 					uploadUrl: firstUrl.uploadUrl,
 					blobPath: firstUrl.blobName,
+					contractId: response.contractId, // Include contractId for legacy compatibility
 				};
 			},
 			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
@@ -211,11 +214,10 @@ export const useContractUpload = () => {
 
 	const uploadDocuments = async (
 		files: Array<{ file: File; type: DocumentType }>,
-		contractData: Omit<UpdatedContractInitRequest, 'documents'>
+		contractData: Omit<UpdatedContractInitRequest, 'documents' | 'contractId'>
 	) => {
-		console.log('🚀 ~ uploadDocuments ~ contractData:', contractData);
 		try {
-			// Step 1: Generate batch signed upload URLs
+			// Step 1: Generate batch signed upload URLs and get contractId
 			const uploadUrlsResponse = await generateBatchUploadUrls({
 				files: files.map(({ file, type }) => ({
 					fileName: file.name,
@@ -236,9 +238,10 @@ export const useContractUpload = () => {
 
 			await Promise.all(uploadPromises);
 
-			// Step 3: Initialize contract processing with all documents
+			// Step 3: Initialize contract processing with contractId and all documents
 			const contractResponse = await initContract({
 				...contractData,
+				contractId: uploadUrlsResponse.contractId,
 				documents: uploadUrlsResponse.uploadUrls.map((urlData) => ({
 					blobPath: urlData.blobName,
 					documentType: urlData.documentType,
