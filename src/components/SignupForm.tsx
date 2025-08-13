@@ -146,6 +146,15 @@ const SignupForm: React.FC = () => {
 		}
 	};
 
+	const onGoogleSubmit = async () => {
+		// Check if user has accepted terms
+		if (!step1Form.watch('acceptedTerms')) {
+			setStep1Error("Vous devez accepter les conditions d'utilisation");
+			return;
+		}
+		await handleGoogleSignup();
+	};
+
 	// Countdown redirect
 	useEffect(() => {
 		if (submitSuccess && countdown > 0) {
@@ -342,7 +351,7 @@ const SignupForm: React.FC = () => {
 										et la{' '}
 										<button
 											type="button"
-											onClick={() => window.open('/general-terms', '_blank')}
+											onClick={() => window.open('/privacy-policy', '_blank')}
 											className="text-blue-600 hover:text-blue-500 underline"
 										>
 											politique de confidentialité
@@ -515,9 +524,9 @@ const SignupForm: React.FC = () => {
 					)}
 
 					<GoogleLoginButton
-						onClick={handleGoogleSignup}
+						onClick={onGoogleSubmit}
 						loading={isGoogleLoading}
-						disabled={step2Form.formState.isSubmitting || !step1Form.watch('acceptedTerms')}
+						disabled={step2Form.formState.isSubmitting}
 						isLogin={false}
 					/>
 

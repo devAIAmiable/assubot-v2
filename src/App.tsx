@@ -21,6 +21,7 @@ import NotificationsModule from './components/NotificationsModule';
 import PaymentCancelPage from './components/PaymentCancelPage';
 import PaymentSuccessPage from './components/PaymentSuccessPage';
 import { PersistGate } from 'redux-persist/integration/react';
+import PrivacyPolicyPage from './components/PrivacyPolicyPage';
 import ProfileCompletionGuard from './components/ProfileCompletionGuard';
 import ProfileModule from './components/ProfileModule';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -53,6 +54,9 @@ function App() {
 
 							{/* General Terms page - Public */}
 							<Route path="/general-terms" element={<GeneralTermsPage />} />
+
+							{/* Privacy Policy page - Public */}
+							<Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
 							{/* App routes with layout - Protected */}
 							<Route

@@ -28,6 +28,7 @@ import { useAvatarUpload } from '../hooks/useAvatarUpload';
 import { formatDateForAPI, formatDateForInput, formatDateForDisplay } from '../utils/dateHelpers';
 import { calculateAge } from '../utils/ageValidation';
 import { showToast } from './ui/Toast';
+import { useNavigate } from 'react-router-dom';
 import {
 	personalInfoSchema,
 	addressSchema,
@@ -38,6 +39,7 @@ import {
 } from '../schemas/profileValidation';
 
 const ProfileModule = () => {
+	const navigate = useNavigate();
 	const { currentUser } = useAppSelector(getUserState);
 	const { updateProfile, loading: profileLoading } = useProfileUpdate();
 	const { changePassword, loading: passwordLoading } = usePasswordChange();
@@ -743,6 +745,34 @@ const ProfileModule = () => {
 								? new Date(currentUser.updatedAt).toLocaleDateString('fr-FR')
 								: 'Non disponible'}
 						</p>
+					</div>
+				</div>
+			</motion.div>
+
+			{/* Legal Footer */}
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.6, delay: 0.6 }}
+				className="mt-8 pt-6 border-t border-gray-100"
+			>
+				<div className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
+					<p className="text-sm text-gray-500">
+						© {new Date().getFullYear()} AssuBot. Tous droits réservés.
+					</p>
+					<div className="flex items-center space-x-6">
+						<button
+							onClick={() => navigate('/general-terms')}
+							className="text-sm text-gray-600 hover:text-[#1e51ab] transition-colors"
+						>
+							Conditions d'utilisation
+						</button>
+						<button
+							onClick={() => navigate('/privacy-policy')}
+							className="text-sm text-gray-600 hover:text-[#1e51ab] transition-colors"
+						>
+							Politique de confidentialité
+						</button>
 					</div>
 				</div>
 			</motion.div>
