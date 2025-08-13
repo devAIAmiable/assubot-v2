@@ -1,14 +1,13 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { FaPause, FaPlay, FaTimes, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
-import React, { useEffect, useRef } from 'react';
-
-import { Fragment } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 
 interface VideoModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	videoSrc: string;
 	title?: string;
+	autoPlay?: boolean;
 }
 
 const VideoModal: React.FC<VideoModalProps> = ({
@@ -16,125 +15,158 @@ const VideoModal: React.FC<VideoModalProps> = ({
 	onClose,
 	videoSrc,
 	title = 'AssuBot Présentation',
+	autoPlay = false,
 }) => {
 	const videoRef = useRef<HTMLVideoElement>(null);
-	const [isPlaying, setIsPlaying] = React.useState(false);
-	const [isMuted, setIsMuted] = React.useState(true);
-	const [currentTime, setCurrentTime] = React.useState(0);
-	const [duration, setDuration] = React.useState(0);
-	const [isLoading, setIsLoading] = React.useState(true);
-	const [hasError, setHasError] = React.useState(false);
 
-	// Reset video when modal opens and start playing automatically
+	// Start muted when autoplaying to satisfy browser policies
+	const [isMuted, setIsMuted] = useState<boolean>(autoPlay);
+	const [isPlaying, setIsPlaying] = useState<boolean>(false);
+	const [currentTime, setCurrentTime] = useState<number>(0);
+	const [duration, setDuration] = useState<number>(0);
+	const [isLoading, setIsLoading] = useState<boolean>(true);
+	const [hasError, setHasError] = useState<boolean>(false);
+
+	// Open/close lifecycle
 	useEffect(() => {
-		if (isOpen && videoRef.current) {
-			videoRef.current.currentTime = 0;
+		const el = videoRef.current;
+
+		if (!isOpen) {
+			// Pause and reset when closing so that each open starts fresh
+			if (el) {
+				try {
+					el.pause();
+				} catch {}
+				el.currentTime = 0;
+			}
+			setIsPlaying(false);
 			setCurrentTime(0);
 			setIsLoading(true);
 			setHasError(false);
-			
-			// Start playing automatically when modal opens
-			const playVideo = async () => {
-				try {
-					await videoRef.current?.play();
-					setIsPlaying(true);
-				} catch (error) {
-					console.log('Auto-play failed:', error);
-					// Auto-play might fail due to browser policies, but that's okay
-					setIsPlaying(false);
-				}
-			};
-			
-			// Wait for video to load metadata before attempting to play
-			const handleCanPlay = () => {
-				playVideo();
-				videoRef.current?.removeEventListener('canplay', handleCanPlay);
-			};
-			
-			videoRef.current.addEventListener('canplay', handleCanPlay);
-			
-			// Fallback: try to play after a short delay
-			const fallbackTimer = setTimeout(() => {
-				if (videoRef.current && !isPlaying) {
-					playVideo();
-				}
-			}, 500);
-			
-			return () => {
-				clearTimeout(fallbackTimer);
-				videoRef.current?.removeEventListener('canplay', handleCanPlay);
-			};
+			return;
 		}
-	}, [isOpen]);
 
-	// Handle video time updates
-	const handleTimeUpdate = () => {
-		if (videoRef.current) {
-			setCurrentTime(videoRef.current.currentTime);
+		// When opening
+		if (el) {
+			el.currentTime = 0;
+			setCurrentTime(0);
+			setIsLoading(true);
+			setHasError(false);
+
+			if (autoPlay) {
+				// Ensure the DOM property is muted as well (even though React prop sets it)
+				el.muted = true;
+				setIsMuted(true);
+
+				const playVideo = async () => {
+					try {
+						await el.play();
+						setIsPlaying(true);
+					} catch (error) {
+						// Autoplay may still be blocked in rare cases
+						// (user gesture will be required then)
+						// eslint-disable-next-line no-console
+						console.log('Auto-play failed:', error);
+						setIsPlaying(false);
+					}
+				};
+
+				// Wait for enough data to start playback
+				const handleLoadedData = () => {
+					playVideo();
+					el.removeEventListener('loadeddata', handleLoadedData);
+				};
+
+				el.addEventListener('loadeddata', handleLoadedData);
+
+				// Fallback retry
+				const fallbackTimer = setTimeout(() => {
+					if (!el.paused) return;
+					playVideo();
+				}, 1000);
+
+				return () => {
+					clearTimeout(fallbackTimer);
+					el.removeEventListener('loadeddata', handleLoadedData);
+				};
+			}
 		}
+	}, [isOpen, autoPlay]);
+
+	// Video event handlers
+	const handleTimeUpdate = () => {
+		const el = videoRef.current;
+		if (el) setCurrentTime(el.currentTime);
 	};
 
-	// Handle video loaded metadata
 	const handleLoadedMetadata = () => {
-		if (videoRef.current) {
-			setDuration(videoRef.current.duration);
+		const el = videoRef.current;
+		if (el) {
+			setDuration(Number.isFinite(el.duration) ? el.duration : 0);
 			setIsLoading(false);
 			setHasError(false);
 		}
 	};
 
-	// Handle video error
 	const handleVideoError = () => {
 		setIsLoading(false);
 		setHasError(true);
 	};
 
-	// Toggle play/pause
-	const togglePlay = () => {
-		if (videoRef.current) {
-			if (isPlaying) {
-				videoRef.current.pause();
-			} else {
-				videoRef.current.play();
-			}
-			setIsPlaying(!isPlaying);
-		}
-	};
-
-	// Toggle mute
-	const toggleMute = () => {
-		if (videoRef.current) {
-			videoRef.current.muted = !isMuted;
-			setIsMuted(!isMuted);
-		}
-	};
-
-	// Handle video end
 	const handleVideoEnd = () => {
 		setIsPlaying(false);
-		if (videoRef.current) {
-			videoRef.current.currentTime = 0;
+		const el = videoRef.current;
+		if (el) {
+			el.currentTime = 0;
 			setCurrentTime(0);
 		}
 	};
 
-	// Format time in MM:SS
+	// Controls
+	const togglePlay = async () => {
+		const el = videoRef.current;
+		if (!el) return;
+
+		if (isPlaying) {
+			el.pause();
+			setIsPlaying(false);
+		} else {
+			try {
+				await el.play();
+				setIsPlaying(true);
+			} catch {
+				setIsPlaying(false);
+			}
+		}
+	};
+
+	const toggleMute = () => {
+		const el = videoRef.current;
+		if (!el) return;
+		const next = !isMuted;
+		el.muted = next;
+		setIsMuted(next);
+	};
+
+	// Progress bar seek
+	const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+		const el = videoRef.current;
+		if (!el || duration <= 0) return;
+
+		const rect = e.currentTarget.getBoundingClientRect();
+		const clickX = e.clientX - rect.left;
+		const pct = Math.min(Math.max(clickX / rect.width, 0), 1);
+		const newTime = pct * duration;
+
+		el.currentTime = newTime;
+		setCurrentTime(newTime);
+	};
+
 	const formatTime = (time: number) => {
+		if (!Number.isFinite(time) || time < 0) time = 0;
 		const minutes = Math.floor(time / 60);
 		const seconds = Math.floor(time % 60);
 		return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-	};
-
-	// Handle progress bar click
-	const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (videoRef.current) {
-			const rect = e.currentTarget.getBoundingClientRect();
-			const clickX = e.clientX - rect.left;
-			const percentage = clickX / rect.width;
-			const newTime = percentage * duration;
-			videoRef.current.currentTime = newTime;
-			setCurrentTime(newTime);
-		}
 	};
 
 	return (
@@ -170,8 +202,10 @@ const VideoModal: React.FC<VideoModalProps> = ({
 										{title}
 									</Dialog.Title>
 									<button
+										type="button"
 										onClick={onClose}
 										className="rounded-full p-2 hover:bg-gray-100 transition-colors"
+										aria-label="Fermer"
 									>
 										<FaTimes className="h-5 w-5 text-gray-500" />
 									</button>
@@ -182,7 +216,12 @@ const VideoModal: React.FC<VideoModalProps> = ({
 									<video
 										ref={videoRef}
 										className="w-full h-auto max-h-[70vh]"
-										muted
+										// Ensure autoplay works reliably
+										muted={isMuted || autoPlay}
+										playsInline
+										autoPlay={autoPlay}
+										preload="metadata"
+										// crossOrigin="anonymous" // uncomment if serving from another domain and CORS issues occur
 										onTimeUpdate={handleTimeUpdate}
 										onLoadedMetadata={handleLoadedMetadata}
 										onError={handleVideoError}
@@ -217,52 +256,64 @@ const VideoModal: React.FC<VideoModalProps> = ({
 									{/* Video Controls Overlay */}
 									{!isLoading && !hasError && (
 										<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-										{/* Progress Bar */}
-										<div
-											className="w-full h-2 bg-gray-600 rounded-full cursor-pointer mb-3"
-											onClick={handleProgressClick}
-										>
+											{/* Progress Bar */}
 											<div
-												className="h-full bg-blue-500 rounded-full transition-all"
-												style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
-											/>
-										</div>
+												className="w-full h-2 bg-gray-600 rounded-full cursor-pointer mb-3"
+												onClick={handleProgressClick}
+												role="progressbar"
+												aria-valuemin={0}
+												aria-valuemax={duration || 0}
+												aria-valuenow={currentTime}
+												aria-label="Position de lecture"
+											>
+												<div
+													className="h-full bg-blue-500 rounded-full transition-all"
+													style={{
+														width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
+													}}
+												/>
+											</div>
 
-										{/* Controls */}
-										<div className="flex items-center justify-between text-white">
-											<div className="flex items-center space-x-4">
-												<button
-													onClick={togglePlay}
-													className="p-2 hover:bg-white/20 rounded-full transition-colors"
-												>
-													{isPlaying ? (
-														<FaPause className="h-4 w-4" />
-													) : (
-														<FaPlay className="h-4 w-4" />
-													)}
-												</button>
-												<button
-													onClick={toggleMute}
-													className="p-2 hover:bg-white/20 rounded-full transition-colors"
-												>
-													{isMuted ? (
-														<FaVolumeMute className="h-4 w-4" />
-													) : (
-														<FaVolumeUp className="h-4 w-4" />
-													)}
-												</button>
-												<span className="text-sm">
-													{formatTime(currentTime)} / {formatTime(duration)}
-												</span>
+											{/* Controls */}
+											<div className="flex items-center justify-between text-white">
+												<div className="flex items-center space-x-4">
+													<button
+														type="button"
+														onClick={togglePlay}
+														className="p-2 hover:bg-white/20 rounded-full transition-colors"
+														aria-label={isPlaying ? 'Pause' : 'Lecture'}
+													>
+														{isPlaying ? (
+															<FaPause className="h-4 w-4" />
+														) : (
+															<FaPlay className="h-4 w-4" />
+														)}
+													</button>
+													<button
+														type="button"
+														onClick={toggleMute}
+														className="p-2 hover:bg-white/20 rounded-full transition-colors"
+														aria-label={isMuted ? 'Activer le son' : 'Couper le son'}
+													>
+														{isMuted ? (
+															<FaVolumeMute className="h-4 w-4" />
+														) : (
+															<FaVolumeUp className="h-4 w-4" />
+														)}
+													</button>
+													<span className="text-sm">
+														{formatTime(currentTime)} / {formatTime(duration)}
+													</span>
+												</div>
 											</div>
 										</div>
-									</div>
 									)}
 								</div>
 
 								{/* Footer */}
 								<div className="flex justify-end p-6 border-t border-gray-200">
 									<button
+										type="button"
 										onClick={onClose}
 										className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
 									>

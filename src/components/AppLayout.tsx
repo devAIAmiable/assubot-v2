@@ -394,6 +394,7 @@ const AppLayout = () => {
 			<VideoModal
 				isOpen={isVideoModalOpen}
 				onClose={closeVideoModal}
+				autoPlay={true}
 				videoSrc="/assubot-video.mp4"
 				title="Bienvenue sur AssuBot"
 			/>
