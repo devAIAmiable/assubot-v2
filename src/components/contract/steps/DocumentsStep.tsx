@@ -1,4 +1,4 @@
-import { FaCheckCircle, FaPlus, FaUpload } from 'react-icons/fa';
+import { FaCheckCircle, FaUpload } from 'react-icons/fa';
 import React, { useCallback, useState } from 'react';
 
 import type { ContractFormData } from '../../../types';

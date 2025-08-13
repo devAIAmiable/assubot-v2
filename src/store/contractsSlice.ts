@@ -2,9 +2,6 @@ import type { Contract } from '../types';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-// Use Contract as the main contract type
-export type Contract = Contract;
-
 interface ContractsState {
 	contracts: Contract[];
 	loading: boolean;

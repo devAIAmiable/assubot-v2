@@ -530,6 +530,12 @@ const SignupForm: React.FC = () => {
 						isLogin={false}
 					/>
 
+					{submitError && (
+						<p className="mt-2 text-sm text-red-600">
+							{submitError}
+						</p>
+					)}
+
 					{!step1Form.watch('acceptedTerms') &&
 						step1Error &&
 						step1Error.includes("conditions d'utilisation") && (

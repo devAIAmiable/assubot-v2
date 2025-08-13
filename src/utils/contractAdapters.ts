@@ -1,4 +1,4 @@
-import type { ContactType, Contract, DocumentType, ObligationType } from '../types';
+import type { ContactType, Contract } from '../types';
 
 /**
  * Adapter functions to work with Contract in legacy components

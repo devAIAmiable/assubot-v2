@@ -39,7 +39,6 @@ import { Link } from 'react-router-dom';
 import Spinner from './ui/Spinner';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { motion } from 'framer-motion';
-import { openModal } from '../store/contractCreationSlice';
 import { useState } from 'react';
 
 const ContratsModule = () => {
