@@ -15,7 +15,6 @@ import {
 	FaShare,
 	FaShieldAlt,
 	FaTimes,
-	FaTimes as FaTimesIcon,
 } from 'react-icons/fa';
 import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel, isExpired } from '../utils/contract';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -28,7 +27,7 @@ import { useState } from 'react';
 
 function highlightKeywords(text: string) {
 	const keywords = [
-		'Modalité', 'Justificatif', 'Preuve', 'Effet', 'Délai', 'Prise d’effet', 'Contact',
+		'Modalité', 'Justificatif', 'Preuve', 'Effet', 'Délai', 'Prise d\'effet', 'Contact',
 		'Oui', 'Non', 'R :', 'Q :'
 	];
 	const regex = new RegExp(`(${keywords.map(k => k.replace(/([.*+?^=!:${}()|[\]\\])/g, "\\$1")).join('|')})`, 'g');
@@ -102,16 +101,16 @@ const ContractDetailsPage = () => {
 							</button>
 							<div className="flex items-center space-x-3">
 								{/* Insurer logo or type icon */}
-								{getInsurerLogo(contract.insurer) ? (
+								{getInsurerLogo(contract.insurerName) ? (
 									<img
-										src={getInsurerLogo(contract.insurer)}
-										alt={contract.insurer}
+										src={getInsurerLogo(contract.insurerName)}
+										alt={contract.insurerName}
 										className="w-12 h-12 object-contain rounded bg-white border border-gray-100"
 									/>
 								) : (
 									<div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
 										{(() => {
-											const TypeIcon = getTypeIcon(contract.type);
+											const TypeIcon = getTypeIcon(contract.category);
 											return <TypeIcon className="h-6 w-6 text-[#1e51ab]" />;
 										})()}
 									</div>
@@ -119,7 +118,7 @@ const ContractDetailsPage = () => {
 								<div>
 									<h1 className="text-2xl font-bold text-gray-900">{contract.name}</h1>
 									<p className="text-gray-600">
-										{contract.insurer} - {getTypeLabel(contract.type)}
+										{contract.insurerName} - {getTypeLabel(contract.category)}
 									</p>
 								</div>
 							</div>
@@ -182,7 +181,7 @@ const ContractDetailsPage = () => {
 						{/* Vue d'ensemble */}
 						<Tab.Panel className="p-6">
 							<div className="max-w-7xl mx-auto">
-								{/* Mon contrat en un coup d'œil: full width */}
+								{/* Mon contrat en un coup d'œil */}
 								<div className="mb-8">
 									<div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
 										<h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
@@ -194,19 +193,19 @@ const ContractDetailsPage = () => {
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Formule</span>
 													<span className="font-semibold text-gray-900">
-														{capitalizeFirst(contract.overview.planType)}
+														{contract.formula ? capitalizeFirst(contract.formula) : 'Non spécifiée'}
 													</span>
 												</div>
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Début de contrat</span>
 													<span className="font-semibold text-gray-900">
-														{new Date(contract.overview.startDate).toLocaleDateString('fr-FR')}
+														{new Date(contract.startDate).toLocaleDateString('fr-FR')}
 													</span>
 												</div>
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Fin de contrat</span>
 													<span className="font-semibold text-gray-900">
-														{new Date(contract.overview.endDate).toLocaleDateString('fr-FR')}
+														{new Date(contract.endDate).toLocaleDateString('fr-FR')}
 													</span>
 												</div>
 											</div>
@@ -214,22 +213,22 @@ const ContractDetailsPage = () => {
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Prime annuelle</span>
 													<span className="font-semibold text-[#1e51ab]">
-														{contract.overview.annualPremium}
+														{(contract.annualPremiumCents / 100).toFixed(2)} €
 													</span>
 												</div>
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Renouvellement tacite</span>
 													<span className="font-semibold text-gray-900">
-														{contract.overview.hasTacitRenewal ? 'Oui' : 'Non'}
+														{contract.tacitRenewal ? 'Oui' : 'Non'}
 													</span>
 												</div>
-												{contract.overview.hasTacitRenewal && (
+												{contract.tacitRenewal && contract.cancellationDeadline && (
 													<div className="flex items-center justify-between py-3">
 														<span className="text-gray-600 font-medium">
 														Date limite
 														</span>
 														<span className="font-semibold text-gray-900">
-															{new Date(contract.overview.tacitRenewalDeadline).toLocaleDateString('fr-FR')}
+															{new Date(contract.cancellationDeadline).toLocaleDateString('fr-FR')}
 														</span>
 													</div>
 												)}
@@ -237,6 +236,7 @@ const ContractDetailsPage = () => {
 										</div>
 									</div>
 								</div>
+
 								{/* Garanties souscrites + Sidebar */}
 								<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 									{/* Garanties souscrites (2/3) */}
@@ -246,109 +246,65 @@ const ContractDetailsPage = () => {
 												Garanties souscrites
 											</h3>
 											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-												{contract.overview.subscribedCoverages.map((garantie, index) => (
-													<div
-														key={index}
-														className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-100"
-													>
-														<FaCheck className="h-5 w-5 text-green-600" />
-														<span className="font-medium text-gray-900">
-															{capitalizeFirst(garantie)}
-														</span>
+												{contract.guarantees && contract.guarantees.length > 0 ? (
+													contract.guarantees.map((garantie) => (
+														<div
+															key={garantie.id}
+															className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-100"
+														>
+															<FaCheck className="h-5 w-5 text-green-600" />
+															<span className="font-medium text-gray-900">
+																{capitalizeFirst(garantie.title)}
+															</span>
+														</div>
+													))
+												) : (
+													<div className="col-span-2 text-center text-gray-500 py-4">
+														Aucune garantie spécifiée
 													</div>
-												))}
+												)}
 											</div>
 										</div>
 									</div>
+
 									{/* Sidebar (1/3) */}
 									<div className="space-y-6">
 										{/* Documents */}
 										<div className="bg-white border border-gray-200 rounded-2xl p-6">
 											<h3 className="text-lg font-semibold text-gray-900 mb-4">Documents</h3>
 											<div className="space-y-3">
-												{/* Conditions Générales */}
-												<div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl border border-blue-100">
-													<div className="flex items-center space-x-3">
-														<FaFileAlt className="h-5 w-5 text-blue-600" />
-														<div>
-															<p className="text-sm font-medium text-gray-900">
-																{contract.documents.generalConditions.name}
-															</p>
-															<p className="text-xs text-gray-500">
-																Ajouté le {contract.documents.generalConditions.uploadDate}
-															</p>
-														</div>
-													</div>
-													<div className="flex items-center space-x-3">
-														<a
-															href={contract.documents.generalConditions.url}
-															target="_blank"
-															rel="noopener noreferrer"
-															className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
-														>
-															<FaEye className="h-4 w-4" />
-														</a>
-														<a
-															href={contract.documents.generalConditions.url}
-															download={contract.documents.generalConditions.name}
-															className="text-gray-500 hover:text-[#1e51ab] text-sm font-medium"
-															title="Télécharger"
-														>
-															<FaDownload className="inline h-4 w-4" />
-														</a>
-													</div>
-												</div>
-												{/* Conditions Particulières */}
-												<div className="flex items-center justify-between p-3 bg-green-50 rounded-xl border border-green-100">
-													<div className="flex items-center space-x-3">
-														<FaFileAlt className="h-5 w-5 text-green-600" />
-														<div>
-															<p className="text-sm font-medium text-gray-900">
-																{contract.documents.particularConditions.name}
-															</p>
-															<p className="text-xs text-gray-500">
-																Ajouté le {contract.documents.particularConditions.uploadDate}
-															</p>
-														</div>
-													</div>
-													<div className="flex items-center space-x-6">
-														<a
-															href={contract.documents.particularConditions.url}
-															target="_blank"
-															rel="noopener noreferrer"
-															className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
-														>
-															<FaEye className="h-4 w-4" />
-														</a>
-														<a
-															href={contract.documents.particularConditions.url}
-															download={contract.documents.particularConditions.name}
-															className="text-gray-500 hover:text-[#1e51ab] text-sm font-medium"
-															title="Télécharger"
-														>
-															<FaDownload className="inline h-4 w-4" />
-														</a>
-													</div>
-												</div>
-												{/* Autres Documents */}
-												{contract.documents.otherDocs &&
-													contract.documents.otherDocs.map((doc, index) => (
+												{contract.documents && contract.documents.length > 0 ? (
+													contract.documents.map((doc) => (
 														<div
-															key={index}
-															className="flex items-center justify-between p-3 bg-gray-50 rounded-xl"
+															key={doc.id}
+															className={`flex items-center justify-between p-3 rounded-xl border ${
+																doc.type === 'CG' 
+																	? 'bg-blue-50 border-blue-100' 
+																	: doc.type === 'CP' 
+																		? 'bg-green-50 border-green-100' 
+																		: 'bg-gray-50 border-gray-100'
+															}`}
 														>
-															<div className="flex items-center space-x-6">
-																<FaFileAlt className="h-5 w-5 text-gray-400" />
+															<div className="flex items-center space-x-3">
+																<FaFileAlt className={`h-5 w-5 ${
+																	doc.type === 'CG' 
+																		? 'text-blue-600' 
+																		: doc.type === 'CP' 
+																			? 'text-green-600' 
+																			: 'text-gray-400'
+																}`} />
 																<div>
-																	<p className="text-sm font-medium text-gray-900">{doc.name}</p>
+																	<p className="text-sm font-medium text-gray-900">
+																		Document {doc.type}
+																	</p>
 																	<p className="text-xs text-gray-500">
-																		Ajouté le {doc.uploadDate}
+																		Ajouté le {new Date(doc.createdAt).toLocaleDateString('fr-FR')}
 																	</p>
 																</div>
 															</div>
-															<div className="flex items-center space-x-6">
+															<div className="flex items-center space-x-3">
 																<a
-																	href={doc.url}
+																	href={doc.fileUrl}
 																	target="_blank"
 																	rel="noopener noreferrer"
 																	className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
@@ -356,8 +312,8 @@ const ContractDetailsPage = () => {
 																	<FaEye className="h-4 w-4" />
 																</a>
 																<a
-																	href={doc.url}
-																	download={doc.name}
+																	href={doc.fileUrl}
+																	download
 																	className="text-gray-500 hover:text-[#1e51ab] text-sm font-medium"
 																	title="Télécharger"
 																>
@@ -365,7 +321,12 @@ const ContractDetailsPage = () => {
 																</a>
 															</div>
 														</div>
-													))}
+													))
+												) : (
+													<div className="text-center text-gray-500 py-4">
+														Aucun document disponible
+													</div>
+												)}
 											</div>
 										</div>
 									</div>
@@ -377,107 +338,37 @@ const ContractDetailsPage = () => {
 						<Tab.Panel className="p-6">
 							<div className="max-w-7xl mx-auto">
 								<div className="space-y-8">
-									{contract.coverages.map((garantie, index) => (
-										<div key={index} className="bg-white border border-gray-200 rounded-2xl p-8">
-											<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-												<FaShieldAlt className="h-6 w-6 text-[#1e51ab] mr-3" />
-												{capitalizeFirst(garantie.name)}
-											</h3>
-
-											{/* Détails des prestations */}
-											{garantie.details && garantie.details.length > 0 && (
-												<div className="mb-8">
-													<h4 className="text-xl font-semibold text-gray-900 mb-6">
-														Détails des prestations
-													</h4>
-													<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-														{garantie.details.map((detail, detailIndex) => (
-															<div
-																key={detailIndex}
-																className="bg-gray-50 p-6 rounded-xl border border-gray-200"
-															>
-																<h5 className="text-lg font-semibold text-gray-900 mb-4">
-																	{capitalizeFirst(detail.service)}
-																</h5>
-																<div className="grid grid-cols-2 gap-4">
-																	<div>
-																		<span className="text-gray-600 text-sm">Plafond</span>
-																		<p className="font-semibold text-gray-900">
-																			{capitalizeFirst(detail.limit)}
-																		</p>
-																	</div>
-																	<div>
-																		<span className="text-gray-600 text-sm">Franchise</span>
-																		<p className="font-semibold text-gray-900">
-																			{capitalizeFirst(detail.deductible)}
-																		</p>
-																	</div>
-																	<div className="col-span-2">
-																		<span className="text-gray-600 text-sm">Limite</span>
-																		<p className="font-semibold text-gray-900">
-																			{capitalizeFirst(detail.restrictions)}
-																		</p>
-																	</div>
-																</div>
-															</div>
-														))}
+									{contract.guarantees && contract.guarantees.length > 0 ? (
+										contract.guarantees.map((garantie) => (
+											<div key={garantie.id} className="bg-white border border-gray-200 rounded-2xl p-8">
+												<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+													<FaShieldAlt className="h-6 w-6 text-[#1e51ab] mr-3" />
+													{capitalizeFirst(garantie.title)}
+												</h3>
+												{garantie.details && (
+													<div className="mb-6">
+														<p className="text-gray-700">{garantie.details}</p>
 													</div>
-												</div>
-											)}
-
-											{/* Non couvert */}
-											{garantie.details && garantie.details.some(detail => detail.excludedItems && detail.excludedItems.length > 0) && (
-												<div className="mb-8">
-													<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-														Non couvert
-													</h4>
-													<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-														{garantie.details.map((detail, detailIndex) =>
-															detail.excludedItems && detail.excludedItems.length > 0
-																? detail.excludedItems.map((item: string, index: number) => (
-																	<div
-																		key={`${detailIndex}-${index}`}
-																		className="flex items-center space-x-3 p-4 bg-red-50 rounded-xl border border-red-100"
-																	>
-																		<FaTimesIcon className="h-5 w-5 text-red-600" />
-																		<span className="font-medium text-gray-900">
-																			{capitalizeFirst(item)}
-																		</span>
-																	</div>
-																))
-																: null
-														)}
+												)}
+												{garantie.covered && (
+													<div className="mb-6">
+														<h4 className="text-lg font-semibold text-gray-900 mb-3">Ce qui est couvert</h4>
+														<p className="text-gray-700">{garantie.covered}</p>
 													</div>
-												</div>
-											)}
-
-											{/* Ce qui est couvert */}
-											{garantie.details && garantie.details.some(detail => detail.coveredItems && detail.coveredItems.length > 0) && (
-												<div className="mb-8">
-													<h4 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-														Ce qui est couvert
-													</h4>
-													<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-														{garantie.details.map((detail, detailIndex) =>
-															detail.coveredItems && detail.coveredItems.length > 0
-																? detail.coveredItems.map((item: string, index: number) => (
-																	<div
-																		key={`${detailIndex}-${index}`}
-																		className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-100"
-																	>
-																		<FaCheck className="h-5 w-5 text-green-600" />
-																		<span className="font-medium text-gray-900">
-																			{capitalizeFirst(item)}
-																		</span>
-																	</div>
-																))
-																: null
-														)}
+												)}
+												{garantie.notCovered && (
+													<div className="mb-6">
+														<h4 className="text-lg font-semibold text-gray-900 mb-3">Non couvert</h4>
+														<p className="text-gray-700">{garantie.notCovered}</p>
 													</div>
-												</div>
-											)}
+												)}
+											</div>
+										))
+									) : (
+										<div className="text-center text-gray-500 py-8">
+											Aucune garantie disponible
 										</div>
-									))}
+									)}
 								</div>
 							</div>
 						</Tab.Panel>
@@ -491,22 +382,28 @@ const ContractDetailsPage = () => {
 										Exclusions générales
 									</h3>
 									<div className="space-y-4">
-										{contract.generalExclusions.map((exclusion, index) => (
-											<div
-												key={index}
-												className="flex items-start space-x-4 p-6 bg-white rounded-2xl border border-red-100"
-											>
-												<span className="text-gray-900 font-medium">
-													{capitalizeFirst(exclusion)}
-												</span>
+										{contract.exclusions && contract.exclusions.length > 0 ? (
+											contract.exclusions.map((exclusion) => (
+												<div
+													key={exclusion.id}
+													className="flex items-start space-x-4 p-6 bg-white rounded-2xl border border-red-100"
+												>
+													<span className="text-gray-900 font-medium">
+														{capitalizeFirst(exclusion.description)}
+													</span>
+												</div>
+											))
+										) : (
+											<div className="text-center text-gray-500 py-4">
+												Aucune exclusion spécifiée
 											</div>
-										))}
+										)}
 									</div>
 								</div>
 							</div>
 						</Tab.Panel>
 
-						{/* Zone géographique (new tab) */}
+						{/* Zone géographique */}
 						<Tab.Panel className="p-6">
 							<div className="max-w-7xl mx-auto">
 								<div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
@@ -515,14 +412,20 @@ const ContractDetailsPage = () => {
 										Zone de couverture géographique
 									</h3>
 									<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-										{contract.geographicCoverage.countries.map((pays, index) => (
-											<div
-												key={index}
-												className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-center"
-											>
-												<span className="font-medium text-gray-900">{capitalizeFirst(pays)}</span>
+										{contract.zones && contract.zones.length > 0 ? (
+											contract.zones.map((zone) => (
+												<div
+													key={zone.id}
+													className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-center"
+												>
+													<span className="font-medium text-gray-900">{capitalizeFirst(zone.label)}</span>
+												</div>
+											))
+										) : (
+											<div className="col-span-full text-center text-gray-500 py-4">
+												Aucune zone géographique spécifiée
 											</div>
-										))}
+										)}
 									</div>
 								</div>
 							</div>
@@ -536,39 +439,21 @@ const ContractDetailsPage = () => {
 									Mes obligations
 								</h3>
 								<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-									<div className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
-										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-											<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
-											Souscription
-										</h4>
-										<ul className="list-disc list-inside space-y-2">
-											{contract.obligations.atSubscription.map((item: string, idx: number) => (
-												<li key={idx} className="text-gray-900 text-base">{capitalizeFirst(item)}</li>
-											))}
-										</ul>
-									</div>
-									<div className="bg-green-50 p-8 rounded-2xl border border-green-100">
-										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-											<FaClipboardList className="h-5 w-5 text-green-600 mr-2" />
-											Pendant le contrat
-										</h4>
-										<ul className="list-disc list-inside space-y-2">
-											{contract.obligations.duringContract.map((item: string, idx: number) => (
-												<li key={idx} className="text-gray-900 text-base">{capitalizeFirst(item)}</li>
-											))}
-										</ul>
-									</div>
-									<div className="bg-yellow-50 p-8 rounded-2xl border border-yellow-100">
-										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-											<FaClipboardList className="h-5 w-5 text-yellow-600 mr-2" />
-											En cas de sinistre
-										</h4>
-										<ul className="list-disc list-inside space-y-2">
-											{contract.obligations.inCaseOfClaim.map((item: string, idx: number) => (
-												<li key={idx} className="text-gray-900 text-base">{capitalizeFirst(item)}</li>
-											))}
-										</ul>
-									</div>
+									{contract.obligations && contract.obligations.length > 0 ? (
+										contract.obligations.map((obligation) => (
+											<div key={obligation.id} className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
+												<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+													<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
+													{capitalizeFirst(obligation.type)}
+												</h4>
+												<p className="text-gray-900 text-base">{capitalizeFirst(obligation.description)}</p>
+											</div>
+										))
+									) : (
+										<div className="col-span-full text-center text-gray-500 py-8">
+											Aucune obligation spécifiée
+										</div>
+									)}
 								</div>
 							</div>
 						</Tab.Panel>
@@ -582,69 +467,27 @@ const ContractDetailsPage = () => {
 										Comment résilier mon contrat
 									</h3>
 									<div className="space-y-8">
-										{contract.cancellation.map((qa, idx) => (
-											<div key={idx} className="bg-white p-6 rounded-xl border border-yellow-200">
-												<h4 className="text-xl font-semibold text-gray-900 mb-2">{qa.question}</h4>
-												{/* Improved Q&A formatting */}
-												{(() => {
-													// Split answer into lines
-													const lines: string[] = qa.answer.split('\n').map(l => l.trim()).filter(Boolean);
-													// Detect if this answer contains a numbered list (e.g., '1- ...')
-													const numberedListIndices: number[] = lines
-														.map((line: string, i: number) => (/^\d+- /.test(line) ? i : -1))
-														.filter((i: number) => i !== -1);
-													if (numberedListIndices.length > 0) {
-														// Find the intro (before the list)
-														const intro: string[] = lines.slice(0, numberedListIndices[0]);
-														// Group list items and their sub-lines
-														type Item = { main: string; sub: string[] };
-														const items: Item[] = [];
-														let currentItem: Item | null = null;
-														lines.slice(numberedListIndices[0]).forEach((line: string) => {
-															if (/^\d+- /.test(line)) {
-																if (currentItem) items.push(currentItem);
-																currentItem = { main: line.replace(/^\d+- /, ''), sub: [] };
-															} else if (currentItem) {
-																currentItem.sub.push(line);
-															}
-														});
-														if (currentItem) items.push(currentItem);
-														return (
-															<div className="space-y-2">
-																{intro.map((line: string, i: number) => (
-																	<p key={i} className="text-gray-900 text-lg">
-																		{highlightKeywords(line)}
-																	</p>
-																))}
-																<ul className="list-decimal list-inside ml-4 space-y-2">
-																	{items.map((item: Item, i: number) => (
-																		<li key={i} className="text-gray-900 text-lg">
-																			{highlightKeywords(item.main)}
-																			{item.sub.length > 0 && (
-																				<ul className="ml-4 list-none space-y-1">
-																					{item.sub.map((sub: string, j: number) => (
-																						<li key={j} className="text-gray-900 text-base">
-																							{highlightKeywords(sub)}
-																						</li>
-																					))}
-																				</ul>
-																			)}
-																		</li>
-																	))}
-																</ul>
-															</div>
-														);
-													} else {
-														// No numbered list, just paragraphs
-														return lines.map((line: string, i: number) => (
-															<p key={i} className="text-gray-900 text-lg">
-																{highlightKeywords(line)}
-															</p>
-														));
-													}
-												})()}
+										{contract.termination ? (
+											<div className="bg-white p-6 rounded-xl border border-yellow-200">
+												<h4 className="text-xl font-semibold text-gray-900 mb-2">
+													{contract.termination.mode || 'Résiliation'}
+												</h4>
+												{contract.termination.details && (
+													<div className="text-gray-900 text-lg">
+														{highlightKeywords(contract.termination.details)}
+													</div>
+												)}
+												{contract.termination.notice && (
+													<div className="mt-4 p-4 bg-yellow-50 rounded-lg">
+														<p className="text-yellow-800 font-medium">Délai de préavis : {contract.termination.notice}</p>
+													</div>
+												)}
 											</div>
-										))}
+										) : (
+											<div className="text-center text-gray-500 py-4">
+												Aucune information de résiliation disponible
+											</div>
+										)}
 									</div>
 								</div>
 							</div>
@@ -659,107 +502,46 @@ const ContractDetailsPage = () => {
 								</h3>
 
 								<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-									{/* Gestion contrat */}
-									<div className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
-										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-											<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
-											Gestion contrat
-										</h4>
-										<div className="space-y-4">
-											<div>
-												<span className="text-gray-600 text-sm">Nom</span>
-												<p className="font-semibold text-gray-900">
-													{capitalizeFirst(contract.contacts.contractManagement.name)}
-												</p>
+									{contract.contacts && contract.contacts.length > 0 ? (
+										contract.contacts.map((contact) => (
+											<div key={contact.id} className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
+												<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+													<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
+													{capitalizeFirst(contact.type)}
+												</h4>
+												<div className="space-y-4">
+													{contact.name && (
+														<div>
+															<span className="text-gray-600 text-sm">Nom</span>
+															<p className="font-semibold text-gray-900">{contact.name}</p>
+														</div>
+													)}
+													{contact.phone && (
+														<div className="flex items-center space-x-3">
+															<FaPhone className="h-4 w-4 text-gray-400" />
+															<span className="font-medium text-gray-900">{contact.phone}</span>
+														</div>
+													)}
+													{contact.email && (
+														<div className="flex items-center space-x-3">
+															<FaEnvelope className="h-4 w-4 text-gray-400" />
+															<span className="font-medium text-gray-900">{contact.email}</span>
+														</div>
+													)}
+													{contact.openingHours && (
+														<div className="flex items-center space-x-3">
+															<FaClock className="h-4 w-4 text-gray-400" />
+															<span className="font-medium text-gray-900">{contact.openingHours}</span>
+														</div>
+													)}
+												</div>
 											</div>
-											<div className="flex items-center space-x-3">
-												<FaPhone className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.contractManagement.phone)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaEnvelope className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.contractManagement.email)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaClock className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.contractManagement.hours)}
-												</span>
-											</div>
+										))
+									) : (
+										<div className="col-span-full text-center text-gray-500 py-8">
+											Aucun contact disponible
 										</div>
-									</div>
-
-									{/* Assistance */}
-									<div className="bg-green-50 p-8 rounded-2xl border border-green-100">
-										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-											<FaShieldAlt className="h-5 w-5 text-green-600 mr-2" />
-											Assistance
-										</h4>
-										<div className="space-y-4">
-											<div>
-												<span className="text-gray-600 text-sm">Nom</span>
-												<p className="font-semibold text-gray-900">
-													{capitalizeFirst(contract.contacts.assistance.name)}
-												</p>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaPhone className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.assistance.phone)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaEnvelope className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.assistance.email)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaClock className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.assistance.availability)}
-												</span>
-											</div>
-										</div>
-									</div>
-
-									{/* Urgences */}
-									<div className="bg-red-50 p-8 rounded-2xl border border-red-100">
-										<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-											<FaExclamationTriangle className="h-5 w-5 text-red-600 mr-2" />
-											Urgences
-										</h4>
-										<div className="space-y-4">
-											<div>
-												<span className="text-gray-600 text-sm">Nom</span>
-												<p className="font-semibold text-gray-900">
-													{capitalizeFirst(contract.contacts.emergency.name)}
-												</p>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaPhone className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.emergency.phone)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaEnvelope className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.emergency.email)}
-												</span>
-											</div>
-											<div className="flex items-center space-x-3">
-												<FaClock className="h-4 w-4 text-gray-400" />
-												<span className="font-medium text-gray-900">
-													{capitalizeFirst(contract.contacts.emergency.availability)}
-												</span>
-											</div>
-										</div>
-									</div>
+									)}
 								</div>
 							</div>
 						</Tab.Panel>
