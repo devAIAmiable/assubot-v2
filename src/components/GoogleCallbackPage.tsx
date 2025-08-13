@@ -44,8 +44,14 @@ const GoogleCallbackPage: React.FC = () => {
 						})
 					);
 
-					// Redirect to dashboard
-					navigate('/app', { replace: true });
+					// Check if this is a first-time login (Google or regular)
+					if (user.isFirstLogin) {
+						// Redirect to profile page for first-time users
+						navigate('/app/profil', { replace: true });
+					} else {
+						// Redirect to dashboard for existing users
+						navigate('/app', { replace: true });
+					}
 					return;
 				} catch (err) {
 					console.error('Error parsing user data:', err);
@@ -79,8 +85,14 @@ const GoogleCallbackPage: React.FC = () => {
 								})
 							);
 
-							// Redirect to dashboard
-							navigate('/app', { replace: true });
+							// Check if this is a first-time login (Google or regular)
+							if (profileResponse.data.user.isFirstLogin) {
+								// Redirect to profile page for first-time users
+								navigate('/app/profil', { replace: true });
+							} else {
+								// Redirect to dashboard for existing users
+								navigate('/app', { replace: true });
+							}
 						} else {
 							// Fallback to basic auth data if profile fetch fails
 							const userData = {
@@ -95,8 +107,14 @@ const GoogleCallbackPage: React.FC = () => {
 								})
 							);
 
-							// Redirect to dashboard
-							navigate('/app', { replace: true });
+							// Check if this is a first-time login (Google or regular)
+							if (authResponse.data.user.isFirstLogin) {
+								// Redirect to profile page for first-time users
+								navigate('/app/profil', { replace: true });
+							} else {
+								// Redirect to dashboard for existing users
+								navigate('/app', { replace: true });
+							}
 						}
 					} else {
 						const errorMessage = authResponse.error || 'Échec de l\'authentification Google';

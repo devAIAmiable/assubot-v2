@@ -3,6 +3,7 @@ import {
 	FaCheck,
 	FaEdit,
 	FaEnvelope,
+	FaExclamationTriangle,
 	FaGoogle,
 	FaLock,
 	FaMapMarkerAlt,
@@ -11,6 +12,8 @@ import {
 	FaUser,
 } from 'react-icons/fa';
 import { useAppSelector } from '../store/hooks';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
@@ -22,8 +25,17 @@ import Avatar from './ui/Avatar';
 import { useProfileUpdate } from '../hooks/useProfileUpdate';
 import { usePasswordChange } from '../hooks/usePasswordChange';
 import { useAvatarUpload } from '../hooks/useAvatarUpload';
-import { formatDateForAPI, formatDateForInput } from '../utils/dateHelpers';
+import { formatDateForAPI, formatDateForInput, formatDateForDisplay } from '../utils/dateHelpers';
+import { calculateAge } from '../utils/ageValidation';
 import { showToast } from './ui/Toast';
+import {
+	personalInfoSchema,
+	addressSchema,
+	passwordChangeSchema,
+	type PersonalInfoFormData,
+	type AddressFormData,
+	type PasswordChangeFormData,
+} from '../schemas/profileValidation';
 
 const ProfileModule = () => {
 	const { currentUser } = useAppSelector(getUserState);
@@ -31,36 +43,54 @@ const ProfileModule = () => {
 	const { changePassword, loading: passwordLoading } = usePasswordChange();
 	const { uploadAvatar, loading: avatarLoading } = useAvatarUpload();
 
-	const [isEditingPersonal, setIsEditingPersonal] = useState(false);
+	// Check if profile is incomplete by directly checking required fields
+	const isProfileIncomplete =
+		!currentUser?.birthDate || !currentUser?.gender || !currentUser?.professionalCategory;
+
+	const [isEditingPersonal, setIsEditingPersonal] = useState(isProfileIncomplete);
 	const [isEditingAddress, setIsEditingAddress] = useState(false);
 	const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-	// Form states
-	const [personalForm, setPersonalForm] = useState({
-		firstName: currentUser?.firstName || '',
-		lastName: currentUser?.lastName || '',
-		birthDate: formatDateForInput(currentUser?.birthDate),
-		gender: currentUser?.gender || '',
-		professionalCategory: currentUser?.professionalCategory || '',
+	// Form states using React Hook Form with Zod validation
+	const personalForm = useForm<PersonalInfoFormData>({
+		resolver: zodResolver(personalInfoSchema),
+		mode: 'onChange',
+		defaultValues: {
+			firstName: currentUser?.firstName || '',
+			lastName: currentUser?.lastName || '',
+			birthDate: formatDateForInput(currentUser?.birthDate),
+			gender: currentUser?.gender || '',
+			professionalCategory: currentUser?.professionalCategory || '',
+		},
 	});
 
-	const [addressForm, setAddressForm] = useState({
-		address: currentUser?.address || '',
-		city: currentUser?.city || '',
-		zip: currentUser?.zip || '',
+	const addressForm = useForm<AddressFormData>({
+		resolver: zodResolver(addressSchema),
+		mode: 'onChange',
+		defaultValues: {
+			address: currentUser?.address || '',
+			city: currentUser?.city || '',
+			zip: currentUser?.zip || '',
+		},
 	});
 
-	const [passwordForm, setPasswordForm] = useState({
-		currentPassword: '',
-		newPassword: '',
-		confirmPassword: '',
+	const passwordForm = useForm<PasswordChangeFormData>({
+		resolver: zodResolver(passwordChangeSchema),
+		mode: 'onChange',
+		defaultValues: {
+			currentPassword: '',
+			newPassword: '',
+			confirmPassword: '',
+		},
 	});
-	const [hasInteractedWithConfirmPassword, setHasInteractedWithConfirmPassword] = useState(false);
+
+	// Check if personal form is valid using form state
+	const isPersonalFormValid = personalForm.formState.isValid;
 
 	// Update form state when currentUser changes
 	useEffect(() => {
 		if (currentUser) {
-			setPersonalForm({
+			personalForm.reset({
 				firstName: currentUser.firstName || '',
 				lastName: currentUser.lastName || '',
 				birthDate: formatDateForInput(currentUser.birthDate),
@@ -68,43 +98,46 @@ const ProfileModule = () => {
 				professionalCategory: currentUser.professionalCategory || '',
 			});
 
-			setAddressForm({
+			addressForm.reset({
 				address: currentUser.address || '',
 				city: currentUser.city || '',
 				zip: currentUser.zip || '',
 			});
 		}
-	}, [currentUser]);
+	}, [currentUser, personalForm, addressForm]);
 
 	// Dropdown options
 	const genderOptions: DropdownOption[] = [
-		{ value: 'Homme', label: 'Homme' },
-		{ value: 'Femme', label: 'Femme' },
-		{ value: 'Autre', label: 'Autre' },
+		{ value: '', label: 'Sélectionner un genre' },
+		{ value: 'male', label: 'Homme' },
+		{ value: 'female', label: 'Femme' },
+		{ value: 'other', label: 'Autre' },
 	];
 
 	const professionalCategoryOptions: DropdownOption[] = [
-		{ value: 'Cadre', label: 'Cadre' },
-		{ value: 'Employé', label: 'Employé' },
-		{ value: 'Ouvrier', label: 'Ouvrier' },
-		{ value: 'Profession libérale', label: 'Profession libérale' },
-		{ value: 'Artisan', label: 'Artisan' },
-		{ value: 'Commerçant', label: 'Commerçant' },
-		{ value: 'Étudiant', label: 'Étudiant' },
-		{ value: 'Retraité', label: 'Retraité' },
-		{ value: 'Sans emploi', label: 'Sans emploi' },
-		{ value: 'Autre', label: 'Autre' },
+		{ value: '', label: 'Sélectionner une catégorie' },
+		{ value: 'executive', label: 'Employé cadre' },
+		{ value: 'non-executive', label: 'Employé non cadre' },
+		{ value: 'entrepreneur', label: 'Entrepreneur' },
+		{ value: 'student', label: 'Étudiant' },
+		{ value: 'unemployed', label: 'Sans emploi' },
 	];
 
-	const handlePersonalSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const handlePersonalSubmit = async (data: PersonalInfoFormData) => {
+		// Déclencher la validation complète avant la soumission
+		const isValid = await personalForm.trigger();
+		
+		if (!isValid) {
+			// Les erreurs s'afficheront automatiquement grâce à formState.errors
+			return;
+		}
 
 		const result = await updateProfile({
-			firstName: personalForm.firstName,
-			lastName: personalForm.lastName,
-			birthDate: formatDateForAPI(personalForm.birthDate),
-			gender: personalForm.gender,
-			profession: personalForm.professionalCategory,
+			firstName: data.firstName,
+			lastName: data.lastName,
+			birthDate: formatDateForAPI(data.birthDate),
+			gender: data.gender,
+			profession: data.professionalCategory,
 		});
 
 		if (result.success) {
@@ -115,13 +148,19 @@ const ProfileModule = () => {
 		}
 	};
 
-	const handleAddressSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const handleAddressSubmit = async (data: AddressFormData) => {
+		// Déclencher la validation complète avant la soumission
+		const isValid = await addressForm.trigger();
+		
+		if (!isValid) {
+			// Les erreurs s'afficheront automatiquement grâce à formState.errors
+			return;
+		}
 
 		const result = await updateProfile({
-			address: addressForm.address,
-			city: addressForm.city,
-			zip: addressForm.zip,
+			address: data.address,
+			city: data.city,
+			zip: data.zip,
 		});
 
 		if (result.success) {
@@ -132,31 +171,24 @@ const ProfileModule = () => {
 		}
 	};
 
-	const handlePasswordSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-
-		// Validate passwords match
-		if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-			showToast.error('Les mots de passe ne correspondent pas');
-			return;
-		}
-
-		// Validate password strength
-		if (passwordForm.newPassword.length < 8) {
-			showToast.error('Le mot de passe doit contenir au moins 8 caractères');
+	const handlePasswordSubmit = async (data: PasswordChangeFormData) => {
+		// Déclencher la validation complète avant la soumission
+		const isValid = await passwordForm.trigger();
+		
+		if (!isValid) {
+			// Les erreurs s'afficheront automatiquement grâce à formState.errors
 			return;
 		}
 
 		const result = await changePassword({
-			currentPassword: passwordForm.currentPassword,
-			newPassword: passwordForm.newPassword,
+			currentPassword: data.currentPassword,
+			newPassword: data.newPassword,
 		});
 
 		if (result.success) {
 			showToast.success('Mot de passe changé avec succès');
-			setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+			passwordForm.reset();
 			setIsChangingPassword(false);
-			setHasInteractedWithConfirmPassword(false);
 		} else {
 			showToast.error('Erreur lors du changement de mot de passe');
 		}
@@ -181,20 +213,6 @@ const ProfileModule = () => {
 		} else {
 			showToast.error("Erreur lors de la mise à jour de l'avatar");
 		}
-	};
-
-
-
-	const calculateAge = (birthDate: string) => {
-		if (!birthDate) return null;
-		const today = new Date();
-		const birth = new Date(birthDate);
-		let age = today.getFullYear() - birth.getFullYear();
-		const monthDiff = today.getMonth() - birth.getMonth();
-		if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-			age--;
-		}
-		return age;
 	};
 
 	if (!currentUser) {
@@ -222,6 +240,33 @@ const ProfileModule = () => {
 					Gérez vos informations personnelles et paramètres de compte
 				</p>
 			</motion.div>
+
+			{/* Profile completion alert */}
+			{isProfileIncomplete && (
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.6, delay: 0.1 }}
+					className="bg-yellow-50 border border-yellow-200 rounded-lg p-4"
+				>
+					<div className="flex items-center">
+						<FaExclamationTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+						<div className="ml-3 flex-1">
+							<h3 className="text-sm font-medium text-yellow-900">Profil à compléter</h3>
+							<p className="text-sm text-yellow-800 mt-1">
+								Veuillez compléter :{' '}
+								{[
+									!currentUser?.birthDate && 'date de naissance',
+									!currentUser?.gender && 'genre',
+									!currentUser?.professionalCategory && 'catégorie professionnelle',
+								]
+									.filter(Boolean)
+									.join(', ')}
+							</p>
+						</div>
+					</div>
+				</motion.div>
+			)}
 
 			{/* Profile Header Card */}
 			<motion.div
@@ -263,7 +308,7 @@ const ProfileModule = () => {
 									{currentUser.city}
 								</div>
 							)}
-							{currentUser.is_google_account && (
+							{currentUser.isGoogleAccount && (
 								<div className="flex items-center text-sm text-blue-600">
 									<FaGoogle className="h-4 w-4 mr-2" />
 									Compte Google
@@ -308,49 +353,71 @@ const ProfileModule = () => {
 				</div>
 
 				{isEditingPersonal ? (
-					<form onSubmit={handlePersonalSubmit} className="space-y-4">
+					<form onSubmit={personalForm.handleSubmit(handlePersonalSubmit)} className="space-y-4">
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<Input
 								label="Prénom"
 								type="text"
-								value={personalForm.firstName}
-								onChange={(e) => setPersonalForm({ ...personalForm, firstName: e.target.value })}
+								{...personalForm.register('firstName')}
 								required
+								disabled={profileLoading}
+								error={personalForm.formState.errors.firstName?.message}
 							/>
 							<Input
 								label="Nom"
 								type="text"
-								value={personalForm.lastName}
-								onChange={(e) => setPersonalForm({ ...personalForm, lastName: e.target.value })}
+								{...personalForm.register('lastName')}
 								required
+								disabled={profileLoading}
+								error={personalForm.formState.errors.lastName?.message}
 							/>
 							<Input
 								label="Date de naissance"
 								type="date"
-								value={personalForm.birthDate}
-								onChange={(e) => setPersonalForm({ ...personalForm, birthDate: e.target.value })}
+								{...personalForm.register('birthDate')}
+								required
+								disabled={profileLoading}
+								error={personalForm.formState.errors.birthDate?.message}
 							/>
-							<Dropdown
-								label="Genre"
-								options={genderOptions}
-								value={personalForm.gender}
-								onChange={(value) => setPersonalForm({ ...personalForm, gender: value })}
-								placeholder="Sélectionner"
+							<Controller
+								name="gender"
+								control={personalForm.control}
+								render={({ field, fieldState }) => (
+									<Dropdown
+										label="Genre"
+										options={genderOptions}
+										value={field.value}
+										onChange={field.onChange}
+										placeholder="Sélectionner"
+										disabled={profileLoading}
+										error={fieldState.error?.message}
+									/>
+								)}
 							/>
 							<div className="md:col-span-2">
-								<Dropdown
-									label="Catégorie professionnelle"
-									options={professionalCategoryOptions}
-									value={personalForm.professionalCategory}
-									onChange={(value) =>
-										setPersonalForm({ ...personalForm, professionalCategory: value })
-									}
-									placeholder="Sélectionner"
+								<Controller
+									name="professionalCategory"
+									control={personalForm.control}
+									render={({ field, fieldState }) => (
+										<Dropdown
+											label="Catégorie professionnelle"
+											options={professionalCategoryOptions}
+											value={field.value}
+											onChange={field.onChange}
+											placeholder="Sélectionner"
+											disabled={profileLoading}
+											error={fieldState.error?.message}
+										/>
+									)}
 								/>
 							</div>
 						</div>
 						<div className="flex space-x-3">
-							<Button type="submit" className="flex items-center" disabled={profileLoading}>
+							<Button
+								type="submit"
+								className="flex items-center"
+								disabled={profileLoading || !isPersonalFormValid}
+							>
 								{profileLoading ? (
 									<>
 										<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -366,7 +433,10 @@ const ProfileModule = () => {
 							<Button
 								variant="secondary"
 								type="button"
-								onClick={() => setIsEditingPersonal(false)}
+								onClick={() => {
+									setIsEditingPersonal(false);
+									personalForm.reset();
+								}}
 								className="flex items-center"
 								disabled={profileLoading}
 							>
@@ -391,18 +461,36 @@ const ProfileModule = () => {
 							<p className="text-sm text-gray-600 mb-1">Date de naissance</p>
 							<p className="font-medium text-gray-900">
 								{currentUser.birthDate
-									? new Date(currentUser.birthDate).toLocaleDateString('fr-FR')
+									? formatDateForDisplay(currentUser.birthDate)
 									: 'Non renseigné'}
 							</p>
 						</div>
 						<div>
 							<p className="text-sm text-gray-600 mb-1">Genre</p>
-							<p className="font-medium text-gray-900">{currentUser.gender || 'Non renseigné'}</p>
+							<p className="font-medium text-gray-900">
+								{currentUser.gender === 'male'
+									? 'Homme'
+									: currentUser.gender === 'female'
+										? 'Femme'
+										: currentUser.gender === 'other'
+											? 'Autre'
+											: 'Non renseigné'}
+							</p>
 						</div>
 						<div className="md:col-span-2">
 							<p className="text-sm text-gray-600 mb-1">Catégorie professionnelle</p>
 							<p className="font-medium text-gray-900">
-								{currentUser.professionalCategory || 'Non renseigné'}
+								{currentUser.professionalCategory === 'executive'
+									? 'Employé cadre'
+									: currentUser.professionalCategory === 'non-executive'
+										? 'Employé non cadre'
+										: currentUser.professionalCategory === 'entrepreneur'
+											? 'Entrepreneur'
+											: currentUser.professionalCategory === 'student'
+												? 'Étudiant'
+												: currentUser.professionalCategory === 'unemployed'
+													? 'Sans emploi'
+													: 'Non renseigné'}
 							</p>
 						</div>
 					</div>
@@ -435,28 +523,28 @@ const ProfileModule = () => {
 				</div>
 
 				{isEditingAddress ? (
-					<form onSubmit={handleAddressSubmit} className="space-y-4">
+					<form onSubmit={addressForm.handleSubmit(handleAddressSubmit)} className="space-y-4">
 						<Input
 							label="Adresse"
 							type="text"
-							value={addressForm.address}
-							onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
+							{...addressForm.register('address')}
 							placeholder="123 Rue de la République"
+							error={addressForm.formState.errors.address?.message}
 						/>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<Input
 								label="Ville"
 								type="text"
-								value={addressForm.city}
-								onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+								{...addressForm.register('city')}
 								placeholder="Paris"
+								error={addressForm.formState.errors.city?.message}
 							/>
 							<Input
 								label="Code postal"
 								type="text"
-								value={addressForm.zip}
-								onChange={(e) => setAddressForm({ ...addressForm, zip: e.target.value })}
+								{...addressForm.register('zip')}
 								placeholder="75001"
+								error={addressForm.formState.errors.zip?.message}
 							/>
 						</div>
 						<div className="flex space-x-3">
@@ -476,7 +564,10 @@ const ProfileModule = () => {
 							<Button
 								variant="secondary"
 								type="button"
-								onClick={() => setIsEditingAddress(false)}
+								onClick={() => {
+									setIsEditingAddress(false);
+									addressForm.reset();
+								}}
 								className="flex items-center"
 								disabled={profileLoading}
 							>
@@ -563,61 +654,40 @@ const ProfileModule = () => {
 						</div>
 
 						{isChangingPassword ? (
-							<form onSubmit={handlePasswordSubmit} className="space-y-4">
+							<form
+								onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}
+								className="space-y-4"
+							>
 								<Input
 									label="Mot de passe actuel"
 									type="password"
-									value={passwordForm.currentPassword}
-									onChange={(e) =>
-										setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
-									}
+									{...passwordForm.register('currentPassword')}
 									required
 									disabled={passwordLoading}
+									error={passwordForm.formState.errors.currentPassword?.message}
 								/>
 								<Input
 									label="Nouveau mot de passe"
 									type="password"
-									value={passwordForm.newPassword}
-									onChange={(e) =>
-										setPasswordForm({ ...passwordForm, newPassword: e.target.value })
-									}
+									{...passwordForm.register('newPassword')}
 									required
 									disabled={passwordLoading}
 									helperText="Le mot de passe doit contenir au moins 8 caractères"
+									error={passwordForm.formState.errors.newPassword?.message}
 								/>
 								<Input
 									label="Confirmer le mot de passe"
 									type="password"
-									value={passwordForm.confirmPassword}
-									onChange={(e) => {
-										setPasswordForm({ ...passwordForm, confirmPassword: e.target.value });
-										setHasInteractedWithConfirmPassword(true);
-									}}
-									onBlur={() => {
-										if (passwordForm.confirmPassword) {
-											setHasInteractedWithConfirmPassword(true);
-										}
-									}}
+									{...passwordForm.register('confirmPassword')}
 									required
 									disabled={passwordLoading}
-									error={
-										hasInteractedWithConfirmPassword &&
-										passwordForm.newPassword &&
-										passwordForm.confirmPassword &&
-										passwordForm.newPassword !== passwordForm.confirmPassword
-											? 'Les mots de passe ne correspondent pas'
-											: undefined
-									}
+									error={passwordForm.formState.errors.confirmPassword?.message}
 								/>
 								<div className="flex space-x-3">
 									<Button
 										type="submit"
 										size="sm"
-										disabled={
-											passwordLoading ||
-											passwordForm.newPassword !== passwordForm.confirmPassword ||
-											passwordForm.newPassword.length < 8
-										}
+										disabled={passwordLoading || !passwordForm.formState.isValid}
 									>
 										{passwordLoading ? (
 											<>
@@ -634,7 +704,7 @@ const ProfileModule = () => {
 										type="button"
 										onClick={() => {
 											setIsChangingPassword(false);
-											setHasInteractedWithConfirmPassword(false);
+											passwordForm.reset();
 										}}
 										disabled={passwordLoading}
 									>
@@ -648,8 +718,6 @@ const ProfileModule = () => {
 					</div>
 				</div>
 			</motion.div>
-
-
 
 			{/* Account Info */}
 			<motion.div

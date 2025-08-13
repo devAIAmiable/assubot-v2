@@ -14,7 +14,7 @@ export interface User {
 	birthDate?: string;
 	gender?: string;
 	professionalCategory?: string;
-	is_google_account?: boolean;
+	isGoogleAccount?: boolean; // Changed from is_google_account to isGoogleAccount
 	isFirstLogin: boolean;
 	address?: string;
 	city?: string;
@@ -299,14 +299,14 @@ const userSlice = createSlice({
 		// Google account integration
 		linkGoogleAccount: (state) => {
 			if (state.currentUser) {
-				state.currentUser.is_google_account = true;
+				state.currentUser.isGoogleAccount = true;
 				state.currentUser.updatedAt = new Date().toISOString();
 			}
 		},
 
 		unlinkGoogleAccount: (state) => {
 			if (state.currentUser) {
-				state.currentUser.is_google_account = false;
+				state.currentUser.isGoogleAccount = false;
 				state.currentUser.updatedAt = new Date().toISOString();
 			}
 		},

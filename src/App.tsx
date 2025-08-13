@@ -21,6 +21,7 @@ import NotificationsModule from './components/NotificationsModule';
 import PaymentCancelPage from './components/PaymentCancelPage';
 import PaymentSuccessPage from './components/PaymentSuccessPage';
 import { PersistGate } from 'redux-persist/integration/react';
+import ProfileCompletionGuard from './components/ProfileCompletionGuard';
 import ProfileModule from './components/ProfileModule';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Provider } from 'react-redux';
@@ -58,7 +59,9 @@ function App() {
 								path="/app"
 								element={
 									<ProtectedRoute>
-										<AppLayout />
+										<ProfileCompletionGuard>
+											<AppLayout />
+										</ProfileCompletionGuard>
 									</ProtectedRoute>
 								}
 							>
