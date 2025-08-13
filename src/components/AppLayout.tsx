@@ -147,9 +147,9 @@ const AppLayout = () => {
 							{currentUser?.creditBalance !== undefined && (
 								<button
 									onClick={() => handleNavigate('/app/credits')}
-									className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+									className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
 								>
-									<span className="text-sm font-medium text-[#1e51ab]">
+									<span className="text-sm font-medium text-[#1e51ab] inline">
 										{currentUser.creditBalance}
 									</span>
 									<FaCoins className="h-4 w-4 text-[#1e51ab]" />
