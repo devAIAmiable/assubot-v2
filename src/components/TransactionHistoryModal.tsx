@@ -1,6 +1,6 @@
 import { FaTimes, FaPlus, FaMinus, FaExclamationTriangle, FaInbox } from 'react-icons/fa';
 import { Fragment, useState, useEffect } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { motion } from 'framer-motion';
 import { useLazyCreditTransactions } from '../hooks/useCreditTransactions';
 import {
@@ -218,21 +218,24 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 	return (
 		<Transition appear show={isOpen} as={Fragment}>
 			<Dialog as="div" className="relative z-50" onClose={onClose}>
-				<Transition.Child
-					as={Fragment}
-					enter="ease-out duration-300"
-					enterFrom="opacity-0"
-					enterTo="opacity-100"
-					leave="ease-in duration-200"
-					leaveFrom="opacity-100"
-					leaveTo="opacity-0"
-				>
-					<div className="fixed inset-0 bg-black/30 backdrop-blur-md" />
-				</Transition.Child>
-
 				<div className="fixed inset-0 overflow-y-auto">
 					<div className="flex min-h-full items-center justify-center p-4 h-screen">
-						<Transition.Child
+						<TransitionChild
+							as={Fragment}
+							enter="ease-out duration-300"
+							enterFrom="opacity-0"
+							enterTo="opacity-100"
+							leave="ease-in duration-200"
+							leaveFrom="opacity-100"
+							leaveTo="opacity-0"
+						>
+							<div 
+								className="fixed inset-0 backdrop-blur-sm" 
+								style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+							/>
+						</TransitionChild>
+
+						<TransitionChild
 							as={Fragment}
 							enter="ease-out duration-300"
 							enterFrom="opacity-0 scale-95"
@@ -241,13 +244,13 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 							leaveFrom="opacity-100 scale-100"
 							leaveTo="opacity-0 scale-95"
 						>
-							<Dialog.Panel className="w-full max-w-6xl h-3/4 transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all flex flex-col max-h-[75vh]">
+							<DialogPanel className="w-full max-w-6xl h-3/4 transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all flex flex-col max-h-[75vh]">
 								{/* Header */}
 								<div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
 									<div>
-										<Dialog.Title className="text-xl font-semibold text-gray-900">
+										<DialogTitle className="text-xl font-semibold text-gray-900">
 											Historique des transactions
-										</Dialog.Title>
+										</DialogTitle>
 										<p className="text-sm text-gray-600 mt-1">
 											Consultez toutes vos transactions de crédits
 										</p>
@@ -586,8 +589,8 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 								</div>
 
 								{/* Pagination removed - using infinite scroll instead */}
-							</Dialog.Panel>
-						</Transition.Child>
+							</DialogPanel>
+						</TransitionChild>
 					</div>
 				</div>
 			</Dialog>

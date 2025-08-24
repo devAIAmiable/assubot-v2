@@ -1,6 +1,9 @@
 import type React from 'react';
 import type { User } from '../store/userSlice';
 
+// Import contract types
+export * from './contract';
+
 // Re-export User for compatibility
 export type { User };
 

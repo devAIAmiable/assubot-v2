@@ -1,4 +1,4 @@
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { FaPause, FaPlay, FaTimes, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 
@@ -172,21 +172,24 @@ const VideoModal: React.FC<VideoModalProps> = ({
 	return (
 		<Transition appear show={isOpen} as={Fragment}>
 			<Dialog as="div" className="relative z-50" onClose={onClose}>
-				<Transition.Child
-					as={Fragment}
-					enter="ease-out duration-300"
-					enterFrom="opacity-0"
-					enterTo="opacity-100"
-					leave="ease-in duration-200"
-					leaveFrom="opacity-100"
-					leaveTo="opacity-0"
-				>
-					<div className="fixed inset-0 bg-white/30 backdrop-blur-md" />
-				</Transition.Child>
-
 				<div className="fixed inset-0 overflow-y-auto">
 					<div className="flex min-h-full items-center justify-center p-4 text-center">
-						<Transition.Child
+						<TransitionChild
+							as={Fragment}
+							enter="ease-out duration-300"
+							enterFrom="opacity-0"
+							enterTo="opacity-100"
+							leave="ease-in duration-200"
+							leaveFrom="opacity-100"
+							leaveTo="opacity-0"
+						>
+							<div 
+								className="fixed inset-0 backdrop-blur-sm" 
+								style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+							/>
+						</TransitionChild>
+
+						<TransitionChild
 							as={Fragment}
 							enter="ease-out duration-300"
 							enterFrom="opacity-0 scale-95"
@@ -195,12 +198,12 @@ const VideoModal: React.FC<VideoModalProps> = ({
 							leaveFrom="opacity-100 scale-100"
 							leaveTo="opacity-0 scale-95"
 						>
-							<Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+							<DialogPanel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
 								{/* Header */}
 								<div className="flex items-center justify-between p-6 border-b border-gray-200">
-									<Dialog.Title as="h3" className="text-lg font-semibold text-gray-900">
+									<DialogTitle as="h3" className="text-lg font-semibold text-gray-900">
 										{title}
-									</Dialog.Title>
+									</DialogTitle>
 									<button
 										type="button"
 										onClick={onClose}
@@ -320,8 +323,8 @@ const VideoModal: React.FC<VideoModalProps> = ({
 										Fermer
 									</button>
 								</div>
-							</Dialog.Panel>
-						</Transition.Child>
+							</DialogPanel>
+						</TransitionChild>
 					</div>
 				</div>
 			</Dialog>
