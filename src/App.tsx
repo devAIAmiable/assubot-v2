@@ -8,7 +8,7 @@ import AuthInitializer from './components/AuthInitializer';
 import ChatbotModule from './components/ChatbotModule';
 import ComparateurModule from './components/ComparateurModule';
 import ContractDetailsPage from './components/ContractDetailsPage';
-import ContratsModule from './components/ContratsModule';
+import ContractsModule from './components/ContractsModule';
 import CreditPage from './components/CreditPage';
 import Dashboard from './components/Dashboard';
 import FAQPage from './components/FAQPage';
@@ -74,7 +74,7 @@ function App() {
 
 								{/* Module routes */}
 								<Route path="dashboard" element={<Dashboard />} />
-								<Route path="contrats" element={<ContratsModule />} />
+								<Route path="contrats" element={<ContractsModule />} />
 								<Route path="contrats/:contractId" element={<ContractDetailsPage />} />
 								<Route path="chatbot" element={<ChatbotModule />} />
 								<Route path="comparateur" element={<ComparateurModule />} />

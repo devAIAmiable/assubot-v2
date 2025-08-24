@@ -138,7 +138,7 @@ pnpm type-check
 ```
 src/
 ├── components/          # React components
-│   ├── ContratsModule.tsx
+│   ├── ContractsModule.tsx
 │   ├── ContractDetailsPage.tsx
 │   ├── CreateContractModal.tsx
 │   └── ...

@@ -41,7 +41,7 @@ import { getInsurerLogo } from '../utils/insurerLogo';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
-const ContratsModule = () => {
+const ContractsModule = () => {
 	const dispatch = useAppDispatch();
 	const { contracts, searchQuery, selectedType, selectedStatus, loading, error } = useAppSelector(
 		(state) =>
@@ -625,4 +625,4 @@ const ContratsModule = () => {
 	);
 };
 
-export default ContratsModule;
+export default ContractsModule;
