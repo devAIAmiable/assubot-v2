@@ -16,7 +16,8 @@ import {
 	FaShieldAlt,
 	FaTimes,
 } from 'react-icons/fa';
-import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel, isExpired } from '../utils/contract';
+import { formatDateForDisplayFR, getDisplayValue } from '../utils/dateHelpers';
+import { getContactTypeLabel, getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel, isExpired } from '../utils/contract';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Tab } from '@headlessui/react';
@@ -153,7 +154,7 @@ const ContractDetailsPage = () => {
 								<div>
 									<h1 className="text-2xl font-bold text-gray-900">{contract.name}</h1>
 									<p className="text-gray-600">
-										{contract.insurerName} - {getTypeLabel(contract.category)}
+										{getDisplayValue(contract.insurerName)} - {getTypeLabel(contract.category)}
 									</p>
 								</div>
 							</div>
@@ -234,13 +235,13 @@ const ContractDetailsPage = () => {
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Début de contrat</span>
 													<span className="font-semibold text-gray-900">
-														{new Date(contract.startDate).toLocaleDateString('fr-FR')}
+														{contract.startDate ? formatDateForDisplayFR(contract.startDate) : '-'}
 													</span>
 												</div>
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Fin de contrat</span>
 													<span className="font-semibold text-gray-900">
-														{new Date(contract.endDate).toLocaleDateString('fr-FR')}
+														{contract.endDate ? formatDateForDisplayFR(contract.endDate) : '-'}
 													</span>
 												</div>
 											</div>
@@ -263,7 +264,7 @@ const ContractDetailsPage = () => {
 														Date limite
 														</span>
 														<span className="font-semibold text-gray-900">
-															{new Date(contract.cancellationDeadline).toLocaleDateString('fr-FR')}
+															{formatDateForDisplayFR(contract.cancellationDeadline)}
 														</span>
 													</div>
 												)}
@@ -332,9 +333,9 @@ const ContractDetailsPage = () => {
 																	<p className="text-sm font-medium text-gray-900">
 																		Document {doc.type}
 																	</p>
-																	<p className="text-xs text-gray-500">
-																		Ajouté le {new Date(doc.createdAt).toLocaleDateString('fr-FR')}
-																	</p>
+																														<p className="text-xs text-gray-500">
+														Ajouté le {formatDateForDisplayFR(doc.createdAt)}
+													</p>
 																</div>
 															</div>
 															<div className="flex items-center space-x-3">
@@ -542,7 +543,7 @@ const ContractDetailsPage = () => {
 											<div key={contact.id} className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
 												<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
 													<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
-													{capitalizeFirst(contact.type)}
+													{getContactTypeLabel(contact.type)}
 												</h4>
 												<div className="space-y-4">
 													{contact.name && (

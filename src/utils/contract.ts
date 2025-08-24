@@ -1,5 +1,6 @@
 import { FaFileAlt, FaFileContract } from 'react-icons/fa';
 
+import type { ContactType } from '../types';
 import type { Contract } from '../types';
 
 export const isExpired = (contract: Contract) => new Date(contract.endDate) < new Date();
@@ -61,3 +62,21 @@ export const getStatusLabel = (status: string) => {
 			return 'Inconnu';
 	}
 };
+
+/**
+ * Get French label for contract contact type
+ * @param contactType - The contact type enum value
+ * @returns French label for the contact type
+ */
+export function getContactTypeLabel(contactType: ContactType): string {
+	switch (contactType) {
+		case 'management':
+			return 'Gestion du contrat';
+		case 'assistance':
+			return 'Assistance';
+		case 'emergency':
+			return 'Urgence';
+		default:
+			return 'Contact';
+	}
+}

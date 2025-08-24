@@ -1,3 +1,10 @@
+import 'dayjs/locale/fr';
+
+import dayjs from 'dayjs';
+
+// Set French as default locale
+dayjs.locale('fr');
+
 /**
  * Converts a date string to ISO datetime format for API requests
  * @param dateString - Date string in YYYY-MM-DD format
@@ -8,8 +15,7 @@ export const formatDateForAPI = (dateString: string | undefined): string | undef
 
 	try {
 		// Create a date object and set it to midnight UTC
-		const date = new Date(dateString + 'T00:00:00.000Z');
-		return date.toISOString();
+		return dayjs(dateString + 'T00:00:00.000Z').toISOString();
 	} catch (error) {
 		console.error('Error formatting date for API:', error);
 		return undefined;
@@ -25,8 +31,7 @@ export const formatDateForInput = (isoString: string | undefined): string => {
 	if (!isoString) return '';
 
 	try {
-		const date = new Date(isoString);
-		return date.toISOString().split('T')[0];
+		return dayjs(isoString).format('YYYY-MM-DD');
 	} catch (error) {
 		console.error('Error formatting date for input:', error);
 		return '';
@@ -42,18 +47,86 @@ export const formatDateForDisplay = (dateString: string | undefined): string => 
 	if (!dateString) return '';
 
 	try {
-		const date = new Date(dateString);
+		const date = dayjs(dateString);
 		
 		// Check if date is valid
-		if (isNaN(date.getTime())) return '';
+		if (!date.isValid()) return '';
 		
-		const day = date.getDate().toString().padStart(2, '0');
-		const month = (date.getMonth() + 1).toString().padStart(2, '0');
-		const year = date.getFullYear();
-		
-		return `${day}-${month}-${year}`;
+		return date.format('DD-MM-YYYY');
 	} catch (error) {
 		console.error('Error formatting date for display:', error);
 		return '';
 	}
+};
+
+/**
+ * Formats a date string to French locale format for display
+ * @param dateString - Date string in YYYY-MM-DD or ISO format
+ * @returns Date string in French format or empty string if invalid
+ */
+export const formatDateForDisplayFR = (dateString: string | undefined): string => {
+	if (!dateString) return '';
+
+	try {
+		const date = dayjs(dateString);
+		
+		// Check if date is valid
+		if (!date.isValid()) return '';
+		
+		return date.format('DD MMMM YYYY');
+	} catch (error) {
+		console.error('Error formatting date for display:', error);
+		return '';
+	}
+};
+
+/**
+ * Formats a date string to French locale format with time for display
+ * @param dateString - Date string in YYYY-MM-DD or ISO format
+ * @returns Date string in French format with time or empty string if invalid
+ */
+export const formatDateTimeForDisplayFR = (dateString: string | undefined): string => {
+	if (!dateString) return '';
+
+	try {
+		const date = dayjs(dateString);
+		
+		// Check if date is valid
+		if (!date.isValid()) return '';
+		
+		return date.format('DD MMMM YYYY à HH:mm');
+	} catch (error) {
+		console.error('Error formatting date for display:', error);
+		return '';
+	}
+};
+
+/**
+ * Checks if a date is expired (in the past)
+ * @param dateString - Date string to check
+ * @returns true if date is expired, false otherwise
+ */
+export const isDateExpired = (dateString: string | undefined): boolean => {
+	if (!dateString) return false;
+	
+	try {
+		const date = dayjs(dateString);
+		return date.isValid() && date.isBefore(dayjs());
+	} catch (error) {
+		console.error('Error checking if date is expired:', error);
+		return false;
+	}
+};
+
+/**
+ * Gets a placeholder value for null/undefined data
+ * @param value - The value to check
+ * @param placeholder - Custom placeholder (defaults to "-")
+ * @returns The value if it exists, otherwise the placeholder
+ */
+export const getDisplayValue = (value: string | number | null | undefined, placeholder: string = '-'): string => {
+	if (value === null || value === undefined || value === '') {
+		return placeholder;
+	}
+	return String(value);
 };
