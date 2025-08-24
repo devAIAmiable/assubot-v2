@@ -3,7 +3,7 @@ export const ContractCategory = {
 	AUTO: 'auto',
 	HEALTH: 'health',
 	HOME: 'home',
-	MOTORCYCLE: 'motorcycle',
+	MOTORCYCLE: 'moto', // Backend uses 'moto' instead of 'motorcycle'
 	ELECTRONIC_DEVICES: 'electronic_devices',
 	OTHER: 'other',
 } as const;
@@ -17,6 +17,7 @@ export const ContractStatus = {
 export const DocumentType = {
 	CP: 'CP',
 	CG: 'CG',
+	AA: 'AA', // Additional document type from backend
 	OTHER: 'OTHER',
 } as const;
 
@@ -240,6 +241,7 @@ export interface ContractFormData {
 }
 
 // API response types
+// Backend API response types
 export interface ContractApiResponse {
 	success: boolean;
 	data: {
@@ -254,4 +256,153 @@ export interface ContractErrorResponse {
 		code: string;
 		message: string;
 	};
+}
+
+// Pagination types
+export interface PaginationInfo {
+	page: number;
+	limit: number;
+	total: number;
+	totalPages: number;
+	hasNext: boolean;
+	hasPrev: boolean;
+}
+
+// Backend contract response with pagination
+export interface GetContractsResponse {
+	status: 'success';
+	message: string;
+	data: BackendContract[];
+	pagination: PaginationInfo;
+}
+
+// Backend contract response for single contract
+export interface GetContractByIdResponse {
+	status: string;
+	message: string;
+	id: string;
+	userId: string;
+	name: string;
+	insurerName?: string;
+	category: ContractCategory;
+	formula?: string;
+	startDate?: string;
+	endDate?: string;
+	annualPremiumCents: number;
+	monthlyPremiumCents?: number;
+	tacitRenewal: boolean;
+	cancellationDeadline?: string | null;
+	documentLabel?: string;
+	documents: BackendContractDocument[];
+	guarantees?: BackendContractGuarantee[];
+	exclusions?: BackendContractExclusion[];
+	obligations?: BackendContractObligation[];
+	zones?: BackendContractZone[];
+	termination?: BackendContractTermination;
+	contacts?: BackendContractContact[];
+	createdAt: string;
+	updatedAt: string;
+}
+
+// Backend contract model (matches API response)
+export interface BackendContract {
+	id: string;
+	userId: string;
+	insurerName?: string;
+	name: string;
+	category: ContractCategory;
+	formula?: string;
+	startDate?: string; // ISO string from backend
+	endDate?: string; // ISO string from backend
+	annualPremiumCents: number;
+	monthlyPremiumCents?: number;
+	tacitRenewal: boolean;
+	cancellationDeadline?: string | null; // ISO string from backend or null
+	documentLabel?: string;
+	coveredCountries?: string[] | null;
+	rawJsonData?: Record<string, unknown>;
+	status: ContractStatus;
+	createdAt: string; // ISO string from backend
+	updatedAt: string; // ISO string from backend
+
+	// Relations
+	documents: BackendContractDocument[];
+	guarantees?: BackendContractGuarantee[];
+	exclusions?: BackendContractExclusion[];
+	obligations?: BackendContractObligation[];
+	zones?: BackendContractZone[];
+	termination?: BackendContractTermination;
+	contacts?: BackendContractContact[];
+}
+
+// Backend document model
+export interface BackendContractDocument {
+	id: string;
+	contractId: string;
+	type: DocumentType;
+	fileUrl: string;
+	createdAt: string; // ISO string from backend
+}
+
+// Backend guarantee model with detailed structure
+export interface BackendContractGuarantee {
+	id: string;
+	title: string;
+	details?: BackendGuaranteeDetail[];
+}
+
+export interface BackendGuaranteeDetail {
+	service?: string;
+	limit?: string;
+	coverages?: BackendCoverage[];
+}
+
+export interface BackendCoverage {
+	type: 'covered' | 'not_covered';
+	description: string;
+}
+
+// Backend exclusion model
+export interface BackendContractExclusion {
+	id: string;
+	description: string;
+}
+
+// Backend obligation model
+export interface BackendContractObligation {
+	id: string;
+	type: ObligationType;
+	description: string;
+}
+
+// Backend zone model
+export interface BackendContractZone {
+	id: string;
+	label: string;
+	type: 'country' | 'zone';
+	coordinates?: Record<string, unknown>;
+}
+
+// Backend termination model
+export interface BackendContractTermination {
+	id: string;
+	mode?: string;
+	notice?: string;
+	details?: string;
+}
+
+// Backend contact model
+export interface BackendContractContact {
+	id: string;
+	type: ContactType;
+	name?: string | null;
+	phone?: string;
+	email?: string;
+	openingHours?: string;
+}
+
+// Query parameters for getting contracts
+export interface GetContractsParams {
+	page?: number;
+	limit?: number;
 }

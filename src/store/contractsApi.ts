@@ -2,6 +2,9 @@ import type {
 	ContractInitResponse,
 	ContractNotificationRequest,
 	DocumentType,
+	GetContractByIdResponse,
+	GetContractsParams,
+	GetContractsResponse,
 	UploadUrlRequest,
 	UploadUrlResponse,
 } from '../types';
@@ -79,6 +82,41 @@ export const contractsApi = createApi({
 	baseQuery,
 	tagTypes: ['Contract'],
 	endpoints: (builder) => ({
+		// Get paginated active contracts for the authenticated user
+		getContracts: builder.query<GetContractsResponse, GetContractsParams>({
+			keepUnusedDataFor: 30 * 60, // 30 minutes in seconds
+			query: (params) => ({
+				url: '/',
+				method: 'GET',
+				params: {
+					page: params.page || 1,
+					limit: Math.min(params.limit || 10, 100), // Ensure limit doesn't exceed 100
+				},
+			}),
+			transformResponse: (response: GetContractsResponse) => response,
+			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+				status: response.status,
+				message: response.data.error.message,
+				code: response.data.error.code,
+			}),
+			providesTags: ['Contract'],
+		}),
+
+		// Get a specific contract by ID
+		getContractById: builder.query<GetContractByIdResponse, string>({
+			keepUnusedDataFor: 30 * 60, // 30 minutes in seconds
+			query: (contractId) => ({
+				url: `/${contractId}`,
+				method: 'GET',
+			}),
+			transformResponse: (response: GetContractByIdResponse) => response,
+			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+				status: response.status,
+				message: response.data.error.message,
+				code: response.data.error.code,
+			}),
+			providesTags: (result, error, contractId) => [{ type: 'Contract', id: contractId }],
+		}),
 		// Generate batch signed Azure upload URLs
 		generateBatchUploadUrls: builder.mutation<BatchUploadUrlResponse, BatchUploadUrlRequest>({
 			query: (uploadRequest) => ({
@@ -199,6 +237,8 @@ export const contractsApi = createApi({
 });
 
 export const {
+	useGetContractsQuery,
+	useGetContractByIdQuery,
 	useGenerateBatchUploadUrlsMutation,
 	useGenerateUploadUrlMutation,
 	useUploadToAzureMutation,

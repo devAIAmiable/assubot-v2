@@ -22,7 +22,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Tab } from '@headlessui/react';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
-import { useAppSelector } from '../store/hooks';
+import { useContractDetails } from '../hooks/useContractDetails';
 import { useState } from 'react';
 
 function highlightKeywords(text: string) {
@@ -42,11 +42,46 @@ const ContractDetailsPage = () => {
 	const navigate = useNavigate();
 	const [selectedTab, setSelectedTab] = useState(0);
 
-	// Get contract from Redux store
-	const { contracts } = useAppSelector((state) => state.contracts);
-	const contract = contracts.find((c) => c.id === contractId);
+	// Get contract details using the new hook
+	const { contract, isLoading, isError, error } = useContractDetails({
+		contractId: contractId!,
+		enabled: !!contractId,
+	});
 
-	const isContractExpired = isExpired(contract!);
+	const isContractExpired = contract ? isExpired(contract) : false;
+
+	// Show loading state
+	if (isLoading) {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e51ab] mx-auto mb-4"></div>
+					<h1 className="text-2xl font-bold text-gray-900 mb-4">Chargement du contrat...</h1>
+					<p className="text-gray-600">Veuillez patienter pendant que nous récupérons les détails.</p>
+				</div>
+			</div>
+		);
+	}
+
+	// Show error state
+	if (isError) {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<div className="text-center">
+					<h1 className="text-2xl font-bold text-red-900 mb-4">Erreur lors du chargement</h1>
+					<p className="text-red-600 mb-6">
+						{error?.data?.message || 'Une erreur est survenue lors du chargement du contrat.'}
+					</p>
+					<button
+						onClick={() => navigate('/app/contrats')}
+						className="px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-medium hover:bg-[#163d82] transition-colors"
+					>
+						Retour aux contrats
+					</button>
+				</div>
+			</div>
+		);
+	}
 
 	// Redirect if contract not found
 	if (!contract) {

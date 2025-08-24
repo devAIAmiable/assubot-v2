@@ -1,3 +1,4 @@
+import type { Contract, ContractWithRelations } from '../types';
 import {
 	FaCalendarAlt,
 	FaChevronDown,
@@ -12,13 +13,6 @@ import {
 	FaTrash,
 } from 'react-icons/fa';
 import {
-	deleteContract,
-	setSearchQuery,
-	setSelectedStatus,
-	setSelectedType,
-	updateContract,
-} from '../store/contractsSlice';
-import {
 	getContractDocuments,
 	getContractInsurer,
 	getContractPremium,
@@ -31,83 +25,68 @@ import {
 	getTypeLabel,
 	isExpired,
 } from '../utils/contract';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
 
-import type { Contract } from '../types';
 import CreateContractModal from './CreateContractModal';
 import { Link } from 'react-router-dom';
+import Pagination from './ui/Pagination';
 import Spinner from './ui/Spinner';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { motion } from 'framer-motion';
+import { useContracts } from '../hooks/useContracts';
 import { useState } from 'react';
 
 const ContractsModule = () => {
-	const dispatch = useAppDispatch();
-	const { contracts, searchQuery, selectedType, selectedStatus, loading, error } = useAppSelector(
-		(state) =>
-			state.contracts || {
-				contracts: [],
-				searchQuery: '',
-				selectedType: 'all',
-				selectedStatus: 'all',
-				loading: false,
-				error: null,
-			}
-	);
+	const {
+		contracts,
+		pagination,
+		isLoading,
+		isFetching,
+		error,
+		searchQuery,
+		selectedCategory,
+		selectedStatus,
+		setPage,
+		setLimit,
+		setSearchQuery,
+		setCategory,
+		setStatus,
+		resetFilters,
+		filteredContracts,
+		contractStats,
+	} = useContracts({
+		initialPage: 1,
+		initialLimit: 10,
+	});
 
 	const [editingContract, setEditingContract] = useState<Contract | null>(null);
 	const [isCreateContractModalOpen, setIsCreateContractModalOpen] = useState(false);
-	// Filter contracts based on search and filters
-	const filteredContracts = contracts.filter((contract) => {
-		const matchesSearch =
-			contract.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			getContractInsurer(contract).toLowerCase().includes(searchQuery.toLowerCase());
-		const matchesType = selectedType === 'all' || getContractType(contract) === selectedType;
-		const matchesStatus = selectedStatus === 'all' || contract.status === selectedStatus;
-
-		return matchesSearch && matchesType && matchesStatus;
-	});
 
 	const handleSearchChange = (query: string) => {
-		dispatch(setSearchQuery(query));
+		setSearchQuery(query);
 	};
 
-	const handleTypeFilter = (type: string) => {
-		dispatch(setSelectedType(type));
+	const handleTypeFilter = (category: string) => {
+		setCategory(category === 'all' ? 'all' : category as any);
 	};
 
 	const handleStatusFilter = (status: string) => {
-		dispatch(setSelectedStatus(status));
+		setStatus(status === 'all' ? 'all' : status as any);
 	};
 
-	// const handleAddContract = (contractData: Omit<Contract, 'id'>) => {
-	// 	dispatch(addContract(contractData));
-	// 	setShowAddModal(false);
-	// };
-
 	const handleUpdateContract = (contract: Contract) => {
-		dispatch(updateContract(contract));
+		// TODO: Implement contract update API call
+		console.log('Update contract:', contract);
 		setEditingContract(null);
 	};
 
 	const handleDeleteContract = (contractId: string) => {
 		if (window.confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?')) {
-			dispatch(deleteContract(contractId));
+			// TODO: Implement contract delete API call
+			console.log('Delete contract:', contractId);
 		}
 	};
 
-	// Remove handleFileUpload if not used
-
-	const contractStats = {
-		total: contracts.length,
-		active: contracts.filter((c) => c.status === 'active').length,
-		expired: contracts.filter((c) => isExpired(c)).length,
-		totalPremium: contracts
-			.filter((c) => c.status === 'active')
-			.reduce((sum, c) => sum + getContractPremium(c), 0),
-	};
-
-	if (loading) {
+	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-96">
 				<Spinner size="lg" color="blue" className="mx-auto mb-4" />
@@ -235,15 +214,17 @@ const ContractsModule = () => {
 						{/* Type Filter */}
 						<div className="relative">
 							<select
-								value={selectedType}
+								value={selectedCategory}
 								onChange={(e) => handleTypeFilter(e.target.value)}
 								className="appearance-none bg-white border border-gray-300 rounded-xl px-4 py-3 pr-8 focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors"
 							>
 								<option value="all">Tous les types</option>
 								<option value="auto">Automobile</option>
-								<option value="habitation">Habitation</option>
-								<option value="sante">Santé</option>
-								<option value="autre">Autre</option>
+								<option value="home">Habitation</option>
+								<option value="health">Santé</option>
+								<option value="moto">Moto</option>
+								<option value="electronic_devices">Équipements électroniques</option>
+								<option value="other">Autre</option>
 							</select>
 							<FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
 						</div>
@@ -335,9 +316,9 @@ const ContractsModule = () => {
 									<div className="space-y-3 mb-4">
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Assureur</span>
-											<span className="text-sm font-medium text-gray-900">
-												{getContractInsurer(contract)}
-											</span>
+																		<span className="text-sm font-medium text-gray-900">
+								{getContractInsurer(contract) || 'Non spécifié'}
+							</span>
 										</div>
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Prime annuelle</span>
@@ -616,6 +597,17 @@ const ContractsModule = () => {
 					</motion.div>
 				</div>
 			)}
+
+			{/* Pagination */}
+			<Pagination
+				currentPage={pagination.page}
+				totalPages={pagination.totalPages}
+				totalItems={pagination.total}
+				itemsPerPage={pagination.limit}
+				onPageChange={setPage}
+				onItemsPerPageChange={setLimit}
+				className="mt-8"
+			/>
 
 			<CreateContractModal
 				open={isCreateContractModalOpen}
