@@ -4,6 +4,7 @@ import type {
 	BackendContractDocument,
 	BackendContractExclusion,
 	BackendContractGuarantee,
+	BackendContractListItem,
 	BackendContractObligation,
 	BackendContractTermination,
 	BackendContractZone,
@@ -11,11 +12,13 @@ import type {
 	ContractDocument,
 	ContractExclusion,
 	ContractGuarantee,
+	ContractListItem,
 	ContractObligation,
+	ContractStatus,
 	ContractTermination,
 	ContractWithRelations,
 	ContractZone,
-	GetContractByIdResponse
+	GetContractByIdResponse,
 } from '../types/contract';
 
 /**
@@ -34,18 +37,31 @@ export function transformBackendDocument(backendDoc: BackendContractDocument): C
 /**
  * Transform a backend contract guarantee to frontend format
  */
-export function transformBackendGuarantee(backendGuarantee: BackendContractGuarantee): ContractGuarantee {
+export function transformBackendGuarantee(
+	backendGuarantee: BackendContractGuarantee
+): ContractGuarantee {
 	return {
 		id: backendGuarantee.id,
 		contractId: '', // Will be set by parent contract
 		title: backendGuarantee.title,
-		details: backendGuarantee.details?.map(detail => 
-			`${detail.service || ''} ${detail.limit || ''} ${detail.deductible || ''} ${detail.limitation || ''}`
-		).join('; ').trim() || undefined,
-		covered: backendGuarantee.details?.filter(d => d.coverages?.some(c => c.type === 'covered'))
-			.map(d => d.service).join(', ') || undefined,
-		notCovered: backendGuarantee.details?.filter(d => d.coverages?.some(c => c.type === 'not_covered'))
-			.map(d => d.service).join(', ') || undefined,
+		details:
+			backendGuarantee.details
+				?.map(
+					(detail) =>
+						`${detail.service || ''} ${detail.limit || ''} ${detail.deductible || ''} ${detail.limitation || ''}`
+				)
+				.join('; ')
+				.trim() || undefined,
+		covered:
+			backendGuarantee.details
+				?.filter((d) => d.coverages?.some((c) => c.type === 'covered'))
+				.map((d) => d.service)
+				.join(', ') || undefined,
+		notCovered:
+			backendGuarantee.details
+				?.filter((d) => d.coverages?.some((c) => c.type === 'not_covered'))
+				.map((d) => d.service)
+				.join(', ') || undefined,
 		createdAt: new Date(), // Backend doesn't provide this, use current date
 	};
 }
@@ -53,7 +69,9 @@ export function transformBackendGuarantee(backendGuarantee: BackendContractGuara
 /**
  * Transform a backend contract exclusion to frontend format
  */
-export function transformBackendExclusion(backendExclusion: BackendContractExclusion): ContractExclusion {
+export function transformBackendExclusion(
+	backendExclusion: BackendContractExclusion
+): ContractExclusion {
 	return {
 		id: backendExclusion.id,
 		contractId: '', // Will be set by parent contract
@@ -65,7 +83,9 @@ export function transformBackendExclusion(backendExclusion: BackendContractExclu
 /**
  * Transform a backend contract obligation to frontend format
  */
-export function transformBackendObligation(backendObligation: BackendContractObligation): ContractObligation {
+export function transformBackendObligation(
+	backendObligation: BackendContractObligation
+): ContractObligation {
 	return {
 		id: backendObligation.id,
 		contractId: '', // Will be set by parent contract
@@ -91,7 +111,9 @@ export function transformBackendZone(backendZone: BackendContractZone): Contract
 /**
  * Transform a backend contract termination to frontend format
  */
-export function transformBackendTermination(backendTermination: BackendContractTermination): ContractTermination {
+export function transformBackendTermination(
+	backendTermination: BackendContractTermination
+): ContractTermination {
 	return {
 		id: backendTermination.id,
 		contractId: '', // Will be set by parent contract
@@ -121,7 +143,9 @@ export function transformBackendContact(backendContact: BackendContractContact):
 /**
  * Transform a backend contract to frontend format
  */
-export function transformBackendContract(backendContract: GetContractByIdResponse): ContractWithRelations {
+export function transformBackendContract(
+	backendContract: GetContractByIdResponse
+): ContractWithRelations {
 	const contract: ContractWithRelations = {
 		id: backendContract.id,
 		userId: backendContract.userId,
@@ -134,38 +158,47 @@ export function transformBackendContract(backendContract: GetContractByIdRespons
 		annualPremiumCents: backendContract.annualPremiumCents,
 		monthlyPremiumCents: backendContract.monthlyPremiumCents,
 		tacitRenewal: backendContract.tacitRenewal,
-		cancellationDeadline: backendContract.cancellationDeadline ? new Date(backendContract.cancellationDeadline) : undefined,
-		status: backendContract.status,
+		cancellationDeadline: backendContract.cancellationDeadline
+			? new Date(backendContract.cancellationDeadline)
+			: undefined,
+		status: backendContract.status as ContractStatus,
 		createdAt: new Date(backendContract.createdAt),
 		updatedAt: new Date(backendContract.updatedAt),
 
 		// Transform relations
 		user: { id: backendContract.userId, contracts: [] }, // Minimal user object
-		documents: backendContract.documents.map(doc => transformBackendDocument(doc)),
-		guarantees: backendContract.guarantees?.map(guarantee => ({
-			...transformBackendGuarantee(guarantee),
-			contractId: backendContract.id,
-		})) || [],
-		exclusions: backendContract.exclusions?.map(exclusion => ({
-			...transformBackendExclusion(exclusion),
-			contractId: backendContract.id,
-		})) || [],
-		obligations: backendContract.obligations?.map(obligation => ({
-			...transformBackendObligation(obligation),
-			contractId: backendContract.id,
-		})) || [],
-		zones: backendContract.zones?.map(zone => ({
-			...transformBackendZone(zone),
-			contractId: backendContract.id,
-		})) || [],
-		termination: backendContract.termination ? {
-			...transformBackendTermination(backendContract.termination),
-			contractId: backendContract.id,
-		} : undefined,
-		contacts: backendContract.contacts?.map(contact => ({
-			...transformBackendContact(contact),
-			contractId: backendContract.id,
-		})) || [],
+		documents: backendContract.documents.map((doc) => transformBackendDocument(doc)),
+		guarantees:
+			backendContract.guarantees?.map((guarantee) => ({
+				...transformBackendGuarantee(guarantee),
+				contractId: backendContract.id,
+			})) || [],
+		exclusions:
+			backendContract.exclusions?.map((exclusion) => ({
+				...transformBackendExclusion(exclusion),
+				contractId: backendContract.id,
+			})) || [],
+		obligations:
+			backendContract.obligations?.map((obligation) => ({
+				...transformBackendObligation(obligation),
+				contractId: backendContract.id,
+			})) || [],
+		zones:
+			backendContract.zones?.map((zone) => ({
+				...transformBackendZone(zone),
+				contractId: backendContract.id,
+			})) || [],
+		termination: backendContract.termination
+			? {
+					...transformBackendTermination(backendContract.termination),
+					contractId: backendContract.id,
+				}
+			: undefined,
+		contacts:
+			backendContract.contacts?.map((contact) => ({
+				...transformBackendContact(contact),
+				contractId: backendContract.id,
+			})) || [],
 	};
 
 	return contract;
@@ -174,6 +207,42 @@ export function transformBackendContract(backendContract: GetContractByIdRespons
 /**
  * Transform an array of backend contracts to frontend format
  */
-export function transformBackendContracts(backendContracts: BackendContract[]): ContractWithRelations[] {
+export function transformBackendContracts(
+	backendContracts: BackendContract[]
+): ContractWithRelations[] {
 	return backendContracts.map(transformBackendContract);
+}
+
+/**
+ * Transform a backend contract list item to frontend format
+ */
+export function transformBackendContractListItem(
+	backendContract: BackendContractListItem
+): ContractListItem {
+	return {
+		id: backendContract.id,
+		name: backendContract.name,
+		insurerName: backendContract.insurerName,
+		category: backendContract.category,
+		startDate: backendContract.startDate ? new Date(backendContract.startDate) : null,
+		endDate: backendContract.endDate ? new Date(backendContract.endDate) : null,
+		annualPremiumCents: backendContract.annualPremiumCents,
+		status: backendContract.status,
+		createdAt: new Date(backendContract.createdAt),
+		updatedAt: new Date(backendContract.updatedAt),
+		documents: backendContract.documents.map((doc) => ({
+			id: doc.id,
+			type: doc.type,
+			fileUrl: doc.fileUrl,
+		})),
+	};
+}
+
+/**
+ * Transform an array of backend contract list items to frontend format
+ */
+export function transformBackendContractListItems(
+	backendContracts: BackendContractListItem[]
+): ContractListItem[] {
+	return backendContracts.map(transformBackendContractListItem);
 }

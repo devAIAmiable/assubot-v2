@@ -1,6 +1,6 @@
+import type { ContactType, ObligationType } from '../types';
 import { FaFileAlt, FaFileContract } from 'react-icons/fa';
 
-import type { ContactType } from '../types';
 import type { Contract } from '../types';
 
 export const isExpired = (contract: Contract) => new Date(contract.endDate) < new Date();
@@ -78,5 +78,23 @@ export function getContactTypeLabel(contactType: ContactType): string {
 			return 'Urgence';
 		default:
 			return 'Contact';
+	}
+}
+
+/**
+ * Get French label for contract obligation type
+ * @param obligationType - The obligation type enum value
+ * @returns French label for the obligation type
+ */
+export function getObligationTypeLabel(obligationType: ObligationType): string {
+	switch (obligationType) {
+		case 'subscription':
+			return 'À la souscription';
+		case 'during_contract':
+			return 'En cours de contrat';
+		case 'claim':
+			return 'En cas de sinistre';
+		default:
+			return 'Obligation';
 	}
 }

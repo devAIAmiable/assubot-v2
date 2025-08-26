@@ -1,4 +1,3 @@
-import type { Contract, ContractWithRelations } from '../types';
 import {
 	FaCalendarAlt,
 	FaChevronDown,
@@ -26,6 +25,7 @@ import {
 	isExpired,
 } from '../utils/contract';
 
+import type { Contract } from '../types';
 import CreateContractModal from './CreateContractModal';
 import { Link } from 'react-router-dom';
 import Pagination from './ui/Pagination';
@@ -66,11 +66,11 @@ const ContractsModule = () => {
 	};
 
 	const handleTypeFilter = (category: string) => {
-		setCategory(category === 'all' ? 'all' : category as any);
+		setCategory(category === 'all' ? 'all' : (category as any));
 	};
 
 	const handleStatusFilter = (status: string) => {
-		setStatus(status === 'all' ? 'all' : status as any);
+		setStatus(status === 'all' ? 'all' : (status as any));
 	};
 
 	const handleUpdateContract = (contract: Contract) => {
@@ -139,7 +139,9 @@ const ContractsModule = () => {
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-sm font-medium text-gray-600 mb-1">Total des contrats</p>
-							<p className="text-3xl font-bold text-gray-900">{contractStats.total}</p>
+							<p className="text-3xl font-bold text-gray-900">
+								{isFetching ? '...' : contractStats.total}
+							</p>
 						</div>
 						<div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
 							<FaFileContract className="h-6 w-6 text-[#1e51ab]" />
@@ -164,7 +166,11 @@ const ContractsModule = () => {
 						<div>
 							<p className="text-sm font-medium text-gray-600 mb-1">Primes totales</p>
 							<p className="text-3xl font-bold text-gray-900">
-								{contractStats.totalPremium.toLocaleString()}€
+								{(contractStats.totalPremium / 100).toLocaleString('fr-FR', {
+									minimumFractionDigits: 2,
+									maximumFractionDigits: 2,
+								})}
+								€
 							</p>
 						</div>
 						<div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
@@ -316,9 +322,9 @@ const ContractsModule = () => {
 									<div className="space-y-3 mb-4">
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Assureur</span>
-																		<span className="text-sm font-medium text-gray-900">
-								{getContractInsurer(contract) || 'Non spécifié'}
-							</span>
+											<span className="text-sm font-medium text-gray-900">
+												{getContractInsurer(contract) || 'Non spécifié'}
+											</span>
 										</div>
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Prime annuelle</span>

@@ -1,6 +1,12 @@
-import type { ContractCategory, ContractStatus, ContractWithRelations, GetContractsParams } from '../types/contract';
+import type {
+	ContractCategory,
+	ContractListItem,
+	ContractStatus,
+	GetContractsParams,
+} from '../types/contract';
 import { useCallback, useMemo, useState } from 'react';
 
+import { transformBackendContractListItems } from '../utils/contractTransformers';
 import { useGetContractsQuery } from '../store/contractsApi';
 
 interface UseContractsOptions {
@@ -13,7 +19,7 @@ interface UseContractsOptions {
 
 interface UseContractsReturn {
 	// Data
-	contracts: ContractWithRelations[];
+	contracts: ContractListItem[];
 	pagination: {
 		page: number;
 		limit: number;
@@ -22,17 +28,17 @@ interface UseContractsReturn {
 		hasNext: boolean;
 		hasPrev: boolean;
 	};
-	
+
 	// Loading and error states
 	isLoading: boolean;
 	isFetching: boolean;
 	error: string | null;
-	
+
 	// Filters
 	searchQuery: string;
 	selectedCategory: ContractCategory | 'all';
 	selectedStatus: ContractStatus | 'all';
-	
+
 	// Actions
 	setPage: (page: number) => void;
 	setLimit: (limit: number) => void;
@@ -40,9 +46,9 @@ interface UseContractsReturn {
 	setCategory: (category: ContractCategory | 'all') => void;
 	setStatus: (status: ContractStatus | 'all') => void;
 	resetFilters: () => void;
-	
+
 	// Computed values
-	filteredContracts: ContractWithRelations[];
+	filteredContracts: ContractListItem[];
 	contractStats: {
 		total: number;
 		active: number;
@@ -64,7 +70,9 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 	const [page, setPage] = useState(initialPage);
 	const [limit, setLimit] = useState(initialLimit);
 	const [searchQuery, setSearchQuery] = useState(initialSearch);
-	const [selectedCategory, setSelectedCategory] = useState<ContractCategory | 'all'>(initialCategory);
+	const [selectedCategory, setSelectedCategory] = useState<ContractCategory | 'all'>(
+		initialCategory
+	);
 	const [selectedStatus, setSelectedStatus] = useState<ContractStatus | 'all'>(initialStatus);
 
 	// API query
@@ -76,7 +84,7 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 	// Extract data from API response
 	const contracts = useMemo(() => {
 		if (!data?.data) return [];
-		return data.data;
+		return transformBackendContractListItems(data.data);
 	}, [data]);
 
 	const pagination = useMemo(() => {
@@ -96,10 +104,12 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 	// Filter contracts based on local filters
 	const filteredContracts = useMemo(() => {
 		return contracts.filter((contract) => {
-			const matchesSearch = searchQuery === '' || 
+			const matchesSearch =
+				searchQuery === '' ||
 				contract.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				(contract.insurerName?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
-			
+				contract.insurerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				false;
+
 			const matchesCategory = selectedCategory === 'all' || contract.category === selectedCategory;
 			const matchesStatus = selectedStatus === 'all' || contract.status === selectedStatus;
 
@@ -107,22 +117,24 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 		});
 	}, [contracts, searchQuery, selectedCategory, selectedStatus]);
 
-	// Contract statistics
+	// Contract statistics from API metadata
 	const contractStats = useMemo(() => {
-		const total = contracts.length;
-		const active = contracts.filter(c => c.status === 'active').length;
-		const expired = contracts.filter(c => c.status === 'expired').length;
-		const totalPremium = contracts
-			.filter(c => c.status === 'active')
-			.reduce((sum, c) => sum + (c.annualPremiumCents || 0), 0);
+		if (!data?.metadata) {
+			return {
+				total: 0,
+				active: 0,
+				expired: 0,
+				totalPremium: 0,
+			};
+		}
 
 		return {
-			total,
-			active,
-			expired,
-			totalPremium,
+			total: data.metadata.totalContracts,
+			active: data.metadata.totalValid,
+			expired: data.metadata.totalExpired,
+			totalPremium: data.metadata.totalAnnualPremiumCents,
 		};
-	}, [contracts]);
+	}, [data?.metadata]);
 
 	// Actions
 	const setPageHandler = useCallback((newPage: number) => {
@@ -160,17 +172,17 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 		// Data
 		contracts,
 		pagination,
-		
+
 		// Loading and error states
 		isLoading,
 		isFetching,
 		error: error ? (error as any)?.message || 'Une erreur est survenue' : null,
-		
+
 		// Filters
 		searchQuery,
 		selectedCategory,
 		selectedStatus,
-		
+
 		// Actions
 		setPage: setPageHandler,
 		setLimit: setLimitHandler,
@@ -178,7 +190,7 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 		setCategory: setCategoryHandler,
 		setStatus: setStatusHandler,
 		resetFilters,
-		
+
 		// Computed values
 		filteredContracts,
 		contractStats,

@@ -17,9 +17,18 @@ import {
 	FaTimes,
 } from 'react-icons/fa';
 import { formatDateForDisplayFR, getDisplayValue } from '../utils/dateHelpers';
-import { getContactTypeLabel, getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel, isExpired } from '../utils/contract';
+import {
+	getContactTypeLabel,
+	getObligationTypeLabel,
+	getStatusColor,
+	getStatusLabel,
+	getTypeIcon,
+	getTypeLabel,
+	isExpired,
+} from '../utils/contract';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import type { ObligationType } from '../types';
 import { Tab } from '@headlessui/react';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
@@ -28,14 +37,24 @@ import { useState } from 'react';
 
 function highlightKeywords(text: string) {
 	const keywords = [
-		'Modalité', 'Justificatif', 'Preuve', 'Effet', 'Délai', 'Prise d\'effet', 'Contact',
-		'Oui', 'Non', 'R :', 'Q :'
+		'Modalité',
+		'Justificatif',
+		'Preuve',
+		'Effet',
+		'Délai',
+		"Prise d'effet",
+		'Contact',
+		'Oui',
+		'Non',
+		'R :',
+		'Q :',
 	];
-	const regex = new RegExp(`(${keywords.map(k => k.replace(/([.*+?^=!:${}()|[\]\\])/g, "\\$1")).join('|')})`, 'g');
-	const parts = text.split(regex);
-	return parts.map((part, i) =>
-		keywords.includes(part) ? <strong key={i}>{part}</strong> : part
+	const regex = new RegExp(
+		`(${keywords.map((k) => k.replace(/([.*+?^=!:${}()|[\]\\])/g, '\\$1')).join('|')})`,
+		'g'
 	);
+	const parts = text.split(regex);
+	return parts.map((part, i) => (keywords.includes(part) ? <strong key={i}>{part}</strong> : part));
 }
 
 const ContractDetailsPage = () => {
@@ -58,7 +77,9 @@ const ContractDetailsPage = () => {
 				<div className="text-center">
 					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e51ab] mx-auto mb-4"></div>
 					<h1 className="text-2xl font-bold text-gray-900 mb-4">Chargement du contrat...</h1>
-					<p className="text-gray-600">Veuillez patienter pendant que nous récupérons les détails.</p>
+					<p className="text-gray-600">
+						Veuillez patienter pendant que nous récupérons les détails.
+					</p>
 				</div>
 			</div>
 		);
@@ -260,9 +281,7 @@ const ContractDetailsPage = () => {
 												</div>
 												{contract.tacitRenewal && contract.cancellationDeadline && (
 													<div className="flex items-center justify-between py-3">
-														<span className="text-gray-600 font-medium">
-														Date limite
-														</span>
+														<span className="text-gray-600 font-medium">Date limite</span>
 														<span className="font-semibold text-gray-900">
 															{formatDateForDisplayFR(contract.cancellationDeadline)}
 														</span>
@@ -314,28 +333,30 @@ const ContractDetailsPage = () => {
 														<div
 															key={doc.id}
 															className={`flex items-center justify-between p-3 rounded-xl border ${
-																doc.type === 'CG' 
-																	? 'bg-blue-50 border-blue-100' 
-																	: doc.type === 'CP' 
-																		? 'bg-green-50 border-green-100' 
+																doc.type === 'CG'
+																	? 'bg-blue-50 border-blue-100'
+																	: doc.type === 'CP'
+																		? 'bg-green-50 border-green-100'
 																		: 'bg-gray-50 border-gray-100'
 															}`}
 														>
 															<div className="flex items-center space-x-3">
-																<FaFileAlt className={`h-5 w-5 ${
-																	doc.type === 'CG' 
-																		? 'text-blue-600' 
-																		: doc.type === 'CP' 
-																			? 'text-green-600' 
-																			: 'text-gray-400'
-																}`} />
+																<FaFileAlt
+																	className={`h-5 w-5 ${
+																		doc.type === 'CG'
+																			? 'text-blue-600'
+																			: doc.type === 'CP'
+																				? 'text-green-600'
+																				: 'text-gray-400'
+																	}`}
+																/>
 																<div>
 																	<p className="text-sm font-medium text-gray-900">
 																		Document {doc.type}
 																	</p>
-																														<p className="text-xs text-gray-500">
-														Ajouté le {formatDateForDisplayFR(doc.createdAt)}
-													</p>
+																	<p className="text-xs text-gray-500">
+																		Ajouté le {formatDateForDisplayFR(doc.createdAt)}
+																	</p>
 																</div>
 															</div>
 															<div className="flex items-center space-x-3">
@@ -376,7 +397,10 @@ const ContractDetailsPage = () => {
 								<div className="space-y-8">
 									{contract.guarantees && contract.guarantees.length > 0 ? (
 										contract.guarantees.map((garantie) => (
-											<div key={garantie.id} className="bg-white border border-gray-200 rounded-2xl p-8">
+											<div
+												key={garantie.id}
+												className="bg-white border border-gray-200 rounded-2xl p-8"
+											>
 												<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
 													<FaShieldAlt className="h-6 w-6 text-[#1e51ab] mr-3" />
 													{capitalizeFirst(garantie.title)}
@@ -388,22 +412,24 @@ const ContractDetailsPage = () => {
 												)}
 												{garantie.covered && (
 													<div className="mb-6">
-														<h4 className="text-lg font-semibold text-gray-900 mb-3">Ce qui est couvert</h4>
+														<h4 className="text-lg font-semibold text-gray-900 mb-3">
+															Ce qui est couvert
+														</h4>
 														<p className="text-gray-700">{garantie.covered}</p>
 													</div>
 												)}
 												{garantie.notCovered && (
 													<div className="mb-6">
-														<h4 className="text-lg font-semibold text-gray-900 mb-3">Non couvert</h4>
+														<h4 className="text-lg font-semibold text-gray-900 mb-3">
+															Non couvert
+														</h4>
 														<p className="text-gray-700">{garantie.notCovered}</p>
 													</div>
 												)}
 											</div>
 										))
 									) : (
-										<div className="text-center text-gray-500 py-8">
-											Aucune garantie disponible
-										</div>
+										<div className="text-center text-gray-500 py-8">Aucune garantie disponible</div>
 									)}
 								</div>
 							</div>
@@ -454,7 +480,9 @@ const ContractDetailsPage = () => {
 													key={zone.id}
 													className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-center"
 												>
-													<span className="font-medium text-gray-900">{capitalizeFirst(zone.label)}</span>
+													<span className="font-medium text-gray-900">
+														{capitalizeFirst(zone.label)}
+													</span>
 												</div>
 											))
 										) : (
@@ -476,15 +504,44 @@ const ContractDetailsPage = () => {
 								</h3>
 								<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 									{contract.obligations && contract.obligations.length > 0 ? (
-										contract.obligations.map((obligation) => (
-											<div key={obligation.id} className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
-												<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-													<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
-													{capitalizeFirst(obligation.type)}
-												</h4>
-												<p className="text-gray-900 text-base">{capitalizeFirst(obligation.description)}</p>
-											</div>
-										))
+										(() => {
+											// Group obligations by type
+											const groupedObligations = contract.obligations.reduce(
+												(groups, obligation) => {
+													const type = obligation.type;
+													if (!groups[type]) {
+														groups[type] = [];
+													}
+													groups[type].push(obligation);
+													return groups;
+												},
+												{} as Record<string, typeof contract.obligations>
+											);
+
+											// Render grouped obligations
+											return Object.entries(groupedObligations).map(([type, obligations]) => (
+												<div
+													key={type}
+													className="bg-blue-50 p-8 rounded-2xl border border-blue-100"
+												>
+													<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+														<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
+														{getObligationTypeLabel(type as ObligationType)}
+													</h4>
+													<ul className="space-y-3">
+														{obligations.map((obligation) => (
+															<li
+																key={obligation.id}
+																className="text-gray-900 text-base flex items-start"
+															>
+																<span className="text-blue-600 mr-2 mt-1">•</span>
+																<span>{capitalizeFirst(obligation.description)}</span>
+															</li>
+														))}
+													</ul>
+												</div>
+											));
+										})()
 									) : (
 										<div className="col-span-full text-center text-gray-500 py-8">
 											Aucune obligation spécifiée
@@ -515,7 +572,9 @@ const ContractDetailsPage = () => {
 												)}
 												{contract.termination.notice && (
 													<div className="mt-4 p-4 bg-yellow-50 rounded-lg">
-														<p className="text-yellow-800 font-medium">Délai de préavis : {contract.termination.notice}</p>
+														<p className="text-yellow-800 font-medium">
+															Délai de préavis : {contract.termination.notice}
+														</p>
 													</div>
 												)}
 											</div>
@@ -540,7 +599,10 @@ const ContractDetailsPage = () => {
 								<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 									{contract.contacts && contract.contacts.length > 0 ? (
 										contract.contacts.map((contact) => (
-											<div key={contact.id} className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
+											<div
+												key={contact.id}
+												className="bg-blue-50 p-8 rounded-2xl border border-blue-100"
+											>
 												<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
 													<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
 													{getContactTypeLabel(contact.type)}
@@ -548,7 +610,6 @@ const ContractDetailsPage = () => {
 												<div className="space-y-4">
 													{contact.name && (
 														<div>
-															<span className="text-gray-600 text-sm">Nom</span>
 															<p className="font-semibold text-gray-900">{contact.name}</p>
 														</div>
 													)}
@@ -567,7 +628,9 @@ const ContractDetailsPage = () => {
 													{contact.openingHours && (
 														<div className="flex items-center space-x-3">
 															<FaClock className="h-4 w-4 text-gray-400" />
-															<span className="font-medium text-gray-900">{contact.openingHours}</span>
+															<span className="font-medium text-gray-900">
+																{contact.openingHours}
+															</span>
 														</div>
 													)}
 												</div>

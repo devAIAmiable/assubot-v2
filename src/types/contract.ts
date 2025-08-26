@@ -211,19 +211,20 @@ export interface ContractWithRelations extends Contract {
 	contacts: ContractContact[];
 }
 
-// Type for contract list items (without heavy relations)
-export type ContractListItem = Pick<
-	Contract,
-	| 'id'
-	| 'name'
-	| 'category'
-	| 'insurerName'
-	| 'status'
-	| 'startDate'
-	| 'endDate'
-	| 'annualPremiumCents'
-	| 'createdAt'
->;
+// Lightweight contract interface for list endpoints
+export interface ContractListItem {
+	id: string;
+	name: string;
+	insurerName: string | null;
+	category: ContractCategory;
+	startDate: Date | null;
+	endDate: Date | null;
+	annualPremiumCents: number;
+	status: ContractStatus;
+	createdAt: Date;
+	updatedAt: Date;
+	documents: Omit<ContractDocument, 'contractId' | 'createdAt'>[];
+}
 
 // Utility types for form handling
 export interface ContractFormData {
@@ -272,8 +273,32 @@ export interface PaginationInfo {
 export interface GetContractsResponse {
 	status: 'success';
 	message: string;
-	data: BackendContract[];
+	data: BackendContractListItem[];
 	pagination: PaginationInfo;
+	metadata: ContractMetadata;
+}
+
+// Contract metadata for dashboard
+export interface ContractMetadata {
+	totalContracts: number;
+	totalValid: number;
+	totalExpired: number;
+	totalAnnualPremiumCents: number;
+}
+
+// Lightweight backend contract interface for list endpoints
+export interface BackendContractListItem {
+	id: string;
+	name: string;
+	insurerName: string | null;
+	category: ContractCategory;
+	startDate: string | null; // ISO string from backend
+	endDate: string | null; // ISO string from backend
+	annualPremiumCents: number;
+	status: ContractStatus;
+	createdAt: string; // ISO string from backend
+	updatedAt: string; // ISO string from backend
+	documents: Omit<BackendContractDocument, 'contractId' | 'createdAt'>[];
 }
 
 // Backend contract response for single contract
