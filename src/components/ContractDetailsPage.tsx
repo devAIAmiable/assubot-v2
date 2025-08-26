@@ -1,4 +1,12 @@
 import {
+	ComposableMap,
+	Geographies,
+	Geography,
+	Graticule,
+	Marker,
+	ZoomableGroup,
+} from 'react-simple-maps';
+import {
 	FaArrowLeft,
 	FaCheck,
 	FaClipboardList,
@@ -55,6 +63,224 @@ function highlightKeywords(text: string) {
 	);
 	const parts = text.split(regex);
 	return parts.map((part, i) => (keywords.includes(part) ? <strong key={i}>{part}</strong> : part));
+}
+
+function getZoneCoordinates(zoneLabel: string): [number, number] | null {
+	const zoneMap: Record<string, [number, number]> = {
+		// Europe
+		europe: [10, 50],
+		france: [2, 46],
+		allemagne: [10, 51],
+		espagne: [-3, 40],
+		italie: [12, 42],
+		'royaume-uni': [-2, 54],
+		suisse: [8, 47],
+		belgique: [4, 50],
+		'pays-bas': [5, 52],
+		luxembourg: [6, 50],
+		autriche: [14, 47],
+		pologne: [19, 52],
+		'republique-tcheque': [15, 50],
+		slovaquie: [19, 48],
+		hongrie: [19, 47],
+		roumanie: [25, 46],
+		bulgarie: [25, 43],
+		grece: [22, 39],
+		portugal: [-8, 39],
+		irlande: [-8, 53],
+		danemark: [10, 56],
+		suede: [18, 62],
+		norvege: [8, 62],
+		finlande: [26, 64],
+		estonie: [26, 59],
+		lettonie: [25, 57],
+		lituanie: [24, 55],
+		slovenie: [15, 46],
+		croatie: [16, 45],
+		serbie: [21, 44],
+		montenegro: [19, 42],
+		albanie: [20, 41],
+		macedoine: [22, 42],
+		'bosnie-herzegovine': [18, 44],
+		malte: [14, 36],
+		chypre: [33, 35],
+		islande: [-18, 65],
+
+		// Amérique du Nord
+		'amerique-du-nord': [-100, 45],
+		'etats-unis': [-98, 39],
+		canada: [-96, 56],
+		mexique: [-102, 23],
+		alaska: [-150, 64],
+		californie: [-120, 37],
+		texas: [-100, 31],
+		floride: [-81, 27],
+		'new-york': [-75, 43],
+		quebec: [-71, 52],
+		ontario: [-79, 50],
+		'colombie-britannique': [-125, 53],
+
+		// Amérique du Sud
+		'amerique-du-sud': [-60, -15],
+		bresil: [-55, -15],
+		argentine: [-64, -34],
+		chili: [-71, -30],
+		perou: [-75, -10],
+		colombie: [-74, 4],
+		venezuela: [-66, 6],
+		equateur: [-78, -2],
+		bolivie: [-65, -17],
+		paraguay: [-58, -23],
+		uruguay: [-56, -33],
+		guyane: [-59, 5],
+		suriname: [-56, 4],
+		'guyane-francaise': [-53, 4],
+
+		// Afrique
+		afrique: [20, 0],
+		'afrique-du-nord': [3, 30],
+		'afrique-de-l-ouest': [-10, 10],
+		'afrique-centrale': [20, 0],
+		'afrique-de-l-est': [35, 0],
+		'afrique-du-sud': [25, -30],
+		maroc: [-7, 32],
+		algerie: [3, 28],
+		tunisie: [9, 34],
+		libye: [17, 27],
+		egypte: [30, 27],
+		senegal: [-14, 14],
+		mali: [-3, 17],
+		niger: [8, 17],
+		tchad: [19, 15],
+		soudan: [30, 15],
+		ethiopie: [40, 8],
+		kenya: [38, 0],
+		tanzanie: [35, -6],
+		zambie: [27, -15],
+		zimbabwe: [29, -20],
+		botswana: [24, -22],
+		namibie: [17, -22],
+		angola: [18, -12],
+		congo: [15, -1],
+		rdc: [23, -3],
+		cameroun: [12, 6],
+		nigeria: [8, 10],
+		ghana: [-1, 8],
+		'cote-d-ivoire': [-5, 8],
+		guinee: [-10, 10],
+		'sierra-leone': [-12, 8],
+		liberia: [-9, 6],
+		gambie: [-16, 13],
+		'guinee-bissau': [-15, 12],
+		'cap-vert': [-24, 16],
+		mauritanie: [-12, 20],
+		'burkina-faso': [-2, 12],
+		benin: [2, 9],
+		togo: [1, 8],
+		gabon: [12, -1],
+		'guinee-equatoriale': [10, 2],
+		'sao-tome-et-principe': [7, 1],
+		comores: [44, -12],
+		seychelles: [55, -5],
+		maurice: [58, -20],
+		madagascar: [47, -20],
+		mayotte: [45, -13],
+		reunion: [56, -21],
+
+		// Asie
+		asie: [100, 40],
+		'asie-de-l-est': [120, 35],
+		'asie-du-sud': [80, 20],
+		'asie-du-sud-est': [105, 10],
+		'asie-centrale': [70, 45],
+		chine: [105, 35],
+		japon: [138, 36],
+		'coree-du-sud': [128, 36],
+		'coree-du-nord': [127, 40],
+		mongolie: [105, 46],
+		inde: [78, 20],
+		pakistan: [70, 30],
+		afghanistan: [67, 33],
+		iran: [53, 32],
+		irak: [44, 33],
+		'arabie-saoudite': [45, 24],
+		yemen: [48, 15],
+		oman: [57, 21],
+		'emirats-arabes-unis': [54, 24],
+		qatar: [51, 25],
+		kuwait: [47, 29],
+		bahrein: [50, 26],
+		jordanie: [36, 31],
+		syrie: [39, 35],
+		liban: [36, 34],
+		israel: [35, 31],
+		palestine: [35, 32],
+		turquie: [35, 39],
+		georgie: [43, 42],
+		armenie: [45, 40],
+		azerbaidjan: [47, 40],
+		kazakhstan: [68, 48],
+		ouzbekistan: [64, 41],
+		turkmenistan: [59, 40],
+		kirghizistan: [75, 41],
+		tadjikistan: [71, 39],
+		vietnam: [106, 16],
+		laos: [103, 18],
+		cambodge: [104, 13],
+		thailande: [101, 13],
+		myanmar: [96, 22],
+		malaisie: [102, 3],
+		singapour: [104, 1],
+		brunei: [115, 4],
+		indonesie: [120, -2],
+		philippines: [122, 13],
+		taiwan: [121, 24],
+		'hong-kong': [114, 22],
+		macao: [113, 22],
+		'sri-lanka': [81, 7],
+		maldives: [73, 3],
+		nepal: [84, 28],
+		bhoutan: [90, 27],
+		bangladesh: [90, 24],
+		// Océanie
+		oceanie: [135, -25],
+		australie: [135, -25],
+		'nouvelle-zelande': [174, -41],
+		'papouasie-nouvelle-guinee': [145, -6],
+		fidji: [178, -18],
+		samoa: [-172, -14],
+		tonga: [-175, -21],
+		vanuatu: [167, -16],
+		'nouvelle-caledonie': [166, -21],
+		'polynesie-francaise': [-150, -17],
+
+		// Régions générales
+		monde: [0, 20],
+		'hemisphere-nord': [0, 45],
+		'hemisphere-sud': [0, -45],
+		'zone-euro': [10, 50],
+		schengen: [10, 50],
+		'union-europeenne': [10, 50],
+		ue: [10, 50],
+		mediterranee: [18, 35],
+		atlantique: [-30, 30],
+		pacifique: [180, 0],
+		indien: [80, -20],
+	};
+
+	const normalizedLabel = zoneLabel
+		.toLowerCase()
+		.replace(/[éèêë]/g, 'e')
+		.replace(/[àâä]/g, 'a')
+		.replace(/[îï]/g, 'i')
+		.replace(/[ôö]/g, 'o')
+		.replace(/[ûüù]/g, 'u')
+		.replace(/[ç]/g, 'c')
+		.replace(/[^a-z0-9-]/g, '-')
+		.replace(/-+/g, '-')
+		.replace(/^-|-$/g, '');
+
+	return zoneMap[normalizedLabel] || null;
 }
 
 const ContractDetailsPage = () => {
@@ -469,28 +695,131 @@ const ContractDetailsPage = () => {
 						<Tab.Panel className="p-6">
 							<div className="max-w-7xl mx-auto">
 								<div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
-									<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-										<FaGlobe className="h-6 w-6 text-blue-600 mr-3" />
-										Zone de couverture géographique
-									</h3>
-									<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-										{contract.zones && contract.zones.length > 0 ? (
-											contract.zones.map((zone) => (
-												<div
-													key={zone.id}
-													className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-center"
-												>
-													<span className="font-medium text-gray-900">
-														{capitalizeFirst(zone.label)}
-													</span>
+									{contract.zones && contract.zones.length > 0 ? (
+										<div className="space-y-8">
+											{/* World Map */}
+											<div className="">
+												<h4 className="text-xl font-bold text-gray-900 mb-6">Zones couvertes</h4>
+												<div className="w-full h-[600px] bg-white rounded-lg border border-blue-200 shadow-inner overflow-hidden">
+													<ComposableMap
+														projection="geoEqualEarth"
+														projectionConfig={{
+															scale: 190,
+															center: [0, 15],
+														}}
+														style={{
+															width: '100%',
+															height: '100%',
+														}}
+													>
+														<ZoomableGroup>
+															{/* Graticule */}
+															<Graticule stroke="#e2e8f0" strokeWidth={1} />
+
+															{/* World Countries */}
+															<Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
+																{({ geographies }) =>
+																	geographies.map((geo) => (
+																		<Geography
+																			key={geo.rsmKey}
+																			geography={geo}
+																			fill="#cedaf0"
+																			stroke="#fff"
+																			strokeWidth={1}
+																			style={{
+																				default: { outline: 'none' },
+																				hover: {
+																					fill: '#e2e8f0',
+																					outline: 'none',
+																					cursor: 'crosshair',
+																				},
+																				pressed: { outline: 'none' },
+																			}}
+																		/>
+																	))
+																}
+															</Geographies>
+
+															{/* Zone Markers */}
+															{contract.zones?.map((zone, index) => {
+																const zoneCoordinates = getZoneCoordinates(zone.label);
+																if (!zoneCoordinates) return null;
+
+																return (
+																	<Marker key={`${zone.id}-${index}`} coordinates={zoneCoordinates}>
+																		{/* Marker Shadow */}
+																		<circle
+																			r="10"
+																			fill="rgba(0,0,0,0.1)"
+																			transform="translate(2, 2)"
+																		/>
+																		{/* Main Marker */}
+																		<g transform="translate(-10, -20)">
+																			<circle
+																				r="8"
+																				fill="#1e51ab"
+																				stroke="#ffffff"
+																				strokeWidth="2"
+																				filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"
+																			/>
+																			<circle r="3" fill="#ffffff" />
+																		</g>
+																		{/* Zone Label */}
+																		<text
+																			textAnchor="middle"
+																			y={-35}
+																			style={{
+																				fontFamily: 'system-ui, -apple-system, sans-serif',
+																				fill: '#1e51ab',
+																				fontSize: '11px',
+																				fontWeight: '600',
+																				textShadow: '0 1px 2px rgba(255,255,255,0.8)',
+																			}}
+																		>
+																			{zone.label}
+																		</text>
+																	</Marker>
+																);
+															})}
+														</ZoomableGroup>
+													</ComposableMap>
 												</div>
-											))
-										) : (
-											<div className="col-span-full text-center text-gray-500 py-4">
-												Aucune zone géographique spécifiée
+												<div className="mt-4 text-sm text-gray-600 text-center">
+													💡 Utilisez la molette de votre souris pour zoomer et dézoomer sur la
+													carte
+												</div>
 											</div>
-										)}
-									</div>
+
+											{/* Zone List */}
+											<div className="bg-white rounded-xl p-6 border border-blue-100">
+												<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+													{contract.zones.map((zone) => (
+														<div
+															key={zone.id}
+															className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center"
+														>
+															<span className="text-sm font-medium text-gray-700">
+																{capitalizeFirst(zone.label)}
+															</span>
+														</div>
+													))}
+												</div>
+											</div>
+										</div>
+									) : (
+										<div className="text-center text-gray-500 py-12">
+											<div className="w-full max-w-md mx-auto bg-white rounded-xl border border-blue-200 p-8 shadow-lg">
+												<FaGlobe className="h-20 w-20 text-gray-300 mx-auto mb-6" />
+												<h4 className="text-xl font-semibold text-gray-900 mb-3">
+													Aucune zone géographique spécifiée
+												</h4>
+												<p className="text-gray-600 leading-relaxed">
+													Ce contrat ne spécifie pas de zones de couverture géographique. Contactez
+													votre assureur pour plus d'informations sur les zones couvertes.
+												</p>
+											</div>
+										</div>
+									)}
 								</div>
 							</div>
 						</Tab.Panel>
