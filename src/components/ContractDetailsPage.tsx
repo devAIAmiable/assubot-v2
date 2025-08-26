@@ -288,6 +288,7 @@ const ContractDetailsPage = () => {
 	const navigate = useNavigate();
 	const [selectedTab, setSelectedTab] = useState(0);
 
+
 	// Get contract details using the new hook
 	const { contract, isLoading, isError, error } = useContractDetails({
 		contractId: contractId!,
@@ -384,10 +385,10 @@ const ContractDetailsPage = () => {
 							</button>
 							<div className="flex items-center space-x-3">
 								{/* Insurer logo or type icon */}
-								{getInsurerLogo(contract.insurerName) ? (
+								{getInsurerLogo(contract.insurerName!) ? (
 									<img
-										src={getInsurerLogo(contract.insurerName)}
-										alt={contract.insurerName}
+										src={getInsurerLogo(contract.insurerName!)}
+										alt={contract.insurerName!}
 										className="w-12 h-12 object-contain rounded bg-white border border-gray-100"
 									/>
 								) : (
@@ -559,21 +560,21 @@ const ContractDetailsPage = () => {
 														<div
 															key={doc.id}
 															className={`flex items-center justify-between p-3 rounded-xl border ${
-																doc.type === 'CG'
-																	? 'bg-blue-50 border-blue-100'
-																	: doc.type === 'CP'
-																		? 'bg-green-50 border-green-100'
+																doc.type === 'CG' 
+																	? 'bg-blue-50 border-blue-100' 
+																	: doc.type === 'CP' 
+																		? 'bg-green-50 border-green-100' 
 																		: 'bg-gray-50 border-gray-100'
 															}`}
 														>
 															<div className="flex items-center space-x-3">
 																<FaFileAlt
 																	className={`h-5 w-5 ${
-																		doc.type === 'CG'
-																			? 'text-blue-600'
-																			: doc.type === 'CP'
-																				? 'text-green-600'
-																				: 'text-gray-400'
+																	doc.type === 'CG' 
+																		? 'text-blue-600' 
+																		: doc.type === 'CP' 
+																			? 'text-green-600' 
+																			: 'text-gray-400'
 																	}`}
 																/>
 																<div>
@@ -695,7 +696,7 @@ const ContractDetailsPage = () => {
 						<Tab.Panel className="p-6">
 							<div className="max-w-7xl mx-auto">
 								<div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
-									{contract.zones && contract.zones.length > 0 ? (
+										{contract.zones && contract.zones.length > 0 ? (
 										<div className="space-y-8">
 											{/* World Map */}
 											<div className="">
@@ -719,65 +720,77 @@ const ContractDetailsPage = () => {
 															{/* World Countries */}
 															<Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
 																{({ geographies }) =>
-																	geographies.map((geo) => (
-																		<Geography
-																			key={geo.rsmKey}
-																			geography={geo}
-																			fill="#cedaf0"
-																			stroke="#fff"
-																			strokeWidth={1}
-																			style={{
-																				default: { outline: 'none' },
-																				hover: {
-																					fill: '#e2e8f0',
-																					outline: 'none',
-																					cursor: 'crosshair',
-																				},
-																				pressed: { outline: 'none' },
-																			}}
-																		/>
-																	))
+																	geographies.map((geo) => {
+																		// Check if this country/region matches any of the contract zones
+																		const isHighlighted = contract.zones?.some(zone => {
+																			const countryName = geo.properties.name?.toLowerCase();
+																			const zoneName = zone.label.toLowerCase();
+																			
+																			// Direct name matching only
+																			const isMatch = countryName === zoneName;
+																			if (isMatch) {
+																				console.log("🚀 ~ zone:", zoneName, countryName)
+																			}
+																			return isMatch;
+																		});
+
+																		if (isHighlighted) {
+																			console.log("🚀 ~ geo:", geo)
+																		}
+																		
+																		return (
+																			<g key={geo.rsmKey} style={{ cursor: 'crosshair' }}>
+																				<title>{geo.properties.name}</title>
+																				<Geography
+																					geography={geo}
+																					fill={isHighlighted ? "#1e51ab" : "#cedaf0"}
+																					stroke="#fff"
+																					strokeWidth={1}
+																					style={{
+																						default: { outline: 'none' },
+																						hover: {
+																							fill: isHighlighted ? "#163d82" : "#e2e8f0",
+																							outline: 'none',
+																						},
+																						pressed: { outline: 'none' },
+																					}}
+																				/>
+																			</g>
+																		);
+																	})
 																}
 															</Geographies>
 
 															{/* Zone Markers */}
-															{contract.zones?.map((zone, index) => {
-																const zoneCoordinates = getZoneCoordinates(zone.label);
-																if (!zoneCoordinates) return null;
-
+															{contract.zones?.map((zone) => {
+																const coordinates = getZoneCoordinates(zone.label);
+																if (!coordinates) return null;
+																
 																return (
-																	<Marker key={`${zone.id}-${index}`} coordinates={zoneCoordinates}>
-																		{/* Marker Shadow */}
-																		<circle
-																			r="10"
-																			fill="rgba(0,0,0,0.1)"
-																			transform="translate(2, 2)"
-																		/>
-																		{/* Main Marker */}
-																		<g transform="translate(-10, -20)">
+																	<Marker key={zone.id} coordinates={coordinates}>
+																		<g>
+																			{/* Background circle */}
 																			<circle
-																				r="8"
+																				r="2"
 																				fill="#1e51ab"
-																				stroke="#ffffff"
-																				strokeWidth="2"
-																				filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"
+																				stroke="#fff"
+																				strokeWidth="1"
 																			/>
-																			<circle r="3" fill="#ffffff" />
+																			{/* Zone label */}
+																			<text
+																				textAnchor="middle"
+																				y="-15"
+																				style={{
+																					fontFamily: "system-ui",
+																					fill: "#1e51ab",
+																					fontSize: "12px",
+																					fontWeight: "bold",
+																					textShadow: "1px 1px 2px rgba(255,255,255,0.8)",
+																				}}
+																			>
+																				{zone.label}
+																			</text>
 																		</g>
-																		{/* Zone Label */}
-																		<text
-																			textAnchor="middle"
-																			y={-35}
-																			style={{
-																				fontFamily: 'system-ui, -apple-system, sans-serif',
-																				fill: '#1e51ab',
-																				fontSize: '11px',
-																				fontWeight: '600',
-																				textShadow: '0 1px 2px rgba(255,255,255,0.8)',
-																			}}
-																		>
-																			{zone.label}
-																		</text>
 																	</Marker>
 																);
 															})}
@@ -794,8 +807,8 @@ const ContractDetailsPage = () => {
 											<div className="bg-white rounded-xl p-6 border border-blue-100">
 												<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
 													{contract.zones.map((zone) => (
-														<div
-															key={zone.id}
+												<div
+													key={zone.id}
 															className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center"
 														>
 															<span className="text-sm font-medium text-gray-700">
@@ -806,20 +819,20 @@ const ContractDetailsPage = () => {
 												</div>
 											</div>
 										</div>
-									) : (
+										) : (
 										<div className="text-center text-gray-500 py-12">
 											<div className="w-full max-w-md mx-auto bg-white rounded-xl border border-blue-200 p-8 shadow-lg">
 												<FaGlobe className="h-20 w-20 text-gray-300 mx-auto mb-6" />
 												<h4 className="text-xl font-semibold text-gray-900 mb-3">
-													Aucune zone géographique spécifiée
+												Aucune zone géographique spécifiée
 												</h4>
 												<p className="text-gray-600 leading-relaxed">
 													Ce contrat ne spécifie pas de zones de couverture géographique. Contactez
 													votre assureur pour plus d'informations sur les zones couvertes.
 												</p>
 											</div>
-										</div>
-									)}
+											</div>
+										)}
 								</div>
 							</div>
 						</Tab.Panel>
@@ -853,10 +866,10 @@ const ContractDetailsPage = () => {
 													key={type}
 													className="bg-blue-50 p-8 rounded-2xl border border-blue-100"
 												>
-													<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-														<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
+												<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+													<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
 														{getObligationTypeLabel(type as ObligationType)}
-													</h4>
+												</h4>
 													<ul className="space-y-3">
 														{obligations.map((obligation) => (
 															<li
@@ -868,7 +881,7 @@ const ContractDetailsPage = () => {
 															</li>
 														))}
 													</ul>
-												</div>
+											</div>
 											));
 										})()
 									) : (
