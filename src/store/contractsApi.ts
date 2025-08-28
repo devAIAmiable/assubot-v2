@@ -118,7 +118,7 @@ export const contractsApi = createApi({
 				message: response.data.error.message,
 				code: response.data.error.code,
 			}),
-			providesTags: (result, error, contractId) => [{ type: 'Contract', id: contractId }],
+			providesTags: (_result, _error, contractId) => [{ type: 'Contract', id: contractId }],
 		}),
 
 		// Update a specific contract by ID

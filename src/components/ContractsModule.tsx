@@ -349,7 +349,7 @@ const ContractsModule = () => {
 											<span className="text-sm text-gray-600">Échéance</span>
 											<span className="text-sm font-medium text-gray-900">
 												{contract.endDate
-													? new Date(contract.endDate).toLocaleDateString('fr-FR')
+													? contract.endDate.toLocaleDateString('fr-FR')
 													: 'Non spécifiée'}
 											</span>
 										</div>

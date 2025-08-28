@@ -2,7 +2,6 @@ import type {
 	ContractCategory,
 	ContractListItem,
 	ContractStatus,
-	GetContractsParams,
 } from '../types/contract';
 import { useCallback, useMemo, useState } from 'react';
 

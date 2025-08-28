@@ -295,7 +295,7 @@ const ContractDetailsPage = () => {
 		enabled: !!contractId,
 	});
 
-	const isContractExpired = contract ? isExpired(contract) : false;
+	const isContractExpired = contract ? (contract.endDate ? new Date(contract.endDate) < new Date() : false) : false;
 
 	// Show loading state
 	if (isLoading) {
@@ -483,13 +483,13 @@ const ContractDetailsPage = () => {
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Début de contrat</span>
 													<span className="font-semibold text-gray-900">
-														{contract.startDate ? formatDateForDisplayFR(contract.startDate) : '-'}
+														{contract.startDate ? formatDateForDisplayFR(contract.startDate.toISOString()) : '-'}
 													</span>
 												</div>
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Fin de contrat</span>
 													<span className="font-semibold text-gray-900">
-														{contract.endDate ? formatDateForDisplayFR(contract.endDate) : '-'}
+														{contract.endDate ? formatDateForDisplayFR(contract.endDate.toISOString()) : '-'}
 													</span>
 												</div>
 											</div>
@@ -510,7 +510,7 @@ const ContractDetailsPage = () => {
 													<div className="flex items-center justify-between py-3">
 														<span className="text-gray-600 font-medium">Date limite</span>
 														<span className="font-semibold text-gray-900">
-															{formatDateForDisplayFR(contract.cancellationDeadline)}
+															{formatDateForDisplayFR(contract.cancellationDeadline.toISOString())}
 														</span>
 													</div>
 												)}
@@ -582,7 +582,7 @@ const ContractDetailsPage = () => {
 																		Document {doc.type}
 																	</p>
 																	<p className="text-xs text-gray-500">
-																		Ajouté le {formatDateForDisplayFR(doc.createdAt)}
+																		Ajouté le {formatDateForDisplayFR(doc.createdAt.toISOString())}
 																	</p>
 																</div>
 															</div>

@@ -46,10 +46,7 @@ export function transformBackendGuarantee(
 		title: backendGuarantee.title,
 		details:
 			backendGuarantee.details
-				?.map(
-					(detail) =>
-						`${detail.service || ''} ${detail.limit || ''} ${detail.deductible || ''} ${detail.limitation || ''}`
-				)
+				?.map((detail) => `${detail.service || ''} ${detail.limit || ''}`)
 				.join('; ')
 				.trim() || undefined,
 		covered:
@@ -132,7 +129,7 @@ export function transformBackendContact(backendContact: BackendContractContact):
 		id: backendContact.id,
 		contractId: '', // Will be set by parent contract
 		type: backendContact.type,
-		name: backendContact.name,
+		name: backendContact.name || undefined,
 		phone: backendContact.phone,
 		email: backendContact.email,
 		openingHours: backendContact.openingHours,
@@ -210,7 +207,7 @@ export function transformBackendContract(
 export function transformBackendContracts(
 	backendContracts: BackendContract[]
 ): ContractWithRelations[] {
-	return backendContracts.map(transformBackendContract);
+	return backendContracts.map((contract) => transformBackendContract(contract as any));
 }
 
 /**
