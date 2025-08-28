@@ -137,7 +137,7 @@ export const contractsApi = createApi({
 				message: response.data.error.message,
 				code: response.data.error.code,
 			}),
-			invalidatesTags: (result, error, { contractId }) => [
+			invalidatesTags: (_result, _error, { contractId }) => [
 				{ type: 'Contract', id: contractId },
 				{ type: 'Contract' },
 			],
@@ -155,7 +155,7 @@ export const contractsApi = createApi({
 				message: response.data.error.message,
 				code: response.data.error.code,
 			}),
-			invalidatesTags: (result, error, contractId) => [
+			invalidatesTags: (_result, _error, contractId) => [
 				{ type: 'Contract', id: contractId },
 				{ type: 'Contract' },
 			],

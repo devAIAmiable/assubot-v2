@@ -207,19 +207,19 @@ export const getContractListItemDocuments = (contract: ContractListItem) => {
 		generalConditions: {
 			name: cgDoc?.fileUrl.split('/').pop() || 'Conditions Générales',
 			url: cgDoc?.fileUrl || '',
-			uploadDate: cgDoc?.createdAt || contract.createdAt,
+			uploadDate: contract.createdAt,
 			required: true,
 		},
 		particularConditions: {
 			name: cpDoc?.fileUrl.split('/').pop() || 'Conditions Particulières',
 			url: cpDoc?.fileUrl || '',
-			uploadDate: cpDoc?.createdAt || contract.createdAt,
+			uploadDate: contract.createdAt,
 			required: true,
 		},
 		otherDocs: otherDocs.map((doc) => ({
 			name: doc.fileUrl.split('/').pop() || 'Document annexe',
 			url: doc.fileUrl,
-			uploadDate: doc.createdAt,
+			uploadDate: contract.createdAt,
 			required: false,
 		})),
 	};

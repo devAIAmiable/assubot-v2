@@ -1,4 +1,4 @@
-import type { ContractCategory, ContractListItem, ContractStatus } from '../types';
+import type { ContractCategory, ContractListItem, ContractStatus } from '../types/contract';
 import {
 	FaCalendarAlt,
 	FaChevronDown,

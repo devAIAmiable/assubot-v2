@@ -32,7 +32,6 @@ import {
 	getStatusLabel,
 	getTypeIcon,
 	getTypeLabel,
-	isExpired,
 } from '../utils/contract';
 import { useNavigate, useParams } from 'react-router-dom';
 
