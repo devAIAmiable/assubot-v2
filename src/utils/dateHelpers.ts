@@ -10,7 +10,9 @@ dayjs.locale('fr');
  * @param dateString - Date string in YYYY-MM-DD format
  * @returns ISO datetime string or undefined if no date provided
  */
-export const formatDateForAPI = (dateString: string | undefined): string | undefined => {
+export const formatDateForAPI = (
+	dateString: string | Date | undefined
+): string | Date | undefined => {
 	if (!dateString) return undefined;
 
 	try {
@@ -27,7 +29,7 @@ export const formatDateForAPI = (dateString: string | undefined): string | undef
  * @param isoString - ISO datetime string from API
  * @returns Date string in YYYY-MM-DD format or empty string if invalid
  */
-export const formatDateForInput = (isoString: string | undefined): string => {
+export const formatDateForInput = (isoString: string | Date | undefined): string => {
 	if (!isoString) return '';
 
 	try {
@@ -48,10 +50,10 @@ export const formatDateForDisplay = (dateString: string | undefined): string => 
 
 	try {
 		const date = dayjs(dateString);
-		
+
 		// Check if date is valid
 		if (!date.isValid()) return '';
-		
+
 		return date.format('DD-MM-YYYY');
 	} catch (error) {
 		console.error('Error formatting date for display:', error);
@@ -64,15 +66,15 @@ export const formatDateForDisplay = (dateString: string | undefined): string => 
  * @param dateString - Date string in YYYY-MM-DD or ISO format
  * @returns Date string in French format or empty string if invalid
  */
-export const formatDateForDisplayFR = (dateString: string | undefined): string => {
+export const formatDateForDisplayFR = (dateString: string | Date | undefined): string => {
 	if (!dateString) return '';
 
 	try {
 		const date = dayjs(dateString);
-		
+
 		// Check if date is valid
 		if (!date.isValid()) return '';
-		
+
 		return date.format('DD MMMM YYYY');
 	} catch (error) {
 		console.error('Error formatting date for display:', error);
@@ -85,15 +87,15 @@ export const formatDateForDisplayFR = (dateString: string | undefined): string =
  * @param dateString - Date string in YYYY-MM-DD or ISO format
  * @returns Date string in French format with time or empty string if invalid
  */
-export const formatDateTimeForDisplayFR = (dateString: string | undefined): string => {
+export const formatDateTimeForDisplayFR = (dateString: string | Date | undefined): string => {
 	if (!dateString) return '';
 
 	try {
 		const date = dayjs(dateString);
-		
+
 		// Check if date is valid
 		if (!date.isValid()) return '';
-		
+
 		return date.format('DD MMMM YYYY à HH:mm');
 	} catch (error) {
 		console.error('Error formatting date for display:', error);
@@ -106,9 +108,9 @@ export const formatDateTimeForDisplayFR = (dateString: string | undefined): stri
  * @param dateString - Date string to check
  * @returns true if date is expired, false otherwise
  */
-export const isDateExpired = (dateString: string | undefined): boolean => {
+export const isDateExpired = (dateString: string | Date | undefined): boolean => {
 	if (!dateString) return false;
-	
+
 	try {
 		const date = dayjs(dateString);
 		return date.isValid() && date.isBefore(dayjs());
@@ -124,7 +126,10 @@ export const isDateExpired = (dateString: string | undefined): boolean => {
  * @param placeholder - Custom placeholder (defaults to "-")
  * @returns The value if it exists, otherwise the placeholder
  */
-export const getDisplayValue = (value: string | number | null | undefined, placeholder: string = '-'): string => {
+export const getDisplayValue = (
+	value: string | Date | number | null | undefined,
+	placeholder: string = '-'
+): string => {
 	if (value === null || value === undefined || value === '') {
 		return placeholder;
 	}

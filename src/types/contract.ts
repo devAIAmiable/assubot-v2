@@ -86,7 +86,7 @@ export interface ContractGuarantee {
 	id: string;
 	contractId: string;
 	title: string;
-	details?: string;
+	details?: BackendGuaranteeDetail[];
 	covered?: string;
 	notCovered?: string;
 	createdAt: Date;

@@ -24,6 +24,7 @@ import {
 	FaShieldAlt,
 	FaTimes,
 } from 'react-icons/fa';
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { formatDateForDisplayFR, getDisplayValue } from '../utils/dateHelpers';
 import {
 	getContactTypeLabel,
@@ -36,7 +37,6 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 
 import type { ObligationType } from '../types';
-import { Tab } from '@headlessui/react';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { useContractDetails } from '../hooks/useContractDetails';
@@ -287,14 +287,17 @@ const ContractDetailsPage = () => {
 	const navigate = useNavigate();
 	const [selectedTab, setSelectedTab] = useState(0);
 
-
 	// Get contract details using the new hook
 	const { contract, isLoading, isError, error } = useContractDetails({
 		contractId: contractId!,
 		enabled: !!contractId,
 	});
 
-	const isContractExpired = contract ? (contract.endDate ? new Date(contract.endDate) < new Date() : false) : false;
+	const isContractExpired = contract
+		? contract.endDate
+			? new Date(contract.endDate) < new Date()
+			: false
+		: false;
 
 	// Show loading state
 	if (isLoading) {
@@ -436,10 +439,10 @@ const ContractDetailsPage = () => {
 			</div>
 
 			{/* Tabs and Content */}
-			<Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
+			<TabGroup selectedIndex={selectedTab} onChange={setSelectedTab}>
 				{/* Tabs */}
 				<div className="px-6 border-b border-gray-200 bg-white">
-					<Tab.List className="flex space-x-8">
+					<TabList className="flex space-x-8">
 						{tabs.map((tab, index) => (
 							<Tab
 								key={index}
@@ -455,14 +458,14 @@ const ContractDetailsPage = () => {
 								<span>{tab.name}</span>
 							</Tab>
 						))}
-					</Tab.List>
+					</TabList>
 				</div>
 
 				{/* Content */}
 				<div className="flex-1 overflow-y-auto">
-					<Tab.Panels className="h-full">
+					<TabPanels className="h-full">
 						{/* Vue d'ensemble */}
-						<Tab.Panel className="p-6">
+						<TabPanel className="p-6">
 							<div className="max-w-7xl mx-auto">
 								{/* Mon contrat en un coup d'œil */}
 								<div className="mb-8">
@@ -482,13 +485,13 @@ const ContractDetailsPage = () => {
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Début de contrat</span>
 													<span className="font-semibold text-gray-900">
-														{contract.startDate ? formatDateForDisplayFR(contract.startDate.toISOString()) : '-'}
+														{contract.startDate ? formatDateForDisplayFR(contract.startDate) : '-'}
 													</span>
 												</div>
 												<div className="flex items-center justify-between py-3 border-b border-blue-200">
 													<span className="text-gray-600 font-medium">Fin de contrat</span>
 													<span className="font-semibold text-gray-900">
-														{contract.endDate ? formatDateForDisplayFR(contract.endDate.toISOString()) : '-'}
+														{contract.endDate ? formatDateForDisplayFR(contract.endDate) : '-'}
 													</span>
 												</div>
 											</div>
@@ -509,7 +512,7 @@ const ContractDetailsPage = () => {
 													<div className="flex items-center justify-between py-3">
 														<span className="text-gray-600 font-medium">Date limite</span>
 														<span className="font-semibold text-gray-900">
-															{formatDateForDisplayFR(contract.cancellationDeadline.toISOString())}
+															{formatDateForDisplayFR(contract.cancellationDeadline)}
 														</span>
 													</div>
 												)}
@@ -559,21 +562,21 @@ const ContractDetailsPage = () => {
 														<div
 															key={doc.id}
 															className={`flex items-center justify-between p-3 rounded-xl border ${
-																doc.type === 'CG' 
-																	? 'bg-blue-50 border-blue-100' 
-																	: doc.type === 'CP' 
-																		? 'bg-green-50 border-green-100' 
+																doc.type === 'CG'
+																	? 'bg-blue-50 border-blue-100'
+																	: doc.type === 'CP'
+																		? 'bg-green-50 border-green-100'
 																		: 'bg-gray-50 border-gray-100'
 															}`}
 														>
 															<div className="flex items-center space-x-3">
 																<FaFileAlt
 																	className={`h-5 w-5 ${
-																	doc.type === 'CG' 
-																		? 'text-blue-600' 
-																		: doc.type === 'CP' 
-																			? 'text-green-600' 
-																			: 'text-gray-400'
+																		doc.type === 'CG'
+																			? 'text-blue-600'
+																			: doc.type === 'CP'
+																				? 'text-green-600'
+																				: 'text-gray-400'
 																	}`}
 																/>
 																<div>
@@ -581,7 +584,7 @@ const ContractDetailsPage = () => {
 																		Document {doc.type}
 																	</p>
 																	<p className="text-xs text-gray-500">
-																		Ajouté le {formatDateForDisplayFR(doc.createdAt.toISOString())}
+																		Ajouté le {formatDateForDisplayFR(doc.createdAt)}
 																	</p>
 																</div>
 															</div>
@@ -615,54 +618,106 @@ const ContractDetailsPage = () => {
 									</div>
 								</div>
 							</div>
-						</Tab.Panel>
+						</TabPanel>
 
 						{/* Garanties */}
-						<Tab.Panel className="p-6">
+						<TabPanel>
 							<div className="max-w-7xl mx-auto">
-								<div className="space-y-8">
-									{contract.guarantees && contract.guarantees.length > 0 ? (
-										contract.guarantees.map((garantie) => (
+								{/* Simple List */}
+								{contract.guarantees && contract.guarantees.length > 0 ? (
+									<div className="bg-white rounded-lg border border-gray-200">
+																			{contract.guarantees.map((garantie, index) => (
 											<div
 												key={garantie.id}
-												className="bg-white border border-gray-200 rounded-2xl p-8"
+												className={`flex items-center space-x-4 p-4 ${
+													index !== contract.guarantees.length - 1 ? 'border-b border-gray-100' : ''
+												}`}
 											>
-												<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-													<FaShieldAlt className="h-6 w-6 text-[#1e51ab] mr-3" />
-													{capitalizeFirst(garantie.title)}
-												</h3>
-												{garantie.details && (
-													<div className="mb-6">
-														<p className="text-gray-700">{garantie.details}</p>
-													</div>
-												)}
-												{garantie.covered && (
-													<div className="mb-6">
-														<h4 className="text-lg font-semibold text-gray-900 mb-3">
-															Ce qui est couvert
-														</h4>
-														<p className="text-gray-700">{garantie.covered}</p>
-													</div>
-												)}
-												{garantie.notCovered && (
-													<div className="mb-6">
-														<h4 className="text-lg font-semibold text-gray-900 mb-3">
-															Non couvert
-														</h4>
-														<p className="text-gray-700">{garantie.notCovered}</p>
-													</div>
-												)}
+												{/* Number */}
+												<div className="w-6 h-6 bg-[#1e51ab] text-white rounded-full flex items-center justify-center text-sm font-medium">
+													{index + 1}
+												</div>
+
+												{/* Content */}
+												<div className="flex-1 min-w-0">
+													<h3 className="text-base font-medium text-gray-900 mb-2">
+														{capitalizeFirst(garantie.title)}
+													</h3>
+
+													{/* Details */}
+													{garantie.details &&
+														Array.isArray(garantie.details) &&
+														garantie.details.length > 0 && (
+															<div className="space-y-2">
+																{garantie.details.map((detail, detailIndex) => (
+																	<div key={detailIndex} className="space-y-1">
+																		{/* Service */}
+																		{detail.service && detail.service.trim() !== '' && (
+																			<p className="text-sm text-gray-600">{detail.service}</p>
+																		)}
+
+																		{/* Limit */}
+																		{detail.limit && detail.limit.trim() !== '' && (
+																			<div className="flex items-center space-x-2">
+																				<span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+																					{detail.limit === 'Valeur du véhicule'
+																						? 'Valeur du véhicule'
+																						: !isNaN(parseFloat(detail.limit))
+																							? `${parseFloat(detail.limit).toLocaleString('fr-FR')}€`
+																							: detail.limit}
+																				</span>
+																			</div>
+																		)}
+
+																		{/* Coverages */}
+																		{detail.coverages && detail.coverages.length > 0 && (
+																			<div className="flex flex-wrap gap-1">
+																				{detail.coverages.map((coverage, coverageIndex) => (
+																					<span
+																						key={coverageIndex}
+																						className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${
+																							coverage.type === 'covered'
+																								? 'bg-green-100 text-green-800'
+																								: 'bg-red-100 text-red-800'
+																						}`}
+																					>
+																						{coverage.type === 'covered' ? '✓' : '✗'}{' '}
+																						{coverage.description}
+																					</span>
+																				))}
+																			</div>
+																		)}
+																	</div>
+																))}
+															</div>
+														)}
+												</div>
 											</div>
-										))
-									) : (
-										<div className="text-center text-gray-500 py-8">Aucune garantie disponible</div>
-									)}
-								</div>
+										))}
+									</div>
+								) : (
+									/* Empty State */
+									<div className="text-center py-12">
+										<FaShieldAlt className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+										<p className="text-gray-500">Aucune garantie spécifiée</p>
+									</div>
+								)}
+
+								{/* Simple Summary */}
+								{contract.guarantees && contract.guarantees.length > 0 && (
+									<div className="mt-4 text-center">
+										<p className="text-sm text-gray-500">
+											{contract.guarantees.length} garantie
+											{contract.guarantees.length > 1 ? 's' : ''} souscrite
+											{contract.guarantees.length > 1 ? 's' : ''}
+										</p>
+									</div>
+								)}
 							</div>
-						</Tab.Panel>
+						</TabPanel>
 
 						{/* Exclusions */}
-						<Tab.Panel className="p-6">
+						<TabPanel className="p-6">
 							<div className="max-w-7xl mx-auto">
 								<div className="bg-gradient-to-br from-red-50 to-orange-50 p-8 rounded-2xl border border-red-100">
 									<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
@@ -689,13 +744,13 @@ const ContractDetailsPage = () => {
 									</div>
 								</div>
 							</div>
-						</Tab.Panel>
+						</TabPanel>
 
 						{/* Zone géographique */}
-						<Tab.Panel className="p-6">
+						<TabPanel className="p-6">
 							<div className="max-w-7xl mx-auto">
 								<div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
-										{contract.zones && contract.zones.length > 0 ? (
+									{contract.zones && contract.zones.length > 0 ? (
 										<div className="space-y-8">
 											{/* World Map */}
 											<div className="">
@@ -721,34 +776,34 @@ const ContractDetailsPage = () => {
 																{({ geographies }) =>
 																	geographies.map((geo) => {
 																		// Check if this country/region matches any of the contract zones
-																		const isHighlighted = contract.zones?.some(zone => {
+																		const isHighlighted = contract.zones?.some((zone) => {
 																			const countryName = geo.properties.name?.toLowerCase();
 																			const zoneName = zone.label.toLowerCase();
-																			
+
 																			// Direct name matching only
 																			const isMatch = countryName === zoneName;
 																			if (isMatch) {
-																				console.log("🚀 ~ zone:", zoneName, countryName)
+																				console.log('🚀 ~ zone:', zoneName, countryName);
 																			}
 																			return isMatch;
 																		});
 
 																		if (isHighlighted) {
-																			console.log("🚀 ~ geo:", geo)
+																			console.log('🚀 ~ geo:', geo);
 																		}
-																		
+
 																		return (
 																			<g key={geo.rsmKey} style={{ cursor: 'crosshair' }}>
 																				<title>{geo.properties.name}</title>
 																				<Geography
 																					geography={geo}
-																					fill={isHighlighted ? "#1e51ab" : "#cedaf0"}
+																					fill={isHighlighted ? '#1e51ab' : '#cedaf0'}
 																					stroke="#fff"
 																					strokeWidth={1}
 																					style={{
 																						default: { outline: 'none' },
 																						hover: {
-																							fill: isHighlighted ? "#163d82" : "#e2e8f0",
+																							fill: isHighlighted ? '#163d82' : '#e2e8f0',
 																							outline: 'none',
 																						},
 																						pressed: { outline: 'none' },
@@ -764,27 +819,22 @@ const ContractDetailsPage = () => {
 															{contract.zones?.map((zone) => {
 																const coordinates = getZoneCoordinates(zone.label);
 																if (!coordinates) return null;
-																
+
 																return (
 																	<Marker key={zone.id} coordinates={coordinates}>
 																		<g>
 																			{/* Background circle */}
-																			<circle
-																				r="2"
-																				fill="#1e51ab"
-																				stroke="#fff"
-																				strokeWidth="1"
-																			/>
+																			<circle r="2" fill="#1e51ab" stroke="#fff" strokeWidth="1" />
 																			{/* Zone label */}
 																			<text
 																				textAnchor="middle"
 																				y="-15"
 																				style={{
-																					fontFamily: "system-ui",
-																					fill: "#1e51ab",
-																					fontSize: "12px",
-																					fontWeight: "bold",
-																					textShadow: "1px 1px 2px rgba(255,255,255,0.8)",
+																					fontFamily: 'system-ui',
+																					fill: '#1e51ab',
+																					fontSize: '12px',
+																					fontWeight: 'bold',
+																					textShadow: '1px 1px 2px rgba(255,255,255,0.8)',
 																				}}
 																			>
 																				{zone.label}
@@ -806,8 +856,8 @@ const ContractDetailsPage = () => {
 											<div className="bg-white rounded-xl p-6 border border-blue-100">
 												<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
 													{contract.zones.map((zone) => (
-												<div
-													key={zone.id}
+														<div
+															key={zone.id}
 															className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center"
 														>
 															<span className="text-sm font-medium text-gray-700">
@@ -818,26 +868,26 @@ const ContractDetailsPage = () => {
 												</div>
 											</div>
 										</div>
-										) : (
+									) : (
 										<div className="text-center text-gray-500 py-12">
 											<div className="w-full max-w-md mx-auto bg-white rounded-xl border border-blue-200 p-8 shadow-lg">
 												<FaGlobe className="h-20 w-20 text-gray-300 mx-auto mb-6" />
 												<h4 className="text-xl font-semibold text-gray-900 mb-3">
-												Aucune zone géographique spécifiée
+													Aucune zone géographique spécifiée
 												</h4>
 												<p className="text-gray-600 leading-relaxed">
 													Ce contrat ne spécifie pas de zones de couverture géographique. Contactez
 													votre assureur pour plus d'informations sur les zones couvertes.
 												</p>
 											</div>
-											</div>
-										)}
+										</div>
+									)}
 								</div>
 							</div>
-						</Tab.Panel>
+						</TabPanel>
 
 						{/* Obligations */}
-						<Tab.Panel className="p-6">
+						<TabPanel className="p-6">
 							<div className="max-w-7xl mx-auto">
 								<h3 className="text-2xl font-semibold text-gray-900 mb-8 flex items-center">
 									<FaClipboardList className="h-6 w-6 text-[#1e51ab] mr-3" />
@@ -865,10 +915,10 @@ const ContractDetailsPage = () => {
 													key={type}
 													className="bg-blue-50 p-8 rounded-2xl border border-blue-100"
 												>
-												<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-													<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
+													<h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+														<FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
 														{getObligationTypeLabel(type as ObligationType)}
-												</h4>
+													</h4>
 													<ul className="space-y-3">
 														{obligations.map((obligation) => (
 															<li
@@ -880,7 +930,7 @@ const ContractDetailsPage = () => {
 															</li>
 														))}
 													</ul>
-											</div>
+												</div>
 											));
 										})()
 									) : (
@@ -890,10 +940,10 @@ const ContractDetailsPage = () => {
 									)}
 								</div>
 							</div>
-						</Tab.Panel>
+						</TabPanel>
 
 						{/* Résiliation */}
-						<Tab.Panel className="p-6">
+						<TabPanel className="p-6">
 							<div className="max-w-7xl mx-auto">
 								<div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-8 rounded-2xl border border-yellow-100">
 									<h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
@@ -927,10 +977,10 @@ const ContractDetailsPage = () => {
 									</div>
 								</div>
 							</div>
-						</Tab.Panel>
+						</TabPanel>
 
 						{/* Contacts */}
-						<Tab.Panel className="p-6">
+						<TabPanel className="p-6">
 							<div className="max-w-7xl mx-auto">
 								<h3 className="text-2xl font-semibold text-gray-900 mb-8 flex items-center">
 									<FaPhone className="h-6 w-6 text-[#1e51ab] mr-3" />
@@ -984,10 +1034,10 @@ const ContractDetailsPage = () => {
 									)}
 								</div>
 							</div>
-						</Tab.Panel>
-					</Tab.Panels>
+						</TabPanel>
+					</TabPanels>
 				</div>
-			</Tab.Group>
+			</TabGroup>
 		</div>
 	);
 };

@@ -44,11 +44,7 @@ export function transformBackendGuarantee(
 		id: backendGuarantee.id,
 		contractId: '', // Will be set by parent contract
 		title: backendGuarantee.title,
-		details:
-			backendGuarantee.details
-				?.map((detail) => `${detail.service || ''} ${detail.limit || ''}`)
-				.join('; ')
-				.trim() || undefined,
+		details: backendGuarantee.details || [],
 		covered:
 			backendGuarantee.details
 				?.filter((d) => d.coverages?.some((c) => c.type === 'covered'))
