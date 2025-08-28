@@ -6,12 +6,12 @@ import {
 	Marker,
 	ZoomableGroup,
 } from 'react-simple-maps';
+import type { ContractListItem, ObligationType } from '../types';
 import {
 	FaArrowLeft,
 	FaCheck,
 	FaClipboardList,
 	FaClock,
-	FaDownload,
 	FaEdit,
 	FaEnvelope,
 	FaExclamationTriangle,
@@ -19,8 +19,6 @@ import {
 	FaFileAlt,
 	FaGlobe,
 	FaPhone,
-	FaPrint,
-	FaShare,
 	FaShieldAlt,
 	FaTimes,
 } from 'react-icons/fa';
@@ -36,7 +34,7 @@ import {
 } from '../utils/contract';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import type { ObligationType } from '../types';
+import EditContractModal from './EditContractModal';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { useContractDetails } from '../hooks/useContractDetails';
@@ -287,6 +285,7 @@ const ContractDetailsPage = () => {
 	const { contractId } = useParams<{ contractId: string }>();
 	const navigate = useNavigate();
 	const [selectedTab, setSelectedTab] = useState(0);
+	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
 	// Get contract details using the new hook
 	const { contract, isLoading, isError, error } = useContractDetails({
@@ -367,13 +366,43 @@ const ContractDetailsPage = () => {
 	];
 
 	const handleEdit = () => {
-		// Navigate to edit page or open edit modal
-		// For now, we'll just go back to contracts list
-		navigate('/app/contrats');
+		setIsEditModalOpen(true);
+	};
+
+	const handleCloseEditModal = () => {
+		setIsEditModalOpen(false);
+	};
+
+	const handleEditSuccess = () => {
+		setIsEditModalOpen(false);
+		// Optionally refresh the contract data or show success message
 	};
 
 	const handleClose = () => {
 		navigate('/app/contrats');
+	};
+
+	// Transform ContractWithRelations to ContractListItem for the edit modal
+	const transformContractForEdit = (): ContractListItem | null => {
+		if (!contract) return null;
+
+		return {
+			id: contract.id,
+			name: contract.name,
+			insurerName: contract.insurerName || null,
+			category: contract.category,
+			startDate: contract.startDate || null,
+			endDate: contract.endDate || null,
+			annualPremiumCents: contract.annualPremiumCents,
+			status: contract.status,
+			createdAt: contract.createdAt,
+			updatedAt: contract.updatedAt,
+			documents: contract.documents.map((doc) => ({
+				id: doc.id,
+				type: doc.type,
+				fileUrl: doc.fileUrl,
+			})),
+		};
 	};
 
 	const handleDownload = async (type: DocumentType) => {
@@ -1034,6 +1063,16 @@ const ContractDetailsPage = () => {
 					</TabPanels>
 				</div>
 			</TabGroup>
+
+			{/* Edit Contract Modal */}
+			{contract && (
+				<EditContractModal
+					contract={transformContractForEdit()!}
+					isOpen={isEditModalOpen}
+					onClose={handleCloseEditModal}
+					onSuccess={handleEditSuccess}
+				/>
+			)}
 		</div>
 	);
 };

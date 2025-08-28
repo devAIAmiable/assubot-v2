@@ -26,7 +26,7 @@ const EditContractModal: React.FC<EditContractModalProps> = ({
 		name: contract.name,
 		insurerName: contract.insurerName || '',
 		category: contract.category,
-		annualPremiumCents: contract.annualPremiumCents,
+		annualPremiumCents: contract.annualPremiumCents || 0,
 		startDate: contract.startDate ? formatDateForInput(contract.startDate.toISOString()) : '',
 		endDate: contract.endDate ? formatDateForInput(contract.endDate.toISOString()) : '',
 	});
@@ -51,12 +51,17 @@ const EditContractModal: React.FC<EditContractModalProps> = ({
 						: formData.annualPremiumCents,
 			};
 
-			// Convert dates to ISO strings if provided
-			if (updates.startDate) {
+			// Convert dates to ISO strings if provided and not empty
+			if (updates.startDate && updates.startDate.trim() !== '') {
 				updates.startDate = new Date(updates.startDate).toISOString();
+			} else {
+				delete updates.startDate;
 			}
-			if (updates.endDate) {
+			
+			if (updates.endDate && updates.endDate.trim() !== '') {
 				updates.endDate = new Date(updates.endDate).toISOString();
+			} else {
+				delete updates.endDate;
 			}
 
 			await updateContract(contract.id, updates);
@@ -180,7 +185,7 @@ const EditContractModal: React.FC<EditContractModalProps> = ({
 												value={
 													formData.annualPremiumCents
 														? (formData.annualPremiumCents / 100).toString()
-														: ''
+														: 0
 												}
 												onChange={(e) =>
 													handleInputChange('annualPremiumCents', parseInt(e.target.value) * 100)
