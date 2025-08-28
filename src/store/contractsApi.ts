@@ -1,10 +1,13 @@
 import type {
 	ContractInitResponse,
 	ContractNotificationRequest,
+	DeleteContractResponse,
 	DocumentType,
 	GetContractByIdResponse,
 	GetContractsParams,
 	GetContractsResponse,
+	UpdateContractRequest,
+	UpdateContractResponse,
 	UploadUrlRequest,
 	UploadUrlResponse,
 } from '../types';
@@ -116,6 +119,46 @@ export const contractsApi = createApi({
 				code: response.data.error.code,
 			}),
 			providesTags: (result, error, contractId) => [{ type: 'Contract', id: contractId }],
+		}),
+
+		// Update a specific contract by ID
+		updateContract: builder.mutation<
+			UpdateContractResponse,
+			{ contractId: string; updates: UpdateContractRequest }
+		>({
+			query: ({ contractId, updates }) => ({
+				url: `/${contractId}`,
+				method: 'PUT',
+				body: updates,
+			}),
+			transformResponse: (response: UpdateContractResponse) => response,
+			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+				status: response.status,
+				message: response.data.error.message,
+				code: response.data.error.code,
+			}),
+			invalidatesTags: (result, error, { contractId }) => [
+				{ type: 'Contract', id: contractId },
+				{ type: 'Contract' },
+			],
+		}),
+
+		// Delete a specific contract by ID
+		deleteContract: builder.mutation<DeleteContractResponse, string>({
+			query: (contractId) => ({
+				url: `/${contractId}`,
+				method: 'DELETE',
+			}),
+			transformResponse: (response: DeleteContractResponse) => response,
+			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+				status: response.status,
+				message: response.data.error.message,
+				code: response.data.error.code,
+			}),
+			invalidatesTags: (result, error, contractId) => [
+				{ type: 'Contract', id: contractId },
+				{ type: 'Contract' },
+			],
 		}),
 		// Generate batch signed Azure upload URLs
 		generateBatchUploadUrls: builder.mutation<BatchUploadUrlResponse, BatchUploadUrlRequest>({
@@ -239,6 +282,8 @@ export const contractsApi = createApi({
 export const {
 	useGetContractsQuery,
 	useGetContractByIdQuery,
+	useUpdateContractMutation,
+	useDeleteContractMutation,
 	useGenerateBatchUploadUrlsMutation,
 	useGenerateUploadUrlMutation,
 	useUploadToAzureMutation,

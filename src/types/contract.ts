@@ -278,6 +278,34 @@ export interface GetContractsResponse {
 	metadata: ContractMetadata;
 }
 
+// Update contract request
+export interface UpdateContractRequest {
+	insurerName?: string;
+	name?: string;
+	category?: ContractCategory;
+	formula?: string;
+	startDate?: string;
+	endDate?: string;
+	annualPremiumCents?: number;
+	monthlyPremiumCents?: number;
+	tacitRenewal?: boolean;
+	cancellationDeadline?: string;
+}
+
+// Update contract response
+export interface UpdateContractResponse {
+	status: 'success';
+	data: BackendContract;
+}
+
+// Delete contract response
+export interface DeleteContractResponse {
+	status: 'success';
+	data: {
+		message: string;
+	};
+}
+
 // Contract metadata for dashboard
 export interface ContractMetadata {
 	totalContracts: number;

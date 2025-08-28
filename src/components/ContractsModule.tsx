@@ -1,3 +1,4 @@
+import type { ContractCategory, ContractListItem, ContractStatus } from '../types';
 import {
 	FaCalendarAlt,
 	FaChevronDown,
@@ -8,36 +9,35 @@ import {
 	FaFileContract,
 	FaPlus,
 	FaSearch,
-	FaTimes,
 	FaTrash,
 } from 'react-icons/fa';
 import {
-	getContractDocuments,
-	getContractInsurer,
-	getContractPremium,
-	getContractType,
+	getContractListItemDocuments,
+	getContractListItemInsurer,
+	getContractListItemPremium,
+	getContractListItemType,
 } from '../utils/contractAdapters';
 import {
 	getStatusColor,
 	getStatusLabel,
 	getTypeIcon,
 	getTypeLabel,
-	isExpired,
 } from '../utils/contract';
 
-import type { Contract } from '../types';
 import CreateContractModal from './CreateContractModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
+import EditContractModal from './EditContractModal';
 import { Link } from 'react-router-dom';
 import Pagination from './ui/Pagination';
 import Spinner from './ui/Spinner';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { motion } from 'framer-motion';
+import { useContractOperations } from '../hooks/useContractOperations';
 import { useContracts } from '../hooks/useContracts';
 import { useState } from 'react';
 
 const ContractsModule = () => {
 	const {
-		contracts,
 		pagination,
 		isLoading,
 		isFetching,
@@ -50,7 +50,6 @@ const ContractsModule = () => {
 		setSearchQuery,
 		setCategory,
 		setStatus,
-		resetFilters,
 		filteredContracts,
 		contractStats,
 	} = useContracts({
@@ -58,7 +57,9 @@ const ContractsModule = () => {
 		initialLimit: 10,
 	});
 
-	const [editingContract, setEditingContract] = useState<Contract | null>(null);
+	const { deleteContract, isDeleting } = useContractOperations();
+	const [editingContract, setEditingContract] = useState<ContractListItem | null>(null);
+	const [deletingContract, setDeletingContract] = useState<ContractListItem | null>(null);
 	const [isCreateContractModalOpen, setIsCreateContractModalOpen] = useState(false);
 
 	const handleSearchChange = (query: string) => {
@@ -66,24 +67,34 @@ const ContractsModule = () => {
 	};
 
 	const handleTypeFilter = (category: string) => {
-		setCategory(category === 'all' ? 'all' : (category as any));
+		setCategory(category === 'all' ? 'all' : (category as ContractCategory));
 	};
 
 	const handleStatusFilter = (status: string) => {
-		setStatus(status === 'all' ? 'all' : (status as any));
+		setStatus(status === 'all' ? 'all' : (status as ContractStatus));
 	};
 
-	const handleUpdateContract = (contract: Contract) => {
-		// TODO: Implement contract update API call
-		console.log('Update contract:', contract);
-		setEditingContract(null);
+	const handleDeleteContract = (contract: ContractListItem) => {
+		setDeletingContract(contract);
 	};
 
-	const handleDeleteContract = (contractId: string) => {
-		if (window.confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?')) {
-			// TODO: Implement contract delete API call
-			console.log('Delete contract:', contractId);
+	const handleConfirmDelete = async () => {
+		if (!deletingContract) return;
+
+		try {
+			await deleteContract(deletingContract.id);
+			setDeletingContract(null);
+		} catch (error) {
+			console.error('Failed to delete contract:', error);
 		}
+	};
+
+	const handleCancelDelete = () => {
+		setDeletingContract(null);
+	};
+
+	const handleEditSuccess = () => {
+		setEditingContract(null);
 	};
 
 	if (isLoading) {
@@ -276,8 +287,10 @@ const ContractsModule = () => {
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{filteredContracts.map((contract, index) => {
-							const TypeIcon = getTypeIcon(getContractType(contract));
-							const isContractExpired = isExpired(contract);
+							const TypeIcon = getTypeIcon(getContractListItemType(contract));
+							const isContractExpired = contract.endDate
+								? new Date(contract.endDate) < new Date()
+								: false;
 							return (
 								<motion.div
 									key={contract.id}
@@ -291,10 +304,10 @@ const ContractsModule = () => {
 									<div className="flex items-start justify-between mb-4">
 										<div className="flex items-center space-x-3">
 											<div className="flex items-center gap-1">
-												{getInsurerLogo(getContractInsurer(contract)) ? (
+												{getInsurerLogo(getContractListItemInsurer(contract)) ? (
 													<img
-														src={getInsurerLogo(getContractInsurer(contract))}
-														alt={getContractInsurer(contract)}
+														src={getInsurerLogo(getContractListItemInsurer(contract))}
+														alt={getContractListItemInsurer(contract)}
 														className="w-8 h-8 object-contain rounded"
 														style={{ background: '#fff' }}
 													/>
@@ -307,7 +320,7 @@ const ContractsModule = () => {
 											<div>
 												<h3 className="font-semibold text-gray-900 text-sm">{contract.name}</h3>
 												<p className="text-xs text-gray-600">
-													{getTypeLabel(getContractType(contract))}
+													{getTypeLabel(getContractListItemType(contract))}
 												</p>
 											</div>
 										</div>
@@ -323,19 +336,21 @@ const ContractsModule = () => {
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Assureur</span>
 											<span className="text-sm font-medium text-gray-900">
-												{getContractInsurer(contract) || 'Non spécifié'}
+												{getContractListItemInsurer(contract) || 'Non spécifié'}
 											</span>
 										</div>
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Prime annuelle</span>
 											<span className="text-sm font-bold text-[#1e51ab]">
-												{getContractPremium(contract).toLocaleString()}€
+												{getContractListItemPremium(contract).toLocaleString()}€
 											</span>
 										</div>
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Échéance</span>
 											<span className="text-sm font-medium text-gray-900">
-												{new Date(contract.endDate).toLocaleDateString('fr-FR')}
+												{contract.endDate
+													? new Date(contract.endDate).toLocaleDateString('fr-FR')
+													: 'Non spécifiée'}
 											</span>
 										</div>
 									</div>
@@ -344,8 +359,8 @@ const ContractsModule = () => {
 									<div className="mb-4">
 										<p className="text-xs text-gray-600 mb-2">
 											Documents (
-											{getContractDocuments(contract).otherDocs
-												? getContractDocuments(contract).otherDocs.length + 2
+											{getContractListItemDocuments(contract).otherDocs
+												? getContractListItemDocuments(contract).otherDocs.length + 2
 												: 2}
 											)
 										</p>
@@ -361,10 +376,10 @@ const ContractsModule = () => {
 												Conditions Particulières
 											</span>
 											{/* Autres Documents */}
-											{getContractDocuments(contract).otherDocs &&
-												getContractDocuments(contract)
+											{getContractListItemDocuments(contract).otherDocs &&
+												getContractListItemDocuments(contract)
 													.otherDocs.slice(0, 1)
-													.map((doc, docIndex) => (
+													.map((doc, docIndex: number) => (
 														<span
 															key={docIndex}
 															className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg"
@@ -373,10 +388,10 @@ const ContractsModule = () => {
 															{doc.name.length > 15 ? `${doc.name.substring(0, 15)}...` : doc.name}
 														</span>
 													))}
-											{getContractDocuments(contract).otherDocs &&
-												getContractDocuments(contract).otherDocs.length > 1 && (
+											{getContractListItemDocuments(contract).otherDocs &&
+												getContractListItemDocuments(contract).otherDocs.length > 1 && (
 													<span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg">
-														+{getContractDocuments(contract).otherDocs.length - 1}
+														+{getContractListItemDocuments(contract).otherDocs.length - 1}
 													</span>
 												)}
 										</div>
@@ -393,7 +408,7 @@ const ContractsModule = () => {
 												<FaEdit className="h-4 w-4" />
 											</button>
 											<button
-												onClick={() => handleDeleteContract(contract.id)}
+												onClick={() => handleDeleteContract(contract)}
 												className="text-gray-400 hover:text-red-600 transition-colors p-1"
 												title="Supprimer"
 											>
@@ -416,192 +431,25 @@ const ContractsModule = () => {
 				)}
 			</motion.div>
 
-			{/* Contract Edit Modal */}
+			{/* Edit Contract Modal */}
 			{editingContract && (
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-					<motion.div
-						initial={{ opacity: 0, scale: 0.95 }}
-						animate={{ opacity: 1, scale: 1 }}
-						className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-					>
-						<form
-							onSubmit={(e) => {
-								e.preventDefault();
-								const formData = new FormData(e.currentTarget);
-								const updatedContract: Contract = {
-									...editingContract,
-									name: formData.get('name') as string,
-									insurerName: formData.get('insurer') as string,
-									category: formData.get('type') as Contract['category'],
-									annualPremiumCents: parseFloat(formData.get('premium') as string),
-									startDate: formData.get('startDate') as string,
-									endDate: formData.get('endDate') as string,
-									status: formData.get('status') as Contract['status'],
-								};
-								handleUpdateContract(updatedContract);
-							}}
-							className="p-6"
-						>
-							{/* Header */}
-							<div className="flex items-center justify-between mb-6">
-								<h2 className="text-2xl font-bold text-gray-900">Modifier le contrat</h2>
-								<button
-									type="button"
-									onClick={() => setEditingContract(null)}
-									className="text-gray-400 hover:text-gray-600 transition-colors"
-								>
-									<FaTimes className="h-6 w-6" />
-								</button>
-							</div>
+				<EditContractModal
+					contract={editingContract}
+					isOpen={!!editingContract}
+					onClose={() => setEditingContract(null)}
+					onSuccess={handleEditSuccess}
+				/>
+			)}
 
-							{/* Form Fields */}
-							<div className="space-y-6">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-2">
-											Nom du contrat
-										</label>
-										<input
-											type="text"
-											name="name"
-											defaultValue={editingContract.name}
-											required
-											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										/>
-									</div>
-
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-2">Assureur</label>
-										<input
-											type="text"
-											name="insurer"
-											defaultValue={editingContract.insurerName}
-											required
-											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										/>
-									</div>
-
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-2">
-											Type de contrat
-										</label>
-										<select
-											name="type"
-											defaultValue={editingContract.category}
-											required
-											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										>
-											<option value="auto">Automobile</option>
-											<option value="habitation">Habitation</option>
-											<option value="sante">Santé</option>
-											<option value="autre">Autre</option>
-										</select>
-									</div>
-
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-										<select
-											name="status"
-											defaultValue={editingContract.status}
-											required
-											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										>
-											<option value="active">Actif</option>
-											<option value="pending">En attente</option>
-											<option value="expired">Expiré</option>
-										</select>
-									</div>
-
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-2">
-											Prime annuelle (€)
-										</label>
-										<input
-											type="number"
-											name="premium"
-											defaultValue={editingContract.annualPremiumCents}
-											min="0"
-											step="0.01"
-											required
-											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										/>
-									</div>
-
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-2">
-											Montant de couverture (€)
-										</label>
-										<input
-											type="number"
-											name="coverageAmount"
-											defaultValue={editingContract.annualPremiumCents || ''}
-											min="0"
-											step="0.01"
-											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										/>
-									</div>
-
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-2">
-											Date de début
-										</label>
-										<input
-											type="date"
-											name="startDate"
-											defaultValue={editingContract.startDate}
-											required
-											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										/>
-									</div>
-
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-2">
-											Date de fin
-										</label>
-										<input
-											type="date"
-											name="endDate"
-											defaultValue={editingContract.endDate}
-											required
-											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										/>
-									</div>
-
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-2">
-											Franchise (€)
-										</label>
-										<input
-											type="number"
-											name="deductible"
-											defaultValue={editingContract.annualPremiumCents || ''}
-											min="0"
-											step="0.01"
-											className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
-										/>
-									</div>
-								</div>
-							</div>
-
-							{/* Actions */}
-							<div className="flex items-center justify-end space-x-4 mt-8 pt-6 border-t border-gray-100">
-								<button
-									type="button"
-									onClick={() => setEditingContract(null)}
-									className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
-								>
-									Annuler
-								</button>
-								<button
-									type="submit"
-									className="px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-medium hover:bg-[#163d82] transition-colors"
-								>
-									Enregistrer
-								</button>
-							</div>
-						</form>
-					</motion.div>
-				</div>
+			{/* Delete Confirmation Modal */}
+			{deletingContract && (
+				<DeleteConfirmationModal
+					isOpen={!!deletingContract}
+					onClose={handleCancelDelete}
+					onConfirm={handleConfirmDelete}
+					contractName={deletingContract.name}
+					isDeleting={isDeleting}
+				/>
 			)}
 
 			{/* Pagination */}
