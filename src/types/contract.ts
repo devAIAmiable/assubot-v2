@@ -301,9 +301,20 @@ export interface UpdateContractResponse {
 // Delete contract response
 export interface DeleteContractResponse {
 	status: 'success';
-	data: {
-		message: string;
-	};
+	message: string;
+}
+
+// Contract download types
+export interface ContractDownloadDocument {
+	id: string;
+	type: DocumentType;
+	url: string;
+	expiresAt: string;
+}
+
+export interface ContractDownloadResponse {
+	status: 'success';
+	documents: ContractDownloadDocument[];
 }
 
 // Contract metadata for dashboard

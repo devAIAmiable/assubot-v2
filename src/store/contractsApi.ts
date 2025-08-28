@@ -1,4 +1,5 @@
 import type {
+	ContractDownloadResponse,
 	ContractInitResponse,
 	ContractNotificationRequest,
 	DeleteContractResponse,
@@ -160,6 +161,21 @@ export const contractsApi = createApi({
 				{ type: 'Contract' },
 			],
 		}),
+
+		// Generate download URLs for contract documents
+		generateDownloadUrls: builder.mutation<ContractDownloadResponse, string>({
+			query: (contractId) => ({
+				url: `/${contractId}/download`,
+				method: 'POST',
+			}),
+			transformResponse: (response: ContractDownloadResponse) => response,
+			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+				status: response.status,
+				message: response.data.error.message,
+				code: response.data.error.code,
+			}),
+		}),
+
 		// Generate batch signed Azure upload URLs
 		generateBatchUploadUrls: builder.mutation<BatchUploadUrlResponse, BatchUploadUrlRequest>({
 			query: (uploadRequest) => ({
@@ -284,6 +300,7 @@ export const {
 	useGetContractByIdQuery,
 	useUpdateContractMutation,
 	useDeleteContractMutation,
+	useGenerateDownloadUrlsMutation,
 	useGenerateBatchUploadUrlsMutation,
 	useGenerateUploadUrlMutation,
 	useUploadToAzureMutation,

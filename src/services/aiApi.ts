@@ -20,7 +20,7 @@ export const analysisService = {
 	compareContracts: (contracts: unknown[]) =>
 		aiApi.post<{ comparison: unknown; insights: unknown[] }>('/analysis/compare', { contracts }),
 	generateReport: (data: unknown) =>
-		aiApi.post<{ report: unknown; downloadUrl?: string }>('/analysis/report', data),
+		aiApi.post<{ report: unknown; url?: string }>('/analysis/report', data),
 	getRiskAssessment: (userData: unknown) =>
 		aiApi.post<{ riskScore: number; factors: unknown[] }>('/analysis/risk', userData),
 };

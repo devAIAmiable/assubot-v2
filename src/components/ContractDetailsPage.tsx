@@ -40,6 +40,7 @@ import type { ObligationType } from '../types';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { useContractDetails } from '../hooks/useContractDetails';
+import { useContractDownload } from '../hooks/useContractDownload';
 import { useState } from 'react';
 
 function highlightKeywords(text: string) {
@@ -293,6 +294,9 @@ const ContractDetailsPage = () => {
 		enabled: !!contractId,
 	});
 
+	// Contract download functionality
+	const { generateDownloadUrls, isGenerating } = useContractDownload();
+
 	const isContractExpired = contract
 		? contract.endDate
 			? new Date(contract.endDate) < new Date()
@@ -372,6 +376,24 @@ const ContractDetailsPage = () => {
 		navigate('/app/contrats');
 	};
 
+	const handleDownload = async (type: DocumentType) => {
+		if (!contractId) return;
+
+		try {
+			// generateDownloadUrls generates links for all documents but we only need to open the one we clicked on
+			const downloadDocuments = await generateDownloadUrls(contractId);
+			const docDownload = downloadDocuments.find(
+				(d) => (d.type as unknown as DocumentType) === type
+			);
+			if (docDownload) {
+				window.open(docDownload.url, '_blank');
+			}
+		} catch (error) {
+			console.error('Failed to download contract documents:', error);
+			// You could add a toast notification here
+		}
+	};
+
 	return (
 		<div className="min-h-screen bg-gray-50">
 			{/* Header */}
@@ -416,15 +438,6 @@ const ContractDetailsPage = () => {
 								{isContractExpired ? 'Expiré' : getStatusLabel(contract.status)}
 							</span>
 							<div className="flex items-center space-x-2">
-								<button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-									<FaDownload className="h-4 w-4" />
-								</button>
-								<button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-									<FaPrint className="h-4 w-4" />
-								</button>
-								<button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-									<FaShare className="h-4 w-4" />
-								</button>
 								<button
 									onClick={handleEdit}
 									className="px-4 py-2 bg-[#1e51ab] text-white rounded-lg font-medium hover:bg-[#163d82] transition-colors flex items-center space-x-2"
@@ -561,50 +574,33 @@ const ContractDetailsPage = () => {
 													contract.documents.map((doc) => (
 														<div
 															key={doc.id}
-															className={`flex items-center justify-between p-3 rounded-xl border ${
-																doc.type === 'CG'
-																	? 'bg-blue-50 border-blue-100'
-																	: doc.type === 'CP'
-																		? 'bg-green-50 border-green-100'
-																		: 'bg-gray-50 border-gray-100'
-															}`}
+															className={`flex items-center justify-between p-3 rounded-xl border border-gray-200`}
 														>
 															<div className="flex items-center space-x-3">
-																<FaFileAlt
-																	className={`h-5 w-5 ${
-																		doc.type === 'CG'
-																			? 'text-blue-600'
-																			: doc.type === 'CP'
-																				? 'text-green-600'
-																				: 'text-gray-400'
-																	}`}
-																/>
+																<FaFileAlt className={`h-5 w-5 text-gray-400`} />
 																<div>
-																	<p className="text-sm font-medium text-gray-900">
-																		Document {doc.type}
-																	</p>
-																	<p className="text-xs text-gray-500">
-																		Ajouté le {formatDateForDisplayFR(doc.createdAt)}
-																	</p>
+																	<p className="text-sm font-medium text-gray-900">{doc.type}</p>
 																</div>
 															</div>
 															<div className="flex items-center space-x-3">
-																<a
-																	href={doc.fileUrl}
-																	target="_blank"
-																	rel="noopener noreferrer"
-																	className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium"
+																<button
+																	onClick={() =>
+																		handleDownload(doc.type as unknown as DocumentType)
+																	}
+																	disabled={isGenerating}
+																	className="text-gray-500 hover:text-[#1e51ab] text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+																	title={
+																		doc.type === 'CP'
+																			? 'Ouvrir dans un nouvel onglet'
+																			: 'Télécharger'
+																	}
 																>
-																	<FaEye className="h-4 w-4" />
-																</a>
-																<a
-																	href={doc.fileUrl}
-																	download
-																	className="text-gray-500 hover:text-[#1e51ab] text-sm font-medium"
-																	title="Télécharger"
-																>
-																	<FaDownload className="inline h-4 w-4" />
-																</a>
+																	{isGenerating ? (
+																		<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+																	) : (
+																		<FaEye className="inline h-4 w-4" />
+																	)}
+																</button>
 															</div>
 														</div>
 													))
@@ -626,7 +622,7 @@ const ContractDetailsPage = () => {
 								{/* Simple List */}
 								{contract.guarantees && contract.guarantees.length > 0 ? (
 									<div className="bg-white rounded-lg border border-gray-200">
-																			{contract.guarantees.map((garantie, index) => (
+										{contract.guarantees.map((garantie, index) => (
 											<div
 												key={garantie.id}
 												className={`flex items-center space-x-4 p-4 ${
