@@ -76,6 +76,7 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({
 			'Generali': '/insurances/generali.png',
 			'Groupama': '/insurances/groupama.png',
 			'MACIF': '/insurances/macif.png',
+			'kenko': '/insurances/kenko.png',
 		};
 		return logoMap[insurerName] || null;
 	};
