@@ -2,6 +2,7 @@ import type {
 	ContractDownloadResponse,
 	ContractInitResponse,
 	ContractNotificationRequest,
+	DashboardStats,
 	DeleteContractResponse,
 	DocumentType,
 	GetContractByIdResponse,
@@ -90,7 +91,7 @@ export const contractsApi = createApi({
 		getContracts: builder.query<GetContractsResponse, GetContractsParams>({
 			keepUnusedDataFor: 30 * 60, // 30 minutes in seconds
 			query: (params) => {
-				const queryParams: Record<string, any> = {
+				const queryParams: Record<string, string | number> = {
 					page: params.page || 1,
 					limit: Math.min(params.limit || 10, 100), // Ensure limit doesn't exceed 100
 				};
@@ -302,6 +303,21 @@ export const contractsApi = createApi({
 			}),
 			invalidatesTags: ['Contract'],
 		}),
+
+		// Get dashboard statistics
+		getDashboardStats: builder.query<DashboardStats, void>({
+			keepUnusedDataFor: 15 * 60, // 15 minutes in seconds
+			query: () => ({
+				url: '/dashboard-stats',
+				method: 'GET',
+			}),
+			transformResponse: (response: DashboardStats) => response,
+			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+				status: response.status,
+				message: response.data.error.message,
+				code: response.data.error.code,
+			}),
+		}),
 	}),
 });
 
@@ -316,6 +332,7 @@ export const {
 	useUploadToAzureMutation,
 	useInitContractMutation,
 	useNotifyMutation,
+	useGetDashboardStatsQuery,
 } = contractsApi;
 
 // Combined hook for the complete upload process

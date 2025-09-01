@@ -1,24 +1,31 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
 
-import { contractsService } from '../services/coreApi';
+import { renderHook } from '@testing-library/react';
 import { useDashboardStats } from './useDashboardStats';
+// Import the mocked module
+import { useGetDashboardStatsQuery } from '../store/contractsApi';
 
-// Mock the contractsService
-vi.mock('../services/coreApi', () => ({
-	contractsService: {
-		getDashboardStats: vi.fn(),
+// Mock the contractsApi
+vi.mock('../store/contractsApi', () => ({
+	contractsApi: {
+		endpoints: {
+			getDashboardStats: {
+				useQuery: vi.fn(),
+			},
+		},
 	},
+	useGetDashboardStatsQuery: vi.fn(),
 }));
 
-const mockContractsService = vi.mocked(contractsService);
+
+const mockUseGetDashboardStatsQuery = vi.mocked(useGetDashboardStatsQuery);
 
 describe('useDashboardStats', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it('should fetch dashboard stats on mount', async () => {
+	it('should fetch dashboard stats on mount', () => {
 		const mockStats = {
 			status: 'success',
 			message: 'Success',
@@ -45,104 +52,79 @@ describe('useDashboardStats', () => {
 			},
 		};
 
-		mockContractsService.getDashboardStats.mockResolvedValue({
-			success: true,
+		mockUseGetDashboardStatsQuery.mockReturnValue({
 			data: mockStats,
+			isLoading: false,
+			error: null,
+			refetch: vi.fn(),
 		});
 
 		const { result } = renderHook(() => useDashboardStats());
-
-		expect(result.current.isLoading).toBe(true);
-		expect(result.current.dashboardStats).toBe(null);
-		expect(result.current.error).toBe(null);
-
-		await waitFor(() => {
-			expect(result.current.isLoading).toBe(false);
-		});
 
 		expect(result.current.dashboardStats).toEqual(mockStats);
+		expect(result.current.isLoading).toBe(false);
 		expect(result.current.error).toBe(null);
-		expect(mockContractsService.getDashboardStats).toHaveBeenCalledTimes(1);
+		expect(mockUseGetDashboardStatsQuery).toHaveBeenCalledTimes(1);
 	});
 
-	it('should handle API errors', async () => {
-		mockContractsService.getDashboardStats.mockResolvedValue({
-			success: false,
-			error: 'API Error',
+	it('should handle loading state', () => {
+		mockUseGetDashboardStatsQuery.mockReturnValue({
+			data: undefined,
+			isLoading: true,
+			error: null,
+			refetch: vi.fn(),
 		});
 
 		const { result } = renderHook(() => useDashboardStats());
 
-		await waitFor(() => {
-			expect(result.current.isLoading).toBe(false);
+		expect(result.current.dashboardStats).toBe(null);
+		expect(result.current.isLoading).toBe(true);
+		expect(result.current.error).toBe(null);
+	});
+
+	it('should handle API errors', () => {
+		mockUseGetDashboardStatsQuery.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			error: { message: 'API Error' },
+			refetch: vi.fn(),
 		});
 
+		const { result } = renderHook(() => useDashboardStats());
+
 		expect(result.current.dashboardStats).toBe(null);
+		expect(result.current.isLoading).toBe(false);
 		expect(result.current.error).toBe('API Error');
 	});
 
-	it('should handle network errors', async () => {
-		mockContractsService.getDashboardStats.mockRejectedValue(new Error('Network Error'));
+	it('should handle network errors', () => {
+		mockUseGetDashboardStatsQuery.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			error: { message: 'Network Error' },
+			refetch: vi.fn(),
+		});
 
 		const { result } = renderHook(() => useDashboardStats());
-
-		await waitFor(() => {
-			expect(result.current.isLoading).toBe(false);
-		});
 
 		expect(result.current.dashboardStats).toBe(null);
-		expect(result.current.error).toBe('Erreur de connexion au serveur');
+		expect(result.current.isLoading).toBe(false);
+		expect(result.current.error).toBe('Network Error');
 	});
 
-	it('should refetch data when refetch is called', async () => {
-		const mockStats = {
-			status: 'success',
-			message: 'Success',
-			totalAnnualCostCents: 1000000,
-			activeContracts: 8,
-			monthlyPremiumCents: 100000,
-			expiringSoonContracts: 1,
-			categoryBreakdown: {},
-		};
-
-		mockContractsService.getDashboardStats.mockResolvedValue({
-			success: true,
-			data: mockStats,
+	it('should provide refetch function', () => {
+		const mockRefetch = vi.fn();
+		mockUseGetDashboardStatsQuery.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			error: null,
+			refetch: mockRefetch,
 		});
 
 		const { result } = renderHook(() => useDashboardStats());
 
-		await waitFor(() => {
-			expect(result.current.isLoading).toBe(false);
-		});
-
-		expect(result.current.dashboardStats).toEqual(mockStats);
-
-		// Change the mock response for refetch
-		const newMockStats = {
-			status: 'success',
-			message: 'Success',
-			totalAnnualCostCents: 1000000,
-			activeContracts: 10,
-			monthlyPremiumCents: 100000,
-			expiringSoonContracts: 1,
-			categoryBreakdown: {},
-		};
-
-		mockContractsService.getDashboardStats.mockResolvedValue({
-			success: true,
-			data: newMockStats,
-		});
-
-		// Clear the mock call count before refetch
-		mockContractsService.getDashboardStats.mockClear();
-
-		await result.current.refetch();
-
-		await waitFor(() => {
-			expect(result.current.dashboardStats).toEqual(newMockStats);
-		});
-
-		expect(mockContractsService.getDashboardStats).toHaveBeenCalledTimes(1);
+		expect(typeof result.current.refetch).toBe('function');
+		result.current.refetch();
+		expect(mockRefetch).toHaveBeenCalledTimes(1);
 	});
 });

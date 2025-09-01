@@ -1,5 +1,3 @@
-import type { DashboardStats, DashboardStatsResponse } from '../types/contract';
-
 import type { ServiceResponse } from './api';
 import config from '../config/env';
 import { coreApi } from './api';
@@ -403,29 +401,6 @@ export const contractsService = {
 	delete: (id: string) => coreApi.delete(`/contracts/${id}`),
 	uploadDocument: (contractId: string, documentData: FormData) =>
 		coreApi.post<unknown>(`/contracts/${contractId}/documents`, documentData),
-	getDashboardStats: async (): Promise<ServiceResponse<DashboardStats>> => {
-		try {
-			const response = await coreApi.get<DashboardStatsResponse>('/contracts/dashboard-stats');
-
-			if (response.success && response.status === 'success' && response.data) {
-				return {
-					success: true,
-					data: response.data,
-				};
-			}
-
-			return {
-				success: false,
-				error: response.error?.message || 'Impossible de récupérer les statistiques du dashboard',
-			};
-		} catch (error) {
-			console.error('Dashboard stats error:', error);
-			return {
-				success: false,
-				error: 'Erreur de connexion au serveur',
-			};
-		}
-	},
 };
 
 // Comparison endpoints
