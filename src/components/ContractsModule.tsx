@@ -44,12 +44,14 @@ const ContractsModule = () => {
 		error,
 		searchQuery,
 		selectedCategory,
-		selectedStatus,
+		selectedSortBy,
+		selectedSortOrder,
 		setPage,
 		setLimit,
 		setSearchQuery,
 		setCategory,
-		setStatus,
+		setSortBy,
+		setSortOrder,
 		filteredContracts,
 		contractStats,
 	} = useContracts({
@@ -70,9 +72,7 @@ const ContractsModule = () => {
 		setCategory(category === 'all' ? 'all' : (category as ContractCategory));
 	};
 
-	const handleStatusFilter = (status: string) => {
-		setStatus(status === 'all' ? 'all' : (status as ContractStatus));
-	};
+
 
 	const handleDeleteContract = (contract: ContractListItem) => {
 		setDeletingContract(contract);
@@ -226,8 +226,8 @@ const ContractsModule = () => {
 						/>
 					</div>
 
-					{/* Filters */}
-					<div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+					{/* Filters and Sorting */}
+					<div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4">
 						{/* Type Filter */}
 						<div className="relative">
 							<select
@@ -246,19 +246,40 @@ const ContractsModule = () => {
 							<FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
 						</div>
 
-						{/* Status Filter */}
-						<div className="relative">
+						{/* Combined Sort Control */}
+						<div className="flex items-center space-x-2 bg-gray-50 rounded-xl p-1 border border-gray-200">
+							<span className="px-3 py-2 text-sm font-medium text-gray-600">Trier par:</span>
 							<select
-								value={selectedStatus}
-								onChange={(e) => handleStatusFilter(e.target.value)}
-								className="appearance-none bg-white border border-gray-300 rounded-xl px-4 py-3 pr-8 focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors"
+								value={selectedSortBy}
+								onChange={(e) => setSortBy(e.target.value as any)}
+								className="appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors text-sm"
 							>
-								<option value="all">Tous les statuts</option>
-								<option value="active">Actif</option>
-								<option value="expired">Expiré</option>
-								<option value="pending">En attente</option>
+								<option value="createdAt">Date de création</option>
+								<option value="updatedAt">Date de modification</option>
+								<option value="startDate">Date de début</option>
+								<option value="endDate">Date de fin</option>
+								<option value="annualPremiumCents">Prime annuelle</option>
+								<option value="monthlyPremiumCents">Prime mensuelle</option>
+								<option value="name">Nom du contrat</option>
+								<option value="insurerName">Nom de l'assureur</option>
+								<option value="category">Catégorie</option>
+								<option value="status">Statut</option>
 							</select>
-							<FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+							<button
+								onClick={() => setSortOrder(selectedSortOrder === 'asc' ? 'desc' : 'asc')}
+								className="p-2 hover:bg-white rounded-lg transition-colors"
+								title={selectedSortOrder === 'asc' ? 'Trier décroissant' : 'Trier croissant'}
+							>
+								{selectedSortOrder === 'asc' ? (
+									<svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+									</svg>
+								) : (
+									<svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+									</svg>
+								)}
+							</button>
 						</div>
 					</div>
 				</div>

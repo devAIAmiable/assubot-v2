@@ -469,4 +469,8 @@ export interface BackendContractContact {
 export interface GetContractsParams {
 	page?: number;
 	limit?: number;
+	sortBy?: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status';
+	sortOrder?: 'asc' | 'desc';
+	search?: string;
+	category?: ContractCategory | 'all';
 }

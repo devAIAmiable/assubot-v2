@@ -89,14 +89,24 @@ export const contractsApi = createApi({
 		// Get paginated active contracts for the authenticated user
 		getContracts: builder.query<GetContractsResponse, GetContractsParams>({
 			keepUnusedDataFor: 30 * 60, // 30 minutes in seconds
-			query: (params) => ({
-				url: '/',
-				method: 'GET',
-				params: {
+			query: (params) => {
+				const queryParams: Record<string, any> = {
 					page: params.page || 1,
 					limit: Math.min(params.limit || 10, 100), // Ensure limit doesn't exceed 100
-				},
-			}),
+				};
+
+				// Add optional parameters if they exist
+				if (params.sortBy) queryParams.sortBy = params.sortBy;
+				if (params.sortOrder) queryParams.sortOrder = params.sortOrder;
+				if (params.search && params.search.trim().length >= 2) queryParams.search = params.search.trim();
+				if (params.category && params.category !== 'all') queryParams.category = params.category;
+
+				return {
+					url: '/',
+					method: 'GET',
+					params: queryParams,
+				};
+			},
 			transformResponse: (response: GetContractsResponse) => response,
 			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
 				status: response.status,

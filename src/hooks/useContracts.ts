@@ -14,6 +14,8 @@ interface UseContractsOptions {
 	initialCategory?: ContractCategory | 'all';
 	initialStatus?: ContractStatus | 'all';
 	initialSearch?: string;
+	initialSortBy?: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status';
+	initialSortOrder?: 'asc' | 'desc';
 }
 
 interface UseContractsReturn {
@@ -37,6 +39,8 @@ interface UseContractsReturn {
 	searchQuery: string;
 	selectedCategory: ContractCategory | 'all';
 	selectedStatus: ContractStatus | 'all';
+	selectedSortBy: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status';
+	selectedSortOrder: 'asc' | 'desc';
 
 	// Actions
 	setPage: (page: number) => void;
@@ -44,6 +48,8 @@ interface UseContractsReturn {
 	setSearchQuery: (query: string) => void;
 	setCategory: (category: ContractCategory | 'all') => void;
 	setStatus: (status: ContractStatus | 'all') => void;
+	setSortBy: (sortBy: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status') => void;
+	setSortOrder: (sortOrder: 'asc' | 'desc') => void;
 	resetFilters: () => void;
 
 	// Computed values
@@ -63,6 +69,8 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 		initialCategory = 'all',
 		initialStatus = 'all',
 		initialSearch = '',
+		initialSortBy = 'createdAt',
+		initialSortOrder = 'desc',
 	} = options;
 
 	// Local state for filters
@@ -73,11 +81,17 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 		initialCategory
 	);
 	const [selectedStatus, setSelectedStatus] = useState<ContractStatus | 'all'>(initialStatus);
+	const [selectedSortBy, setSelectedSortBy] = useState<'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status'>(initialSortBy);
+	const [selectedSortOrder, setSelectedSortOrder] = useState<'asc' | 'desc'>(initialSortOrder);
 
 	// API query
 	const { data, isLoading, isFetching, error } = useGetContractsQuery({
 		page,
 		limit,
+		search: searchQuery,
+		category: selectedCategory,
+		sortBy: selectedSortBy,
+		sortOrder: selectedSortOrder,
 	});
 
 	// Extract data from API response
@@ -110,11 +124,10 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 				false;
 
 			const matchesCategory = selectedCategory === 'all' || contract.category === selectedCategory;
-			const matchesStatus = selectedStatus === 'all' || contract.status === selectedStatus;
 
-			return matchesSearch && matchesCategory && matchesStatus;
+			return matchesSearch && matchesCategory;
 		});
-	}, [contracts, searchQuery, selectedCategory, selectedStatus]);
+	}, [contracts, searchQuery, selectedCategory]);
 
 	// Contract statistics from API metadata
 	const contractStats = useMemo(() => {
@@ -160,10 +173,21 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 		setPage(1); // Reset to first page when changing status
 	}, []);
 
+	const setSortByHandler = useCallback((sortBy: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status') => {
+		setSelectedSortBy(sortBy);
+		setPage(1); // Reset to first page when changing sort
+	}, []);
+
+	const setSortOrderHandler = useCallback((sortOrder: 'asc' | 'desc') => {
+		setSelectedSortOrder(sortOrder);
+		setPage(1); // Reset to first page when changing sort order
+	}, []);
+
 	const resetFilters = useCallback(() => {
 		setSearchQuery('');
 		setSelectedCategory('all');
-		setSelectedStatus('all');
+		setSelectedSortBy('createdAt');
+		setSelectedSortOrder('desc');
 		setPage(1);
 	}, []);
 
@@ -181,6 +205,8 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 		searchQuery,
 		selectedCategory,
 		selectedStatus,
+		selectedSortBy,
+		selectedSortOrder,
 
 		// Actions
 		setPage: setPageHandler,
@@ -188,6 +214,8 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
 		setSearchQuery: setSearchQueryHandler,
 		setCategory: setCategoryHandler,
 		setStatus: setStatusHandler,
+		setSortBy: setSortByHandler,
+		setSortOrder: setSortOrderHandler,
 		resetFilters,
 
 		// Computed values
