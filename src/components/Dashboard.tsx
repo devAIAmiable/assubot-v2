@@ -351,7 +351,7 @@ const Dashboard = () => {
 				<>
 					{/* Stats Cards */}
 					<motion.div
-						className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
+						className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6, delay: 0.1 }}
@@ -420,22 +420,6 @@ const Dashboard = () => {
 					<div className="flex items-center mt-4 text-sm">
 						<FaCalendarAlt className="h-4 w-4 text-amber-500 mr-1" />
 						<span className="text-amber-600 font-medium">Dans 60 jours</span>
-					</div>
-				</div>
-
-				<div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-					<div className="flex items-center justify-between">
-						<div>
-							<p className="text-xs font-medium text-gray-600 mb-1">Alertes</p>
-							<p className="text-2xl font-bold text-[#1e51ab]">2</p>
-						</div>
-						<div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-							<FaBell className="h-6 w-6 text-[#1e51ab]" />
-						</div>
-					</div>
-					<div className="flex items-center mt-4 text-sm">
-						<FaExclamationTriangle className="h-4 w-4 text-red-500 mr-1" />
-						<span className="text-red-600 font-medium">Action requise</span>
 					</div>
 				</div>
 			</motion.div>
@@ -530,7 +514,7 @@ const Dashboard = () => {
 								</div>
 							)}
 
-							{totalAnnual > 0 && (
+							{/* {totalAnnual > 0 && (
 								<motion.div
 									className="mt-6 p-4 bg-blue-50 rounded-xl"
 									initial={{ opacity: 0, y: 20 }}
@@ -548,7 +532,7 @@ const Dashboard = () => {
 										</div>
 									</div>
 								</motion.div>
-							)}
+							)} */}
 						</div>
 					</div>
 				</div>
