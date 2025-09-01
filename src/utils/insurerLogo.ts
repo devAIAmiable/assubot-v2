@@ -17,6 +17,7 @@ export const getInsurerLogo = (insurer: string): string | undefined => {
   if (normalized.includes('kenko')) return '/insurances/kenko.png';
   if (normalized.includes('lcl')) return '/insurances/lcl.png';
   if (normalized.includes('camca')) return '/insurances/camca.jpeg';
+  if (normalized.includes('sg') || normalized.includes('sgassurance') || normalized.includes('societegenerale')) return '/insurances/sg.png';
   if (normalized.includes('harmonie')) return '/insurances/maif.png'; // fallback for Harmonie Mutuelle
   return undefined;
 }; 
