@@ -140,13 +140,13 @@ export interface Notification {
 	actionUrl?: string;
 }
 
-// Dashboard Stats Types
-export interface DashboardStats {
-	total: number;
-	active: number;
-	expiring: number;
-	monthlyPremium: number;
-}
+// Dashboard Stats Types - Moved to contract.ts
+// export interface DashboardStats {
+// 	total: number;
+// 	active: number;
+// 	expiring: number;
+// 	monthlyPremium: number;
+// }
 
 export interface InsuranceStats {
 	type: string;

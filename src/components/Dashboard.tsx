@@ -22,6 +22,7 @@ import type { ChartOptions } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import { motion } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
+import { useDashboardStats } from '../hooks/useDashboardStats';
 import { useNavigate } from 'react-router-dom';
 
 // Register Chart.js components
@@ -31,45 +32,83 @@ const Dashboard = () => {
 	const navigate = useNavigate();
 	const contracts = useAppSelector((state) => state.contracts?.contracts || []);
 	const user = useAppSelector((state) => state.user?.currentUser);
+	const { dashboardStats, isLoading, error } = useDashboardStats();
 
 	const handleNavigateToModule = (module: string) => {
 		navigate(`/app/${module}`);
 	};
 
-	// Calculate insurance budget from Redux contracts data
-	const insuranceBudget = [
-		{
-			type: 'Santé',
-			amount: contracts
-				.filter((c) => getContractType(c) === 'sante' && c.status === 'active')
-				.reduce((sum: number, c) => sum + getContractPremium(c), 0),
-			color: '#ef4444',
-			percentage: 0,
-		},
-		{
-			type: 'Automobile',
-			amount: contracts
-				.filter((c) => getContractType(c) === 'auto' && c.status === 'active')
-				.reduce((sum: number, c) => sum + getContractPremium(c), 0),
-			color: '#3b82f6',
-			percentage: 0,
-		},
-		{
-			type: 'Habitation',
-			amount: contracts
-				.filter((c) => getContractType(c) === 'habitation' && c.status === 'active')
-				.reduce((sum: number, c) => sum + getContractPremium(c), 0),
-			color: '#10b981',
-			percentage: 0,
-		},
-	];
+	// Use dashboard stats from API if available, fallback to local calculation
+	const contractStats = {
+		active: dashboardStats?.activeContracts || contracts.filter((c) => c.status === 'active').length,
+		total: contracts.length,
+		expiring: dashboardStats?.expiringSoonContracts || contracts.filter((c) => {
+			const endDate = new Date(c.endDate);
+			const now = new Date();
+			const daysUntilExpiry = Math.ceil(
+				(endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+			);
+			return daysUntilExpiry <= 60 && daysUntilExpiry > 0;
+		}).length,
+		monthlyPremium: dashboardStats?.monthlyPremiumCents ? dashboardStats.monthlyPremiumCents / 100 : contracts
+			.filter((c) => c.status === 'active')
+			.reduce((sum: number, c) => sum + getContractPremium(c) / 12, 0),
+	};
 
-	const totalAnnual = insuranceBudget.reduce((sum, item) => sum + item.amount, 0);
+	// Calculate insurance budget from API data if available, otherwise from Redux contracts data
+	const insuranceBudget = dashboardStats?.categoryBreakdown ? 
+		Object.entries(dashboardStats.categoryBreakdown).map(([category, data]) => ({
+			type: category === 'auto' ? 'Automobile' : 
+				  category === 'health' ? 'Santé' : 
+				  category === 'home' ? 'Habitation' : 
+				  category === 'moto' ? 'Moto' : 
+				  category === 'electronic_devices' ? 'Appareils électroniques' : 
+				  'Autre',
+			amount: data.totalAnnualCostCents / 100,
+			color: category === 'auto' ? '#3b82f6' : 
+				   category === 'health' ? '#ef4444' : 
+				   category === 'home' ? '#10b981' : 
+				   category === 'moto' ? '#f59e0b' : 
+				   category === 'electronic_devices' ? '#8b5cf6' : 
+				   '#6b7280',
+			percentage: data.percentage,
+		})) : [
+			{
+				type: 'Santé',
+				amount: contracts
+					.filter((c) => getContractType(c) === 'sante' && c.status === 'active')
+					.reduce((sum: number, c) => sum + getContractPremium(c), 0),
+				color: '#ef4444',
+				percentage: 0,
+			},
+			{
+				type: 'Automobile',
+				amount: contracts
+					.filter((c) => getContractType(c) === 'auto' && c.status === 'active')
+					.reduce((sum: number, c) => sum + getContractPremium(c), 0),
+				color: '#3b82f6',
+				percentage: 0,
+			},
+			{
+				type: 'Habitation',
+				amount: contracts
+					.filter((c) => getContractType(c) === 'habitation' && c.status === 'active')
+					.reduce((sum: number, c) => sum + getContractPremium(c), 0),
+				color: '#10b981',
+				percentage: 0,
+			},
+		];
 
-	// Calculate percentages
-	insuranceBudget.forEach((item) => {
-		item.percentage = totalAnnual > 0 ? Math.round((item.amount / totalAnnual) * 100) : 0;
-	});
+	const totalAnnual = dashboardStats?.totalAnnualCostCents ? 
+		dashboardStats.totalAnnualCostCents / 100 : 
+		insuranceBudget.reduce((sum, item) => sum + item.amount, 0);
+
+	// Calculate percentages if not provided by API
+	if (!dashboardStats?.categoryBreakdown) {
+		insuranceBudget.forEach((item) => {
+			item.percentage = totalAnnual > 0 ? Math.round((item.amount / totalAnnual) * 100) : 0;
+		});
+	}
 
 	// Chart.js data configuration
 	const chartData = {
@@ -250,21 +289,7 @@ const Dashboard = () => {
 	};
 
 	// Calculate dashboard stats from contracts
-	const contractStats = {
-		active: contracts.filter((c) => c.status === 'active').length,
-		total: contracts.length,
-		expiring: contracts.filter((c) => {
-			const endDate = new Date(c.endDate);
-			const now = new Date();
-			const daysUntilExpiry = Math.ceil(
-				(endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-			);
-			return daysUntilExpiry <= 60 && daysUntilExpiry > 0;
-		}).length,
-		monthlyPremium: contracts
-			.filter((c) => c.status === 'active')
-			.reduce((sum: number, c) => sum + getContractPremium(c) / 12, 0),
-	};
+	// const contractStats = useDashboardStats(); // This line is removed as per the edit hint
 
 	return (
 		<div className="space-y-8">
@@ -284,13 +309,53 @@ const Dashboard = () => {
 				</p>
 			</motion.div>
 
-			{/* Stats Cards */}
-			<motion.div
-				className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.6, delay: 0.1 }}
-			>
+			{/* Loading State */}
+			{isLoading && (
+				<motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					className="flex items-center justify-center py-12"
+				>
+					<div className="text-center">
+						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e51ab] mx-auto mb-4"></div>
+						<p className="text-gray-600">Chargement des statistiques...</p>
+					</div>
+				</motion.div>
+			)}
+
+			{/* Error State */}
+			{error && !isLoading && (
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					className="bg-red-50 border border-red-200 rounded-2xl p-6"
+				>
+					<div className="flex items-center">
+						<FaExclamationTriangle className="h-6 w-6 text-red-600 mr-3" />
+						<div>
+							<h3 className="text-lg font-semibold text-red-800">Erreur de chargement</h3>
+							<p className="text-red-700">{error}</p>
+						</div>
+					</div>
+					<button
+						onClick={() => window.location.reload()}
+						className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+					>
+						Réessayer
+					</button>
+				</motion.div>
+			)}
+
+			{/* Dashboard Content - Only show when not loading and no error */}
+			{!isLoading && !error && (
+				<>
+					{/* Stats Cards */}
+					<motion.div
+						className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6, delay: 0.1 }}
+					>
 				<div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
 					<div className="flex items-center justify-between">
 						<div>
@@ -683,6 +748,8 @@ const Dashboard = () => {
 					)}
 				</div>
 			</motion.div>
+				</>
+			)}
 		</div>
 	);
 };

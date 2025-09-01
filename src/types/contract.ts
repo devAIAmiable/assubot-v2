@@ -474,3 +474,30 @@ export interface GetContractsParams {
 	search?: string;
 	category?: ContractCategory | 'all';
 }
+
+// Dashboard statistics types
+export interface DashboardCategoryBreakdown {
+	count: number;
+	totalAnnualCostCents: number;
+	percentage: number;
+}
+
+export interface DashboardStats {
+	status: string;
+	message: string;
+	totalAnnualCostCents: number;
+	activeContracts: number;
+	monthlyPremiumCents: number;
+	expiringSoonContracts: number;
+	categoryBreakdown: Record<string, DashboardCategoryBreakdown>;
+}
+
+export interface DashboardStatsResponse {
+	status: string;
+	message: string;
+	totalAnnualCostCents: number;
+	activeContracts: number;
+	monthlyPremiumCents: number;
+	expiringSoonContracts: number;
+	categoryBreakdown: Record<string, DashboardCategoryBreakdown>;
+}
