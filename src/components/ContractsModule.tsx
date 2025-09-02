@@ -1,4 +1,4 @@
-import type { ContractCategory, ContractListItem, ContractStatus } from '../types/contract';
+import type { ContractCategory, ContractListItem } from '../types/contract';
 import {
 	FaCalendarAlt,
 	FaChevronDown,
@@ -12,7 +12,6 @@ import {
 	FaTrash,
 } from 'react-icons/fa';
 import {
-	getContractListItemDocuments,
 	getContractListItemInsurer,
 	getContractListItemPremium,
 	getContractListItemType,
@@ -251,7 +250,7 @@ const ContractsModule = () => {
 							<span className="px-3 py-2 text-sm font-medium text-gray-600">Trier par:</span>
 							<select
 								value={selectedSortBy}
-								onChange={(e) => setSortBy(e.target.value as any)}
+								onChange={(e) => setSortBy(e.target.value as 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status')}
 								className="appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors text-sm"
 							>
 								<option value="createdAt">Date de création</option>
@@ -379,42 +378,56 @@ const ContractsModule = () => {
 									{/* Documents */}
 									<div className="mb-4">
 										<p className="text-xs text-gray-600 mb-2">
-											Documents (
-											{getContractListItemDocuments(contract).otherDocs
-												? getContractListItemDocuments(contract).otherDocs.length + 2
-												: 2}
-											)
+											Documents ({contract.documents?.length || 0})
 										</p>
 										<div className="flex flex-wrap gap-1">
-											{/* Conditions Générales */}
-											<span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-lg">
-												<FaFileAlt className="h-3 w-3 mr-1" />
-												Conditions Générales
-											</span>
-											{/* Conditions Particulières */}
-											<span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs rounded-lg">
-												<FaFileAlt className="h-3 w-3 mr-1" />
-												Conditions Particulières
-											</span>
-											{/* Autres Documents */}
-											{getContractListItemDocuments(contract).otherDocs &&
-												getContractListItemDocuments(contract)
-													.otherDocs.slice(0, 1)
-													.map((doc, docIndex: number) => (
-														<span
-															key={docIndex}
-															className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg"
-														>
-															<FaFileAlt className="h-3 w-3 mr-1" />
-															{doc.name.length > 15 ? `${doc.name.substring(0, 15)}...` : doc.name}
-														</span>
-													))}
-											{getContractListItemDocuments(contract).otherDocs &&
-												getContractListItemDocuments(contract).otherDocs.length > 1 && (
-													<span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg">
-														+{getContractListItemDocuments(contract).otherDocs.length - 1}
+											{contract.documents?.map((doc) => {
+												// Determine label and styling based on document type
+												let label = '';
+												let bgColor = '';
+												let textColor = '';
+												
+												switch (doc.type) {
+													case 'CG':
+														label = 'Conditions Générales';
+														bgColor = 'bg-blue-100';
+														textColor = 'text-blue-700';
+														break;
+													case 'CP':
+														label = 'Conditions Particulières';
+														bgColor = 'bg-green-100';
+														textColor = 'text-green-700';
+														break;
+													case 'OTHER':
+														label = 'Document annexe';
+														bgColor = 'bg-gray-100';
+														textColor = 'text-gray-700';
+														break;
+													default:
+														label = doc.type || 'Document';
+														bgColor = 'bg-purple-100';
+														textColor = 'text-purple-700';
+														break;
+												}
+												
+												return (
+													<span
+														key={doc.id}
+														className={`inline-flex items-center px-2 py-1 ${bgColor} ${textColor} text-xs rounded-lg`}
+													>
+														<FaFileAlt className="h-3 w-3 mr-1" />
+														{label}
 													</span>
-												)}
+												);
+											})}
+											
+											{/* Show message if no documents */}
+											{(!contract.documents || contract.documents.length === 0) && (
+												<span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-lg">
+													<FaFileAlt className="h-3 w-3 mr-1" />
+													Aucun document
+												</span>
+											)}
 										</div>
 									</div>
 
