@@ -16,7 +16,7 @@ import {
 	FaRobot,
 	FaShieldAlt,
 } from 'react-icons/fa';
-import { getContractInsurer, getContractPremium, getContractType } from '../utils/contractAdapters';
+import { getContractPremium, getContractType } from '../utils/contractAdapters';
 
 import type { ChartOptions } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
@@ -707,7 +707,6 @@ const Dashboard = () => {
 							</div>
 						</div>
 					</motion.div>
-
 				</>
 			)}
 		</div>

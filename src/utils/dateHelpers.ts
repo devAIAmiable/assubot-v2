@@ -12,7 +12,7 @@ dayjs.locale('fr');
  */
 export const formatDateForAPI = (
 	dateString: string | Date | undefined
-): string | Date | undefined => {
+): string | undefined => {
 	if (!dateString) return undefined;
 
 	try {
