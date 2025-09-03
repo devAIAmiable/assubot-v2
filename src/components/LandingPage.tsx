@@ -1,162 +1,199 @@
 import {
+	FaArrowRight,
 	FaBars,
-	FaBell,
 	FaBrain,
-	FaBullseye,
-	FaChartBar,
 	FaChartLine,
-	FaEnvelope,
-	FaExclamationTriangle,
+	FaCheck,
 	FaFileContract,
-	FaFolder,
-	FaLightbulb,
-	FaMapMarkerAlt,
-	FaPhone,
-	FaPlug,
+	FaInstagram,
+	FaLinkedin,
 	FaRobot,
-	FaRocket,
 	FaStar,
-	FaUser,
 } from 'react-icons/fa';
 
 import { motion } from 'framer-motion';
+import { useGetCreditPacksQuery } from '../store/creditPacksApi';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 const LandingPage = () => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [contactForm, setContactForm] = useState({
+		firstName: '',
+		lastName: '',
+		email: '',
+		company: '',
+		message: '',
+	});
 	const navigate = useNavigate();
 
 	const navigateToApp = () => {
 		navigate('/app');
 	};
 
+	const handleContactSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		// Create mailto link with form data
+		const subject = encodeURIComponent('Contact depuis le site AssuBot');
+		const body = encodeURIComponent(`
+Nom: ${contactForm.firstName} ${contactForm.lastName}
+Email: ${contactForm.email}
+Entreprise: ${contactForm.company || 'Non renseignée'}
+
+Message:
+${contactForm.message}
+		`);
+		const mailtoLink = `mailto:contact@a-lamiable.com?subject=${subject}&body=${body}`;
+		window.open(mailtoLink);
+	};
+
+	const handleContactChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+		setContactForm({
+			...contactForm,
+			[e.target.name]: e.target.value,
+		});
+	};
+
 	const features = [
 		{
-			icon: (
-				<FaFolder className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300" />
-			),
+			icon: <FaFileContract className="w-8 h-8" />,
 			title: 'Centralisation des contrats',
-			subtitle: "Votre coffre-fort d'assurance personnel",
-			description:
-				"Téléchargez, stockez et organisez tous vos contrats d'assurance (auto, habitation, santé, etc.) en un seul endroit sécurisé. Extraction automatique des données et alertes de renouvellement.",
+			description: 'Stockez et organisez tous vos contrats d\'assurance en un seul endroit sécurisé.',
+			details: [
+				'Extraction intelligente des données clés',
+				'Organisation par catégorie et assureur',
+				'Historique complet des modifications',
+				'Stockage sécurisé et chiffré'
+			]
 		},
 		{
-			icon: (
-				<FaRobot className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300" />
-			),
-			title: 'Chatbot AssuBot',
-			subtitle: "Assistant conversationnel alimenté par l'IA",
-			description:
-				"Support 24h/24 et 7j/7 pour répondre à vos questions sur l'assurance. Comprend vos clauses complexes et fournit des recommandations personnalisées en langage naturel.",
+			icon: <FaRobot className="w-8 h-8" />,
+			title: 'Assistant IA intelligent',
+			description: 'Obtenez des réponses instantanées à vos questions d\'assurance 24h/24.',
+			details: [
+				'Compréhension du langage naturel',
+				'Analyse de vos contrats spécifiques',
+				'Conseils personnalisés en temps réel',
+				'Traduction des clauses complexes',
+			]
 		},
 		{
-			icon: (
-				<FaChartLine className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300" />
-			),
-			title: 'Dashboard utilisateur',
-			subtitle: "Votre situation d'assurance en un coup d'œil",
-			description:
-				"Vue d'ensemble visuelle de tous vos contrats, niveaux de couverture, renouvellements à venir et dépenses. Suivi des KPI et intégration avec tous les modules.",
+			icon: <FaChartLine className="w-8 h-8" />,
+			title: 'Dashboard personnalisé',
+			description: 'Visualisez votre situation d\'assurance et vos dépenses en temps réel.',
+			details: [
+				'Vue d\'ensemble de tous vos contrats',
+				'Graphiques de dépenses et économies',
+				'Alertes de renouvellement automatiques',
+				'Rapports personnalisables'
+			]
 		},
 		{
-			icon: (
-				<FaBrain className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300" />
-			),
+			icon: <FaBrain className="w-8 h-8" />,
 			title: 'Comparateur intelligent',
-			subtitle: 'Comparaison intelligente adaptée à vos besoins',
-			description:
-				'Compare vos contrats existants avec les offres du marché, pas seulement sur le prix, mais sur la profondeur de couverture, les exclusions, les niveaux de service, etc.',
+			description: 'Comparez vos contrats avec les meilleures offres du marché.',
+			details: [
+				'Analyse comparative des garanties',
+				'Recommandations personnalisées',
+				'Simulation d\'économies potentielles',
+				'Évaluation des risques et exclusions',
+			]
+		}
+	];
+
+	const benefits = [
+		'Économisez du temps et de l\'argent',
+		'Comprenez vos contrats facilement',
+		'Ne manquez plus d\'échéances',
+		'Obtenez des conseils personnalisés',
+	];
+
+	const testimonials = [
+		{
+			name: 'Marie C.',
+			role: 'Consultante',
+			content:
+				"AssuBot a révolutionné ma gestion d'assurance. Tout est maintenant centralisé et accessible.",
+			rating: 5,
 		},
 		{
-			icon: (
-				<FaBell className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300" />
-			),
-			title: 'Centre de notifications',
-			subtitle: 'Ne manquez jamais un événement important',
-			description:
-				"Alertes intelligentes pour l'expiration des contrats, de meilleures offres disponibles, et l'exposition aux risques détectée. Notifications configurables multi-canaux.",
+			name: 'Jean D.',
+			role: "Chef d'entreprise",
+			content:
+				"Le comparateur m'a fait économiser 400€ par an. L'IA comprend vraiment mes besoins.",
+			rating: 5,
 		},
 		{
-			icon: (
-				<FaUser className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300" />
-			),
-			title: 'Profil utilisateur',
-			subtitle: 'Expérience personnalisée',
-			description:
-				"Stocke vos préférences, votre historique d'assurance et vos informations personnelles pour une expérience vraiment personnalisée dans tous les modules.",
+			name: 'Sophie M.',
+			role: 'Maman de 2 enfants',
+			content:
+				'Plus jamais de contrats perdus ! Les alertes me rappellent chaque échéance importante.',
+			rating: 5,
 		},
 	];
 
-	const containerVariants = {
-		hidden: { opacity: 0 },
-		visible: {
-			opacity: 1,
-			transition: {
-				staggerChildren: 0.1,
-			},
-		},
-	};
+	// Get credit packs from API
+	const { data: creditPacks, isLoading: isLoadingPricing, error: pricingError } = useGetCreditPacksQuery();
 
-	const itemVariants = {
-		hidden: { y: 20, opacity: 0 },
-		visible: {
-			y: 0,
-			opacity: 1,
-			transition: {
-				duration: 0.6,
-			},
-		},
-	};
+	// Transform credit packs to pricing plans format
+	const pricingPlans = creditPacks?.map((pack) => ({
+		id: pack.id,
+		name: pack.name,
+		price: `${(pack.priceCents / 100).toFixed(0)}€`,
+		period: '/mois',
+		description: pack.description,
+		features: [
+			`${pack.creditAmount} crédits inclus`,
+		],
+		cta: pack.isFeatured ? 'Choisir ce pack' : 'Commander',
+		popular: pack.isFeatured,
+		creditAmount: pack.creditAmount,
+		priceCents: pack.priceCents
+	})) || [];
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+		<div className="min-h-screen bg-white">
 			{/* Navigation */}
-			<motion.nav
-				className="bg-white shadow-lg sticky top-0 z-50"
-				initial={{ y: -100 }}
-				animate={{ y: 0 }}
-				transition={{ duration: 0.5 }}
-			>
+			<nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="flex justify-between h-16">
+					<div className="flex justify-between items-center h-16">
 						<div className="flex items-center">
-							<div className="flex-shrink-0 flex items-center">
-								<img src="/logo.png" alt="AssuBot Logo" className="h-8 w-auto mr-2" />
-								<span className="text-2xl font-bold" style={{ color: '#1e51ab' }}>
-									AssuBot
-								</span>
-							</div>
+							<img src="/logo.png" alt="AssuBot Logo" className="h-8 w-auto mr-3" />
+							<span className="text-xl font-semibold text-gray-900">AssuBot</span>
 						</div>
 
 						<div className="hidden md:flex items-center space-x-8">
-							<a href="#features" className="text-gray-700 hover:text-[#1e51ab] transition-colors">
+							<a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">
 								Fonctionnalités
 							</a>
-							<a href="#about" className="text-gray-700 hover:text-[#1e51ab] transition-colors">
-								À propos
+							<a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors">
+								Tarifs
 							</a>
-							<a href="#contact" className="text-gray-700 hover:text-[#1e51ab] transition-colors">
+							<a href="#testimonials" className="text-gray-600 hover:text-gray-900 transition-colors">
+								Témoignages
+							</a>
+							<a href="#contact" className="text-gray-600 hover:text-gray-900 transition-colors">
 								Contact
 							</a>
 							<button 
 								onClick={() => navigate('/faq')}
-								className="text-gray-700 hover:text-[#1e51ab] transition-colors"
+								className="text-gray-600 hover:text-gray-900 transition-colors"
 							>
-								FAQ
+								Aide
 							</button>
 							<button 
-								className="bg-[#1e51ab] text-white px-4 py-2 rounded-lg hover:bg-[#163d82] transition-colors"
 								onClick={navigateToApp}
+								className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors font-medium"
+								style={{ backgroundColor: '#1e51ab' }}
 							>
 								Commencer
 							</button>
 						</div>
 
-						<div className="md:hidden flex items-center">
+						<div className="md:hidden">
 							<button
 								onClick={() => setIsMenuOpen(!isMenuOpen)}
-								className="text-gray-700 hover:text-[#1e51ab]"
+								className="text-gray-600 hover:text-gray-900"
 							>
 								<FaBars className="h-6 w-6" />
 							</button>
@@ -166,30 +203,34 @@ const LandingPage = () => {
 					{/* Mobile menu */}
 					{isMenuOpen && (
 						<motion.div
-							className="md:hidden"
+							className="md:hidden border-t border-gray-100"
 							initial={{ opacity: 0, height: 0 }}
 							animate={{ opacity: 1, height: 'auto' }}
 							exit={{ opacity: 0, height: 0 }}
 						>
-							<div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-								<a href="#features" className="block px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
+							<div className="px-2 pt-2 pb-3 space-y-1">
+								<a href="#features" className="block px-3 py-2 text-gray-600 hover:text-gray-900">
 									Fonctionnalités
 								</a>
-								<a href="#about" className="block px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
-									À propos
+								<a href="#pricing" className="block px-3 py-2 text-gray-600 hover:text-gray-900">
+									Tarifs
 								</a>
-								<a href="#contact" className="block px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
+								<a href="#testimonials" className="block px-3 py-2 text-gray-600 hover:text-gray-900">
+									Témoignages
+								</a>
+								<a href="#contact" className="block px-3 py-2 text-gray-600 hover:text-gray-900">
 									Contact
 								</a>
 								<button 
 									onClick={() => navigate('/faq')}
-									className="block w-full text-left px-3 py-2 text-gray-700 hover:text-[#1e51ab]"
+									className="block w-full text-left px-3 py-2 text-gray-600 hover:text-gray-900"
 								>
 									Aide
 								</button>
 								<button 
-									className="w-full text-left bg-[#1e51ab] text-white px-3 py-2 rounded-lg hover:bg-[#163d82] transition-colors"
 									onClick={navigateToApp}
+									className="w-full text-left text-white px-3 py-2 rounded-lg hover:opacity-90 transition-colors font-medium"
+									style={{ backgroundColor: '#1e51ab' }}
 								>
 									Commencer
 								</button>
@@ -197,495 +238,331 @@ const LandingPage = () => {
 						</motion.div>
 					)}
 				</div>
-			</motion.nav>
+			</nav>
 
 			{/* Hero Section */}
-			<motion.section
-				className="relative py-20 px-4 sm:px-6 lg:px-8"
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={{ duration: 1 }}
-			>
-				<div className="max-w-7xl mx-auto">
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-						<motion.div
-							className="text-center lg:text-left"
-							variants={containerVariants}
-							initial="hidden"
-							animate="visible"
-						>
+			<section className="py-20 px-4 sm:px-6 lg:px-8">
+				<div className="max-w-4xl mx-auto text-center">
 							<motion.h1
-								className="text-5xl md:text-6xl font-bold text-gray-900 mb-6"
-								variants={itemVariants}
-							>
-								Simplifiez vos <span className="text-[#1e51ab]">Assurances</span> avec l'IA
+						className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6 }}
+					>
+						Simplifiez vos <span style={{ color: '#1e51ab' }}>assurances</span>, grâce <br /> à
+						notre{' '}
+						<span style={{ color: '#1e51ab' }}>assistante virtuelle</span>
 							</motion.h1>
-							<motion.p className="text-xl text-gray-600 mb-8 max-w-3xl" variants={itemVariants}>
-								AssuBot est une plateforme numérique qui vous aide à mieux comprendre, gérer et
-								optimiser votre couverture d'assurance grâce à l'automatisation alimentée par l'IA
-								et des interfaces conviviales.
+
+					<motion.p
+						className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6, delay: 0.1 }}
+					>
+						AssuBot centralise tous vos contrats, répond à vos questions et vous aide à faire les
+						meilleurs choix d'assurance.
 							</motion.p>
+
 							<motion.div
-								className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
-								variants={itemVariants}
+						className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6, delay: 0.2 }}
 							>
 								<button 
-									className="bg-[#1e51ab] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-[#163d82] transition-colors shadow-lg"
 									onClick={navigateToApp}
-								>
-									Commencer la gestion
-								</button>
-								<button className="border-2 border-[#1e51ab] text-[#1e51ab] px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors">
-									Voir la démo
-								</button>
-							</motion.div>
-						</motion.div>
-
-						{/* Contract illustration */}
-						<motion.div
-							className="relative flex justify-center items-center"
-							initial={{ x: 100, opacity: 0 }}
-							animate={{ x: 0, opacity: 1 }}
-							transition={{ duration: 0.8, delay: 0.3 }}
+							className="text-white px-8 py-4 rounded-lg text-lg font-semibold hover:opacity-90 transition-colors shadow-lg flex items-center justify-center"
+							style={{ backgroundColor: '#1e51ab' }}
 						>
-							<img
-								src="/illustrations/contract_illustration.svg"
-								alt="Gestion des contrats d'assurance"
-								className="w-full h-auto max-w-lg drop-shadow-2xl"
-							/>
+							Commencer gratuitement
+							<FaArrowRight className="ml-2 w-4 h-4" />
+								</button>
 						</motion.div>
-					</div>
-				</div>
-			</motion.section>
 
-			{/* Features Section */}
-			<section id="features" className="py-20 bg-white">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<motion.div
-						className="text-center mb-16"
-						initial={{ opacity: 0, y: 50 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6 }}
-						viewport={{ once: true }}
+					{/* Benefits */}
+						<motion.div
+						className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6, delay: 0.3 }}
 					>
-						<h2 className="text-4xl font-bold text-gray-900 mb-4">
-							Fonctionnalités Puissantes pour une Gestion Intelligente
-						</h2>
-						<p className="text-xl text-gray-600 max-w-3xl mx-auto">
-							Notre plateforme modulaire offre tout ce dont vous avez besoin pour prendre le
-							contrôle de votre portefeuille d'assurance
-						</p>
-					</motion.div>
-
-					<motion.div
-						className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-						variants={containerVariants}
-						initial="hidden"
-						whileInView="visible"
-						viewport={{ once: true }}
-					>
-						{features.map((feature, index) => (
-							<motion.div
-								key={index}
-								className="bg-gray-50 rounded-xl p-8 hover:shadow-xl transition-all duration-300 border border-gray-100 group"
-								variants={itemVariants}
-								whileHover={{ y: -5, scale: 1.02 }}
-							>
-								<div className="text-[#1e51ab]">{feature.icon}</div>
-								<h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
-								<p className="text-[#1e51ab] font-medium mb-3 italic">"{feature.subtitle}"</p>
-								<p className="text-gray-600">{feature.description}</p>
-							</motion.div>
+						{benefits.map((benefit, index) => (
+							<div key={index} className="flex items-center space-x-2">
+								<FaCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
+								<span className="text-sm text-gray-600">{benefit}</span>
+							</div>
 						))}
-					</motion.div>
+						</motion.div>
 				</div>
 			</section>
 
-			{/* Reviews Section */}
-			<motion.section
-				className="py-20 bg-[#1e51ab]"
-				initial={{ opacity: 0 }}
-				whileInView={{ opacity: 1 }}
-				transition={{ duration: 0.8 }}
-				viewport={{ once: true }}
-			>
+			{/* Features Section */}
+			<section id="features" className="py-20 bg-gray-50">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<motion.div
 						className="text-center mb-16"
-						initial={{ opacity: 0, y: 50 }}
+						initial={{ opacity: 0, y: 20 }}
 						whileInView={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6 }}
 						viewport={{ once: true }}
 					>
-						<h2 className="text-4xl font-bold text-white mb-4">Ce Que Nos Clients Disent</h2>
-						<p className="text-xl text-blue-200 max-w-3xl mx-auto">
-							Découvrez comment AssuBot transforme la gestion d'assurance pour des milliers
-							d'utilisateurs
+						<h2 className="text-3xl font-bold text-gray-900 mb-4">
+							Une plateforme complète pour tous vos besoins d'assurance
+						</h2>
+						<p className="text-lg text-gray-600 max-w-2xl mx-auto">
+							Découvrez comment AssuBot révolutionne la gestion d'assurance avec des fonctionnalités avancées
 						</p>
 					</motion.div>
 
-					<motion.div
-						className="grid grid-cols-1 md:grid-cols-3 gap-8"
-						variants={containerVariants}
-						initial="hidden"
-						whileInView="visible"
-						viewport={{ once: true }}
-					>
-						<motion.div
-							className="bg-white/10 backdrop-blur rounded-xl p-8 text-white"
-							variants={itemVariants}
-							whileHover={{ y: -5, scale: 1.02 }}
-						>
-							<div className="flex items-center mb-6">
-								<div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
-									MC
-								</div>
-								<div>
-									<h4 className="font-semibold text-lg">Marie Charretier</h4>
-									<p className="text-blue-200 text-sm">Consultante, Paris</p>
-								</div>
-							</div>
-							<div className="flex mb-4">
-								{[...Array(5)].map((_, i) => (
-									<FaStar key={i} className="text-yellow-400 text-xl" />
-								))}
-							</div>
-							<p className="text-blue-100 leading-relaxed">
-								"AssuBot a complètement révolutionné ma façon de gérer mes assurances. Le chatbot
-								comprend parfaitement mes questions et me donne des réponses claires. Plus jamais de
-								clauses mystérieuses !"
-							</p>
-						</motion.div>
-
-						<motion.div
-							className="bg-white/10 backdrop-blur rounded-xl p-8 text-white"
-							variants={itemVariants}
-							whileHover={{ y: -5, scale: 1.02 }}
-						>
-							<div className="flex items-center mb-6">
-								<div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
-									JD
-								</div>
-								<div>
-									<h4 className="font-semibold text-lg">Jean Dubois</h4>
-									<p className="text-blue-200 text-sm">Chef d'entreprise, Lyon</p>
-								</div>
-							</div>
-							<div className="flex mb-4">
-								{[...Array(5)].map((_, i) => (
-									<FaStar key={i} className="text-yellow-400 text-xl" />
-								))}
-							</div>
-							<p className="text-blue-100 leading-relaxed">
-								"Le comparateur intelligent m'a fait économiser 400€ par an sur mes assurances. Il
-								ne compare pas que les prix mais analyse vraiment la qualité des couvertures.
-								Impressionnant !"
-							</p>
-						</motion.div>
-
-						<motion.div
-							className="bg-white/10 backdrop-blur rounded-xl p-8 text-white"
-							variants={itemVariants}
-							whileHover={{ y: -5, scale: 1.02 }}
-						>
-							<div className="flex items-center mb-6">
-								<div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
-									SM
-								</div>
-								<div>
-									<h4 className="font-semibold text-lg">Sophie Martin</h4>
-									<p className="text-blue-200 text-sm">Maman de 2 enfants, Toulouse</p>
-								</div>
-							</div>
-							<div className="flex mb-4">
-								{[...Array(5)].map((_, i) => (
-									<FaStar key={i} className="text-yellow-400 text-xl" />
-								))}
-							</div>
-							<p className="text-blue-100 leading-relaxed">
-								"Avec 3 assurances différentes, j'étais perdue. AssuBot centralise tout et m'envoie
-								des alertes avant chaque échéance. Je ne rate plus jamais un renouvellement !"
-							</p>
-						</motion.div>
-					</motion.div>
-
-					{/* Additional testimonial highlight */}
-					<motion.div
-						className="mt-16 text-center"
-						initial={{ opacity: 0, scale: 0.8 }}
-						whileInView={{ opacity: 1, scale: 1 }}
-						transition={{ duration: 0.6, delay: 0.4 }}
-						viewport={{ once: true }}
-					>
-						<div className="bg-white/5 backdrop-blur rounded-2xl p-8 max-w-4xl mx-auto">
-							<div className="flex items-center justify-center mb-6">
-								<div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-6">
-									AL
-								</div>
-								<div className="text-left">
-									<h4 className="font-semibold text-xl text-white">Antoine Lefebvre</h4>
-									<p className="text-blue-200">Directeur Financier, Bordeaux</p>
-								</div>
-							</div>
-							<div className="flex justify-center mb-4">
-								{[...Array(5)].map((_, i) => (
-									<FaStar key={i} className="text-yellow-400 text-2xl" />
-								))}
-							</div>
-							<p className="text-blue-100 text-lg leading-relaxed italic">
-								"En tant que directeur financier, j'ai testé beaucoup d'outils. AssuBot est de loin
-								la solution la plus intuitive et complète que j'aie utilisée. L'IA comprend vraiment
-								le contexte de l'assurance française."
-							</p>
-						</div>
-					</motion.div>
-				</div>
-			</motion.section>
-
-			{/* Roadmap Section */}
-			<motion.section
-				className="py-20 bg-gray-50"
-				initial={{ opacity: 0 }}
-				whileInView={{ opacity: 1 }}
-				transition={{ duration: 0.8 }}
-				viewport={{ once: true }}
-			>
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<motion.div
-						className="text-center mb-16"
-						initial={{ opacity: 0, y: 50 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6 }}
-						viewport={{ once: true }}
-					>
-						<h2 className="text-4xl font-bold text-gray-900 mb-4">Feuille de Route</h2>
-						<p className="text-xl text-gray-600 max-w-3xl mx-auto">
-							Découvrez les modules à venir qui révolutionneront encore plus votre expérience
-							d'assurance
-						</p>
-					</motion.div>
-
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-						{[
-							{
-								icon: <FaExclamationTriangle className="text-3xl mb-3 text-[#1e51ab]" />,
-								title: 'e-Risk',
-								desc: 'Scoring de risque personnalisé et conseils',
-							},
-							{
-								icon: <FaFileContract className="text-3xl mb-3 text-[#1e51ab]" />,
-								title: 'e-Souscription',
-								desc: 'Souscription ou changement direct de police',
-							},
-							{
-								icon: <FaChartBar className="text-3xl mb-3 text-[#1e51ab]" />,
-								title: 'Analytics & Insights',
-								desc: 'Pour les assureurs',
-							},
-							{
-								icon: <FaPlug className="text-3xl mb-3 text-[#1e51ab]" />,
-								title: 'Open API',
-								desc: 'Pour les courtiers ou clients B2B',
-							},
-						].map((item, index) => (
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+						{features.map((feature, index) => (
 							<motion.div
 								key={index}
-								className="bg-white p-6 rounded-xl shadow-md text-center"
+								className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300"
 								initial={{ opacity: 0, y: 20 }}
 								whileInView={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.5, delay: index * 0.1 }}
 								viewport={{ once: true }}
-								whileHover={{ y: -5 }}
+								whileHover={{ y: -4 }}
 							>
-								{item.icon}
-								<h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
-								<p className="text-gray-600 text-sm">{item.desc}</p>
+								<div
+									className="w-16 h-16 rounded-xl flex items-center justify-center mb-6"
+									style={{ backgroundColor: '#e6f0ff' }}
+								>
+									<div style={{ color: '#1e51ab' }}>{feature.icon}</div>
+								</div>
+								<h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
+								<p className="text-gray-600 mb-4 leading-relaxed">{feature.description}</p>
+								<ul className="space-y-2">
+									{feature.details.map((detail, detailIndex) => (
+										<li key={detailIndex} className="flex items-start space-x-2">
+											<FaCheck className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+											<span className="text-sm text-gray-600">{detail}</span>
+										</li>
+									))}
+								</ul>
 							</motion.div>
 						))}
 					</div>
 				</div>
-			</motion.section>
+			</section>
 
-			{/* About Section */}
-			<section id="about" className="py-20 bg-white">
+			{/* Social Proof */}
+			<section className="py-16 bg-white">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<motion.div
-						className="text-center mb-16"
-						initial={{ opacity: 0, y: 50 }}
+						className="text-center"
+						initial={{ opacity: 0, y: 20 }}
 						whileInView={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6 }}
 						viewport={{ once: true }}
 					>
-						<h2 className="text-4xl font-bold text-gray-900 mb-4">À Propos d'AssuBot</h2>
-						<p className="text-xl text-gray-600 max-w-3xl mx-auto">
-							Découvrez l'histoire et la vision derrière la révolution de l'assurance numérique
+						<p className="text-gray-600 mb-4">Rejoignez des milliers d'utilisateurs satisfaits</p>
+						<div className="flex justify-center items-center space-x-8 text-gray-400">
+							<div className="flex items-center space-x-1">
+								{[...Array(5)].map((_, i) => (
+									<FaStar key={i} className="w-5 h-5 text-yellow-400" />
+								))}
+								<span className="ml-2 text-gray-600 font-medium">4.9/5</span>
+							</div>
+							<span className="text-gray-400">•</span>
+							<span className="text-gray-600">+2,500 utilisateurs</span>
+							<span className="text-gray-400">•</span>
+							<span className="text-gray-600">98% de satisfaction</span>
+						</div>
+					</motion.div>
+				</div>
+			</section>
+
+			{/* Testimonials */}
+			<section id="testimonials" className="py-20 bg-gray-50">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+					<motion.div
+						className="text-center mb-16"
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6 }}
+						viewport={{ once: true }}
+					>
+						<h2 className="text-3xl font-bold text-gray-900 mb-4">
+							Ce que disent nos utilisateurs
+						</h2>
+						<p className="text-lg text-gray-600 max-w-2xl mx-auto">
+							Découvrez comment AssuBot transforme la gestion d'assurance
 						</p>
 					</motion.div>
 
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-						<motion.div
-							initial={{ opacity: 0, x: -50 }}
-							whileInView={{ opacity: 1, x: 0 }}
-							transition={{ duration: 0.8 }}
-							viewport={{ once: true }}
-						>
-							<h3 className="text-2xl font-bold text-gray-900 mb-6">Développé par À l'amiable</h3>
-							<p className="text-gray-600 mb-6 leading-relaxed">
-								AssuBot est né de la frustration de voir tant de personnes perdues dans le
-								labyrinthe de leurs contrats d'assurance. Chez À l'amiable, nous croyons que la
-								technologie doit servir à simplifier la vie, pas à la compliquer.
-							</p>
-							<p className="text-gray-600 mb-6 leading-relaxed">
-								Notre équipe d'experts en assurance et d'ingénieurs en IA a créé une plateforme qui
-								comprend vraiment vos besoins et parle votre langue. Fini le jargon incompréhensible
-								et les comparaisons superficielles.
-							</p>
-							<div className="grid grid-cols-2 gap-6">
-								<div className="text-center p-4 bg-gray-50 rounded-lg">
-									<div className="text-2xl font-bold text-[#1e51ab] mb-2">2024</div>
-									<div className="text-gray-600">Année de création</div>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+						{testimonials.map((testimonial, index) => (
+							<motion.div
+								key={index}
+								className="bg-white p-8 rounded-xl shadow-sm border border-gray-100"
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.5, delay: index * 0.1 }}
+								viewport={{ once: true }}
+							>
+								<div className="flex mb-4">
+									{[...Array(testimonial.rating)].map((_, i) => (
+										<FaStar key={i} className="w-4 h-4 text-yellow-400" />
+									))}
 								</div>
-								<div className="text-center p-4 bg-gray-50 rounded-lg">
-									<div className="text-2xl font-bold text-[#1e51ab] mb-2">15+</div>
-									<div className="text-gray-600">Experts dédiés</div>
+								<p className="text-gray-600 mb-6 leading-relaxed">"{testimonial.content}"</p>
+								<div>
+									<p className="font-semibold text-gray-900">{testimonial.name}</p>
+									<p className="text-sm text-gray-500">{testimonial.role}</p>
 								</div>
-							</div>
-						</motion.div>
-
-						<motion.div
-							initial={{ opacity: 0, x: 50 }}
-							whileInView={{ opacity: 1, x: 0 }}
-							transition={{ duration: 0.8 }}
-							viewport={{ once: true }}
-							className="space-y-6"
-						>
-							<div className="bg-[#1e51ab] text-white p-6 rounded-xl">
-								<h4 className="text-xl font-semibold mb-3 flex items-center">
-									<FaBullseye className="mr-3" /> Notre Mission
-								</h4>
-								<p>
-									Démocratiser l'accès à une assurance transparente et faire de chaque utilisateur
-									un expert de sa propre couverture.
-								</p>
-							</div>
-							<div className="bg-gray-50 p-6 rounded-xl">
-								<h4 className="text-xl font-semibold text-gray-900 mb-3 flex items-center">
-									<FaRocket className="mr-3 text-[#1e51ab]" /> Notre Vision
-								</h4>
-								<p className="text-gray-600">
-									Un monde où choisir et gérer ses assurances est aussi simple que commander un café
-									en ligne.
-								</p>
-							</div>
-							<div className="bg-blue-50 p-6 rounded-xl">
-								<h4 className="text-xl font-semibold text-gray-900 mb-3 flex items-center">
-									<FaLightbulb className="mr-3 text-[#1e51ab]" /> Nos Valeurs
-								</h4>
-								<p className="text-gray-600">
-									Transparence, simplicité et innovation au service de votre tranquillité d'esprit.
-								</p>
-							</div>
-						</motion.div>
+							</motion.div>
+						))}
 					</div>
+				</div>
+			</section>
+
+			{/* Pricing Section */}
+			<section id="pricing" className="py-20 bg-white">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+					<motion.div
+						className="text-center mb-16"
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6 }}
+						viewport={{ once: true }}
+					>
+						<h2 className="text-3xl font-bold text-gray-900 mb-4">
+							Des tarifs simples et transparents
+						</h2>
+						<p className="text-lg text-gray-600 max-w-2xl mx-auto">
+							Choisissez le plan qui correspond à vos besoins. Pas de frais cachés.
+						</p>
+					</motion.div>
+
+					{isLoadingPricing ? (
+						<div className="flex justify-center items-center py-12">
+							<div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#1e51ab' }}></div>
+						</div>
+					) : pricingError ? (
+						<div className="text-center py-12">
+							<p className="text-red-600 mb-4">Erreur lors du chargement des tarifs</p>
+							<button 
+								onClick={() => window.location.reload()}
+								className="text-blue-600 hover:text-blue-800 underline"
+							>
+								Réessayer
+							</button>
+						</div>
+					) : pricingPlans.length === 0 ? (
+						<div className="text-center py-12">
+							<p className="text-gray-600">Aucun pack de crédits disponible pour le moment</p>
+						</div>
+					) : (
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+							{pricingPlans.map((plan, index) => (
+								<motion.div
+									key={plan.id || index}
+									className={`relative bg-white p-8 rounded-xl shadow-sm border-2 transition-all duration-300 ${
+										plan.popular
+											? 'border-blue-500 shadow-lg scale-105'
+											: 'border-gray-100 hover:shadow-md'
+									}`}
+									initial={{ opacity: 0, y: 20 }}
+									whileInView={{ opacity: 1, y: 0 }}
+									transition={{ duration: 0.5, delay: index * 0.1 }}
+									viewport={{ once: true }}
+								>
+									{plan.popular && (
+										<div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+											<span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+												Populaire
+											</span>
+										</div>
+									)}
+									<div className="text-center mb-8">
+										<h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+										<div className="flex items-baseline justify-center">
+											<span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+										</div>
+										<p className="text-gray-600 mt-2">{plan.description}</p>
+									</div>
+									<ul className="space-y-3 mb-8">
+										{plan.features.map((feature, featureIndex) => (
+											<li key={featureIndex} className="flex items-center space-x-3">
+												<FaCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
+												<span className="text-gray-600">{feature}</span>
+											</li>
+										))}
+									</ul>
+									<button
+										onClick={() => navigateToApp()}
+										className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
+											plan.popular
+												? 'text-white hover:opacity-90'
+												: 'border-2 border-gray-300 text-gray-700 hover:border-gray-400'
+										}`}
+										style={plan.popular ? { backgroundColor: '#1e51ab' } : {}}
+									>
+										{plan.cta}
+									</button>
+								</motion.div>
+							))}
+						</div>
+					)}
 				</div>
 			</section>
 
 			{/* Contact Section */}
 			<section id="contact" className="py-20 bg-gray-50">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 					<motion.div
 						className="text-center mb-16"
-						initial={{ opacity: 0, y: 50 }}
+						initial={{ opacity: 0, y: 20 }}
 						whileInView={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6 }}
 						viewport={{ once: true }}
 					>
-						<h2 className="text-4xl font-bold text-gray-900 mb-4">Contactez-Nous</h2>
-						<p className="text-xl text-gray-600 max-w-3xl mx-auto">
+						<h2 className="text-3xl font-bold text-gray-900 mb-4">
+							Contactez-nous
+						</h2>
+						<p className="text-lg text-gray-600 max-w-2xl mx-auto">
 							Une question ? Un projet ? Notre équipe est là pour vous accompagner
 						</p>
 					</motion.div>
 
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 						<motion.div
-							initial={{ opacity: 0, x: -50 }}
-							whileInView={{ opacity: 1, x: 0 }}
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.8 }}
 							viewport={{ once: true }}
-							className="space-y-8"
-						>
-							<div className="flex items-start space-x-4">
-								<div className="w-12 h-12 bg-[#1e51ab] rounded-lg flex items-center justify-center text-white">
-									<FaEnvelope />
-								</div>
-								<div>
-									<h3 className="text-lg font-semibold text-gray-900 mb-2">Email</h3>
-									<p className="text-gray-600">contact@assubot.fr</p>
-									<p className="text-gray-600">support@assubot.fr</p>
-								</div>
-							</div>
-
-							<div className="flex items-start space-x-4">
-								<div className="w-12 h-12 bg-[#1e51ab] rounded-lg flex items-center justify-center text-white">
-									<FaPhone />
-								</div>
-								<div>
-									<h3 className="text-lg font-semibold text-gray-900 mb-2">Téléphone</h3>
-									<p className="text-gray-600">+33 1 23 45 67 89</p>
-									<p className="text-gray-500 text-sm">Lundi - Vendredi, 9h - 18h</p>
-								</div>
-							</div>
-
-							<div className="flex items-start space-x-4">
-								<div className="w-12 h-12 bg-[#1e51ab] rounded-lg flex items-center justify-center text-white">
-									<FaMapMarkerAlt />
-								</div>
-								<div>
-									<h3 className="text-lg font-semibold text-gray-900 mb-2">Adresse</h3>
-									<p className="text-gray-600">123 Avenue de l'Innovation</p>
-									<p className="text-gray-600">75001 Paris, France</p>
-								</div>
-							</div>
-
-							<div className="bg-[#1e51ab] text-white p-6 rounded-xl">
-								<h3 className="text-lg font-semibold mb-3 flex items-center">
-									<FaRobot className="mr-2" /> Besoin d'aide immédiate ?
-								</h3>
-								<p className="mb-4">
-									Notre chatbot AssuBot est disponible 24h/24 pour répondre à vos questions.
-								</p>
-								<button className="bg-white text-[#1e51ab] px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-									Parler à AssuBot
-								</button>
-							</div>
-						</motion.div>
-
-						<motion.div
-							initial={{ opacity: 0, x: 50 }}
-							whileInView={{ opacity: 1, x: 0 }}
-							transition={{ duration: 0.8 }}
-							viewport={{ once: true }}
+						className="max-w-2xl mx-auto"
 						>
 							<div className="bg-white p-8 rounded-2xl shadow-lg">
-								<h3 className="text-2xl font-semibold text-gray-900 mb-6">
+							<h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
 									Envoyez-nous un message
 								</h3>
-								<form className="space-y-6">
+							<form onSubmit={handleContactSubmit} className="space-y-6">
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 										<div>
 											<label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
 											<input
 												type="text"
-												className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors"
+											name="firstName"
+											value={contactForm.firstName}
+											onChange={handleContactChange}
+											className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
 												placeholder="Votre prénom"
+											required
 											/>
 										</div>
 										<div>
 											<label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
 											<input
 												type="text"
-												className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors"
+											name="lastName"
+											value={contactForm.lastName}
+											onChange={handleContactChange}
+											className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
 												placeholder="Votre nom"
+											required
 											/>
 										</div>
 									</div>
@@ -693,127 +570,153 @@ const LandingPage = () => {
 										<label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
 										<input
 											type="email"
-											className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors"
+										name="email"
+										value={contactForm.email}
+										onChange={handleContactChange}
+										className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
 											placeholder="votre.email@exemple.fr"
+										required
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-2">Sujet</label>
-										<select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors">
-											<option>Question générale</option>
-											<option>Support technique</option>
-											<option>Partenariat</option>
-											<option>Demande de démo</option>
-										</select>
+									<label className="block text-sm font-medium text-gray-700 mb-2">Entreprise (optionnel)</label>
+									<input
+										type="text"
+										name="company"
+										value={contactForm.company}
+										onChange={handleContactChange}
+										className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+										placeholder="Nom de votre entreprise"
+									/>
 									</div>
 									<div>
 										<label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
 										<textarea
+										name="message"
+										value={contactForm.message}
+										onChange={handleContactChange}
 											rows={4}
-											className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors"
+										className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
 											placeholder="Décrivez votre demande..."
+										required
 										></textarea>
 									</div>
 									<button
 										type="submit"
-										className="w-full bg-[#1e51ab] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#163d82] transition-colors"
+									className="w-full py-3 px-6 rounded-lg font-semibold text-white hover:opacity-90 transition-colors"
+									style={{ backgroundColor: '#1e51ab' }}
 									>
 										Envoyer le message
 									</button>
 								</form>
 							</div>
 						</motion.div>
-					</div>
 				</div>
 			</section>
 
 			{/* CTA Section */}
-			<motion.section
-				className="py-20 bg-gray-900"
-				initial={{ opacity: 0 }}
-				whileInView={{ opacity: 1 }}
-				transition={{ duration: 0.8 }}
-				viewport={{ once: true }}
-			>
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+			<section className="py-20" style={{ backgroundColor: '#1e51ab' }}>
+				<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
 					<motion.h2
-						className="text-4xl font-bold text-white mb-6"
+						className="text-3xl font-bold text-white mb-4"
 						initial={{ opacity: 0, y: 20 }}
 						whileInView={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6 }}
 						viewport={{ once: true }}
 					>
-						Prêt à Transformer Votre Expérience d'Assurance ?
+						Prêt à simplifier vos assurances ?
 					</motion.h2>
 					<motion.p
-						className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto"
+						className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto"
 						initial={{ opacity: 0, y: 20 }}
 						whileInView={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6, delay: 0.2 }}
+						transition={{ duration: 0.6, delay: 0.1 }}
 						viewport={{ once: true }}
 					>
-						Rejoignez des milliers d'utilisateurs qui ont déjà simplifié leur gestion d'assurance
-						avec AssuBot
+						Rejoignez des milliers d'utilisateurs qui ont déjà transformé leur gestion d'assurance
 					</motion.p>
 					<motion.button
-						className="bg-[#1e51ab] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-[#163d82] transition-colors shadow-lg"
-						initial={{ opacity: 0, scale: 0.8 }}
+						onClick={navigateToApp}
+						className="bg-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 transition-colors shadow-lg"
+						style={{ color: '#1e51ab' }}
+						initial={{ opacity: 0, scale: 0.9 }}
 						whileInView={{ opacity: 1, scale: 1 }}
-						transition={{ duration: 0.5, delay: 0.4 }}
+						transition={{ duration: 0.5, delay: 0.2 }}
 						viewport={{ once: true }}
 						whileHover={{ scale: 1.05 }}
 						whileTap={{ scale: 0.95 }}
-						onClick={navigateToApp}
 					>
-						Commencer Aujourd'hui
+						Commencer gratuitement
 					</motion.button>
 				</div>
-			</motion.section>
+			</section>
 
 			{/* Footer */}
-			<footer className="bg-gray-800 text-gray-300 py-12">
+			<footer className="bg-gray-900 text-gray-300 py-12">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-						<div>
-							<div className="flex items-center text-2xl font-bold text-white mb-4">
+					<div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+						<div className="md:col-span-2">
+							<div className="flex items-center text-xl font-semibold text-white mb-4">
 								<img
 									src="/logo.png"
 									alt="AssuBot Logo"
-									className="h-8 w-auto mr-2 brightness-0 invert"
+									className="h-8 w-auto mr-3 brightness-0 invert"
 								/>
 								AssuBot
 							</div>
-							<p className="text-gray-400">
-								Développé par À l'amiable - Simplifier les décisions d'assurance grâce à l'IA et à
-								l'automatisation.
+							<p className="text-gray-400 text-sm mb-6">
+								Développé par À l'amiable - Simplifier les décisions d'assurance grâce à l'IA.
 							</p>
+							<div className="flex space-x-4">
+								<a
+									href="https://linkedin.com/company/assubot"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+								>
+									<FaLinkedin className="w-5 h-5" />
+								</a>
+								<a
+									href="https://instagram.com/assubot"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+								>
+									<FaInstagram className="w-5 h-5" />
+								</a>
+							</div>
 						</div>
 						<div>
-							<h3 className="text-white font-semibold mb-4">Plateforme</h3>
-							<ul className="space-y-2">
+							<h3 className="text-white font-semibold mb-4">Produit</h3>
+							<ul className="space-y-2 text-sm">
 								<li>
 									<a href="#" className="hover:text-white transition-colors">
-										Gestion des Contrats
+										Fonctionnalités
+									</a>
+								</li>
+								<li>
+									<a href="#pricing" className="hover:text-white transition-colors">
+										Tarifs
 									</a>
 								</li>
 								<li>
 									<a href="#" className="hover:text-white transition-colors">
-										Chatbot IA
-									</a>
-								</li>
-								<li>
-									<a href="#" className="hover:text-white transition-colors">
-										Comparaison Intelligente
+										API
 									</a>
 								</li>
 							</ul>
 						</div>
 						<div>
 							<h3 className="text-white font-semibold mb-4">Entreprise</h3>
-							<ul className="space-y-2">
+							<ul className="space-y-2 text-sm">
 								<li>
 									<a href="#" className="hover:text-white transition-colors">
-										À Propos
+										À propos
+									</a>
+								</li>
+								<li>
+									<a href="#" className="hover:text-white transition-colors">
+										Blog
 									</a>
 								</li>
 								<li>
@@ -821,22 +724,17 @@ const LandingPage = () => {
 										Carrières
 									</a>
 								</li>
-								<li>
-									<a href="#" className="hover:text-white transition-colors">
-										Contact
-									</a>
-								</li>
 							</ul>
 						</div>
 						<div>
 							<h3 className="text-white font-semibold mb-4">Support</h3>
-							<ul className="space-y-2">
+							<ul className="space-y-2 text-sm">
 														<li>
 							<button
 								onClick={() => navigate('/faq')}
 								className="hover:text-white transition-colors text-left"
 							>
-								Centre d'Aide
+										Centre d'aide
 							</button>
 						</li>
 						<li>
@@ -844,27 +742,22 @@ const LandingPage = () => {
 								onClick={() => navigate('/general-terms')}
 								className="hover:text-white transition-colors text-left"
 							>
-								Conditions Générales
+										Conditions générales
 							</button>
-						</li>
-								<li>
-									<a href="#" className="hover:text-white transition-colors">
-										Documentation API
-									</a>
 								</li>
 								<li>
 									<button
 										onClick={() => navigate('/general-terms')}
 										className="hover:text-white transition-colors text-left"
 									>
-										Politique de Confidentialité
+										Confidentialité
 									</button>
 								</li>
 							</ul>
 						</div>
 					</div>
-					<div className="border-t border-gray-700 mt-8 pt-8 text-center">
-						<p>&copy; 2024 AssuBot par À l'amiable. Tous droits réservés.</p>
+					<div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+						<p>&copy; {new Date().getFullYear()} AssuBot par À l'amiable. Tous droits réservés.</p>
 					</div>
 				</div>
 			</footer>
