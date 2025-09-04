@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  # Development frontend only
+  assubot:
+    build:
+      context: .
+      target: development
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    env_file:
+      - .env.dev
+    networks:
+      - assubot-network
+
+networks:
+  assubot-network:
+    driver: bridge

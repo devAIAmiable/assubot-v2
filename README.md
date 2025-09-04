@@ -23,7 +23,7 @@ The application uses a custom fetch wrapper that supports multiple API connectio
 
 ### Environment Variables
 
-Copy `env.example` to `.env` and configure your API endpoints:
+Copy `.env.example` to `.env.dev` and configure your API endpoints:
 
 ```bash
 # API URLs
@@ -50,11 +50,22 @@ The application provides two main API clients and service modules:
 ```typescript
 // Core API (Business Logic)
 import { coreApi } from '../services/api';
-import { authService, contractsService, comparisonService, notificationsService, userService } from '../services/coreApi';
+import {
+	authService,
+	contractsService,
+	comparisonService,
+	notificationsService,
+	userService,
+} from '../services/coreApi';
 
 // AI API (AI/ML Services)
 import { aiApi } from '../services/api';
-import { chatService, analysisService, recommendationService, aiModelService } from '../services/aiApi';
+import {
+	chatService,
+	analysisService,
+	recommendationService,
+	aiModelService,
+} from '../services/aiApi';
 
 // Example usage
 const response = await authService.verify(token);
@@ -79,7 +90,7 @@ function MyComponent() {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-  
+
   return <div>{/* Render data */}</div>;
 }
 ```
@@ -87,50 +98,157 @@ function MyComponent() {
 ## Features
 
 ### Contract Management
+
 - View and manage insurance contracts
 - Detailed contract information with tabbed interface
 - Document upload and management
 - Contract creation with multi-step modal
 
 ### Contract Comparison
+
 - Compare multiple insurance contracts
 - Side-by-side analysis
 - Historical comparison tracking
 
 ### Chatbot Integration
+
 - AI-powered insurance assistance
 - Real-time chat interface
 - Context-aware responses
 
 ### User Profile & Notifications
+
 - User profile management
 - Notification system
 - Account settings
 
 ## Development
 
-### Installation
+### Prerequisites
+
+- **Docker** (version 20.10 or higher)
+- **Docker Compose** (version 2.0 or higher)
+
+### Quick Start with Docker
+
+The easiest way to start the development environment is using the provided script:
 
 ```bash
-pnpm install
+# Make the script executable (first time only)
+chmod +x dev.sh
+
+# Start the development environment
+./dev.sh
 ```
 
-### Development Server
+The script will:
+
+- ✅ Check if Docker is running
+- 📝 Create `.env.dev` from `.env.example` if missing
+- 🧹 Clean up existing containers
+- 🐳 Start the frontend development server
+- 🔥 Enable hot reload for automatic code updates
+
+**Access the application at:** http://localhost:5173
+
+### Manual Docker Setup
+
+If you prefer to run Docker commands manually:
 
 ```bash
+# Create environment file
+cp .env.example .env.dev
+
+# Start development environment
+docker compose -f docker-compose.dev.yml up --build
+```
+
+### Traditional Development (without Docker)
+
+If you prefer to run the application without Docker:
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development server
 pnpm dev
 ```
 
 ### Build
 
 ```bash
+# Build for production
 pnpm build
+
+# Preview production build
+pnpm preview
 ```
 
 ### Type Checking
 
 ```bash
 pnpm type-check
+```
+
+### Testing
+
+```bash
+# Run tests
+pnpm test
+
+# Run tests with UI
+pnpm test:ui
+
+# Run tests once
+pnpm test:run
+```
+
+## Docker Setup
+
+The project includes a complete Docker setup for development and production environments.
+
+### Development with Docker
+
+The `dev.sh` script provides an easy way to start the development environment:
+
+```bash
+./dev.sh
+```
+
+### Docker Files
+
+- **`Dockerfile`** - Multi-stage build configuration
+- **`docker-compose.dev.yml`** - Development environment
+- **`nginx.conf`** - Production nginx configuration
+- **`.dockerignore`** - Optimized build context
+
+### Environment Configuration
+
+The development environment uses `.env.dev` for configuration:
+
+```bash
+# Copy example environment file
+cp .env.example .env.dev
+
+# Edit with your configuration
+nano .env.dev
+```
+
+### Docker Commands
+
+```bash
+# Start development environment
+docker compose -f docker-compose.dev.yml up --build
+
+# Stop all containers
+docker compose -f docker-compose.dev.yml down
+
+# View logs
+docker compose -f docker-compose.dev.yml logs -f
+
+# Clean up everything
+docker compose -f docker-compose.dev.yml down --rmi all --volumes
 ```
 
 ## Project Structure
@@ -161,11 +279,11 @@ The application expects the following API response format:
 
 ```json
 {
-  "success": true,
-  "data": {
-    "message": "string",
-    "resource": "any"
-  }
+	"success": true,
+	"data": {
+		"message": "string",
+		"resource": "any"
+	}
 }
 ```
 
@@ -173,11 +291,11 @@ Error responses should follow:
 
 ```json
 {
-  "status": "error",
-  "error": {
-    "code": "string",
-    "message": "string"
-  }
+	"status": "error",
+	"error": {
+		"code": "string",
+		"message": "string"
+	}
 }
 ```
 
