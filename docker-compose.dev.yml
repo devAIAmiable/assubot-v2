@@ -7,15 +7,22 @@ services:
       context: .
       target: development
     ports:
-      - "5173:5173"
+      - '5173:5173'
     volumes:
       - .:/app
       - /app/node_modules
     env_file:
       - .env.dev
     networks:
+      - shared-network
       - assubot-network
+    # Note: Frontend connects to backend services via shared network
 
 networks:
+  # Shared network for cross-project communication
+  shared-network:
+    external: true
+    name: shared-services-network
+  # Internal network for this project
   assubot-network:
     driver: bridge
