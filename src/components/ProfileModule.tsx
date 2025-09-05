@@ -125,6 +125,13 @@ const ProfileModule = () => {
 		{ value: 'unemployed', label: 'Sans emploi' },
 	];
 
+	// Helper function to get professional category label
+	const getProfessionalCategoryLabel = (value: string | undefined): string => {
+		if (!value) return 'Non renseigné';
+		const option = professionalCategoryOptions.find(opt => opt.value === value);
+		return option ? option.label : 'Non renseigné';
+	};
+
 	const handlePersonalSubmit = async (data: PersonalInfoFormData) => {
 		// Déclencher la validation complète avant la soumission
 		const isValid = await personalForm.trigger();
@@ -294,7 +301,7 @@ const ProfileModule = () => {
 						</h2>
 						<p className="text-gray-600 mb-1">{currentUser.email}</p>
 						{currentUser.professionalCategory && (
-							<p className="text-gray-500 mb-4">{currentUser.professionalCategory}</p>
+							<p className="text-gray-500 mb-4">{getProfessionalCategoryLabel(currentUser.professionalCategory)}</p>
 						)}
 
 						<div className="flex flex-wrap gap-4 justify-center md:justify-start">
@@ -482,17 +489,7 @@ const ProfileModule = () => {
 						<div className="md:col-span-2">
 							<p className="text-sm text-gray-600 mb-1">Catégorie professionnelle</p>
 							<p className="font-medium text-gray-900">
-								{currentUser.professionalCategory === 'executive'
-									? 'Employé cadre'
-									: currentUser.professionalCategory === 'non-executive'
-										? 'Employé non cadre'
-										: currentUser.professionalCategory === 'entrepreneur'
-											? 'Entrepreneur'
-											: currentUser.professionalCategory === 'student'
-												? 'Étudiant'
-												: currentUser.professionalCategory === 'unemployed'
-													? 'Sans emploi'
-													: 'Non renseigné'}
+								{getProfessionalCategoryLabel(currentUser.professionalCategory)}
 							</p>
 						</div>
 					</div>
