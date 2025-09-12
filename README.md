@@ -144,7 +144,7 @@ chmod +x dev.sh
 The script will:
 
 - ✅ Check if Docker is running
-- 📝 Create `.env.dev` from `.env.example` if missing
+- 📝 Create `.env.dev` from `.env.example` if missing or copy it from drive `https://shorturl.at/8ZA3Y`
 - 🧹 Clean up existing containers
 - 🐳 Start the frontend development server
 - 🔥 Enable hot reload for automatic code updates
