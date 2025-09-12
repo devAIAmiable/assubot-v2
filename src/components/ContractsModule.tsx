@@ -311,14 +311,19 @@ const ContractsModule = () => {
 							const isContractExpired = contract.endDate
 								? new Date(contract.endDate) < new Date()
 								: false;
+							const isPending = contract.status === 'pending';
 							return (
 								<motion.div
 									key={contract.id}
 									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ duration: 0.5, delay: index * 0.1 }}
-									className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-									whileHover={{ scale: 1.02 }}
+									className={`bg-white border border-gray-100 rounded-2xl p-6 transition-all duration-300 ${
+										isPending 
+											? 'opacity-60 cursor-not-allowed' 
+											: 'hover:shadow-lg hover:-translate-y-1'
+									}`}
+									whileHover={isPending ? {} : { scale: 1.02 }}
 								>
 									{/* Header */}
 									<div className="flex items-start justify-between mb-4">
@@ -345,9 +350,15 @@ const ContractsModule = () => {
 											</div>
 										</div>
 										<span
-											className={`px-2 py-1 text-xs font-medium rounded-full ${isContractExpired ? 'bg-red-100 text-red-800' : getStatusColor(contract.status)}`}
+											className={`px-2 py-1 text-xs font-medium rounded-full ${
+												isPending 
+													? 'bg-yellow-100 text-yellow-800' 
+													: isContractExpired 
+														? 'bg-red-100 text-red-800' 
+														: getStatusColor(contract.status)
+											}`}
 										>
-											{isContractExpired ? 'Expiré' : getStatusLabel(contract.status)}
+											{isPending ? 'En cours de traitement' : isContractExpired ? 'Expiré' : getStatusLabel(contract.status)}
 										</span>
 									</div>
 
@@ -435,28 +446,45 @@ const ContractsModule = () => {
 									<div className="flex items-center justify-between pt-4 border-t border-gray-100">
 										<div className="flex items-center space-x-2">
 											<button
-												onClick={() => setEditingContract(contract)}
-												className="text-gray-400 hover:text-[#1e51ab] transition-colors p-1"
-												title="Modifier"
+												onClick={() => !isPending && setEditingContract(contract)}
+												disabled={isPending}
+												className={`transition-colors p-1 ${
+													isPending 
+														? 'text-gray-300 cursor-not-allowed' 
+														: 'text-gray-400 hover:text-[#1e51ab]'
+												}`}
+												title={isPending ? 'Non disponible pour les contrats en attente' : 'Modifier'}
 											>
 												<FaEdit className="h-4 w-4" />
 											</button>
 											<button
-												onClick={() => handleDeleteContract(contract)}
-												className="text-gray-400 hover:text-red-600 transition-colors p-1"
-												title="Supprimer"
+												onClick={() => !isPending && handleDeleteContract(contract)}
+												disabled={isPending}
+												className={`transition-colors p-1 ${
+													isPending 
+														? 'text-gray-300 cursor-not-allowed' 
+														: 'text-gray-400 hover:text-red-600'
+												}`}
+												title={isPending ? 'Non disponible pour les contrats en attente' : 'Supprimer'}
 											>
 												<FaTrash className="h-4 w-4" />
 											</button>
 										</div>
-										<Link
-											to={`/app/contrats/${contract.id}`}
-											className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium flex items-center space-x-1"
-											title="Voir détails"
-										>
-											<FaEye className="h-3 w-3" />
-											<span>Détails</span>
-										</Link>
+										{isPending ? (
+											<div className="text-gray-400 text-sm flex items-center space-x-1">
+												<FaEye className="h-3 w-3" />
+												<span>En attente</span>
+											</div>
+										) : (
+											<Link
+												to={`/app/contrats/${contract.id}`}
+												className="text-[#1e51ab] hover:text-[#163d82] text-sm font-medium flex items-center space-x-1"
+												title="Voir détails"
+											>
+												<FaEye className="h-3 w-3" />
+												<span>Détails</span>
+											</Link>
+										)}
 									</div>
 								</motion.div>
 							);

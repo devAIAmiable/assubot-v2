@@ -41,7 +41,7 @@ const Dashboard = () => {
 	// Use dashboard stats from API if available, fallback to local calculation
 	const contractStats = {
 		active:
-			dashboardStats?.activeContracts || contracts.filter((c) => c.status === 'active').length,
+			dashboardStats?.availableContracts || contracts.filter((c) => c.status === 'active').length,
 		total: contracts.length,
 		expiring:
 			dashboardStats?.expiringSoonContracts ||

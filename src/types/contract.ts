@@ -473,6 +473,7 @@ export interface GetContractsParams {
 	sortOrder?: 'asc' | 'desc';
 	search?: string;
 	category?: ContractCategory | 'all';
+	status?: ContractStatus[];
 }
 
 // Dashboard statistics types
@@ -486,7 +487,7 @@ export interface DashboardStats {
 	status: string;
 	message: string;
 	totalAnnualCostCents: number;
-	activeContracts: number;
+	availableContracts: number;
 	monthlyPremiumCents: number;
 	expiringSoonContracts: number;
 	categoryBreakdown: Record<string, DashboardCategoryBreakdown>;
@@ -496,7 +497,7 @@ export interface DashboardStatsResponse {
 	status: string;
 	message: string;
 	totalAnnualCostCents: number;
-	activeContracts: number;
+	availableContracts: number;
 	monthlyPremiumCents: number;
 	expiringSoonContracts: number;
 	categoryBreakdown: Record<string, DashboardCategoryBreakdown>;

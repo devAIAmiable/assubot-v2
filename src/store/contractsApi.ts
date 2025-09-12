@@ -91,9 +91,10 @@ export const contractsApi = createApi({
 		getContracts: builder.query<GetContractsResponse, GetContractsParams>({
 			keepUnusedDataFor: 30 * 60, // 30 minutes in seconds
 			query: (params) => {
-				const queryParams: Record<string, string | number> = {
+				const queryParams: Record<string, string | number | string[]> = {
 					page: params.page || 1,
 					limit: Math.min(params.limit || 10, 100), // Ensure limit doesn't exceed 100
+					status: params.status || ['active', 'pending'], // Default to active and pending
 				};
 
 				// Add optional parameters if they exist

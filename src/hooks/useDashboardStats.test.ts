@@ -30,7 +30,7 @@ describe('useDashboardStats', () => {
 			status: 'success',
 			message: 'Success',
 			totalAnnualCostCents: 1450000,
-			activeContracts: 12,
+			availableContracts: 12,
 			monthlyPremiumCents: 125000,
 			expiringSoonContracts: 3,
 			categoryBreakdown: {

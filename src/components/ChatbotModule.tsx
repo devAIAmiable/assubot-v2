@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import type { BackendContractListItem, Contract } from '../types';
+import type { BackendContractListItem, Contract, ContractStatus } from '../types';
 import type { ChatMessage, ChatSession } from '../types';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -60,6 +60,7 @@ const ChatbotModule = () => {
 		category: 'all' as const,
 		sortBy: 'createdAt' as const,
 		sortOrder: 'desc' as const,
+		status: ['active'] as ContractStatus[],
 	});
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -189,6 +190,7 @@ const ChatbotModule = () => {
 			category: 'all',
 			sortBy: 'createdAt',
 			sortOrder: 'desc',
+			status: ['active'] as ContractStatus[],
 		});
 	};
 
