@@ -2,7 +2,9 @@ import type {
 	Chat,
 	ChatFilters,
 	CreateChatRequest,
+	MessageFilters,
 	PaginatedChatResponse,
+	PaginatedMessageResponse,
 	UpdateChatRequest,
 } from '../types/chat';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
@@ -32,7 +34,7 @@ const baseQuery = fetchBaseQuery({
 export const chatsApi = createApi({
 	reducerPath: 'chatsApi',
 	baseQuery,
-	tagTypes: ['Chat'],
+	tagTypes: ['Chat', 'Message'],
 	endpoints: (builder) => ({
 		// Get paginated chats for the authenticated user
 		getChats: builder.query<PaginatedChatResponse, ChatFilters | undefined>({
@@ -140,12 +142,49 @@ export const chatsApi = createApi({
 				{ type: 'Chat' },
 			],
 		}),
+
+		// Get paginated messages for a specific chat
+		getChatMessages: builder.query<PaginatedMessageResponse, { chatId: string; filters?: MessageFilters }>({
+			keepUnusedDataFor: 5 * 60, // 5 minutes in seconds
+			query: ({ chatId, filters = {} }) => {
+				const queryParams: Record<string, string | number> = {
+					page: filters.page || 1,
+					limit: Math.min(filters.limit || 20, 100), // Ensure limit doesn't exceed 100
+					sortBy: filters.sortBy || 'createdAt',
+					sortOrder: filters.sortOrder || 'asc',
+				};
+
+				return {
+					url: `/${chatId}/messages`,
+					method: 'GET',
+					params: queryParams,
+				};
+			},
+			transformResponse: (response: any) => {
+				// Handle the actual API response structure
+				if (response.status === 'success' && response.data) {
+					return {
+						messages: response.data,
+						pagination: response.pagination,
+					};
+				}
+				// Fallback to original structure if different
+				return response;
+			},
+			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+				status: response.status,
+				message: response.data.error.message,
+				code: response.data.error.code,
+			}),
+			providesTags: (_result, _error, { chatId }) => [{ type: 'Message', id: chatId }],
+		}),
 	}),
 });
 
 export const {
 	useGetChatsQuery,
 	useGetChatByIdQuery,
+	useGetChatMessagesQuery,
 	useCreateChatMutation,
 	useUpdateChatMutation,
 	useDeleteChatMutation,

@@ -6,8 +6,13 @@ export interface Chat {
 	contractIds: string[];
 	isDeleted: boolean;
 	userId: string;
-	messages?: ChatMessage[];
 	contracts?: Contract[];
+	lastMessage?: {
+		id: string;
+		content: string;
+		role: 'user' | 'assistant';
+		createdAt: string;
+	};
 }
 
 export interface ChatMessage {
@@ -56,6 +61,25 @@ export interface ChatFilters {
 	sortBy?: 'createdAt' | 'updatedAt' | 'title';
 	sortOrder?: 'asc' | 'desc';
 	search?: string;
+}
+
+export interface MessageFilters {
+	page?: number;
+	limit?: number;
+	sortBy?: 'createdAt';
+	sortOrder?: 'asc' | 'desc';
+}
+
+export interface PaginatedMessageResponse {
+	messages: ChatMessage[];
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
+		hasNext: boolean;
+		hasPrev: boolean;
+	};
 }
 
 export interface ChatState {

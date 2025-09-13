@@ -15,7 +15,7 @@ import {
 	FaTrash,
 } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from 'react';
-import { useGetChatByIdQuery, useGetChatsQuery } from '../store/chatsApi';
+import { useGetChatMessagesQuery, useGetChatsQuery } from '../store/chatsApi';
 
 import type { CreateChatRequest } from '../types/chat';
 import dayjs from 'dayjs';
@@ -49,16 +49,16 @@ const ChatModule: React.FC = () => {
 	// Get error from RTK Query
 	const { error: apiError } = useGetChatsQuery(useChats().filters || {});
 
-	// Get detailed chat data with messages
-	const { data: detailedChat, isLoading: chatLoading } = useGetChatByIdQuery(
-		currentChat?.id || '',
+	// Get messages for the current chat
+	const { data: messagesData, isLoading: messagesLoading } = useGetChatMessagesQuery(
+		{ chatId: currentChat?.id || '', filters: { page: 1, limit: 50, sortOrder: 'asc' } },
 		{
 			skip: !currentChat?.id,
 		}
 	);
 
-	// Use detailed chat data if available, otherwise fallback to currentChat
-	const chatWithMessages = detailedChat || currentChat;
+	// Get the messages array
+	const messages = messagesData?.messages || [];
 
 	// États locaux
 	const [showNewChatModal, setShowNewChatModal] = useState(false);
@@ -184,7 +184,7 @@ const ChatModule: React.FC = () => {
 	// Auto-scroll vers le bas des messages
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-	}, [currentChat, isTyping]);
+	}, [currentChat, isTyping, messages]);
 
 	// Rendu
 	return (
@@ -323,9 +323,7 @@ const ChatModule: React.FC = () => {
 																	currentChat?.id === chat.id ? 'text-blue-600' : 'text-gray-500'
 																}`}
 															>
-																{chat.messages && chat.messages.length > 0
-																	? chat.messages[chat.messages.length - 1].content
-																	: 'Aucun message'}
+																{chat.lastMessage?.content || 'Aucun message'}
 															</p>
 														</div>
 
@@ -336,7 +334,7 @@ const ChatModule: React.FC = () => {
 																	currentChat?.id === chat.id ? 'text-blue-500' : 'text-gray-400'
 																}`}
 															>
-																{dayjs(chat.updatedAt).format('DD MMM')}
+																{dayjs(chat.lastMessage?.createdAt || chat.updatedAt).format('DD MMM')}
 															</span>
 
 															{/* Actions (visible au hover) */}
@@ -434,15 +432,15 @@ const ChatModule: React.FC = () => {
 						<div className="chat-messages flex-1 p-4 bg-gray-50">
 							<div className="max-w-4xl mx-auto space-y-4">
 								{/* Loading Messages */}
-								{chatLoading && (
+								{messagesLoading && (
 									<div className="flex justify-center py-8">
 										<FaSpinner className="animate-spin text-[#1e51ab] text-xl" />
 									</div>
 								)}
 
 								{/* Messages */}
-								{!chatLoading && chatWithMessages?.messages && chatWithMessages.messages.length > 0
-									? chatWithMessages.messages.map((message) => (
+								{!messagesLoading && messages.length > 0
+									? messages.map((message) => (
 											<div
 												key={message.id}
 												className={`flex items-start gap-3 ${
