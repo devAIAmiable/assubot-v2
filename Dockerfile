@@ -24,17 +24,20 @@ FROM base AS build
 COPY . .
 RUN pnpm build
 
-# Production stage
-FROM nginx:alpine AS production
+# Production stage - serve with Node.js
+FROM node:18-alpine AS production
+
+# Install serve for static file serving
+RUN npm install -g serve
 
 # Copy built assets from build stage
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/dist /app/dist
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Set working directory
+WORKDIR /app
 
-# Expose port 80
-EXPOSE 80
+# Expose port 3000
+EXPOSE 3000
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start the server
+CMD ["serve", "-s", "dist", "-l", "3000"]
