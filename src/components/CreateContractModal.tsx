@@ -38,10 +38,10 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({
 
 	const handleSubmit = useCallback(
 		async (fileObjects: Record<string, File>, formData: ContractFormData) => {
-			try {
-				setIsUploading(true);
-				setUploadError(null);
+			setIsUploading(true);
+			setUploadError(null);
 
+			try {
 				// Validate required documents using the service
 				const validation = contractUploadService.validateRequiredDocuments(fileObjects);
 				if (!validation.valid) {
@@ -59,7 +59,10 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({
 				}
 			} catch (error) {
 				console.error('Contract creation failed:', error);
-				setUploadError(error instanceof Error ? error.message : 'Une erreur est survenue');
+				const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
+				setUploadError(errorMessage);
+				// Re-throw the error so the form can handle it
+				throw new Error(errorMessage);
 			} finally {
 				setIsUploading(false);
 			}
@@ -284,9 +287,29 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({
 										animate={{ opacity: 1, scale: 1 }}
 										className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4"
 									>
-										<div className="flex items-center space-x-2">
-											<FaTimes className="h-5 w-5 text-red-500" />
-											<p className="text-sm text-red-800">{uploadError}</p>
+										<div className="flex items-start space-x-3">
+											<FaTimes className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+											<div className="flex-1">
+												<p className="text-sm text-red-800 font-medium mb-2">
+													Échec de la création du contrat
+												</p>
+												<p className="text-sm text-red-700 mb-3">{uploadError}</p>
+												<div className="flex space-x-2">
+													<button
+														onClick={() => setUploadError(null)}
+														className="text-sm text-red-600 hover:text-red-800 underline"
+													>
+														Fermer
+													</button>
+													<span className="text-red-300">•</span>
+													<button
+														onClick={() => setUploadError(null)}
+														className="text-sm text-red-600 hover:text-red-800 underline"
+													>
+														Réessayer
+													</button>
+												</div>
+											</div>
 										</div>
 									</motion.div>
 								)}

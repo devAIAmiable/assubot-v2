@@ -9,7 +9,7 @@ import DocumentsStep from './steps/DocumentsStep';
 import { motion } from 'framer-motion';
 
 interface ContractCreationFormProps {
-	onSubmit: (fileObjects: Record<string, File>, formData: ContractFormData) => void;
+	onSubmit: (fileObjects: Record<string, File>, formData: ContractFormData) => Promise<void>;
 	onStepChange?: (step: number) => void;
 	isUploading?: boolean;
 }
@@ -66,7 +66,7 @@ const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit, o
 		onStepChange?.(prevStep);
 	}, [currentStep, onStepChange]);
 
-	const handleSubmit = useCallback(() => {
+	const handleSubmit = useCallback(async () => {
 		// Clear any previous errors
 		setError(null);
 		
@@ -95,8 +95,18 @@ const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit, o
 		
 		// If validation passes, submit the form
 		setIsSubmitting(true);
-		onSubmit(fileRefs.current, formData as ContractFormData);
-		setIsSubmitting(false);
+		setError(null); // Clear any previous errors
+		
+		try {
+			await onSubmit(fileRefs.current, formData as ContractFormData);
+			// If we reach here, submission was successful
+			// The parent component will handle success state
+		} catch (error) {
+			// Handle submission error
+			setError(error instanceof Error ? error.message : 'Une erreur est survenue lors de la création du contrat');
+		} finally {
+			setIsSubmitting(false);
+		}
 	}, [currentStep, formData.documents, onSubmit, formData]);
 
 	const renderCurrentStep = () => {
