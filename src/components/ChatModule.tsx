@@ -7,6 +7,7 @@ import {
 	FaCheck,
 	FaEdit,
 	FaEllipsisV,
+	FaInfoCircle,
 	FaPaperPlane,
 	FaPlus,
 	FaRobot,
@@ -723,6 +724,16 @@ const ChatModule: React.FC = () => {
 									>
 										{sendingMessage ? <FaSpinner className="animate-spin" /> : <FaPaperPlane />}
 									</button>
+								</div>
+								
+								{/* Privacy Information - Below text area like ChatGPT */}
+								<div className=" flex items-center justify-center">
+									<div className="flex items-center gap-2 text-xs text-gray-500">
+										<FaInfoCircle className="text-gray-400 flex-shrink-0" />
+										<p>
+											Votre espace de conversation est confidentiel. Le ChatBot repose sur une IA, veuillez vérifier les informations importantes.
+										</p>
+									</div>
 								</div>
 							</div>
 						</div>
