@@ -484,7 +484,7 @@ const ChatModule: React.FC = () => {
 								</div>
 								<div>
 									<h1 className="text-white font-medium">{currentChat.title}</h1>
-									<p className="text-sm text-blue-200">Assistant IA</p>
+									<p className="text-sm text-blue-200">AI'A</p>
 								</div>
 							</div>
 							<div className="flex items-center gap-2">
@@ -767,9 +767,9 @@ const ChatModule: React.FC = () => {
 							<div className="w-32 h-32 bg-[#1e51ab] rounded-full flex items-center justify-center mx-auto mb-6">
 								<FaRobot className="text-white text-4xl" />
 							</div>
-							<h2 className="text-2xl font-semibold text-gray-900 mb-4">Assistant IA</h2>
+							<h2 className="text-2xl font-semibold text-gray-900 mb-4">AI'A</h2>
 							<p className="text-gray-600 mb-8 leading-relaxed">
-								Commencez une conversation avec votre assistant IA.
+								Commencez une conversation avec AI'A.
 								<br />
 								Posez vos questions et obtenez des réponses personnalisées.
 							</p>
