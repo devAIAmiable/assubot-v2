@@ -36,8 +36,8 @@ COPY --from=build /app/dist /app/dist
 # Set working directory
 WORKDIR /app
 
-# Expose port 5173 (Railway expects this port)
+# Expose port (Railway will set the PORT environment variable)
 EXPOSE 5173
 
-# Start the server
-CMD ["serve", "-s", "dist", "-l", "5173"]
+# Start the server - use PORT env var or default to 5173
+CMD ["sh", "-c", "serve -s dist -l 0.0.0.0:${PORT:-5173}"]
