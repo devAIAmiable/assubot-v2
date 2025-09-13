@@ -18,7 +18,10 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { useGetChatMessagesQuery, useGetChatsQuery } from '../store/chatsApi';
 
+import ChatListLoader from './ui/ChatListLoader';
 import type { CreateChatRequest } from '../types/chat';
+import Loader from './ui/Loader';
+import MessageLoader from './ui/MessageLoader';
 import UserAvatar from './ui/UserAvatar';
 import dayjs from 'dayjs';
 import { useAppSelector } from '../store/hooks';
@@ -85,6 +88,7 @@ const ChatModule: React.FC = () => {
 	const [selectedContractIds, setSelectedContractIds] = useState<string[]>([]);
 	const [messageInput, setMessageInput] = useState('');
 	const [showChatList, setShowChatList] = useState(true); // Mobile navigation state
+	const [isInitialMessageLoad, setIsInitialMessageLoad] = useState(false);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
 	// Récupération des contrats pour la sélection
@@ -106,6 +110,25 @@ const ChatModule: React.FC = () => {
 			search(searchQuery);
 		}
 	}, [searchQuery, search]);
+
+	// Gérer le chargement initial des messages
+	useEffect(() => {
+		if (currentChat) {
+			if (messagesLoading) {
+				setIsInitialMessageLoad(true);
+			} else if (!messagesLoading && messages.length > 0) {
+				setIsInitialMessageLoad(false);
+			} else if (!messagesLoading && messages.length === 0) {
+				// Délai pour s'assurer que le loader s'affiche même pour les chats vides
+				const timer = setTimeout(() => {
+					setIsInitialMessageLoad(false);
+				}, 500);
+				return () => clearTimeout(timer);
+			}
+		} else {
+			setIsInitialMessageLoad(false);
+		}
+	}, [currentChat, messagesLoading, messages.length]);
 
 	// Handlers
 	const handleCreateChat = async () => {
@@ -253,9 +276,7 @@ const ChatModule: React.FC = () => {
 				{/* Chat List */}
 				<div className="chat-sidebar-list flex-1 overflow-y-auto">
 					{paginationLoading ? (
-						<div className="flex justify-center py-12">
-							<FaSpinner className="animate-spin text-[#1e51ab] text-xl" />
-						</div>
+						<ChatListLoader count={5} className="py-4" />
 					) : apiError ? (
 						<div className="flex flex-col items-center justify-center py-12 text-center">
 							<div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
@@ -417,8 +438,9 @@ const ChatModule: React.FC = () => {
 							<button
 								onClick={goToPrevPage}
 								disabled={!pagination.hasPrev || paginationLoading}
-								className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded disabled:opacity-50 hover:bg-gray-300"
+								className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded disabled:opacity-50 hover:bg-gray-300 flex items-center gap-1"
 							>
+								{paginationLoading && <FaSpinner className="animate-spin text-xs" />}
 								Précédent
 							</button>
 							<span className="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded">
@@ -427,8 +449,9 @@ const ChatModule: React.FC = () => {
 							<button
 								onClick={goToNextPage}
 								disabled={!pagination.hasNext || paginationLoading}
-								className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded disabled:opacity-50 hover:bg-gray-300"
+								className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded disabled:opacity-50 hover:bg-gray-300 flex items-center gap-1"
 							>
+								{paginationLoading && <FaSpinner className="animate-spin text-xs" />}
 								Suivant
 							</button>
 						</div>
@@ -474,14 +497,14 @@ const ChatModule: React.FC = () => {
 						<div className="chat-messages flex-1 p-4 bg-gray-50">
 							<div className="max-w-4xl mx-auto space-y-4">
 								{/* Loading Messages */}
-								{messagesLoading && (
+								{(messagesLoading || isInitialMessageLoad) && (
 									<div className="flex justify-center py-8">
-										<FaSpinner className="animate-spin text-[#1e51ab] text-xl" />
+										<Loader size="lg" text="Chargement des messages..." />
 									</div>
 								)}
 
 								{/* Messages */}
-								{!messagesLoading && messages.length > 0
+								{!messagesLoading && !isInitialMessageLoad && messages.length > 0
 									? messages.map((message) => (
 											<div
 												key={message.id}
@@ -513,29 +536,19 @@ const ChatModule: React.FC = () => {
 												{message.role === 'user' && <UserAvatar user={currentUser} size="md" />}
 											</div>
 										))
-									: null}
-
-								{/* Typing Indicator */}
-								{isAssistantTyping && (
-									<div className="flex items-start gap-3">
-										<div className="w-8 h-8 bg-[#1e51ab] rounded-full flex items-center justify-center flex-shrink-0">
-											<FaRobot className="text-white text-sm" />
-										</div>
-										<div className="bg-white rounded-lg rounded-tl-sm p-3 shadow-sm border border-gray-200">
-											<div className="flex items-center gap-1">
-												<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-												<div
-													className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-													style={{ animationDelay: '0.1s' }}
-												></div>
-												<div
-													className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-													style={{ animationDelay: '0.2s' }}
-												></div>
+									: !messagesLoading && !isInitialMessageLoad && messages.length === 0 && (
+										<div className="flex justify-center py-8">
+											<div className="text-center">
+												<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+													<FaRobot className="text-gray-400 text-2xl" />
+												</div>
+												<p className="text-gray-500 text-sm">Aucun message dans cette conversation</p>
 											</div>
 										</div>
-									</div>
-								)}
+									)}
+
+								{/* Typing Indicator */}
+								{isAssistantTyping && <MessageLoader />}
 
 								<div ref={messagesEndRef} />
 							</div>
@@ -560,7 +573,11 @@ const ChatModule: React.FC = () => {
 										disabled={!messageInput.trim() || sendingMessage || loading}
 										className="p-3 bg-[#1e51ab] text-white rounded-full hover:bg-[#1a4599] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 									>
-										{sendingMessage ? <FaSpinner className="animate-spin" /> : <FaPaperPlane />}
+										{sendingMessage ? (
+											<FaSpinner className="animate-spin" />
+										) : (
+											<FaPaperPlane />
+										)}
 									</button>
 								</div>
 							</div>
@@ -674,7 +691,14 @@ const ChatModule: React.FC = () => {
 									disabled={loading}
 									className="px-4 py-2 bg-[#1e51ab] text-white rounded-lg hover:bg-[#1a4599] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
 								>
-									{loading ? <FaSpinner className="animate-spin" /> : 'Créer'}
+									{loading ? (
+										<>
+											<FaSpinner className="animate-spin" />
+											Création...
+										</>
+									) : (
+										'Créer'
+									)}
 								</button>
 							</div>
 						</motion.div>
@@ -729,7 +753,14 @@ const ChatModule: React.FC = () => {
 									disabled={loading}
 									className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
 								>
-									{loading ? <FaSpinner className="animate-spin" /> : 'Supprimer'}
+									{loading ? (
+										<>
+											<FaSpinner className="animate-spin" />
+											Suppression...
+										</>
+									) : (
+										'Supprimer'
+									)}
 								</button>
 							</div>
 						</motion.div>
