@@ -22,6 +22,7 @@ import ChatListLoader from './ui/ChatListLoader';
 import type { CreateChatRequest } from '../types/chat';
 import Loader from './ui/Loader';
 import MessageLoader from './ui/MessageLoader';
+import ReactMarkdown from 'react-markdown';
 import TextareaAutosize from 'react-textarea-autosize';
 import UserAvatar from './ui/UserAvatar';
 import dayjs from 'dayjs';
@@ -246,9 +247,11 @@ const ChatModule: React.FC = () => {
 			style={{ height: 'calc(100vh - 140px)' }}
 		>
 			{/* Sidebar - Style WhatsApp */}
-			<div className={`w-full md:w-1/3 bg-white border-r border-gray-200 flex flex-col ${
-				showChatList ? 'flex' : 'hidden md:flex'
-			}`}>
+			<div
+				className={`w-full md:w-1/3 bg-white border-r border-gray-200 flex flex-col ${
+					showChatList ? 'flex' : 'hidden md:flex'
+				}`}
+			>
 				{/* Header */}
 				<div className="bg-[#1e51ab] p-4 border-b border-gray-200">
 					<div className="flex items-center justify-between mb-4">
@@ -461,9 +464,7 @@ const ChatModule: React.FC = () => {
 			</div>
 
 			{/* Main Content - Style WhatsApp */}
-			<div className={`flex-1 flex flex-col bg-white ${
-				showChatList ? 'hidden md:flex' : 'flex'
-			}`}>
+			<div className={`flex-1 flex flex-col bg-white ${showChatList ? 'hidden md:flex' : 'flex'}`}>
 				{currentChat ? (
 					<>
 						{/* Header */}
@@ -525,7 +526,148 @@ const ChatModule: React.FC = () => {
 															: 'bg-white text-gray-900 rounded-tl-sm border-gray-200'
 													}`}
 												>
-													<p className="text-sm whitespace-pre-wrap">{message.content}</p>
+													<div className="text-sm prose prose-sm max-w-none">
+														<ReactMarkdown
+															components={{
+																// Headings
+																h1: ({ children }) => (
+																	<h1 className="text-lg font-bold mb-3 mt-4 first:mt-0">
+																		{children}
+																	</h1>
+																),
+																h2: ({ children }) => (
+																	<h2 className="text-base font-bold mb-2 mt-3 first:mt-0">
+																		{children}
+																	</h2>
+																),
+																h3: ({ children }) => (
+																	<h3 className="text-sm font-bold mb-2 mt-3 first:mt-0">
+																		{children}
+																	</h3>
+																),
+																h4: ({ children }) => (
+																	<h4 className="text-sm font-semibold mb-2 mt-2 first:mt-0">
+																		{children}
+																	</h4>
+																),
+																h5: ({ children }) => (
+																	<h5 className="text-sm font-semibold mb-1 mt-2 first:mt-0">
+																		{children}
+																	</h5>
+																),
+																h6: ({ children }) => (
+																	<h6 className="text-sm font-semibold mb-1 mt-2 first:mt-0">
+																		{children}
+																	</h6>
+																),
+
+																// Text elements
+																p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+																strong: ({ children }) => (
+																	<strong className="font-semibold">{children}</strong>
+																),
+																em: ({ children }) => <em className="italic">{children}</em>,
+																del: ({ children }) => (
+																	<del className="line-through text-gray-500">{children}</del>
+																),
+																u: ({ children }) => <u className="underline">{children}</u>,
+
+																// Lists
+																ul: ({ children }) => (
+																	<ul className="mb-2 last:mb-0 ml-4 list-disc space-y-1">
+																		{children}
+																	</ul>
+																),
+																ol: ({ children }) => (
+																	<ol className="mb-2 last:mb-0 ml-4 list-decimal space-y-1">
+																		{children}
+																	</ol>
+																),
+																li: ({ children }) => <li className="mb-1">{children}</li>,
+
+																// Code
+																code: ({ children, className }) => {
+																	const isInline = !className;
+																	return isInline ? (
+																		<code className="bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-xs font-mono">
+																			{children}
+																		</code>
+																	) : (
+																		<code className="block bg-gray-100 text-gray-800 p-2 rounded text-xs font-mono overflow-x-auto">
+																			{children}
+																		</code>
+																	);
+																},
+																pre: ({ children }) => (
+																	<pre className="bg-gray-100 text-gray-800 p-2 rounded text-xs font-mono overflow-x-auto mb-2 last:mb-0">
+																		{children}
+																	</pre>
+																),
+
+																// Block elements
+																blockquote: ({ children }) => (
+																	<blockquote className="border-l-4 border-gray-300 pl-4 italic mb-2 last:mb-0 text-gray-600">
+																		{children}
+																	</blockquote>
+																),
+																hr: () => <hr className="border-gray-300 my-3" />,
+
+																// Links
+																a: ({ href, children }) => (
+																	<a
+																		href={href}
+																		target="_blank"
+																		rel="noopener noreferrer"
+																		className="text-blue-400 hover:text-blue-300 underline"
+																	>
+																		{children}
+																	</a>
+																),
+
+																// Tables
+																table: ({ children }) => (
+																	<div className="overflow-x-auto mb-2 last:mb-0">
+																		<table className="min-w-full border border-gray-300 rounded text-xs">
+																			{children}
+																		</table>
+																	</div>
+																),
+																thead: ({ children }) => (
+																	<thead className="bg-gray-50">{children}</thead>
+																),
+																tbody: ({ children }) => (
+																	<tbody className="bg-white">{children}</tbody>
+																),
+																tr: ({ children }) => (
+																	<tr className="border-b border-gray-200">{children}</tr>
+																),
+																th: ({ children }) => (
+																	<th className="px-2 py-1 text-left font-semibold text-gray-900 border-r border-gray-200 last:border-r-0">
+																		{children}
+																	</th>
+																),
+																td: ({ children }) => (
+																	<td className="px-2 py-1 text-gray-700 border-r border-gray-200 last:border-r-0">
+																		{children}
+																	</td>
+																),
+
+																// Images
+																img: ({ src, alt }) => (
+																	<img
+																		src={src}
+																		alt={alt}
+																		className="max-w-full h-auto rounded mb-2 last:mb-0"
+																	/>
+																),
+
+																// Line breaks
+																br: () => <br />,
+															}}
+														>
+															{message.content}
+														</ReactMarkdown>
+													</div>
 													<p
 														className={`text-xs mt-1 ${
 															message.role === 'user' ? 'text-blue-200' : 'text-gray-500'
@@ -537,16 +679,20 @@ const ChatModule: React.FC = () => {
 												{message.role === 'user' && <UserAvatar user={currentUser} size="md" />}
 											</div>
 										))
-									: !messagesLoading && !isInitialMessageLoad && messages.length === 0 && (
-										<div className="flex justify-center py-8">
-											<div className="text-center">
-												<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-													<FaRobot className="text-gray-400 text-2xl" />
+									: !messagesLoading &&
+										!isInitialMessageLoad &&
+										messages.length === 0 && (
+											<div className="flex justify-center py-8">
+												<div className="text-center">
+													<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+														<FaRobot className="text-gray-400 text-2xl" />
+													</div>
+													<p className="text-gray-500 text-sm">
+														Aucun message dans cette conversation
+													</p>
 												</div>
-												<p className="text-gray-500 text-sm">Aucun message dans cette conversation</p>
 											</div>
-										</div>
-									)}
+										)}
 
 								{/* Typing Indicator */}
 								{isAssistantTyping && <MessageLoader />}
@@ -575,11 +721,7 @@ const ChatModule: React.FC = () => {
 										disabled={!messageInput.trim() || sendingMessage || loading}
 										className="p-3 bg-[#1e51ab] text-white rounded-full hover:bg-[#1a4599] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 									>
-										{sendingMessage ? (
-											<FaSpinner className="animate-spin" />
-										) : (
-											<FaPaperPlane />
-										)}
+										{sendingMessage ? <FaSpinner className="animate-spin" /> : <FaPaperPlane />}
 									</button>
 								</div>
 							</div>
