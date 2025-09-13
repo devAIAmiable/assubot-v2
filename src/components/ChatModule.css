@@ -87,3 +87,32 @@
 	border-color: #1e51ab !important;
 	box-shadow: 0 0 0 1px #1e51ab;
 }
+
+/* Textarea scrollbar styling */
+.chat-textarea {
+	scrollbar-width: thin;
+	scrollbar-color: #d1d5db transparent;
+}
+
+.chat-textarea::-webkit-scrollbar {
+	width: 6px;
+}
+
+.chat-textarea::-webkit-scrollbar-track {
+	background: transparent;
+	border-radius: 3px;
+}
+
+.chat-textarea::-webkit-scrollbar-thumb {
+	background: #d1d5db;
+	border-radius: 3px;
+	transition: background-color 0.2s ease;
+}
+
+.chat-textarea::-webkit-scrollbar-thumb:hover {
+	background: #9ca3af;
+}
+
+.chat-textarea::-webkit-scrollbar-thumb:active {
+	background: #6b7280;
+}

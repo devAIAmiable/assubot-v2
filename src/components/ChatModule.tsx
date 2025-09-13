@@ -22,6 +22,7 @@ import ChatListLoader from './ui/ChatListLoader';
 import type { CreateChatRequest } from '../types/chat';
 import Loader from './ui/Loader';
 import MessageLoader from './ui/MessageLoader';
+import TextareaAutosize from 'react-textarea-autosize';
 import UserAvatar from './ui/UserAvatar';
 import dayjs from 'dayjs';
 import { useAppSelector } from '../store/hooks';
@@ -226,7 +227,7 @@ const ChatModule: React.FC = () => {
 		}
 	};
 
-	const handleKeyPress = (e: React.KeyboardEvent) => {
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
 			handleSendMessage();
@@ -557,15 +558,16 @@ const ChatModule: React.FC = () => {
 						{/* Message Input */}
 						<div className="bg-white p-4 border-t border-gray-200">
 							<div className="max-w-4xl mx-auto">
-								<div className="flex items-center gap-3">
+								<div className="flex items-end gap-3">
 									<div className="flex-1 relative">
-										<input
-											type="text"
+										<TextareaAutosize
 											placeholder="Tapez un message"
 											value={messageInput}
 											onChange={(e) => setMessageInput(e.target.value)}
-											onKeyPress={handleKeyPress}
-											className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-full text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
+											onKeyDown={handleKeyDown}
+											minRows={1}
+											maxRows={4}
+											className="chat-textarea w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent resize-none"
 										/>
 									</div>
 									<button
