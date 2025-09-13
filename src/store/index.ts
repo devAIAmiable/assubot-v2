@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { persistReducer, persistStore } from 'redux-persist';
 
 import chatReducer from './chatSlice';
+import { chatsApi } from './chatsApi';
 import comparisonsReducer from './comparisonsSlice';
 import contractCreationReducer from './contractCreationSlice';
 import { contractsApi } from './contractsApi';
@@ -32,6 +33,7 @@ const rootReducer = combineReducers({
 	chat: chatReducer,
 	comparisons: comparisonsReducer,
 	[contractsApi.reducerPath]: contractsApi.reducer,
+	[chatsApi.reducerPath]: chatsApi.reducer,
 	[creditPacksApi.reducerPath]: creditPacksApi.reducer,
 	[creditTransactionsApi.reducerPath]: creditTransactionsApi.reducer,
 	[generalTermsApi.reducerPath]: generalTermsApi.reducer,
@@ -48,6 +50,7 @@ export const store = configureStore({
 			},
 		}).concat(
 			contractsApi.middleware,
+			chatsApi.middleware,
 			creditPacksApi.middleware,
 			creditTransactionsApi.middleware,
 			generalTermsApi.middleware

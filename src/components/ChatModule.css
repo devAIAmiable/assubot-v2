@@ -1,0 +1,89 @@
+/* ChatModule.css - Styles avec couleurs blanc et #1e51ab */
+.chat-container {
+	height: calc(100vh - 200px);
+	max-height: calc(100vh - 200px);
+	overflow: hidden;
+	background: white;
+}
+
+.chat-sidebar {
+	height: 100%;
+	max-height: 100%;
+	overflow: hidden;
+	background: white;
+	border-right: 1px solid #e5e7eb;
+}
+
+.chat-content {
+	height: 100%;
+	max-height: 100%;
+	overflow: hidden;
+	background: white;
+}
+
+.chat-messages {
+	height: calc(100% - 140px); /* Ajuster selon la hauteur du header et input */
+	max-height: calc(100% - 140px);
+	overflow-y: auto;
+	background: #f9fafb;
+}
+
+.chat-sidebar-list {
+	height: calc(100% - 120px); /* Ajuster selon la hauteur du header */
+	max-height: calc(100% - 120px);
+	overflow-y: auto;
+}
+
+/* Scrollbar personnalisée - Style moderne */
+.chat-messages::-webkit-scrollbar,
+.chat-sidebar-list::-webkit-scrollbar {
+	width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track,
+.chat-sidebar-list::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb,
+.chat-sidebar-list::-webkit-scrollbar-thumb {
+	background: #d1d5db;
+	border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover,
+.chat-sidebar-list::-webkit-scrollbar-thumb:hover {
+	background: #9ca3af;
+}
+
+/* Animations WhatsApp */
+@keyframes messageSlideIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.message-bubble {
+	animation: messageSlideIn 0.2s ease-out;
+}
+
+/* Hover effects */
+.chat-item:hover {
+	background-color: #f9fafb !important;
+}
+
+.chat-item.selected {
+	background-color: #1e51ab;
+	color: white;
+}
+
+/* Input focus effects */
+.message-input:focus {
+	border-color: #1e51ab !important;
+	box-shadow: 0 0 0 1px #1e51ab;
+}

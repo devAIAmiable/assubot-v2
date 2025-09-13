@@ -2,9 +2,9 @@ import { logoutStart, logoutSuccess } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 import { authService } from '../services/coreApi';
-import { clearChat } from '../store/chatSlice';
 import { clearComparisons } from '../store/comparisonsSlice';
 import { clearContracts } from '../store/contractsSlice';
+import { clearCurrentChat } from '../store/chatSlice';
 import { getUserState } from '../utils/stateHelpers';
 import { useCallback } from 'react';
 
@@ -15,7 +15,7 @@ export const useLogout = () => {
 	const clearState = useCallback(() => {
 		dispatch(logoutSuccess());
 		dispatch(clearContracts());
-		dispatch(clearChat());
+		dispatch(clearCurrentChat());
 		dispatch(clearComparisons());
 	}, []);
 

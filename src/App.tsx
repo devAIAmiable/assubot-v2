@@ -5,7 +5,7 @@ import { persistor, store } from './store/index';
 
 import AppLayout from './components/AppLayout';
 import AuthInitializer from './components/AuthInitializer';
-import ChatbotModule from './components/ChatbotModule';
+import ChatModule from './components/ChatModule';
 import ComparateurModule from './components/ComparateurModule';
 import ContractDetailsPage from './components/ContractDetailsPage';
 import ContractsModule from './components/ContractsModule';
@@ -76,7 +76,7 @@ function App() {
 								<Route path="dashboard" element={<Dashboard />} />
 								<Route path="contrats" element={<ContractsModule />} />
 								<Route path="contrats/:contractId" element={<ContractDetailsPage />} />
-								<Route path="chatbot" element={<ChatbotModule />} />
+								<Route path="chatbot" element={<ChatModule />} />
 								<Route path="comparateur" element={<ComparateurModule />} />
 								<Route path="credits" element={<CreditPage />} />
 								<Route path="notifications" element={<NotificationsModule />} />

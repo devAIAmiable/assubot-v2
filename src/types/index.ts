@@ -4,6 +4,9 @@ import type { User } from '../store/userSlice';
 // Import contract types
 export * from './contract';
 
+// Import chat types
+export * from './chat';
+
 // Re-export User for compatibility
 export type { User };
 
@@ -158,13 +161,7 @@ export interface InsuranceStats {
 }
 
 // Contract Creation Types - matching Prisma schema
-export type ContractCategory =
-	| 'auto'
-	| 'health'
-	| 'home'
-	| 'moto'
-	| 'electronic_devices'
-	| 'other';
+export type ContractCategory = 'auto' | 'health' | 'home' | 'moto' | 'electronic_devices' | 'other';
 export type DocumentType = 'CP' | 'CG' | 'OTHER';
 export type ContractStatus = 'active' | 'expired' | 'pending';
 export type ObligationType = 'subscription' | 'during_contract' | 'claim';
