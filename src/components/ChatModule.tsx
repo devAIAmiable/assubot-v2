@@ -705,24 +705,30 @@ const ChatModule: React.FC = () => {
 						{/* Message Input */}
 						<div className="bg-white p-4 border-t border-gray-200">
 							<div className="max-w-4xl mx-auto">
-								<div className="flex items-end gap-3">
-									<div className="flex-1 relative">
-										<TextareaAutosize
-											placeholder="Tapez un message"
-											value={messageInput}
-											onChange={(e) => setMessageInput(e.target.value)}
-											onKeyDown={handleKeyDown}
-											minRows={1}
-											maxRows={4}
-											className="chat-textarea w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent resize-none"
-										/>
-									</div>
+								<div className="relative">
+									<TextareaAutosize
+										placeholder="Posez votre question"
+										value={messageInput}
+										onChange={(e) => setMessageInput(e.target.value)}
+										onKeyDown={handleKeyDown}
+										minRows={1}
+										maxRows={4}
+										className="chat-textarea w-full px-4 py-3 pr-12 bg-gray-100 border border-gray-300 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent resize-none"
+									/>
 									<button
 										onClick={handleSendMessage}
 										disabled={!messageInput.trim() || sendingMessage || loading}
-										className="p-3 bg-[#1e51ab] text-white rounded-full hover:bg-[#1a4599] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+										className={`absolute right-2 bottom-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
+											!messageInput.trim() || sendingMessage || loading
+												? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+												: 'bg-[#1e51ab] text-white hover:bg-[#1a4599] hover:scale-105 shadow-md hover:shadow-lg'
+										}`}
 									>
-										{sendingMessage ? <FaSpinner className="animate-spin" /> : <FaPaperPlane />}
+										{sendingMessage ? (
+											<FaSpinner className="animate-spin text-xs" />
+										) : (
+											<FaPaperPlane className="text-xs" />
+										)}
 									</button>
 								</div>
 								
