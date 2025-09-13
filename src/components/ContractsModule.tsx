@@ -372,16 +372,16 @@ const ContractsModule = () => {
 										</div>
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Prime annuelle</span>
-											<span className="text-sm font-bold text-[#1e51ab]">
-												{getContractListItemPremium(contract).toLocaleString()}€
+											<span className={`text-sm font-bold ${isPending ? 'text-gray-400' : 'text-[#1e51ab]'}`}>
+												{isPending ? '-' : `${getContractListItemPremium(contract).toLocaleString()}€`}
 											</span>
 										</div>
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-gray-600">Échéance</span>
-											<span className="text-sm font-medium text-gray-900">
-												{contract.endDate
+											<span className={`text-sm font-medium ${isPending ? 'text-gray-400' : 'text-gray-900'}`}>
+												{isPending ? '-' : (contract.endDate
 													? contract.endDate.toLocaleDateString('fr-FR')
-													: 'Non spécifiée'}
+													: 'Non spécifiée')}
 											</span>
 										</div>
 									</div>
