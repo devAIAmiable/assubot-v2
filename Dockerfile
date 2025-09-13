@@ -36,8 +36,8 @@ COPY --from=build /app/dist /app/dist
 # Set working directory
 WORKDIR /app
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 5173 (Railway expects this port)
+EXPOSE 5173
 
 # Start the server
-CMD ["serve", "-s", "dist", "-l", "3000"]
+CMD ["serve", "-s", "dist", "-l", "5173"]
