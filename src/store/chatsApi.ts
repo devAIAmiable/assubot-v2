@@ -2,6 +2,7 @@ import type {
 	Chat,
 	ChatFilters,
 	CreateChatRequest,
+	CreateChatResponse,
 	MessageFilters,
 	PaginatedChatResponse,
 	PaginatedMessageResponse,
@@ -96,13 +97,13 @@ export const chatsApi = createApi({
 		}),
 
 		// Create a new chat
-		createChat: builder.mutation<{ chat: Chat; message: string }, CreateChatRequest>({
+		createChat: builder.mutation<CreateChatResponse, CreateChatRequest>({
 			query: (chatData) => ({
 				url: '/',
 				method: 'POST',
 				body: chatData,
 			}),
-			transformResponse: (response: { chat: Chat; message: string }) => response,
+			transformResponse: (response: CreateChatResponse) => response,
 			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
 				status: response.status,
 				message: response.data.error.message,

@@ -1,4 +1,4 @@
-import type { Chat, ChatFilters, CreateChatRequest, UpdateChatRequest } from '../types/chat';
+import type { Chat, ChatFilters, CreateChatRequest, CreateChatResponse, UpdateChatRequest } from '../types/chat';
 import {
 	clearCurrentChat,
 	clearError,
@@ -30,12 +30,11 @@ export const useChats = () => {
 
 	// Actions
 	const createNewChat = useCallback(
-		async (data: CreateChatRequest) => {
+		async (data: CreateChatRequest): Promise<CreateChatResponse> => {
 			const result = await createChatMutation(data).unwrap();
-			// The API returns { chat: Chat; message: string }, so we need to extract the chat
-			const chat = result.chat || result;
-			dispatch(setCurrentChat(chat));
-			return chat;
+			// The API returns CreateChatResponse with chat and actions
+			dispatch(setCurrentChat(result.chat));
+			return result;
 		},
 		[createChatMutation, dispatch]
 	);

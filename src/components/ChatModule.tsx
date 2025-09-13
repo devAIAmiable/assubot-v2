@@ -2,12 +2,12 @@ import './ChatModule.css';
 import 'dayjs/locale/fr';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import type { CreateChatRequest, QuickAction } from '../types/chat';
 import {
 	FaArrowLeft,
 	FaCheck,
 	FaEdit,
 	FaEllipsisV,
-	FaInfoCircle,
 	FaPaperPlane,
 	FaPlus,
 	FaRobot,
@@ -20,7 +20,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useGetChatMessagesQuery, useGetChatsQuery } from '../store/chatsApi';
 
 import ChatListLoader from './ui/ChatListLoader';
-import type { CreateChatRequest } from '../types/chat';
 import Loader from './ui/Loader';
 import MessageLoader from './ui/MessageLoader';
 import ReactMarkdown from 'react-markdown';
@@ -93,6 +92,7 @@ const ChatModule: React.FC = () => {
 	const [messageInput, setMessageInput] = useState('');
 	const [showChatList, setShowChatList] = useState(true); // Mobile navigation state
 	const [isInitialMessageLoad, setIsInitialMessageLoad] = useState(false);
+	const [quickActions, setQuickActions] = useState<QuickAction[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
 	// Récupération des contrats pour la sélection
@@ -134,6 +134,11 @@ const ChatModule: React.FC = () => {
 		}
 	}, [currentChat, messagesLoading, messages.length]);
 
+	// Réinitialiser les actions rapides quand on change de chat
+	useEffect(() => {
+		setQuickActions([]);
+	}, [currentChat]);
+
 	// Handlers
 	const handleCreateChat = async () => {
 		const chatData: CreateChatRequest = {
@@ -142,7 +147,11 @@ const ChatModule: React.FC = () => {
 		};
 
 		try {
-			await createNewChat(chatData);
+			const response = await createNewChat(chatData);
+			// Vérifier si des actions rapides sont retournées
+			if (response.actions && Array.isArray(response.actions)) {
+				setQuickActions(response.actions);
+			}
 			setShowNewChatModal(false);
 			setNewChatTitle('');
 			setSelectedContractIds([]);
@@ -222,11 +231,33 @@ const ChatModule: React.FC = () => {
 
 		try {
 			// Envoyer le message utilisateur
-			await sendUserMessage(currentChat.id, messageContent);
+			const response = await sendUserMessage(currentChat.id, messageContent);
+			// Vérifier si des actions rapides sont retournées
+			if (response && 'actions' in response && response.actions && Array.isArray(response.actions)) {
+				setQuickActions(response.actions);
+			}
 		} catch (error) {
 			console.error("Erreur lors de l'envoi du message:", error);
 			// Restaurer le message en cas d'erreur
 			setMessageInput(messageContent);
+		}
+	};
+
+	const handleQuickAction = async (action: QuickAction) => {
+		if (!currentChat || sendingMessage) return;
+
+		try {
+			// Masquer les actions rapides temporairement
+			setQuickActions([]);
+			
+			// Envoyer l'action comme message utilisateur
+			const response = await sendUserMessage(currentChat.id, action.instructions);
+			// Vérifier si de nouvelles actions rapides sont retournées
+			if (response && 'actions' in response && response.actions && Array.isArray(response.actions)) {
+				setQuickActions(response.actions);
+			}
+		} catch (error) {
+			console.error("Erreur lors de l'envoi de l'action rapide:", error);
 		}
 	};
 
@@ -376,13 +407,49 @@ const ChatModule: React.FC = () => {
 															>
 																{chat.title}
 															</h3>
-															<p
+															<div
 																className={`text-sm truncate ${
 																	currentChat?.id === chat.id ? 'text-blue-600' : 'text-gray-500'
 																}`}
 															>
-																{chat.lastMessage?.content || 'Aucun message'}
-															</p>
+																{chat.lastMessage?.content ? (
+																	<ReactMarkdown
+																		remarkPlugins={[remarkGfm]}
+																		components={{
+																			// Strip all formatting for preview
+																			p: ({ children }) => <span>{children}</span>,
+																			strong: ({ children }) => <span>{children}</span>,
+																			em: ({ children }) => <span>{children}</span>,
+																			code: ({ children }) => <span>{children}</span>,
+																			pre: ({ children }) => <span>{children}</span>,
+																			h1: ({ children }) => <span>{children}</span>,
+																			h2: ({ children }) => <span>{children}</span>,
+																			h3: ({ children }) => <span>{children}</span>,
+																			h4: ({ children }) => <span>{children}</span>,
+																			h5: ({ children }) => <span>{children}</span>,
+																			h6: ({ children }) => <span>{children}</span>,
+																			ul: ({ children }) => <span>{children}</span>,
+																			ol: ({ children }) => <span>{children}</span>,
+																			li: ({ children }) => <span>{children}</span>,
+																			blockquote: ({ children }) => <span>{children}</span>,
+																			a: ({ children }) => <span>{children}</span>,
+																			img: () => <span>[Image]</span>,
+																			table: ({ children }) => <span>{children}</span>,
+																			thead: ({ children }) => <span>{children}</span>,
+																			tbody: ({ children }) => <span>{children}</span>,
+																			tr: ({ children }) => <span>{children}</span>,
+																			th: ({ children }) => <span>{children}</span>,
+																			td: ({ children }) => <span>{children}</span>,
+																			hr: () => <span>---</span>,
+																			br: () => <span> </span>,
+																		}}
+																	>
+																		{chat.lastMessage.content}
+																	</ReactMarkdown>
+																) : (
+																	'Aucun message'
+																)}
+															</div>
 															{chat.contracts && chat.contracts.length > 0 && (
 																<p className="text-xs text-gray-400 truncate mt-1">
 																	{chat.contracts.map(contract => contract.name).join(', ')}
@@ -723,6 +790,33 @@ const ChatModule: React.FC = () => {
 								{/* Typing Indicator */}
 								{isAssistantTyping && <MessageLoader />}
 
+								{/* Quick Actions */}
+								{!messagesLoading && !isInitialMessageLoad && quickActions.length > 0 && (
+									<div className="flex flex-wrap gap-1.5 justify-center py-3">
+										{quickActions.map((action) => (
+											<button
+												key={action.id}
+												onClick={() => handleQuickAction(action)}
+												disabled={sendingMessage}
+												className="group relative px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs text-gray-600 hover:bg-[#1e51ab] hover:border-[#1e51ab] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transform hover:scale-105"
+											>
+												<ReactMarkdown
+													remarkPlugins={[remarkGfm]}
+													components={{
+														p: ({ children }) => <span className="whitespace-nowrap">{children}</span>,
+														strong: ({ children }) => <strong className="font-medium">{children}</strong>,
+														em: ({ children }) => <em className="italic">{children}</em>,
+													}}
+												>
+													{action.label}
+												</ReactMarkdown>
+												{/* Subtle hover effect */}
+												<div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#1e51ab]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+											</button>
+										))}
+									</div>
+								)}
+
 								<div ref={messagesEndRef} />
 							</div>
 						</div>
@@ -738,7 +832,7 @@ const ChatModule: React.FC = () => {
 										onKeyDown={handleKeyDown}
 										minRows={1}
 										maxRows={4}
-										className="chat-textarea w-full px-4 py-3 pr-12 bg-gray-100 border border-gray-300 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent resize-none"
+										className="text-sm chat-textarea w-full px-4 py-3 pr-12 bg-gray-100 border border-gray-300 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent resize-none"
 									/>
 									<button
 										onClick={handleSendMessage}
@@ -759,12 +853,9 @@ const ChatModule: React.FC = () => {
 
 								{/* Privacy Information - Below text area like ChatGPT */}
 								<div className=" flex items-center justify-center">
-									<div className="flex items-center gap-2 text-xs text-gray-500">
-										<FaInfoCircle className="text-gray-400 flex-shrink-0" />
-										<p>
+									<div className="flex items-center gap-2 text-xs text-gray-500 text-center">
 											Votre espace de conversation est confidentiel. Le ChatBot repose sur une IA,
 											veuillez vérifier les informations importantes.
-										</p>
 									</div>
 								</div>
 							</div>

@@ -48,9 +48,27 @@ export interface SendMessageRequest {
 	role: 'user' | 'assistant';
 }
 
+export interface QuickAction {
+	id: string;
+	label: string;
+	instructions: string;
+}
+
+export interface QuickActionsResponse {
+	actions: QuickAction[];
+}
+
 export interface SendMessageResponse {
 	message: ChatMessage;
 	chat: Chat;
+	actions?: QuickAction[];
+}
+
+export interface CreateChatResponse {
+	status: string;
+	message: string;
+	chat: Chat;
+	actions?: QuickAction[];
 }
 
 export interface PaginatedChatResponse {
