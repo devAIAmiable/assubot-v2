@@ -5,6 +5,8 @@ import type {
 	MessageFilters,
 	PaginatedChatResponse,
 	PaginatedMessageResponse,
+	SendMessageRequest,
+	SendMessageResponse,
 	UpdateChatRequest,
 } from '../types/chat';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
@@ -144,7 +146,10 @@ export const chatsApi = createApi({
 		}),
 
 		// Get paginated messages for a specific chat
-		getChatMessages: builder.query<PaginatedMessageResponse, { chatId: string; filters?: MessageFilters }>({
+		getChatMessages: builder.query<
+			PaginatedMessageResponse,
+			{ chatId: string; filters?: MessageFilters }
+		>({
 			keepUnusedDataFor: 5 * 60, // 5 minutes in seconds
 			query: ({ chatId, filters = {} }) => {
 				const queryParams: Record<string, string | number> = {
@@ -178,6 +183,39 @@ export const chatsApi = createApi({
 			}),
 			providesTags: (_result, _error, { chatId }) => [{ type: 'Message', id: chatId }],
 		}),
+
+		// Send a message to a specific chat
+		sendMessage: builder.mutation<
+			SendMessageResponse,
+			{ chatId: string; message: SendMessageRequest }
+		>({
+			query: ({ chatId, message }) => ({
+				url: `/${chatId}/messages`,
+				method: 'POST',
+				body: message,
+			}),
+			transformResponse: (response: any) => {
+				// Handle the actual API response structure
+				if (response.status === 'success' && response.data) {
+					return {
+						message: response.data.message,
+						chat: response.data.chat,
+					};
+				}
+				// Fallback to original structure if different
+				return response;
+			},
+			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+				status: response.status,
+				message: response.data.error.message,
+				code: response.data.error.code,
+			}),
+			invalidatesTags: (_result, _error, { chatId }) => [
+				{ type: 'Message', id: chatId },
+				{ type: 'Chat', id: chatId },
+				{ type: 'Chat' },
+			],
+		}),
 	}),
 });
 
@@ -185,6 +223,7 @@ export const {
 	useGetChatsQuery,
 	useGetChatByIdQuery,
 	useGetChatMessagesQuery,
+	useSendMessageMutation,
 	useCreateChatMutation,
 	useUpdateChatMutation,
 	useDeleteChatMutation,

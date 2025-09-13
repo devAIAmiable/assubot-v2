@@ -3,6 +3,7 @@ import 'dayjs/locale/fr';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import {
+	FaArrowLeft,
 	FaCheck,
 	FaEdit,
 	FaEllipsisV,
@@ -18,10 +19,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useGetChatMessagesQuery, useGetChatsQuery } from '../store/chatsApi';
 
 import type { CreateChatRequest } from '../types/chat';
+import UserAvatar from './ui/UserAvatar';
 import dayjs from 'dayjs';
+import { useAppSelector } from '../store/hooks';
 import { useChatPagination } from '../hooks/useChatPagination';
 import { useChats } from '../hooks/useChats';
 import { useGetContractsQuery } from '../store/contractsApi';
+import { useSendMessage } from '../hooks/useSendMessage';
 
 dayjs.locale('fr');
 
@@ -57,6 +61,16 @@ const ChatModule: React.FC = () => {
 		}
 	);
 
+	// Send message hook
+	const {
+		sendUserMessage,
+		isLoading: sendingMessage,
+		isTyping: isAssistantTyping,
+	} = useSendMessage();
+
+	// Get current user info
+	const currentUser = useAppSelector((state) => state.user.currentUser);
+
 	// Get the messages array
 	const messages = messagesData?.messages || [];
 
@@ -70,7 +84,7 @@ const ChatModule: React.FC = () => {
 	const [newChatTitle, setNewChatTitle] = useState('');
 	const [selectedContractIds, setSelectedContractIds] = useState<string[]>([]);
 	const [messageInput, setMessageInput] = useState('');
-	const [isTyping, setIsTyping] = useState(false);
+	const [showChatList, setShowChatList] = useState(true); // Mobile navigation state
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
 	// Récupération des contrats pour la sélection
@@ -105,6 +119,8 @@ const ChatModule: React.FC = () => {
 			setShowNewChatModal(false);
 			setNewChatTitle('');
 			setSelectedContractIds([]);
+			// On mobile, show the chat list after creating a new chat
+			setShowChatList(true);
 		} catch (error) {
 			console.error('Erreur lors de la création du chat:', error);
 		}
@@ -116,6 +132,8 @@ const ChatModule: React.FC = () => {
 		const selectedChat = paginatedChats.find((chat) => chat.id === chatId);
 		if (selectedChat) {
 			selectChat(selectedChat);
+			// On mobile, hide chat list and show messages
+			setShowChatList(false);
 		}
 	};
 
@@ -143,6 +161,8 @@ const ChatModule: React.FC = () => {
 			await deleteChatById(chatToDelete);
 			if (currentChat?.id === chatToDelete) {
 				selectChat(null);
+				// On mobile, show the chat list after deleting current chat
+				setShowChatList(true);
 			}
 			setShowDeleteModal(false);
 			setChatToDelete(null);
@@ -156,6 +176,11 @@ const ChatModule: React.FC = () => {
 		setChatToDelete(null);
 	};
 
+	const handleBackToChatList = () => {
+		setShowChatList(true);
+		selectChat(null);
+	};
+
 	const toggleContractSelection = (contractId: string) => {
 		setSelectedContractIds((prev) =>
 			prev.includes(contractId) ? prev.filter((id) => id !== contractId) : [...prev, contractId]
@@ -163,15 +188,19 @@ const ChatModule: React.FC = () => {
 	};
 
 	const handleSendMessage = async () => {
-		if (!messageInput.trim() || !currentChat) return;
+		if (!messageInput.trim() || !currentChat || sendingMessage) return;
 
+		const messageContent = messageInput.trim();
 		setMessageInput('');
-		setIsTyping(true);
 
-		// Simuler l'envoi du message (à remplacer par l'API réelle)
-		setTimeout(() => {
-			setIsTyping(false);
-		}, 1000);
+		try {
+			// Envoyer le message utilisateur
+			await sendUserMessage(currentChat.id, messageContent);
+		} catch (error) {
+			console.error("Erreur lors de l'envoi du message:", error);
+			// Restaurer le message en cas d'erreur
+			setMessageInput(messageContent);
+		}
 	};
 
 	const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -184,16 +213,18 @@ const ChatModule: React.FC = () => {
 	// Auto-scroll vers le bas des messages
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-	}, [currentChat, isTyping, messages]);
+	}, [currentChat, isAssistantTyping, messages]);
 
 	// Rendu
 	return (
 		<div
-			className="flex bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+			className="flex bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-full"
 			style={{ height: 'calc(100vh - 140px)' }}
 		>
 			{/* Sidebar - Style WhatsApp */}
-			<div className="w-1/3 bg-white border-r border-gray-200 flex flex-col">
+			<div className={`w-full md:w-1/3 bg-white border-r border-gray-200 flex flex-col ${
+				showChatList ? 'flex' : 'hidden md:flex'
+			}`}>
 				{/* Header */}
 				<div className="bg-[#1e51ab] p-4 border-b border-gray-200">
 					<div className="flex items-center justify-between mb-4">
@@ -334,7 +365,9 @@ const ChatModule: React.FC = () => {
 																	currentChat?.id === chat.id ? 'text-blue-500' : 'text-gray-400'
 																}`}
 															>
-																{dayjs(chat.lastMessage?.createdAt || chat.updatedAt).format('DD MMM')}
+																{dayjs(chat.lastMessage?.createdAt || chat.updatedAt).format(
+																	'DD MMM'
+																)}
 															</span>
 
 															{/* Actions (visible au hover) */}
@@ -404,12 +437,21 @@ const ChatModule: React.FC = () => {
 			</div>
 
 			{/* Main Content - Style WhatsApp */}
-			<div className="flex-1 flex flex-col bg-white">
+			<div className={`flex-1 flex flex-col bg-white ${
+				showChatList ? 'hidden md:flex' : 'flex'
+			}`}>
 				{currentChat ? (
 					<>
 						{/* Header */}
 						<div className="bg-[#1e51ab] p-4 border-b border-gray-200 flex items-center justify-between">
 							<div className="flex items-center gap-3">
+								{/* Back button for mobile */}
+								<button
+									onClick={handleBackToChatList}
+									className="md:hidden p-2 text-blue-200 hover:text-white hover:bg-blue-600 rounded-full transition-colors"
+								>
+									<FaArrowLeft />
+								</button>
 								<div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
 									<FaRobot className="text-[#1e51ab]" />
 								</div>
@@ -468,17 +510,13 @@ const ChatModule: React.FC = () => {
 														{dayjs(message.createdAt).format('HH:mm')}
 													</p>
 												</div>
-												{message.role === 'user' && (
-													<div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-														<span className="text-gray-600 text-xs font-medium">U</span>
-													</div>
-												)}
+												{message.role === 'user' && <UserAvatar user={currentUser} size="md" />}
 											</div>
 										))
 									: null}
 
 								{/* Typing Indicator */}
-								{isTyping && (
+								{isAssistantTyping && (
 									<div className="flex items-start gap-3">
 										<div className="w-8 h-8 bg-[#1e51ab] rounded-full flex items-center justify-center flex-shrink-0">
 											<FaRobot className="text-white text-sm" />
@@ -519,10 +557,10 @@ const ChatModule: React.FC = () => {
 									</div>
 									<button
 										onClick={handleSendMessage}
-										disabled={!messageInput.trim() || loading}
+										disabled={!messageInput.trim() || sendingMessage || loading}
 										className="p-3 bg-[#1e51ab] text-white rounded-full hover:bg-[#1a4599] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 									>
-										<FaPaperPlane />
+										{sendingMessage ? <FaSpinner className="animate-spin" /> : <FaPaperPlane />}
 									</button>
 								</div>
 							</div>
@@ -530,7 +568,7 @@ const ChatModule: React.FC = () => {
 					</>
 				) : (
 					<div className="flex-1 flex items-center justify-center bg-gray-50">
-						<div className="text-center max-w-md">
+						<div className="text-center max-w-md px-4">
 							<div className="w-32 h-32 bg-[#1e51ab] rounded-full flex items-center justify-center mx-auto mb-6">
 								<FaRobot className="text-white text-4xl" />
 							</div>

@@ -43,6 +43,16 @@ export interface UpdateChatRequest {
 	title?: string;
 }
 
+export interface SendMessageRequest {
+	content: string;
+	role: 'user' | 'assistant';
+}
+
+export interface SendMessageResponse {
+	message: ChatMessage;
+	chat: Chat;
+}
+
 export interface PaginatedChatResponse {
 	chats: Chat[];
 	pagination: {
