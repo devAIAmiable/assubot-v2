@@ -383,6 +383,11 @@ const ChatModule: React.FC = () => {
 															>
 																{chat.lastMessage?.content || 'Aucun message'}
 															</p>
+															{chat.contracts && chat.contracts.length > 0 && (
+																<p className="text-xs text-gray-400 truncate mt-1">
+																	{chat.contracts.map(contract => contract.name).join(', ')}
+																</p>
+															)}
 														</div>
 
 														{/* Timestamp et actions */}
@@ -484,7 +489,11 @@ const ChatModule: React.FC = () => {
 								</div>
 								<div>
 									<h1 className="text-white font-medium">{currentChat.title}</h1>
-									<p className="text-sm text-blue-200">AI'A</p>
+									{currentChat.contracts && currentChat.contracts.length > 0 && (
+										<p className="text-xs text-blue-100 mt-1">
+											{currentChat.contracts.map(contract => contract.name).join(', ')}
+										</p>
+									)}
 								</div>
 							</div>
 							<div className="flex items-center gap-2">

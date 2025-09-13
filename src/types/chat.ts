@@ -27,7 +27,7 @@ export interface ChatMessage {
 
 export interface Contract {
 	id: string;
-	title: string;
+	name: string;
 	category: string;
 	status: string;
 	createdAt: string;
