@@ -1,6 +1,14 @@
 # Multi-stage build for React/TypeScript application
 FROM node:18-alpine AS base
 
+ARG VITE_CORE_API_URL
+ARG VITE_APP_NAME
+ARG VITE_APP_VERSION
+
+ENV VITE_CORE_API_URL=${VITE_CORE_API_URL}
+ENV VITE_APP_NAME=${VITE_APP_NAME}
+ENV VITE_APP_VERSION=${VITE_APP_VERSION}
+
 # Install pnpm
 RUN npm install -g pnpm
 
