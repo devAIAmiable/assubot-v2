@@ -27,6 +27,7 @@ import ReactMarkdown from 'react-markdown';
 import TextareaAutosize from 'react-textarea-autosize';
 import UserAvatar from './ui/UserAvatar';
 import dayjs from 'dayjs';
+import remarkGfm from 'remark-gfm';
 import { useAppSelector } from '../store/hooks';
 import { useChatPagination } from '../hooks/useChatPagination';
 import { useChats } from '../hooks/useChats';
@@ -529,6 +530,7 @@ const ChatModule: React.FC = () => {
 												>
 													<div className="text-sm prose prose-sm max-w-none">
 														<ReactMarkdown
+															remarkPlugins={[remarkGfm]}
 															components={{
 																// Headings
 																h1: ({ children }) => (
@@ -627,28 +629,42 @@ const ChatModule: React.FC = () => {
 
 																// Tables
 																table: ({ children }) => (
-																	<div className="overflow-x-auto mb-2 last:mb-0">
-																		<table className="min-w-full border border-gray-300 rounded text-xs">
+																	<div className="overflow-x-auto mb-4 last:mb-0">
+																		<table className="min-w-full border border-gray-300 rounded-lg text-sm">
 																			{children}
 																		</table>
 																	</div>
 																),
 																thead: ({ children }) => (
-																	<thead className="bg-gray-50">{children}</thead>
+																	<thead className="">{children}</thead>
 																),
 																tbody: ({ children }) => (
-																	<tbody className="bg-white">{children}</tbody>
+																	<tbody className=" divide-y divide-gray-100">{children}</tbody>
 																),
-																tr: ({ children }) => (
-																	<tr className="border-b border-gray-200">{children}</tr>
-																),
-																th: ({ children }) => (
-																	<th className="px-2 py-1 text-left font-semibold text-gray-900 border-r border-gray-200 last:border-r-0">
+																tr: ({ children }) => <tr className="">{children}</tr>,
+																th: ({ children, align }) => (
+																	<th
+																		className={`px-4 py-3 text-left font-semibold  ${
+																			align === 'right'
+																				? 'text-right'
+																				: align === 'center'
+																					? 'text-center'
+																					: 'text-left'
+																		}`}
+																	>
 																		{children}
 																	</th>
 																),
-																td: ({ children }) => (
-																	<td className="px-2 py-1 text-gray-700 border-r border-gray-200 last:border-r-0">
+																td: ({ children, align }) => (
+																	<td
+																		className={`px-4 py-3  ${
+																			align === 'right'
+																				? 'text-right'
+																				: align === 'center'
+																					? 'text-center'
+																					: 'text-left'
+																		}`}
+																	>
 																		{children}
 																	</td>
 																),
@@ -731,13 +747,14 @@ const ChatModule: React.FC = () => {
 										)}
 									</button>
 								</div>
-								
+
 								{/* Privacy Information - Below text area like ChatGPT */}
 								<div className=" flex items-center justify-center">
 									<div className="flex items-center gap-2 text-xs text-gray-500">
 										<FaInfoCircle className="text-gray-400 flex-shrink-0" />
 										<p>
-											Votre espace de conversation est confidentiel. Le ChatBot repose sur une IA, veuillez vérifier les informations importantes.
+											Votre espace de conversation est confidentiel. Le ChatBot repose sur une IA,
+											veuillez vérifier les informations importantes.
 										</p>
 									</div>
 								</div>
