@@ -16,7 +16,7 @@ export const getContractType = (contract: Contract): string => {
 		auto: 'auto',
 		health: 'sante',
 		home: 'habitation',
-		motorcycle: 'auto', // Map motorcycle to auto for compatibility
+		moto: 'moto',
 		electronic_devices: 'electronique',
 		other: 'autre',
 	};
@@ -186,7 +186,7 @@ export const getContractListItemType = (contract: ContractListItem): string => {
 		auto: 'auto',
 		health: 'sante',
 		home: 'habitation',
-		moto: 'auto', // Map moto to auto for compatibility
+		moto: 'moto',
 		electronic_devices: 'electronique',
 		other: 'autre',
 	};

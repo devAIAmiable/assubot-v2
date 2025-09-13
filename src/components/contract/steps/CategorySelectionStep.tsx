@@ -36,7 +36,7 @@ const CategorySelectionStep: React.FC<CategorySelectionStepProps> = ({ onDataUpd
 			description: 'Assurance habitation',
 		},
 		{
-			id: 'motorcycle',
+			id: 'moto',
 			name: 'Moto',
 			icon: FaMotorcycle,
 			description: 'Assurance motocycle',

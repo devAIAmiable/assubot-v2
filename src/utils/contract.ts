@@ -26,7 +26,7 @@ export const getTypeLabel = (type: string) => {
 			return 'Habitation';
 		case 'sante':
 			return 'Santé';
-		case 'motorcycle':
+		case 'moto':
 			return 'Moto';
 		case 'electronique':
 			return 'Électronique';

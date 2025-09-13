@@ -49,7 +49,7 @@ export interface ModalProps {
 }
 
 // Insurance Types for Comparator
-export type InsuranceType = 'auto' | 'habitation' | 'sante' | 'motorcycle';
+export type InsuranceType = 'auto' | 'habitation' | 'sante' | 'moto';
 
 export interface InsuranceTypeInfo {
 	id: InsuranceType;
@@ -162,7 +162,7 @@ export type ContractCategory =
 	| 'auto'
 	| 'health'
 	| 'home'
-	| 'motorcycle'
+	| 'moto'
 	| 'electronic_devices'
 	| 'other';
 export type DocumentType = 'CP' | 'CG' | 'OTHER';

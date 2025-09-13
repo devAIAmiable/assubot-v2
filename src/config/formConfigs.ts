@@ -125,8 +125,8 @@ export const motoFormConfig: FormConfig = {
 			fields: ['age', 'profession', 'location', 'postalCode', 'monthlyBudget'],
 		},
 		{
-			id: 'motorcycle',
-			title: 'Votre motorcycle',
+			id: 'moto',
+			title: 'Votre moto',
 			description: 'Caractéristiques de votre deux-roues',
 			fields: [
 				'motorcycleType', 'engineSize', 'brand', 'model',
@@ -164,7 +164,7 @@ export const getFormConfig = (insuranceType: string): FormConfig => {
 			return habitationFormConfig;
 		case 'sante':
 			return santeFormConfig;
-		case 'motorcycle':
+		case 'moto':
 			return motoFormConfig;
 		default:
 			return autoFormConfig;
@@ -269,7 +269,7 @@ export const fieldOptions: Record<string, Array<{ value: string; label: string }
 	vehicleType: [
 		{ value: 'car', label: 'Voiture' },
 		{ value: 'van', label: 'Utilitaire' },
-		{ value: 'motorcycle', label: 'Moto' },
+		{ value: 'moto', label: 'Moto' },
 	],
 	energyType: [
 		{ value: 'petrol', label: 'Essence' },
@@ -351,7 +351,7 @@ export const fieldOptions: Record<string, Array<{ value: string; label: string }
 	// Moto
 	motorcycleType: [
 		{ value: 'scooter', label: 'Scooter' },
-		{ value: 'motorcycle', label: 'Moto' },
+		{ value: 'moto', label: 'Moto' },
 		{ value: 'trail', label: 'Trail' },
 		{ value: 'sport', label: 'Sportive' },
 		{ value: 'cruiser', label: 'Cruiser' },

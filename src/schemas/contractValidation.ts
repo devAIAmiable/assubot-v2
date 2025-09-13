@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Contract category enum validation
 export const contractCategorySchema = z.enum(
-	['auto', 'health', 'home', 'motorcycle', 'other', 'electronic_devices'],
+	['auto', 'health', 'home', 'moto', 'other', 'electronic_devices'],
 	{
 		message: 'La catégorie est obligatoire',
 	}

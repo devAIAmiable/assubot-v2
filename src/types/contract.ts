@@ -3,7 +3,7 @@ export const ContractCategory = {
 	AUTO: 'auto',
 	HEALTH: 'health',
 	HOME: 'home',
-	MOTORCYCLE: 'moto', // Backend uses 'moto' instead of 'motorcycle'
+	MOTORCYCLE: 'moto',
 	ELECTRONIC_DEVICES: 'electronic_devices',
 	OTHER: 'other',
 } as const;

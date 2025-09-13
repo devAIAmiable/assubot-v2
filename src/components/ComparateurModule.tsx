@@ -66,7 +66,7 @@ const ComparateurModule = () => {
 
 	// State management
 	const [currentStep, setCurrentStep] = useState<ComparateurStep>('history');
-	const [selectedType, setSelectedType] = useState<'auto' | 'habitation' | 'sante' | 'motorcycle' | null>(
+	const [selectedType, setSelectedType] = useState<'auto' | 'habitation' | 'sante' | 'moto' | null>(
 		null
 	);
 
@@ -174,7 +174,7 @@ const ComparateurModule = () => {
 		},
 		{ id: 'sante', name: 'Assurance Santé', icon: FaMedkit, color: 'from-red-500 to-red-600' },
 		{
-			id: 'motorcycle',
+			id: 'moto',
 			name: 'Assurance Moto',
 			icon: FaMotorcycle,
 			color: 'from-purple-500 to-purple-600',
@@ -339,7 +339,7 @@ const ComparateurModule = () => {
 						hasChronicCondition: false,
 						practicesSport: false,
 					}),
-					...(selectedType === 'motorcycle' && {
+					...(selectedType === 'moto' && {
 						motorcycleType: currentFormData.vehicleType,
 						engineSize: '125',
 						hasAntiTheft: false,

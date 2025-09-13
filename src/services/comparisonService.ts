@@ -190,7 +190,7 @@ const mockData: Record<InsuranceType, ComparisonOffer[]> = {
 			cons: ['Réseau limité'],
 		},
 	],
-	motorcycle: [
+	moto: [
 		{
 			id: '1',
 			insurer: 'Direct Assurance',
@@ -279,7 +279,7 @@ export class ComparisonService {
 					Optique: { included: true, value: '150€' },
 				};
 				break;
-			case 'motorcycle':
+			case 'moto':
 				coverages = {
 					'Responsabilité civile': { included: true },
 					Vol: { included: true },
@@ -330,9 +330,9 @@ export class ComparisonService {
 			let priceMultiplier = 1;
 			let scoreBonus = 0;
 
-			// Age factor (younger = higher prices for auto/motorcycle)
+			// Age factor (younger = higher prices for auto/moto)
 			const age = parseInt(formData.age) || 25;
-			if (insuranceType === 'auto' || insuranceType === 'motorcycle') {
+			if (insuranceType === 'auto' || insuranceType === 'moto') {
 				if (age < 25) priceMultiplier *= 1.3;
 				else if (age > 50) priceMultiplier *= 0.9;
 			}
@@ -352,7 +352,7 @@ export class ComparisonService {
 			// Insurance type specific adjustments
 			if (insuranceType === 'auto' && 'vehicleType' in formData) {
 				// Vehicle type factor
-				if (formData.vehicleType === 'motorcycle') priceMultiplier *= 1.2;
+				if (formData.vehicleType === 'moto') priceMultiplier *= 1.2;
 				if (formData.vehicleType === 'van') priceMultiplier *= 1.1;
 
 				// Energy type factor
@@ -397,8 +397,8 @@ export class ComparisonService {
 				}
 			}
 
-			if (insuranceType === 'motorcycle' && 'motorcycleType' in formData) {
-				// Motorcycle type factor
+			if (insuranceType === 'moto' && 'motorcycleType' in formData) {
+				// moto type factor
 				if (formData.motorcycleType === 'sport') priceMultiplier *= 1.3;
 				if (formData.motorcycleType === 'scooter') priceMultiplier *= 0.9;
 

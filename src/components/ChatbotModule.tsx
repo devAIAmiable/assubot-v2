@@ -237,7 +237,7 @@ const ChatbotModule = () => {
 			auto: 'Auto',
 			health: 'Santé',
 			home: 'Habitation',
-			moto: 'Auto', // Map motorcycle to auto for compatibility
+			moto: 'Moto',
 			electronic_devices: 'Électronique',
 			other: 'Autre',
 		};

@@ -9,7 +9,7 @@ export interface BaseFormData {
 
 export interface AutoFormData extends BaseFormData {
 	// Vehicle information
-	vehicleType: 'car' | 'van' | 'motorcycle' | '';
+	vehicleType: 'car' | 'van' | 'moto' | '';
 	brand: string;
 	model: string;
 	version: string; // Optional trim/version
@@ -85,7 +85,7 @@ export interface SanteFormData extends BaseFormData {
 
 export interface MotoFormData extends BaseFormData {
 	// Vehicle information
-	motorcycleType: 'scooter' | 'motorcycle' | 'trail' | 'sport' | 'cruiser' | '';
+	motorcycleType: 'scooter' | 'moto' | 'trail' | 'sport' | 'cruiser' | '';
 	engineSize: string; // cc
 	brand: string;
 	model: string;
