@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { Chat, ChatFilters, ChatState } from '../types/chat';
+import type { Chat, ChatFilters, ChatState, QuickAction } from '../types/chat';
 
 const initialState: ChatState = {
 	chats: [],
@@ -13,6 +13,7 @@ const initialState: ChatState = {
 		sortBy: 'createdAt',
 		sortOrder: 'desc',
 	},
+	quickActions: {}, // Initialize empty quick actions storage
 };
 
 // Note: Les thunks asynchrones sont maintenant gérés par RTK Query dans chatsApi.ts
@@ -59,6 +60,30 @@ const chatSlice = createSlice({
 			}
 			state.chats = state.chats.filter((chat) => chat.id !== action.payload);
 		},
+
+		// Quick actions management
+		setQuickActions: (state, action: PayloadAction<{ chatId: string; actions: QuickAction[] }>) => {
+			const { chatId, actions } = action.payload;
+			// Ensure quickActions is always an object
+			if (!state.quickActions) {
+				state.quickActions = {};
+			}
+			state.quickActions[chatId] = actions;
+		},
+
+		clearQuickActions: (state, action: PayloadAction<string>) => {
+			const chatId = action.payload;
+			// Ensure quickActions is always an object
+			if (!state.quickActions) {
+				state.quickActions = {};
+				return;
+			}
+			delete state.quickActions[chatId];
+		},
+
+		clearAllQuickActions: (state) => {
+			state.quickActions = {};
+		},
 	},
 	// Note: Les extraReducers sont maintenant gérés par RTK Query dans chatsApi.ts
 });
@@ -70,6 +95,9 @@ export const {
 	clearCurrentChat,
 	updateChatInList,
 	removeChatFromList,
+	setQuickActions,
+	clearQuickActions,
+	clearAllQuickActions,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

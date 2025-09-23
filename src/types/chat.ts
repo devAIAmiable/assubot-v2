@@ -124,4 +124,6 @@ export interface ChatState {
 		hasPrev: boolean;
 	} | null;
 	filters: ChatFilters;
+	// Store quick actions per chat ID
+	quickActions: Record<string, QuickAction[]>;
 }

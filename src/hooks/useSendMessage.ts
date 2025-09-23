@@ -1,25 +1,30 @@
+import type { SendMessageRequest, SendMessageResponse } from '../types/chat';
 import { useCallback, useState } from 'react';
 
-import type { SendMessageRequest } from '../types/chat';
+import { setQuickActions } from '../store/chatSlice';
+import { useAppDispatch } from '../store/hooks';
 import { useSendMessageMutation } from '../store/chatsApi';
 
 export const useSendMessage = () => {
 	const [sendMessageMutation, { isLoading, error }] = useSendMessageMutation();
 	const [isTyping, setIsTyping] = useState(false);
+	const dispatch = useAppDispatch();
 
 	const sendMessage = useCallback(
-		async (chatId: string, message: SendMessageRequest) => {
-			try {
-				const result = await sendMessageMutation({
-					chatId,
-					message,
-				}).unwrap();
-				return result;
-			} catch (error) {
-				throw error;
+		async (chatId: string, message: SendMessageRequest): Promise<SendMessageResponse> => {
+			const result = await sendMessageMutation({
+				chatId,
+				message,
+			}).unwrap();
+			
+			// Store quick actions if provided in response
+			if (result.actions && Array.isArray(result.actions)) {
+				dispatch(setQuickActions({ chatId, actions: result.actions }));
 			}
+			
+			return result;
 		},
-		[sendMessageMutation]
+		[sendMessageMutation, dispatch]
 	);
 
 	const sendUserMessage = useCallback(

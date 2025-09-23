@@ -45,6 +45,8 @@ const ChatModule: React.FC = () => {
 		deleteChatById,
 		selectChat,
 		clearChatError,
+		getChatQuickActions,
+		clearChatQuickActions,
 	} = useChats();
 
 	const {
@@ -92,7 +94,8 @@ const ChatModule: React.FC = () => {
 	const [messageInput, setMessageInput] = useState('');
 	const [showChatList, setShowChatList] = useState(true); // Mobile navigation state
 	const [isInitialMessageLoad, setIsInitialMessageLoad] = useState(false);
-	const [quickActions, setQuickActions] = useState<QuickAction[]>([]);
+	// Get quick actions from Redux for current chat
+	const quickActions = currentChat ? getChatQuickActions(currentChat.id) : [];
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
 	// Récupération des contrats pour la sélection
@@ -134,9 +137,9 @@ const ChatModule: React.FC = () => {
 		}
 	}, [currentChat, messagesLoading, messages.length]);
 
-	// Réinitialiser les actions rapides quand on change de chat
+	// Quick actions are now managed per chat in Redux, no need to clear them
 	useEffect(() => {
-		setQuickActions([]);
+		// Quick actions are now managed per chat in Redux, no need to clear them
 	}, [currentChat]);
 
 	// Handlers
@@ -147,11 +150,8 @@ const ChatModule: React.FC = () => {
 		};
 
 		try {
-			const response = await createNewChat(chatData);
-			// Vérifier si des actions rapides sont retournées
-			if (response.actions && Array.isArray(response.actions)) {
-				setQuickActions(response.actions);
-			}
+			await createNewChat(chatData);
+			// Quick actions are now handled in the useChats hook
 			setShowNewChatModal(false);
 			setNewChatTitle('');
 			setSelectedContractIds([]);
@@ -230,12 +230,8 @@ const ChatModule: React.FC = () => {
 		setMessageInput('');
 
 		try {
-			// Envoyer le message utilisateur
-			const response = await sendUserMessage(currentChat.id, messageContent);
-			// Vérifier si des actions rapides sont retournées
-			if (response && 'actions' in response && response.actions && Array.isArray(response.actions)) {
-				setQuickActions(response.actions);
-			}
+			// Quick actions are now handled in the useSendMessage hook
+			await sendUserMessage(currentChat.id, messageContent);
 		} catch (error) {
 			console.error("Erreur lors de l'envoi du message:", error);
 			// Restaurer le message en cas d'erreur
@@ -247,15 +243,12 @@ const ChatModule: React.FC = () => {
 		if (!currentChat || sendingMessage) return;
 
 		try {
-			// Masquer les actions rapides temporairement
-			setQuickActions([]);
+			// Clear quick actions temporarily
+			clearChatQuickActions(currentChat.id);
 			
-			// Envoyer l'action comme message utilisateur
-			const response = await sendUserMessage(currentChat.id, action.instructions);
-			// Vérifier si de nouvelles actions rapides sont retournées
-			if (response && 'actions' in response && response.actions && Array.isArray(response.actions)) {
-				setQuickActions(response.actions);
-			}
+			// Send the action as user message
+			await sendUserMessage(currentChat.id, action.instructions);
+			// Quick actions will be updated by the useSendMessage hook
 		} catch (error) {
 			console.error("Erreur lors de l'envoi de l'action rapide:", error);
 		}

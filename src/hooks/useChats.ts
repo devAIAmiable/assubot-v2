@@ -1,10 +1,12 @@
-import type { Chat, ChatFilters, CreateChatRequest, CreateChatResponse, UpdateChatRequest } from '../types/chat';
+import type { Chat, ChatFilters, CreateChatRequest, CreateChatResponse, QuickAction, UpdateChatRequest } from '../types/chat';
 import {
 	clearCurrentChat,
 	clearError,
+	clearQuickActions,
 	removeChatFromList,
 	setCurrentChat,
 	setFilters,
+	setQuickActions,
 	updateChatInList,
 } from '../store/chatSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -18,7 +20,7 @@ import { useCallback } from 'react';
 
 export const useChats = () => {
 	const dispatch = useAppDispatch();
-	const { currentChat, filters } = useAppSelector((state) => state.chat);
+	const { currentChat, filters, quickActions } = useAppSelector((state) => state.chat);
 
 	// RTK Query hooks
 	const [createChatMutation, { isLoading: createLoading, error: createError }] =
@@ -34,6 +36,12 @@ export const useChats = () => {
 			const result = await createChatMutation(data).unwrap();
 			// The API returns CreateChatResponse with chat and actions
 			dispatch(setCurrentChat(result.chat));
+			
+			// Store quick actions if provided
+			if (result.actions && Array.isArray(result.actions)) {
+				dispatch(setQuickActions({ chatId: result.chat.id, actions: result.actions }));
+			}
+			
 			return result;
 		},
 		[createChatMutation, dispatch]
@@ -100,6 +108,28 @@ export const useChats = () => {
 		[dispatch]
 	);
 
+	// Quick actions management
+	const setChatQuickActions = useCallback(
+		(chatId: string, actions: QuickAction[]) => {
+			dispatch(setQuickActions({ chatId, actions }));
+		},
+		[dispatch]
+	);
+
+	const clearChatQuickActions = useCallback(
+		(chatId: string) => {
+			dispatch(clearQuickActions(chatId));
+		},
+		[dispatch]
+	);
+
+	const getChatQuickActions = useCallback(
+		(chatId: string): QuickAction[] => {
+			return quickActions?.[chatId] || [];
+		},
+		[quickActions]
+	);
+
 	// Computed values
 	const loading = createLoading || updateLoading || deleteLoading;
 	const error = createError || updateError || deleteError;
@@ -110,6 +140,7 @@ export const useChats = () => {
 		loading,
 		error,
 		filters,
+		quickActions,
 
 		// Actions
 		createNewChat,
@@ -123,5 +154,10 @@ export const useChats = () => {
 		// Optimistic updates
 		updateChatOptimistically,
 		removeChatOptimistically,
+
+		// Quick actions management
+		setChatQuickActions,
+		clearChatQuickActions,
+		getChatQuickActions,
 	};
 };
