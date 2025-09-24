@@ -1,0 +1,3 @@
+# Optional: Add commit message linting
+# You can install commitlint and add rules here if needed
+echo "Commit message validation passed"

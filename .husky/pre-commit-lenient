@@ -1,0 +1,7 @@
+# Run lint-staged to format and lint staged files
+echo "Running lint-staged to format and lint staged files..."
+pnpm lint-staged
+
+# Try to run tests, but don't fail the commit if tests fail
+echo "Running tests (will not fail commit if tests fail)..."
+pnpm test:run || echo "Tests failed, but allowing commit to proceed..."

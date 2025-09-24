@@ -1,0 +1,24 @@
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Check if there are any staged files
+if [ -z "$STAGED_FILES" ]; then
+  echo "No staged files found"
+  exit 0
+fi
+
+# Format staged files with Prettier
+echo "Formatting staged files with Prettier..."
+echo "$STAGED_FILES" | grep -E '\.(js|jsx|ts|tsx|json|md|css|scss|html)$' | xargs pnpm prettier --write
+
+# Lint staged TypeScript/JavaScript files
+echo "Linting staged TypeScript/JavaScript files..."
+echo "$STAGED_FILES" | grep -E '\.(js|jsx|ts|tsx)$' | xargs pnpm eslint --fix
+
+# Run tests if any test files are staged
+if echo "$STAGED_FILES" | grep -E '\.(test|spec)\.(ts|tsx|js|jsx)$' > /dev/null; then
+  echo "Running tests for staged test files..."
+  pnpm test:run
+else
+  echo "No test files staged, skipping tests..."
+fi
