@@ -401,6 +401,7 @@ export const contractsService = {
 	delete: (id: string) => coreApi.delete(`/contracts/${id}`),
 	uploadDocument: (contractId: string, documentData: FormData) =>
 		coreApi.post<unknown>(`/contracts/${contractId}/documents`, documentData),
+	summarize: (id: string) => coreApi.post<void>(`/contracts/${id}/summarize`, {}),
 };
 
 // Comparison endpoints

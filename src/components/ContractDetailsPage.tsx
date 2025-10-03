@@ -39,6 +39,7 @@ import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { useContractDetails } from '../hooks/useContractDetails';
 import { useContractDownload } from '../hooks/useContractDownload';
+import { useContractSummarize } from '../hooks/useContractSummarize';
 import { useState } from 'react';
 
 function highlightKeywords(text: string) {
@@ -296,6 +297,9 @@ const ContractDetailsPage = () => {
 	// Contract download functionality
 	const { generateDownloadUrls, isGenerating } = useContractDownload();
 
+	// Contract summarize functionality
+	const { summarizeContract, isSummarizing } = useContractSummarize();
+
 	const isContractExpired = contract
 		? contract.endDate
 			? new Date(contract.endDate) < new Date()
@@ -423,6 +427,18 @@ const ContractDetailsPage = () => {
 		}
 	};
 
+	const handleSummarize = async () => {
+		if (!contractId) return;
+
+		try {
+			await summarizeContract(contractId);
+			// Success - could show a toast notification here
+		} catch (error) {
+			console.error('Failed to summarize contract:', error);
+			// Error handling is done in the hook
+		}
+	};
+
 	return (
 		<div className="min-h-screen bg-gray-50">
 			{/* Header */}
@@ -467,6 +483,18 @@ const ContractDetailsPage = () => {
 								{isContractExpired ? 'Expiré' : getStatusLabel(contract.status)}
 							</span>
 							<div className="flex items-center space-x-2">
+								<button
+									onClick={handleSummarize}
+									disabled={isSummarizing}
+									className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									{isSummarizing ? (
+										<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+									) : (
+										<FaFileAlt className="h-4 w-4" />
+									)}
+									<span>{isSummarizing ? 'Génération...' : 'Résumer'}</span>
+								</button>
 								<button
 									onClick={handleEdit}
 									className="px-4 py-2 bg-[#1e51ab] text-white rounded-lg font-medium hover:bg-[#163d82] transition-colors flex items-center space-x-2"
