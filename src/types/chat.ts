@@ -1,129 +1,152 @@
 export interface Chat {
-	id: string;
-	title: string;
-	createdAt: string;
-	updatedAt: string;
-	contractIds: string[];
-	isDeleted: boolean;
-	userId: string;
-	contracts?: Contract[];
-	lastMessage?: {
-		id: string;
-		content: string;
-		role: 'user' | 'assistant';
-		createdAt: string;
-	};
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  contractIds: string[];
+  isDeleted: boolean;
+  userId: string;
+  contracts?: Contract[];
+  lastMessage?: {
+    id: string;
+    content: string;
+    role: 'user' | 'assistant';
+    createdAt: string;
+  };
 }
 
 export interface ChatMessage {
-	id: string;
-	chatId: string;
-	content: string;
-	role: 'user' | 'assistant';
-	createdAt: string;
-	updatedAt: string;
-	metadata?: Record<string, unknown>;
+  id: string;
+  chatId: string;
+  content: string;
+  role: 'user' | 'assistant';
+  createdAt: string;
+  updatedAt: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface Contract {
-	id: string;
-	name: string;
-	category: string;
-	status: string;
-	createdAt: string;
-	updatedAt: string;
+  id: string;
+  name: string;
+  category: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateChatRequest {
-	title?: string;
-	contractIds?: string[];
+  title?: string;
+  contractIds?: string[];
 }
 
 export interface UpdateChatRequest {
-	title?: string;
+  title?: string;
 }
 
 export interface SendMessageRequest {
-	content: string;
-	role: 'user' | 'assistant';
+  content: string;
+  role: 'user' | 'assistant';
 }
 
 export interface QuickAction {
-	id: string;
-	label: string;
-	instructions: string;
+  id: string;
+  label: string;
+  instructions: string;
 }
 
 export interface QuickActionsResponse {
-	actions: QuickAction[];
+  actions: QuickAction[];
 }
 
 export interface SendMessageResponse {
-	message: ChatMessage;
-	chat: Chat;
-	actions?: QuickAction[];
+  message: ChatMessage;
+  chat: Chat;
+  actions?: QuickAction[];
+  usedCredits?: number;
+  remainingCredits?: number;
 }
 
 export interface CreateChatResponse {
-	status: string;
-	message: string;
-	chat: Chat;
-	actions?: QuickAction[];
+  status: string;
+  message: string;
+  chat: Chat;
+  actions?: QuickAction[];
 }
 
 export interface PaginatedChatResponse {
-	chats: Chat[];
-	pagination: {
-		page: number;
-		limit: number;
-		total: number;
-		totalPages: number;
-		hasNext: boolean;
-		hasPrev: boolean;
-	};
+  chats: Chat[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 export interface ChatFilters {
-	page?: number;
-	limit?: number;
-	sortBy?: 'createdAt' | 'updatedAt' | 'title';
-	sortOrder?: 'asc' | 'desc';
-	search?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: 'createdAt' | 'updatedAt' | 'title';
+  sortOrder?: 'asc' | 'desc';
+  search?: string;
 }
 
 export interface MessageFilters {
-	page?: number;
-	limit?: number;
-	sortBy?: 'createdAt';
-	sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+  sortBy?: 'createdAt';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface PaginatedMessageResponse {
-	messages: ChatMessage[];
-	pagination: {
-		page: number;
-		limit: number;
-		total: number;
-		totalPages: number;
-		hasNext: boolean;
-		hasPrev: boolean;
-	};
+  messages: ChatMessage[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+// API Response interfaces
+export interface ApiSuccessResponse<T> {
+  status: 'success';
+  data: T;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+export interface SendMessageApiResponse {
+  message: ChatMessage;
+  chat: Chat;
+  usedCredits?: number;
+  remainingCredits?: number;
 }
 
 export interface ChatState {
-	chats: Chat[];
-	currentChat: Chat | null;
-	loading: boolean;
-	error: string | null;
-	pagination: {
-		page: number;
-		limit: number;
-		total: number;
-		totalPages: number;
-		hasNext: boolean;
-		hasPrev: boolean;
-	} | null;
-	filters: ChatFilters;
-	// Store quick actions per chat ID
-	quickActions: Record<string, QuickAction[]>;
+  chats: Chat[];
+  currentChat: Chat | null;
+  loading: boolean;
+  error: string | null;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  } | null;
+  filters: ChatFilters;
+  // Store quick actions per chat ID
+  quickActions: Record<string, QuickAction[]>;
 }
