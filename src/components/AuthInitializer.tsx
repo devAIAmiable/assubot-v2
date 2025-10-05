@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { loginSuccess, type User } from '../store/userSlice';
-import { authService } from '../services/coreApi';
+import { loginSuccess, updateCredits, type User } from '../store/userSlice';
+import { authService, userService } from '../services/coreApi';
 import Spinner from './ui/Spinner';
 
 interface AuthInitializerProps {
@@ -12,6 +12,18 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
 	const dispatch = useAppDispatch();
 	const { isAuthenticated } = useAppSelector((state) => state.user);
 	const [isInitializing, setIsInitializing] = useState(true);
+
+	// Function to refresh user credits
+	const refreshUserCredits = async () => {
+		try {
+			const creditsResponse = await userService.getCredits();
+			if (creditsResponse.success && creditsResponse.data) {
+				dispatch(updateCredits(creditsResponse.data.credits));
+			}
+		} catch (error) {
+			console.error('Failed to refresh user credits:', error);
+		}
+	};
 
 	useEffect(() => {
 		const initializeAuth = async () => {
@@ -39,6 +51,9 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
 									lastLoginAt: new Date().toISOString(),
 								})
 							);
+
+							// Refresh user credits after successful authentication
+							refreshUserCredits();
 						} else {
 							// Fallback to basic auth data if profile fetch fails
 							const userData = {
@@ -52,6 +67,9 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
 									lastLoginAt: new Date().toISOString(),
 								})
 							);
+
+							// Refresh user credits after successful authentication
+							refreshUserCredits();
 						}
 					}
 				}

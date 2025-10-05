@@ -588,4 +588,29 @@ export const userService = {
   },
 
   deleteAccount: () => coreApi.delete('/user/account'),
+  
+  // Get current user credits
+  getCredits: async (): Promise<ServiceResponse<{ credits: number }>> => {
+    try {
+      const response = await coreApi.get<{ credits: number }>('/user/credits');
+
+      if (response.success && response.status === 'success') {
+        return {
+          success: true,
+          data: response.data,
+        };
+      }
+
+      return {
+        success: false,
+        error: response.error?.message || 'Erreur lors de la récupération des crédits',
+      };
+    } catch (error) {
+      console.error('Get credits error:', error);
+      return {
+        success: false,
+        error: 'Erreur de connexion au serveur',
+      };
+    }
+  },
 };
