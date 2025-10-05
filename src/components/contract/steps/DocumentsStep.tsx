@@ -8,14 +8,12 @@ interface DocumentsStepProps {
 	onDataUpdate: (data: Partial<ContractFormData>) => void;
 	onFileRefsUpdate: (refs: Record<string, File>) => void;
 	initialData: Partial<ContractFormData>;
-	isUploading?: boolean;
 }
 
 const DocumentsStep: React.FC<DocumentsStepProps> = ({
 	onDataUpdate,
 	onFileRefsUpdate,
 	initialData,
-	isUploading = false,
 }) => {
 	const [dragStates, setDragStates] = useState<Record<string, boolean>>({});
 	const [localFileRefs, setLocalFileRefs] = useState<Record<string, File>>({});
@@ -147,13 +145,7 @@ const DocumentsStep: React.FC<DocumentsStepProps> = ({
 				<p className="text-gray-600">Ajoutez les documents nécessaires à votre contrat</p>
 			</div>
 
-			{isUploading ? (
-				<div className="text-center py-8">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e51ab] mx-auto mb-4"></div>
-					<p className="text-gray-600">Téléchargement en cours...</p>
-				</div>
-			) : (
-				<div className="space-y-6">
+			<div className="space-y-6">
 					{/* Document Types */}
 					{documentTypes.map((docType) => (
 						<div key={docType.type} className="space-y-3">
@@ -238,7 +230,6 @@ const DocumentsStep: React.FC<DocumentsStepProps> = ({
 						</div>
 					))}
 				</div>
-			)}
 		</motion.div>
 	);
 };

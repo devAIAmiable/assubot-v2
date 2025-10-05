@@ -11,10 +11,9 @@ import { motion } from 'framer-motion';
 interface ContractCreationFormProps {
 	onSubmit: (fileObjects: Record<string, File>, formData: ContractFormData) => Promise<void>;
 	onStepChange?: (step: number) => void;
-	isUploading?: boolean;
 }
 
-const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit, onStepChange, isUploading = false }) => {
+const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit, onStepChange }) => {
 	const [currentStep, setCurrentStep] = useState(1);
 	const [formData, setFormData] = useState<Partial<ContractFormData>>({
 		documents: [],
@@ -107,7 +106,7 @@ const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit, o
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [currentStep, formData.documents, onSubmit, formData]);
+	}, [currentStep, onSubmit, formData]);
 
 	const renderCurrentStep = () => {
 		switch (currentStep) {
@@ -131,7 +130,6 @@ const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit, o
 						onDataUpdate={(data: Partial<ContractFormData>) => handleStepDataUpdate(data)}
 						onFileRefsUpdate={(refs: Record<string, File>) => { fileRefs.current = refs; }}
 						initialData={formData}
-						isUploading={isUploading}
 					/>
 				);
 			default:
@@ -156,7 +154,7 @@ const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit, o
 
 			{/* Content */}
 			<div className="min-h-[500px]">
-				{!isUploading && renderCurrentStep()}
+				{renderCurrentStep()}
 			</div>
 
 			{/* Navigation */}
@@ -164,18 +162,18 @@ const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit, o
 				<Button
 					variant="secondary"
 					onClick={handlePrevious}
-					disabled={currentStep === 1 || isSubmitting || isUploading}
+					disabled={currentStep === 1 || isSubmitting}
 				>
 					Précédent
 				</Button>
 
 				<div className="flex space-x-3">
 					{currentStep < 3 ? (
-						<Button onClick={handleNext} disabled={isUploading} className="px-8">
+						<Button onClick={handleNext} className="px-8">
 							Suivant
 						</Button>
 					) : (
-						<Button onClick={handleSubmit} disabled={isSubmitting || isUploading} className="px-8">
+						<Button onClick={handleSubmit} disabled={isSubmitting} className="px-8">
 							{isSubmitting ? (
 								<>
 									<FaSpinner className="animate-spin h-4 w-4 mr-2" />
