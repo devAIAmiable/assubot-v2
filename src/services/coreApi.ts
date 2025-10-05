@@ -588,7 +588,7 @@ export const userService = {
   },
 
   deleteAccount: () => coreApi.delete('/user/account'),
-  
+
   // Get current user credits
   getCredits: async (): Promise<ServiceResponse<{ credits: number }>> => {
     try {
