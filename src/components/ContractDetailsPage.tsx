@@ -21,19 +21,13 @@ import { getContactTypeLabel, getObligationTypeLabel, getStatusColor, getStatusL
 import { useNavigate, useParams } from 'react-router-dom';
 
 import EditContractModal from './EditContractModal';
+import ReactMarkdown from 'react-markdown';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { useContractDetails } from '../hooks/useContractDetails';
 import { useContractDownload } from '../hooks/useContractDownload';
 import { useContractSummarize } from '../hooks/useContractSummarize';
 import { useState } from 'react';
-
-function highlightKeywords(text: string) {
-  const keywords = ['Modalité', 'Justificatif', 'Preuve', 'Effet', 'Délai', "Prise d'effet", 'Contact', 'Oui', 'Non', 'R :', 'Q :'];
-  const regex = new RegExp(`(${keywords.map((k) => k.replace(/([.*+?^=!:${}()|[\]\\])/g, '\\$1')).join('|')})`, 'g');
-  const parts = text.split(regex);
-  return parts.map((part, i) => (keywords.includes(part) ? <strong key={i}>{part}</strong> : part));
-}
 
 function getZoneCoordinates(zoneLabel: string): [number, number] | null {
   const zoneMap: Record<string, [number, number]> = {
@@ -860,21 +854,32 @@ const ContractDetailsPage = () => {
                 <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-8 rounded-2xl border border-yellow-100">
                   <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
                     <FaExclamationTriangle className="h-6 w-6 text-yellow-600 mr-3" />
-                    Comment résilier mon contrat
+                    Questions fréquentes sur la résiliation
                   </h3>
-                  <div className="space-y-8">
-                    {contract.termination ? (
-                      <div className="bg-white p-6 rounded-xl border border-yellow-200">
-                        <h4 className="text-xl font-semibold text-gray-900 mb-2">{contract.termination.mode || 'Résiliation'}</h4>
-                        {contract.termination.details && <div className="text-gray-900 text-lg">{highlightKeywords(contract.termination.details)}</div>}
-                        {contract.termination.notice && (
-                          <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
-                            <p className="text-yellow-800 font-medium">Délai de préavis : {contract.termination.notice}</p>
+                  <div className="space-y-6">
+                    {contract.terminations && contract.terminations.length > 0 ? (
+                      contract.terminations.map((termination, index) => (
+                        <div key={termination.id} className="bg-white p-6 rounded-xl border border-yellow-200">
+                          <div className="space-y-4">
+                            <div className="flex items-start space-x-3">
+                              <div className="flex-shrink-0 w-8 h-8 bg-yellow-100 text-yellow-800 rounded-full flex items-center justify-center text-sm font-semibold">
+                                Q{index + 1}
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="text-lg font-semibold text-gray-900 mb-3">{termination.question}</h4>
+                                <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+                                  <ReactMarkdown>{termination.response}</ReactMarkdown>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      ))
                     ) : (
-                      <div className="text-center text-gray-500 py-4">Aucune information de résiliation disponible</div>
+                      <div className="text-center text-gray-500 py-8">
+                        <FaExclamationTriangle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                        <p>Aucune information de résiliation disponible</p>
+                      </div>
                     )}
                   </div>
                 </div>
