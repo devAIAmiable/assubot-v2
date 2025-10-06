@@ -1,13 +1,14 @@
 import type {
   BackendContract,
+  BackendContractCancellation,
   BackendContractContact,
   BackendContractDocument,
   BackendContractExclusion,
   BackendContractGuarantee,
   BackendContractListItem,
   BackendContractObligation,
-  BackendContractTermination,
   BackendContractZone,
+  ContractCancellation,
   ContractContact,
   ContractDocument,
   ContractExclusion,
@@ -15,7 +16,6 @@ import type {
   ContractListItem,
   ContractObligation,
   ContractStatus,
-  ContractTermination,
   ContractWithRelations,
   ContractZone,
   GetContractByIdResponse,
@@ -98,7 +98,7 @@ export function transformBackendZone(backendZone: BackendContractZone): Contract
 /**
  * Transform a backend contract termination to frontend format
  */
-export function transformBackendTermination(backendTermination: BackendContractTermination): ContractTermination {
+export function transformBackendTermination(backendTermination: BackendContractCancellation): ContractCancellation {
   return {
     id: backendTermination.id,
     contractId: '', // Will be set by parent contract
@@ -168,8 +168,8 @@ export function transformBackendContract(backendContract: GetContractByIdRespons
         ...transformBackendZone(zone),
         contractId: backendContract.id,
       })) || [],
-    terminations:
-      backendContract.terminations?.map((termination) => ({
+    cancellations:
+      backendContract.cancellations?.map((termination) => ({
         ...transformBackendTermination(termination),
         contractId: backendContract.id,
       })) || [],

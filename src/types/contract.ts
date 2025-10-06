@@ -65,7 +65,7 @@ export interface Contract {
   exclusions?: ContractExclusion[];
   obligations?: ContractObligation[];
   zones?: ContractZone[];
-  terminations?: ContractTermination[];
+  cancellations?: ContractCancellation[];
   contacts?: ContractContact[];
 }
 
@@ -131,7 +131,7 @@ export interface ContractZone {
 }
 
 // Contract termination model
-export interface ContractTermination {
+export interface ContractCancellation {
   id: string;
   contractId: string;
   question: string;
@@ -183,7 +183,7 @@ export interface ContractWithRelations extends Contract {
   exclusions: ContractExclusion[];
   obligations: ContractObligation[];
   zones: ContractZone[];
-  terminations?: ContractTermination[];
+  cancellations?: ContractCancellation[];
   contacts: ContractContact[];
 }
 
@@ -338,7 +338,7 @@ export interface GetContractByIdResponse {
   exclusions?: BackendContractExclusion[];
   obligations?: BackendContractObligation[];
   zones?: BackendContractZone[];
-  terminations?: BackendContractTermination[];
+  cancellations?: BackendContractCancellation[];
   contacts?: BackendContractContact[];
   createdAt: string;
   updatedAt: string;
@@ -371,7 +371,7 @@ export interface BackendContract {
   exclusions?: BackendContractExclusion[];
   obligations?: BackendContractObligation[];
   zones?: BackendContractZone[];
-  terminations?: BackendContractTermination[];
+  cancellations?: BackendContractCancellation[];
   contacts?: BackendContractContact[];
 }
 
@@ -424,7 +424,7 @@ export interface BackendContractZone {
 }
 
 // Backend termination model
-export interface BackendContractTermination {
+export interface BackendContractCancellation {
   id: string;
   question: string;
   response: string;

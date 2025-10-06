@@ -209,7 +209,7 @@ export interface ContractZone {
   createdAt: string;
 }
 
-export interface ContractTermination {
+export interface ContractCancellation {
   id: string;
   contractId: string;
   question: string;
@@ -252,7 +252,7 @@ export interface Contract {
   exclusions?: ContractExclusion[];
   obligations?: ContractObligation[];
   zones?: ContractZone[];
-  terminations?: ContractTermination[];
+  cancellations?: ContractCancellation[];
   contacts?: ContractContact[];
 }
 

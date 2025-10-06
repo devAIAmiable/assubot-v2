@@ -113,9 +113,9 @@ export const getContractObligations = (contract: Contract) => {
 
 // Create legacy-style cancellation array
 export const getContractCancellation = (contract: Contract) => {
-  if (!contract.terminations || contract.terminations.length === 0) return [];
+  if (!contract.cancellations || contract.cancellations.length === 0) return [];
 
-  return contract.terminations.map((termination) => ({
+  return contract.cancellations.map((termination) => ({
     question: termination.question,
     answer: termination.response,
   }));
