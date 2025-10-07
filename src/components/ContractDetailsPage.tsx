@@ -321,10 +321,11 @@ const ContractDetailsPage = () => {
 
   // Show error state
   if (isError) {
-    const errorMessage = error && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data 
-      ? String(error.data.message) 
-      : 'Une erreur est survenue lors du chargement du contrat.';
-    
+    const errorMessage =
+      error && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data
+        ? String(error.data.message)
+        : 'Une erreur est survenue lors du chargement du contrat.';
+
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -476,9 +477,7 @@ const ContractDetailsPage = () => {
               </div>
             </div>
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en cours</h4>
-            <p className="text-gray-600 leading-relaxed">
-              Notre IA analyse votre contrat et génère les informations détaillées...
-            </p>
+            <p className="text-gray-600 leading-relaxed">Notre IA analyse votre contrat et génère les informations détaillées...</p>
             <p className="text-sm text-gray-500 mt-2">Cela peut prendre quelques instants</p>
           </div>
         </div>
@@ -575,7 +574,13 @@ const ContractDetailsPage = () => {
                     )}
                   </button>
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                    {isSummarizing || contract?.summarizeStatus === 'ongoing' ? 'Génération en cours...' : contract?.summarizeStatus === 'done' ? 'Résumé déjà généré' : contract?.summarizeStatus === 'failed' ? 'Échec de la génération' : 'Générer le résumé'}
+                    {isSummarizing || contract?.summarizeStatus === 'ongoing'
+                      ? 'Génération en cours...'
+                      : contract?.summarizeStatus === 'done'
+                        ? 'Résumé déjà généré'
+                        : contract?.summarizeStatus === 'failed'
+                          ? 'Échec de la génération'
+                          : 'Générer le résumé'}
                   </div>
                 </div>
 
@@ -840,115 +845,115 @@ const ContractDetailsPage = () => {
                 ) : (
                   <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
                     {contract.zones && contract.zones.length > 0 ? (
-                    <div className="space-y-8">
-                      {/* World Map */}
-                      <div className="">
-                        <h4 className="text-xl font-bold text-gray-900 mb-6">Zones couvertes</h4>
-                        <div className="w-full h-[600px] bg-white rounded-lg border border-blue-200 shadow-inner overflow-hidden">
-                          <ComposableMap
-                            projection="geoEqualEarth"
-                            projectionConfig={{
-                              scale: 190,
-                              center: [0, 15],
-                            }}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                            }}
-                          >
-                            <ZoomableGroup>
-                              {/* Graticule */}
-                              <Graticule stroke="#e2e8f0" strokeWidth={1} />
+                      <div className="space-y-8">
+                        {/* World Map */}
+                        <div className="">
+                          <h4 className="text-xl font-bold text-gray-900 mb-6">Zones couvertes</h4>
+                          <div className="w-full h-[600px] bg-white rounded-lg border border-blue-200 shadow-inner overflow-hidden">
+                            <ComposableMap
+                              projection="geoEqualEarth"
+                              projectionConfig={{
+                                scale: 190,
+                                center: [0, 15],
+                              }}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                              }}
+                            >
+                              <ZoomableGroup>
+                                {/* Graticule */}
+                                <Graticule stroke="#e2e8f0" strokeWidth={1} />
 
-                              {/* World Countries */}
-                              <Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
-                                {({ geographies }) =>
-                                  geographies.map((geo) => {
-                                    // Check if this country/region matches any of the contract zones
-                                    const isHighlighted = contract.zones?.some((zone) => {
-                                      const countryName = geo.properties.name?.toLowerCase();
-                                      const zoneName = zone.label.toLowerCase();
+                                {/* World Countries */}
+                                <Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
+                                  {({ geographies }) =>
+                                    geographies.map((geo) => {
+                                      // Check if this country/region matches any of the contract zones
+                                      const isHighlighted = contract.zones?.some((zone) => {
+                                        const countryName = geo.properties.name?.toLowerCase();
+                                        const zoneName = zone.label.toLowerCase();
 
-                                      // Direct name matching only
-                                      const isMatch = countryName === zoneName;
-                                      if (isMatch) {
-                                        console.log('🚀 ~ zone:', zoneName, countryName);
+                                        // Direct name matching only
+                                        const isMatch = countryName === zoneName;
+                                        if (isMatch) {
+                                          console.log('🚀 ~ zone:', zoneName, countryName);
+                                        }
+                                        return isMatch;
+                                      });
+
+                                      if (isHighlighted) {
+                                        console.log('🚀 ~ geo:', geo);
                                       }
-                                      return isMatch;
-                                    });
 
-                                    if (isHighlighted) {
-                                      console.log('🚀 ~ geo:', geo);
-                                    }
+                                      return (
+                                        <g key={geo.rsmKey} style={{ cursor: 'crosshair' }}>
+                                          <title>{geo.properties.name}</title>
+                                          <Geography
+                                            geography={geo}
+                                            fill={isHighlighted ? '#1e51ab' : '#cedaf0'}
+                                            stroke="#fff"
+                                            strokeWidth={1}
+                                            style={{
+                                              default: { outline: 'none' },
+                                              hover: {
+                                                fill: isHighlighted ? '#163d82' : '#e2e8f0',
+                                                outline: 'none',
+                                              },
+                                              pressed: { outline: 'none' },
+                                            }}
+                                          />
+                                        </g>
+                                      );
+                                    })
+                                  }
+                                </Geographies>
 
-                                    return (
-                                      <g key={geo.rsmKey} style={{ cursor: 'crosshair' }}>
-                                        <title>{geo.properties.name}</title>
-                                        <Geography
-                                          geography={geo}
-                                          fill={isHighlighted ? '#1e51ab' : '#cedaf0'}
-                                          stroke="#fff"
-                                          strokeWidth={1}
+                                {/* Zone Markers */}
+                                {contract.zones?.map((zone) => {
+                                  const coordinates = getZoneCoordinates(zone.label);
+                                  if (!coordinates) return null;
+
+                                  return (
+                                    <Marker key={zone.id} coordinates={coordinates}>
+                                      <g>
+                                        {/* Background circle */}
+                                        <circle r="2" fill="#1e51ab" stroke="#fff" strokeWidth="1" />
+                                        {/* Zone label */}
+                                        <text
+                                          textAnchor="middle"
+                                          y="-15"
                                           style={{
-                                            default: { outline: 'none' },
-                                            hover: {
-                                              fill: isHighlighted ? '#163d82' : '#e2e8f0',
-                                              outline: 'none',
-                                            },
-                                            pressed: { outline: 'none' },
+                                            fontFamily: 'system-ui',
+                                            fill: '#1e51ab',
+                                            fontSize: '12px',
+                                            fontWeight: 'bold',
+                                            textShadow: '1px 1px 2px rgba(255,255,255,0.8)',
                                           }}
-                                        />
+                                        >
+                                          {zone.label}
+                                        </text>
                                       </g>
-                                    );
-                                  })
-                                }
-                              </Geographies>
-
-                              {/* Zone Markers */}
-                              {contract.zones?.map((zone) => {
-                                const coordinates = getZoneCoordinates(zone.label);
-                                if (!coordinates) return null;
-
-                                return (
-                                  <Marker key={zone.id} coordinates={coordinates}>
-                                    <g>
-                                      {/* Background circle */}
-                                      <circle r="2" fill="#1e51ab" stroke="#fff" strokeWidth="1" />
-                                      {/* Zone label */}
-                                      <text
-                                        textAnchor="middle"
-                                        y="-15"
-                                        style={{
-                                          fontFamily: 'system-ui',
-                                          fill: '#1e51ab',
-                                          fontSize: '12px',
-                                          fontWeight: 'bold',
-                                          textShadow: '1px 1px 2px rgba(255,255,255,0.8)',
-                                        }}
-                                      >
-                                        {zone.label}
-                                      </text>
-                                    </g>
-                                  </Marker>
-                                );
-                              })}
-                            </ZoomableGroup>
-                          </ComposableMap>
+                                    </Marker>
+                                  );
+                                })}
+                              </ZoomableGroup>
+                            </ComposableMap>
+                          </div>
+                          <div className="mt-4 text-sm text-gray-600 text-center">💡 Utilisez la molette de votre souris pour zoomer et dézoomer sur la carte</div>
                         </div>
-                        <div className="mt-4 text-sm text-gray-600 text-center">💡 Utilisez la molette de votre souris pour zoomer et dézoomer sur la carte</div>
-                      </div>
 
-                      {/* Zone List */}
-                      <div className="bg-white rounded-xl p-6 border border-blue-100">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {contract.zones.map((zone) => (
-                            <div key={zone.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center">
-                              <span className="text-sm font-medium text-gray-700">{capitalizeFirst(zone.label)}</span>
-                            </div>
-                          ))}
+                        {/* Zone List */}
+                        <div className="bg-white rounded-xl p-6 border border-blue-100">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {contract.zones.map((zone) => (
+                              <div key={zone.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                                <span className="text-sm font-medium text-gray-700">{capitalizeFirst(zone.label)}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
                     ) : (
                       <div className="text-center text-gray-500 py-12">
                         <div className="w-full max-w-md mx-auto bg-white rounded-xl border border-blue-200 p-8 shadow-lg">
@@ -979,41 +984,41 @@ const ContractDetailsPage = () => {
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                       {contract.obligations && contract.obligations.length > 0 ? (
-                    (() => {
-                      // Group obligations by type
-                      const groupedObligations = contract.obligations.reduce(
-                        (groups, obligation) => {
-                          const type = obligation.type;
-                          if (!groups[type]) {
-                            groups[type] = [];
-                          }
-                          groups[type].push(obligation);
-                          return groups;
-                        },
-                        {} as Record<string, typeof contract.obligations>
-                      );
+                        (() => {
+                          // Group obligations by type
+                          const groupedObligations = contract.obligations.reduce(
+                            (groups, obligation) => {
+                              const type = obligation.type;
+                              if (!groups[type]) {
+                                groups[type] = [];
+                              }
+                              groups[type].push(obligation);
+                              return groups;
+                            },
+                            {} as Record<string, typeof contract.obligations>
+                          );
 
-                      // Render grouped obligations
-                      return Object.entries(groupedObligations).map(([type, obligations]) => (
-                        <div key={type} className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
-                          <h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                            <FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
-                            {getObligationTypeLabel(type as ObligationType)}
-                          </h4>
-                          <ul className="space-y-3">
-                            {obligations.map((obligation) => (
-                              <li key={obligation.id} className="text-gray-900 text-base flex items-start">
-                                <span className="text-blue-600 mr-2 mt-1">•</span>
-                                <span>{capitalizeFirst(obligation.description)}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        ));
-                      })()
-                    ) : (
-                      <div className="col-span-full text-center text-gray-500 py-8">Aucune obligation spécifiée</div>
-                    )}
+                          // Render grouped obligations
+                          return Object.entries(groupedObligations).map(([type, obligations]) => (
+                            <div key={type} className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
+                              <h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                                <FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
+                                {getObligationTypeLabel(type as ObligationType)}
+                              </h4>
+                              <ul className="space-y-3">
+                                {obligations.map((obligation) => (
+                                  <li key={obligation.id} className="text-gray-900 text-base flex items-start">
+                                    <span className="text-blue-600 mr-2 mt-1">•</span>
+                                    <span>{capitalizeFirst(obligation.description)}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ));
+                        })()
+                      ) : (
+                        <div className="col-span-full text-center text-gray-500 py-8">Aucune obligation spécifiée</div>
+                      )}
                     </div>
                   </>
                 )}
