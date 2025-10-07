@@ -287,11 +287,11 @@ const ContractDetailsPage = () => {
     };
 
     // Listen to custom window event instead of direct socket subscription
-    window.addEventListener('contract_processed', handleContractProcessed as EventListener);
+    window.addEventListener('contract_summarized', handleContractProcessed as EventListener);
 
     // Cleanup
     return () => {
-      window.removeEventListener('contract_processed', handleContractProcessed as EventListener);
+      window.removeEventListener('contract_summarized', handleContractProcessed as EventListener);
     };
   }, [contractId, refetch]);
 

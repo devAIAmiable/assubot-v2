@@ -177,7 +177,7 @@ class SocketService {
       this.handleConnectionError(error);
     });
 
-    this.socket.on('contract_processed', (data: ContractProcessedEvent) => {
+    this.socket.on('contract_summarized', (data: ContractProcessedEvent) => {
       this.eventHandlers.onContractProcessed?.(data);
     });
 

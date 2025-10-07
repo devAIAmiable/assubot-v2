@@ -24,7 +24,7 @@ export const RealTimeProvider: React.FC<RealTimeProviderProps> = ({ children }) 
     // Set up event handlers
     socketService.setEventHandlers({
       onContractProcessed: (data: ContractProcessedEvent) => {
-        console.log('🔔 RealTimeProvider handling contract_processed:', data);
+        console.log('🔔 RealTimeProvider handling contract_summarized:', data);
         const { contractId, status, credits, error } = data;
 
         // Stop the loading state for this contract
@@ -44,7 +44,7 @@ export const RealTimeProvider: React.FC<RealTimeProviderProps> = ({ children }) 
 
         // Dispatch custom event for components that need to react to contract processing
         console.log('📢 Dispatching window event for contract:', contractId);
-        const customEvent = new CustomEvent('contract_processed', {
+        const customEvent = new CustomEvent('contract_summarized', {
           detail: { contractId, status, credits, error },
         });
         window.dispatchEvent(customEvent);
