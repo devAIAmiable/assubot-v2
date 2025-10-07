@@ -18,16 +18,18 @@ import {
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { formatDateForDisplayFR, getDisplayValue } from '../utils/dateHelpers';
 import { getContactTypeLabel, getObligationTypeLabel, getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../utils/contract';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import EditContractModal from './EditContractModal';
+import InsufficientCreditsModal from './ui/InsufficientCreditsModal';
 import ReactMarkdown from 'react-markdown';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
-import { useContractDetails } from '../hooks/useContractDetails';
+import { transformBackendContract } from '../utils/contractTransformers';
 import { useContractDownload } from '../hooks/useContractDownload';
 import { useContractSummarize } from '../hooks/useContractSummarize';
-import { useState } from 'react';
+import { useGetContractByIdQuery } from '../store/contractsApi';
 
 function getZoneCoordinates(zoneLabel: string): [number, number] | null {
   const zoneMap: Record<string, [number, number]> = {
@@ -253,17 +255,48 @@ const ContractDetailsPage = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Get contract details using the new hook
-  const { contract, isLoading, isError, error } = useContractDetails({
-    contractId: contractId!,
-    enabled: !!contractId,
+  // Get contract details using RTK Query directly to access refetch
+  const {
+    data: contractData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useGetContractByIdQuery(contractId!, {
+    skip: !contractId,
   });
+
+  // Transform contract data
+  const contract = contractData ? transformBackendContract(contractData) : undefined;
+
+  // Listen for contract processing events to trigger refetch
+  // Using a custom event on window to avoid duplicate socket listeners
+  useEffect(() => {
+    const handleContractProcessed = (event: Event) => {
+      const customEvent = event as CustomEvent<{ contractId: string; status: string }>;
+      const data = customEvent.detail;
+
+      // Refetch contract when this specific contract is processed successfully
+      if (data.contractId === contractId && data.status === 'success') {
+        console.log('🔄 Refetching contract after successful processing...');
+        refetch();
+      }
+    };
+
+    // Listen to custom window event instead of direct socket subscription
+    window.addEventListener('contract_processed', handleContractProcessed as EventListener);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('contract_processed', handleContractProcessed as EventListener);
+    };
+  }, [contractId, refetch]);
 
   // Contract download functionality
   const { generateDownloadUrls, isGenerating } = useContractDownload();
 
   // Contract summarize functionality
-  const { summarizeContract, isSummarizing } = useContractSummarize();
+  const { summarizeContract, isSummarizing, insufficientCredits } = useContractSummarize();
 
   const isContractExpired = contract ? (contract.endDate ? new Date(contract.endDate) < new Date() : false) : false;
 
@@ -388,6 +421,37 @@ const ContractDetailsPage = () => {
     }
   };
 
+  // Helper functions for summarization status styling
+  const getSummarizeStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'ongoing':
+        return 'bg-blue-100 text-blue-800';
+      case 'done':
+        return 'bg-green-100 text-green-800';
+      case 'failed':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getSummarizeStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'Résumé en attente';
+      case 'ongoing':
+        return 'Résumé en cours';
+      case 'done':
+        return 'Résumé disponible';
+      case 'failed':
+        return 'Résumé échoué';
+      default:
+        return status;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -419,22 +483,47 @@ const ContractDetailsPage = () => {
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              {/* Contract status badge */}
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${isContractExpired ? 'bg-red-100 text-red-800' : getStatusColor(contract.status)}`}>
                 {isContractExpired ? 'Expiré' : getStatusLabel(contract.status)}
               </span>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={handleSummarize}
-                  disabled={isSummarizing}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSummarizing ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : <FaFileAlt className="h-4 w-4" />}
-                  <span>{isSummarizing ? 'Génération...' : 'Résumer'}</span>
-                </button>
-                <button onClick={handleEdit} className="px-4 py-2 bg-[#1e51ab] text-white rounded-lg font-medium hover:bg-[#163d82] transition-colors flex items-center space-x-2">
-                  <FaEdit className="h-4 w-4" />
-                  <span>Modifier</span>
-                </button>
+
+              {/* Summarization status badge */}
+              {contract?.summarizeStatus && (
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getSummarizeStatusColor(contract.summarizeStatus)}`}>
+                  {getSummarizeStatusLabel(contract.summarizeStatus)}
+                </span>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex items-center space-x-1">
+                {/* Summarize button */}
+                <div className="relative group">
+                  <button
+                    onClick={handleSummarize}
+                    disabled={isSummarizing || contract?.summarizeStatus === 'ongoing'}
+                    className="p-2 text-gray-600 hover:text-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSummarizing || contract?.summarizeStatus === 'ongoing' ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                    ) : (
+                      <FaFileAlt className="h-4 w-4" />
+                    )}
+                  </button>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                    {isSummarizing || contract?.summarizeStatus === 'ongoing' ? 'Génération en cours...' : 'Générer le résumé'}
+                  </div>
+                </div>
+
+                {/* Edit button */}
+                <div className="relative group">
+                  <button onClick={handleEdit} className="p-2 text-gray-600 hover:text-[#1e51ab] transition-colors">
+                    <FaEdit className="h-4 w-4" />
+                  </button>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                    Modifier le contrat
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -857,8 +946,8 @@ const ContractDetailsPage = () => {
                     Questions fréquentes sur la résiliation
                   </h3>
                   <div className="space-y-6">
-                    {contract.terminations && contract.terminations.length > 0 ? (
-                      contract.terminations.map((termination, index) => (
+                    {contract.cancellations && contract.cancellations.length > 0 ? (
+                      contract.cancellations.map((termination, index) => (
                         <div key={termination.id} className="bg-white p-6 rounded-xl border border-yellow-200">
                           <div className="space-y-4">
                             <div className="flex items-start space-x-3">
@@ -941,6 +1030,15 @@ const ContractDetailsPage = () => {
 
       {/* Edit Contract Modal */}
       {contract && <EditContractModal contract={transformContractForEdit()!} isOpen={isEditModalOpen} onClose={handleCloseEditModal} onSuccess={handleEditSuccess} />}
+
+      {/* Insufficient Credits Modal */}
+      <InsufficientCreditsModal
+        isOpen={insufficientCredits.isModalOpen}
+        onClose={insufficientCredits.closeModal}
+        operation={insufficientCredits.errorDetails.operation}
+        requiredCredits={insufficientCredits.errorDetails.requiredCredits}
+        currentCredits={insufficientCredits.currentCredits}
+      />
     </div>
   );
 };

@@ -590,14 +590,14 @@ export const userService = {
   deleteAccount: () => coreApi.delete('/user/account'),
 
   // Get current user credits
-  getCredits: async (): Promise<ServiceResponse<{ credits: number }>> => {
+  getCredits: async (): Promise<ServiceResponse<number>> => {
     try {
-      const response = await coreApi.get<{ credits: number }>('/user/credits');
+      const response = await coreApi.get<{ data: { balance: number } }>('/users/credits');
 
       if (response.success && response.status === 'success') {
         return {
           success: true,
-          data: response.data,
+          data: response?.data?.data?.balance ?? 0,
         };
       }
 

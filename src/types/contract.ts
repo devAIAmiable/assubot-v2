@@ -58,6 +58,10 @@ export interface Contract {
   createdAt: Date;
   updatedAt: Date;
 
+  // Optional summarization fields
+  summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';
+  summarizedAt?: Date;
+
   // Relations (optional for partial data)
   user?: User;
   documents?: ContractDocument[];
@@ -200,6 +204,10 @@ export interface ContractListItem {
   createdAt: Date;
   updatedAt: Date;
   documents: Omit<ContractDocument, 'contractId' | 'createdAt'>[];
+
+  // Optional summarization fields
+  summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';
+  summarizedAt?: Date;
 }
 
 // Utility types for form handling
@@ -314,6 +322,10 @@ export interface BackendContractListItem {
   createdAt: string; // ISO string from backend
   updatedAt: string; // ISO string from backend
   documents: Omit<BackendContractDocument, 'contractId' | 'createdAt'>[];
+
+  // Optional summarization fields
+  summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';
+  summarizedAt?: string; // ISO string from backend
 }
 
 // Backend contract response for single contract
@@ -342,6 +354,8 @@ export interface GetContractByIdResponse {
   contacts?: BackendContractContact[];
   createdAt: string;
   updatedAt: string;
+  summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';
+  summarizedAt?: string;
 }
 
 // Backend contract model (matches API response)
@@ -364,6 +378,10 @@ export interface BackendContract {
   status: ContractStatus;
   createdAt: string; // ISO string from backend
   updatedAt: string; // ISO string from backend
+
+  // Optional summarization fields
+  summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';
+  summarizedAt?: string; // ISO string from backend
 
   // Relations
   documents: BackendContractDocument[];

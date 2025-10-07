@@ -145,6 +145,10 @@ export function transformBackendContract(backendContract: GetContractByIdRespons
     createdAt: new Date(backendContract.createdAt),
     updatedAt: new Date(backendContract.updatedAt),
 
+    // Optional summarization fields
+    summarizeStatus: backendContract.summarizeStatus,
+    summarizedAt: backendContract.summarizedAt ? new Date(backendContract.summarizedAt) : undefined,
+
     // Transform relations
     user: { id: backendContract.userId, contracts: [] }, // Minimal user object
     documents: backendContract.documents.map((doc) => transformBackendDocument(doc)),
@@ -210,6 +214,10 @@ export function transformBackendContractListItem(backendContract: BackendContrac
       type: doc.type,
       fileUrl: doc.fileUrl,
     })),
+
+    // Optional summarization fields
+    summarizeStatus: backendContract.summarizeStatus,
+    summarizedAt: backendContract.summarizedAt ? new Date(backendContract.summarizedAt) : undefined,
   };
 }
 

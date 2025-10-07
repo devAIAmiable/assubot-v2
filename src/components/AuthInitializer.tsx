@@ -13,18 +13,6 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
   const { isAuthenticated } = useAppSelector((state) => state.user);
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // Function to refresh user credits
-  const refreshUserCredits = async () => {
-    try {
-      const creditsResponse = await userService.getCredits();
-      if (creditsResponse.success && creditsResponse.data) {
-        dispatch(updateCredits(creditsResponse.data.credits));
-      }
-    } catch (error) {
-      console.error('Failed to refresh user credits:', error);
-    }
-  };
-
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -53,7 +41,14 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
               );
 
               // Refresh user credits after successful authentication
-              refreshUserCredits();
+              try {
+                const creditsResponse = await userService.getCredits();
+                if (creditsResponse.success && creditsResponse.data !== undefined && creditsResponse.data !== null) {
+                  dispatch(updateCredits(creditsResponse.data));
+                }
+              } catch (error) {
+                console.error('Failed to refresh user credits:', error);
+              }
             } else {
               // Fallback to basic auth data if profile fetch fails
               const userData = {
@@ -69,7 +64,14 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
               );
 
               // Refresh user credits after successful authentication
-              refreshUserCredits();
+              try {
+                const creditsResponse = await userService.getCredits();
+                if (creditsResponse.success && creditsResponse.data !== undefined && creditsResponse.data !== null) {
+                  dispatch(updateCredits(creditsResponse.data));
+                }
+              } catch (error) {
+                console.error('Failed to refresh user credits:', error);
+              }
             }
           }
         }
@@ -81,7 +83,8 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
     };
 
     initializeAuth();
-  }, [dispatch, isAuthenticated]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   // Show loading spinner while checking authentication
   if (isInitializing) {
