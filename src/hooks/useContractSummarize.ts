@@ -1,5 +1,8 @@
+import { startProcessing, stopProcessing } from '../store/contractProcessingSlice';
+
 import { contractsService } from '../services/coreApi';
 import { showToast } from '../components/ui/Toast';
+import { useAppDispatch } from '../store/hooks';
 import { useInsufficientCredits } from './useInsufficientCredits';
 import { useRealtimeUpdates } from './useRealtimeUpdates';
 import { useState } from 'react';
@@ -23,6 +26,7 @@ interface UseContractSummarizeReturn {
  * Calls the /api/v1/contracts/{id}/summarize endpoint and tracks progress via Socket.IO
  */
 export const useContractSummarize = (): UseContractSummarizeReturn => {
+  const dispatch = useAppDispatch();
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,7 +41,7 @@ export const useContractSummarize = (): UseContractSummarizeReturn => {
     setError(null);
 
     try {
-      showToast.loading('Démarrage de la génération du résumé...');
+      dispatch(startProcessing(contractId));
 
       await contractsService.summarize(contractId);
     } catch (err) {
@@ -49,6 +53,8 @@ export const useContractSummarize = (): UseContractSummarizeReturn => {
       if (!handled) {
         showToast.error(errorMessage);
       }
+
+      dispatch(stopProcessing(contractId));
 
       throw err;
     } finally {

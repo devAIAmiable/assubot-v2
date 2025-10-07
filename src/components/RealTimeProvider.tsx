@@ -2,6 +2,7 @@ import type { ContractProcessedEvent, CreditUpdateEvent } from '../services/sock
 
 import { showToast } from './ui/Toast';
 import { socketService } from '../services/socketService';
+import { stopProcessing } from '../store/contractProcessingSlice';
 import { updateCredits } from '../store/userSlice';
 import { useAppSelector } from '../store/hooks';
 import { useDispatch } from 'react-redux';
@@ -25,6 +26,9 @@ export const RealTimeProvider: React.FC<RealTimeProviderProps> = ({ children }) 
       onContractProcessed: (data: ContractProcessedEvent) => {
         console.log('🔔 RealTimeProvider handling contract_processed:', data);
         const { contractId, status, credits, error } = data;
+
+        // Stop the loading state for this contract
+        dispatch(stopProcessing(contractId));
 
         if (status === 'success') {
           // Update credits if provided

@@ -12,6 +12,7 @@ import {
   FaFileAlt,
   FaGlobe,
   FaPhone,
+  FaRobot,
   FaShieldAlt,
   FaTimes,
 } from 'react-icons/fa';
@@ -26,7 +27,9 @@ import InsufficientCreditsModal from './ui/InsufficientCreditsModal';
 import ReactMarkdown from 'react-markdown';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
+import { selectIsContractProcessing } from '../store/contractProcessingSlice';
 import { transformBackendContract } from '../utils/contractTransformers';
+import { useAppSelector } from '../store/hooks';
 import { useContractDownload } from '../hooks/useContractDownload';
 import { useContractSummarize } from '../hooks/useContractSummarize';
 import { useGetContractByIdQuery } from '../store/contractsApi';
@@ -298,9 +301,12 @@ const ContractDetailsPage = () => {
   // Contract summarize functionality
   const { summarizeContract, isSummarizing, insufficientCredits } = useContractSummarize();
 
+  // Check if this contract is currently processing (from Redux)
+  const isProcessing = useAppSelector((state) => selectIsContractProcessing(state, contractId || ''));
+
   const isContractExpired = contract ? (contract.endDate ? new Date(contract.endDate) < new Date() : false) : false;
 
-  // Show loading state
+  // Show loading state for initial data fetch
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -315,11 +321,15 @@ const ContractDetailsPage = () => {
 
   // Show error state
   if (isError) {
+    const errorMessage = error && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data 
+      ? String(error.data.message) 
+      : 'Une erreur est survenue lors du chargement du contrat.';
+    
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-900 mb-4">Erreur lors du chargement</h1>
-          <p className="text-red-600 mb-6">{error?.data?.message || 'Une erreur est survenue lors du chargement du contrat.'}</p>
+          <p className="text-red-600 mb-6">{errorMessage}</p>
           <button onClick={() => navigate('/app/contrats')} className="px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-medium hover:bg-[#163d82] transition-colors">
             Retour aux contrats
           </button>
@@ -440,7 +450,7 @@ const ContractDetailsPage = () => {
   const getSummarizeStatusLabel = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'Résumé en attente';
+        return 'Pas de résumé';
       case 'ongoing':
         return 'Résumé en cours';
       case 'done':
@@ -450,6 +460,60 @@ const ContractDetailsPage = () => {
       default:
         return status;
     }
+  };
+
+  // Pending/Processing Summarization Message Component
+  const PendingSummarizationMessage = () => {
+    // Show processing state if contract is being processed
+    if (isProcessing) {
+      return (
+        <div className="text-center py-12">
+          <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
+            <div className="relative mb-6">
+              <FaRobot className="h-16 w-16 text-[#1e51ab] mx-auto animate-pulse" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-[#1e51ab]"></div>
+              </div>
+            </div>
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en cours</h4>
+            <p className="text-gray-600 leading-relaxed">
+              Notre IA analyse votre contrat et génère les informations détaillées...
+            </p>
+            <p className="text-sm text-gray-500 mt-2">Cela peut prendre quelques instants</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Show pending state with button to start analysis
+    return (
+      <div className="text-center py-12">
+        <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
+          <FaRobot className="h-16 w-16 text-[#1e51ab] mx-auto mb-4" />
+          <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en attente</h4>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            Les données détaillées de cette section seront disponibles après l'analyse de votre contrat par notre IA. Cliquez sur le bouton ci-dessous pour lancer l'analyse.
+          </p>
+          <button
+            onClick={handleSummarize}
+            disabled={isSummarizing}
+            className="inline-flex items-center space-x-2 px-6 py-3 bg-[#1e51ab] text-white font-medium rounded-lg hover:bg-[#163d82] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSummarizing ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <span>Démarrage...</span>
+              </>
+            ) : (
+              <>
+                <FaRobot className="h-5 w-5" />
+                <span>Lancer l'analyse</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -501,7 +565,7 @@ const ContractDetailsPage = () => {
                 <div className="relative group">
                   <button
                     onClick={handleSummarize}
-                    disabled={isSummarizing || contract?.summarizeStatus === 'ongoing'}
+                    disabled={isSummarizing || contract?.summarizeStatus !== 'pending'}
                     className="p-2 text-gray-600 hover:text-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSummarizing || contract?.summarizeStatus === 'ongoing' ? (
@@ -511,7 +575,7 @@ const ContractDetailsPage = () => {
                     )}
                   </button>
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                    {isSummarizing || contract?.summarizeStatus === 'ongoing' ? 'Génération en cours...' : 'Générer le résumé'}
+                    {isSummarizing || contract?.summarizeStatus === 'ongoing' ? 'Génération en cours...' : contract?.summarizeStatus === 'done' ? 'Résumé déjà généré' : contract?.summarizeStatus === 'failed' ? 'Échec de la génération' : 'Générer le résumé'}
                   </div>
                 </div>
 
@@ -660,8 +724,10 @@ const ContractDetailsPage = () => {
             {/* Garanties */}
             <TabPanel>
               <div className="max-w-7xl mx-auto">
-                {/* Simple List */}
-                {contract.guarantees && contract.guarantees.length > 0 ? (
+                {/* Show pending message if summarizeStatus is pending */}
+                {contract?.summarizeStatus === 'pending' ? (
+                  <PendingSummarizationMessage />
+                ) : contract.guarantees && contract.guarantees.length > 0 ? (
                   <div className="bg-white rounded-lg border border-gray-200">
                     {contract.guarantees.map((garantie, index) => (
                       <div key={garantie.id} className={`flex items-center space-x-4 p-4 ${index !== contract.guarantees.length - 1 ? 'border-b border-gray-100' : ''}`}>
@@ -740,31 +806,40 @@ const ContractDetailsPage = () => {
             {/* Exclusions */}
             <TabPanel className="p-6">
               <div className="max-w-7xl mx-auto">
-                <div className="bg-gradient-to-br from-red-50 to-orange-50 p-8 rounded-2xl border border-red-100">
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-                    <FaExclamationTriangle className="h-6 w-6 text-red-600 mr-3" />
-                    Exclusions générales
-                  </h3>
-                  <div className="space-y-4">
-                    {contract.exclusions && contract.exclusions.length > 0 ? (
-                      contract.exclusions.map((exclusion) => (
-                        <div key={exclusion.id} className="flex items-start space-x-4 p-6 bg-white rounded-2xl border border-red-100">
-                          <span className="text-gray-900 font-medium">{capitalizeFirst(exclusion.description)}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center text-gray-500 py-4">Aucune exclusion spécifiée</div>
-                    )}
+                {/* Show pending message if summarizeStatus is pending */}
+                {contract?.summarizeStatus === 'pending' ? (
+                  <PendingSummarizationMessage />
+                ) : (
+                  <div className="bg-gradient-to-br from-red-50 to-orange-50 p-8 rounded-2xl border border-red-100">
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+                      <FaExclamationTriangle className="h-6 w-6 text-red-600 mr-3" />
+                      Exclusions générales
+                    </h3>
+                    <div className="space-y-4">
+                      {contract.exclusions && contract.exclusions.length > 0 ? (
+                        contract.exclusions.map((exclusion) => (
+                          <div key={exclusion.id} className="flex items-start space-x-4 p-6 bg-white rounded-2xl border border-red-100">
+                            <span className="text-gray-900 font-medium">{capitalizeFirst(exclusion.description)}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center text-gray-500 py-4">Aucune exclusion spécifiée</div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </TabPanel>
 
             {/* Zone géographique */}
             <TabPanel className="p-6">
               <div className="max-w-7xl mx-auto">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
-                  {contract.zones && contract.zones.length > 0 ? (
+                {/* Show pending message if summarizeStatus is pending */}
+                {contract?.summarizeStatus === 'pending' ? (
+                  <PendingSummarizationMessage />
+                ) : (
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
+                    {contract.zones && contract.zones.length > 0 ? (
                     <div className="space-y-8">
                       {/* World Map */}
                       <div className="">
@@ -874,30 +949,36 @@ const ContractDetailsPage = () => {
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="text-center text-gray-500 py-12">
-                      <div className="w-full max-w-md mx-auto bg-white rounded-xl border border-blue-200 p-8 shadow-lg">
-                        <FaGlobe className="h-20 w-20 text-gray-300 mx-auto mb-6" />
-                        <h4 className="text-xl font-semibold text-gray-900 mb-3">Aucune zone géographique spécifiée</h4>
-                        <p className="text-gray-600 leading-relaxed">
-                          Ce contrat ne spécifie pas de zones de couverture géographique. Contactez votre assureur pour plus d'informations sur les zones couvertes.
-                        </p>
+                    ) : (
+                      <div className="text-center text-gray-500 py-12">
+                        <div className="w-full max-w-md mx-auto bg-white rounded-xl border border-blue-200 p-8 shadow-lg">
+                          <FaGlobe className="h-20 w-20 text-gray-300 mx-auto mb-6" />
+                          <h4 className="text-xl font-semibold text-gray-900 mb-3">Aucune zone géographique spécifiée</h4>
+                          <p className="text-gray-600 leading-relaxed">
+                            Ce contrat ne spécifie pas de zones de couverture géographique. Contactez votre assureur pour plus d'informations sur les zones couvertes.
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
               </div>
             </TabPanel>
 
             {/* Obligations */}
             <TabPanel className="p-6">
               <div className="max-w-7xl mx-auto">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-8 flex items-center">
-                  <FaClipboardList className="h-6 w-6 text-[#1e51ab] mr-3" />
-                  Mes obligations
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {contract.obligations && contract.obligations.length > 0 ? (
+                {/* Show pending message if summarizeStatus is pending */}
+                {contract?.summarizeStatus === 'pending' ? (
+                  <PendingSummarizationMessage />
+                ) : (
+                  <>
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-8 flex items-center">
+                      <FaClipboardList className="h-6 w-6 text-[#1e51ab] mr-3" />
+                      Mes obligations
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      {contract.obligations && contract.obligations.length > 0 ? (
                     (() => {
                       // Group obligations by type
                       const groupedObligations = contract.obligations.reduce(
@@ -928,100 +1009,114 @@ const ContractDetailsPage = () => {
                             ))}
                           </ul>
                         </div>
-                      ));
-                    })()
-                  ) : (
-                    <div className="col-span-full text-center text-gray-500 py-8">Aucune obligation spécifiée</div>
-                  )}
-                </div>
+                        ));
+                      })()
+                    ) : (
+                      <div className="col-span-full text-center text-gray-500 py-8">Aucune obligation spécifiée</div>
+                    )}
+                    </div>
+                  </>
+                )}
               </div>
             </TabPanel>
 
             {/* Résiliation */}
             <TabPanel className="p-6">
               <div className="max-w-7xl mx-auto">
-                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-8 rounded-2xl border border-yellow-100">
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-                    <FaExclamationTriangle className="h-6 w-6 text-yellow-600 mr-3" />
-                    Questions fréquentes sur la résiliation
-                  </h3>
-                  <div className="space-y-6">
-                    {contract.cancellations && contract.cancellations.length > 0 ? (
-                      contract.cancellations.map((termination, index) => (
-                        <div key={termination.id} className="bg-white p-6 rounded-xl border border-yellow-200">
-                          <div className="space-y-4">
-                            <div className="flex items-start space-x-3">
-                              <div className="flex-shrink-0 w-8 h-8 bg-yellow-100 text-yellow-800 rounded-full flex items-center justify-center text-sm font-semibold">
-                                Q{index + 1}
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="text-lg font-semibold text-gray-900 mb-3">{termination.question}</h4>
-                                <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
-                                  <ReactMarkdown>{termination.response}</ReactMarkdown>
+                {/* Show pending message if summarizeStatus is pending */}
+                {contract?.summarizeStatus === 'pending' ? (
+                  <PendingSummarizationMessage />
+                ) : (
+                  <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-8 rounded-2xl border border-yellow-100">
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+                      <FaExclamationTriangle className="h-6 w-6 text-yellow-600 mr-3" />
+                      Questions fréquentes sur la résiliation
+                    </h3>
+                    <div className="space-y-6">
+                      {contract.cancellations && contract.cancellations.length > 0 ? (
+                        contract.cancellations.map((termination, index) => (
+                          <div key={termination.id} className="bg-white p-6 rounded-xl border border-yellow-200">
+                            <div className="space-y-4">
+                              <div className="flex items-start space-x-3">
+                                <div className="flex-shrink-0 w-8 h-8 bg-yellow-100 text-yellow-800 rounded-full flex items-center justify-center text-sm font-semibold">
+                                  Q{index + 1}
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="text-lg font-semibold text-gray-900 mb-3">{termination.question}</h4>
+                                  <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+                                    <ReactMarkdown>{termination.response}</ReactMarkdown>
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className="text-center text-gray-500 py-8">
+                          <FaExclamationTriangle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                          <p>Aucune information de résiliation disponible</p>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center text-gray-500 py-8">
-                        <FaExclamationTriangle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                        <p>Aucune information de résiliation disponible</p>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </TabPanel>
 
             {/* Contacts */}
             <TabPanel className="p-6">
               <div className="max-w-7xl mx-auto">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-8 flex items-center">
-                  <FaPhone className="h-6 w-6 text-[#1e51ab] mr-3" />
-                  Qui contacter
-                </h3>
+                {/* Show pending message if summarizeStatus is pending */}
+                {contract?.summarizeStatus === 'pending' ? (
+                  <PendingSummarizationMessage />
+                ) : (
+                  <>
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-8 flex items-center">
+                      <FaPhone className="h-6 w-6 text-[#1e51ab] mr-3" />
+                      Qui contacter
+                    </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {contract.contacts && contract.contacts.length > 0 ? (
-                    contract.contacts.map((contact) => (
-                      <div key={contact.id} className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
-                        <h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                          <FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
-                          {getContactTypeLabel(contact.type)}
-                        </h4>
-                        <div className="space-y-4">
-                          {contact.name && (
-                            <div>
-                              <p className="font-semibold text-gray-900">{contact.name}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      {contract.contacts && contract.contacts.length > 0 ? (
+                        contract.contacts.map((contact) => (
+                          <div key={contact.id} className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
+                            <h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                              <FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
+                              {getContactTypeLabel(contact.type)}
+                            </h4>
+                            <div className="space-y-4">
+                              {contact.name && (
+                                <div>
+                                  <p className="font-semibold text-gray-900">{contact.name}</p>
+                                </div>
+                              )}
+                              {contact.phone && (
+                                <div className="flex items-center space-x-3">
+                                  <FaPhone className="h-4 w-4 text-gray-400" />
+                                  <span className="font-medium text-gray-900">{contact.phone}</span>
+                                </div>
+                              )}
+                              {contact.email && (
+                                <div className="flex items-center space-x-3">
+                                  <FaEnvelope className="h-4 w-4 text-gray-400" />
+                                  <span className="font-medium text-gray-900">{contact.email}</span>
+                                </div>
+                              )}
+                              {contact.openingHours && (
+                                <div className="flex items-center space-x-3">
+                                  <FaClock className="h-4 w-4 text-gray-400" />
+                                  <span className="font-medium text-gray-900">{contact.openingHours}</span>
+                                </div>
+                              )}
                             </div>
-                          )}
-                          {contact.phone && (
-                            <div className="flex items-center space-x-3">
-                              <FaPhone className="h-4 w-4 text-gray-400" />
-                              <span className="font-medium text-gray-900">{contact.phone}</span>
-                            </div>
-                          )}
-                          {contact.email && (
-                            <div className="flex items-center space-x-3">
-                              <FaEnvelope className="h-4 w-4 text-gray-400" />
-                              <span className="font-medium text-gray-900">{contact.email}</span>
-                            </div>
-                          )}
-                          {contact.openingHours && (
-                            <div className="flex items-center space-x-3">
-                              <FaClock className="h-4 w-4 text-gray-400" />
-                              <span className="font-medium text-gray-900">{contact.openingHours}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-full text-center text-gray-500 py-8">Aucun contact disponible</div>
-                  )}
-                </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="col-span-full text-center text-gray-500 py-8">Aucun contact disponible</div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </TabPanel>
           </TabPanels>

@@ -5,6 +5,7 @@ import chatReducer from './chatSlice';
 import { chatsApi } from './chatsApi';
 import comparisonsReducer from './comparisonsSlice';
 import contractCreationReducer from './contractCreationSlice';
+import contractProcessingReducer from './contractProcessingSlice';
 import { contractsApi } from './contractsApi';
 import contractsReducer from './contractsSlice';
 import { creditPacksApi } from './creditPacksApi';
@@ -29,6 +30,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
 	contracts: contractsReducer,
 	contractCreation: contractCreationReducer,
+	contractProcessing: contractProcessingReducer,
 	user: persistReducer(userPersistConfig, userReducer),
 	chat: chatReducer,
 	comparisons: comparisonsReducer,
