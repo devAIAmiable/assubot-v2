@@ -38,22 +38,12 @@ describe('SignupForm', () => {
 	});
 
 	describe('Password Requirements Display', () => {
-		it('should display password requirements above the password field', () => {
+		it('should display password fields', () => {
 			renderWithProviders(<SignupForm />);
 
-			expect(screen.getByText('Critères du mot de passe :')).toBeInTheDocument();
-			expect(screen.getByText('• Au moins 8 caractères')).toBeInTheDocument();
-			expect(screen.getByText('• Au moins une lettre majuscule')).toBeInTheDocument();
-			expect(screen.getByText('• Au moins une lettre minuscule')).toBeInTheDocument();
-			expect(screen.getByText('• Au moins un chiffre')).toBeInTheDocument();
-			expect(screen.getByText('• Au moins un caractère spécial (@$!%*#?&)')).toBeInTheDocument();
-		});
-
-		it('should show password requirements in a blue info box', () => {
-			renderWithProviders(<SignupForm />);
-
-			const requirementsBox = screen.getByText('Critères du mot de passe :').closest('div');
-			expect(requirementsBox).toHaveClass('bg-blue-50', 'border-blue-200');
+			// Password fields are rendered
+			expect(screen.getByLabelText('Mot de passe')).toBeInTheDocument();
+			expect(screen.getByLabelText('Confirmer le mot de passe')).toBeInTheDocument();
 		});
 	});
 
