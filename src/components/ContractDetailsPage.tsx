@@ -534,11 +534,7 @@ const ContractDetailsPage = () => {
                       disabled={isSummarizing}
                       className="p-2 text-gray-600 hover:text-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isSummarizing ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                      ) : (
-                        <FaFileAlt className="h-4 w-4" />
-                      )}
+                      {isSummarizing ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div> : <FaFileAlt className="h-4 w-4" />}
                     </button>
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                       {isSummarizing ? 'Génération en cours...' : 'Générer le résumé'}
@@ -765,11 +761,6 @@ const ContractDetailsPage = () => {
                               <div className="w-8 h-8 bg-[#1e51ab] text-white rounded-full flex items-center justify-center text-sm font-bold">{index + 1}</div>
                               <div>
                                 <h3 className="text-lg font-semibold text-gray-900">{capitalizeFirst(garantie.title)}</h3>
-                                {garantie.details && garantie.details.length > 0 && (
-                                  <p className="text-xs text-gray-600 mt-1">
-                                    {garantie.details.length} détail{garantie.details.length > 1 ? 's' : ''}
-                                  </p>
-                                )}
                               </div>
                             </div>
                           </div>
