@@ -26,6 +26,7 @@ const EditContractModal: React.FC<EditContractModalProps> = ({
 		name: contract.name,
 		insurerName: contract.insurerName || '',
 		category: contract.category,
+		formula: contract.formula || '',
 		annualPremiumCents: contract.annualPremiumCents || 0,
 		startDate: contract.startDate ? formatDateForInput(contract.startDate.toISOString()) : '',
 		endDate: contract.endDate ? formatDateForInput(contract.endDate.toISOString()) : '',
@@ -153,6 +154,19 @@ const EditContractModal: React.FC<EditContractModalProps> = ({
 												type="text"
 												value={formData.insurerName || ''}
 												onChange={(e) => handleInputChange('insurerName', e.target.value)}
+												className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
+											/>
+										</div>
+
+										<div>
+											<label className="block text-sm font-medium text-gray-700 mb-2">
+												Formule
+											</label>
+											<input
+												type="text"
+												value={formData.formula || ''}
+												onChange={(e) => handleInputChange('formula', e.target.value)}
+												placeholder="Ex: Tous risques, Tiers, etc."
 												className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
 											/>
 										</div>

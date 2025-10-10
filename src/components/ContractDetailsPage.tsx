@@ -395,6 +395,7 @@ const ContractDetailsPage = () => {
       endDate: contract.endDate || null,
       annualPremiumCents: contract.annualPremiumCents,
       status: contract.status,
+      formula: contract.formula || '',
       createdAt: contract.createdAt,
       updatedAt: contract.updatedAt,
       documents: contract.documents.map((doc) => ({
@@ -435,8 +436,8 @@ const ContractDetailsPage = () => {
 
   // Pending/Processing Summarization Message Component
   const PendingSummarizationMessage = () => {
-    // Show processing state if contract is being processed
-    if (isProcessing) {
+    // Show processing loader if status is ongoing
+    if (contract?.summarizeStatus === 'ongoing' || isProcessing) {
       return (
         <div className="text-center py-12">
           <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
@@ -454,35 +455,40 @@ const ContractDetailsPage = () => {
       );
     }
 
-    // Show pending state with button to start analysis
-    return (
-      <div className="text-center py-12">
-        <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
-          <FaRobot className="h-16 w-16 text-[#1e51ab] mx-auto mb-4" />
-          <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en attente</h4>
-          <p className="text-gray-600 leading-relaxed mb-6">
-            Les données détaillées de cette section seront disponibles après l'analyse de votre contrat par notre IA. Cliquez sur le bouton ci-dessous pour lancer l'analyse.
-          </p>
-          <button
-            onClick={handleSummarize}
-            disabled={isSummarizing}
-            className="inline-flex items-center space-x-2 px-6 py-3 bg-[#1e51ab] text-white font-medium rounded-lg hover:bg-[#163d82] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSummarizing ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span>Démarrage...</span>
-              </>
-            ) : (
-              <>
-                <FaRobot className="h-5 w-5" />
-                <span>Lancer l'analyse</span>
-              </>
-            )}
-          </button>
+    // Show pending state with button to start analysis (only when status is pending)
+    if (contract?.summarizeStatus === 'pending') {
+      return (
+        <div className="text-center py-12">
+          <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
+            <FaRobot className="h-16 w-16 text-[#1e51ab] mx-auto mb-4" />
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en attente</h4>
+            <p className="text-gray-600 leading-relaxed mb-6">
+              Les données détaillées de cette section seront disponibles après l'analyse de votre contrat par notre IA. Cliquez sur le bouton ci-dessous pour lancer l'analyse.
+            </p>
+            <button
+              onClick={handleSummarize}
+              disabled={isSummarizing}
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-[#1e51ab] text-white font-medium rounded-lg hover:bg-[#163d82] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSummarizing ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Démarrage...</span>
+                </>
+              ) : (
+                <>
+                  <FaRobot className="h-5 w-5" />
+                  <span>Lancer l'analyse</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+
+    // Return null for other statuses (shouldn't reach here, but safety fallback)
+    return null;
   };
 
   return (
@@ -687,8 +693,8 @@ const ContractDetailsPage = () => {
             {/* Garanties */}
             <TabPanel className="p-4">
               <div className="max-w-6xl mx-auto">
-                {/* Show pending message if summarizeStatus is pending */}
-                {contract?.summarizeStatus === 'pending' ? (
+                {/* Show pending/ongoing message if summarizeStatus is pending or ongoing */}
+                {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
                   <PendingSummarizationMessage />
                 ) : contract.guarantees && contract.guarantees.length > 0 ? (
                   <div className="space-y-4">
@@ -902,8 +908,8 @@ const ContractDetailsPage = () => {
             {/* Exclusions */}
             <TabPanel className="p-6">
               <div className="max-w-7xl mx-auto">
-                {/* Show pending message if summarizeStatus is pending */}
-                {contract?.summarizeStatus === 'pending' ? (
+                {/* Show pending/ongoing message if summarizeStatus is pending or ongoing */}
+                {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
                   <PendingSummarizationMessage />
                 ) : (
                   <div className="bg-gradient-to-br from-red-50 to-orange-50 p-8 rounded-2xl border border-red-100">
@@ -930,8 +936,8 @@ const ContractDetailsPage = () => {
             {/* Zone géographique */}
             <TabPanel className="p-6">
               <div className="max-w-7xl mx-auto">
-                {/* Show pending message if summarizeStatus is pending */}
-                {contract?.summarizeStatus === 'pending' ? (
+                {/* Show pending/ongoing message if summarizeStatus is pending or ongoing */}
+                {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
                   <PendingSummarizationMessage />
                 ) : (
                   <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
@@ -1064,8 +1070,8 @@ const ContractDetailsPage = () => {
             {/* Obligations */}
             <TabPanel className="p-6">
               <div className="max-w-7xl mx-auto">
-                {/* Show pending message if summarizeStatus is pending */}
-                {contract?.summarizeStatus === 'pending' ? (
+                {/* Show pending/ongoing message if summarizeStatus is pending or ongoing */}
+                {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
                   <PendingSummarizationMessage />
                 ) : (
                   <>
@@ -1119,8 +1125,8 @@ const ContractDetailsPage = () => {
             {/* Résiliation */}
             <TabPanel className="p-6">
               <div className="max-w-7xl mx-auto">
-                {/* Show pending message if summarizeStatus is pending */}
-                {contract?.summarizeStatus === 'pending' ? (
+                {/* Show pending/ongoing message if summarizeStatus is pending or ongoing */}
+                {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
                   <PendingSummarizationMessage />
                 ) : (
                   <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-8 rounded-2xl border border-yellow-100">
@@ -1162,8 +1168,8 @@ const ContractDetailsPage = () => {
             {/* Contacts */}
             <TabPanel className="p-6">
               <div className="max-w-7xl mx-auto">
-                {/* Show pending message if summarizeStatus is pending */}
-                {contract?.summarizeStatus === 'pending' ? (
+                {/* Show pending/ongoing message if summarizeStatus is pending or ongoing */}
+                {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
                   <PendingSummarizationMessage />
                 ) : (
                   <>
