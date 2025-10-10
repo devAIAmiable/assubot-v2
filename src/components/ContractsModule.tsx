@@ -1,8 +1,9 @@
 import type { ContractCategory, ContractListItem } from '../types/contract';
-import { FaCalendarAlt, FaChevronDown, FaEdit, FaEuroSign, FaEye, FaFileAlt, FaFileContract, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
+import { FaCalendarAlt, FaChevronDown, FaEdit, FaEuroSign, FaEye, FaFileContract, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
 import { getContractListItemInsurer, getContractListItemPremium, getContractListItemType } from '../utils/contractAdapters';
 import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../utils/contract';
 
+import ContractSummarizationStatus from './ui/ContractSummarizationStatus';
 import CreateContractModal from './CreateContractModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import EditContractModal from './EditContractModal';
@@ -322,13 +323,16 @@ const ContractsModule = () => {
                         <p className="text-xs text-gray-600">{getTypeLabel(getContractListItemType(contract))}</p>
                       </div>
                     </div>
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        isPending ? 'bg-yellow-100 text-yellow-800' : isContractExpired ? 'bg-red-100 text-red-800' : getStatusColor(contract.status)
-                      }`}
-                    >
-                      {isPending ? 'En cours de traitement' : isContractExpired ? 'Expiré' : getStatusLabel(contract.status)}
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          isPending ? 'bg-yellow-100 text-yellow-800' : isContractExpired ? 'bg-red-100 text-red-800' : getStatusColor(contract.status)
+                        }`}
+                      >
+                        {isPending ? 'En cours de traitement' : isContractExpired ? 'Expiré' : getStatusLabel(contract.status)}
+                      </span>
+                      <ContractSummarizationStatus summarizeStatus={contract.summarizeStatus} />
+                    </div>
                   </div>
 
                   {/* Details */}
@@ -352,55 +356,6 @@ const ContractsModule = () => {
                   </div>
 
                   {/* Documents */}
-                  <div className="mb-4">
-                    <p className="text-xs text-gray-600 mb-2">Documents ({contract.documents?.length || 0})</p>
-                    <div className="flex flex-wrap gap-1">
-                      {contract.documents?.map((doc) => {
-                        // Determine label and styling based on document type
-                        let label = '';
-                        let bgColor = '';
-                        let textColor = '';
-
-                        switch (doc.type) {
-                          case 'CG':
-                            label = 'Conditions Générales';
-                            bgColor = 'bg-blue-100';
-                            textColor = 'text-blue-700';
-                            break;
-                          case 'CP':
-                            label = 'Conditions Particulières';
-                            bgColor = 'bg-green-100';
-                            textColor = 'text-green-700';
-                            break;
-                          case 'OTHER':
-                            label = 'Document annexe';
-                            bgColor = 'bg-gray-100';
-                            textColor = 'text-gray-700';
-                            break;
-                          default:
-                            label = doc.type || 'Document';
-                            bgColor = 'bg-purple-100';
-                            textColor = 'text-purple-700';
-                            break;
-                        }
-
-                        return (
-                          <span key={doc.id} className={`inline-flex items-center px-2 py-1 ${bgColor} ${textColor} text-xs rounded-lg`}>
-                            <FaFileAlt className="h-3 w-3 mr-1" />
-                            {label}
-                          </span>
-                        );
-                      })}
-
-                      {/* Show message if no documents */}
-                      {(!contract.documents || contract.documents.length === 0) && (
-                        <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-lg">
-                          <FaFileAlt className="h-3 w-3 mr-1" />
-                          Aucun document
-                        </span>
-                      )}
-                    </div>
-                  </div>
 
                   {/* Actions */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">

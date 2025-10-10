@@ -412,6 +412,8 @@ export interface BackendContractGuarantee {
 export interface BackendGuaranteeDetail {
   service?: string;
   limit?: string;
+  plafond?: string;
+  franchise?: string;
   coverages?: BackendCoverage[];
 }
 

@@ -1,11 +1,11 @@
 import { startProcessing, stopProcessing } from '../store/contractProcessingSlice';
 
-import { contractsService } from '../services/coreApi';
 import { showToast } from '../components/ui/Toast';
 import { useAppDispatch } from '../store/hooks';
 import { useInsufficientCredits } from './useInsufficientCredits';
 import { useRealtimeUpdates } from './useRealtimeUpdates';
 import { useState } from 'react';
+import { useSummarizeContractMutation } from '../store/contractsApi';
 
 interface UseContractSummarizeReturn {
   isSummarizing: boolean;
@@ -27,6 +27,7 @@ interface UseContractSummarizeReturn {
  */
 export const useContractSummarize = (): UseContractSummarizeReturn => {
   const dispatch = useAppDispatch();
+  const [summarizeMutation] = useSummarizeContractMutation();
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +44,7 @@ export const useContractSummarize = (): UseContractSummarizeReturn => {
     try {
       dispatch(startProcessing(contractId));
 
-      await contractsService.summarize(contractId);
+      await summarizeMutation(contractId).unwrap();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la génération du résumé du contrat';
       setError(errorMessage);

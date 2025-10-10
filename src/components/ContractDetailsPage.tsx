@@ -22,6 +22,7 @@ import { getContactTypeLabel, getObligationTypeLabel, getStatusColor, getStatusL
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import ContractSummarizationStatus from './ui/ContractSummarizationStatus';
 import EditContractModal from './EditContractModal';
 import InsufficientCreditsModal from './ui/InsufficientCreditsModal';
 import ReactMarkdown from 'react-markdown';
@@ -432,37 +433,6 @@ const ContractDetailsPage = () => {
     }
   };
 
-  // Helper functions for summarization status styling
-  const getSummarizeStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'ongoing':
-        return 'bg-blue-100 text-blue-800';
-      case 'done':
-        return 'bg-green-100 text-green-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getSummarizeStatusLabel = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'Pas de résumé';
-      case 'ongoing':
-        return 'Résumé en cours';
-      case 'done':
-        return 'Résumé disponible';
-      case 'failed':
-        return 'Résumé échoué';
-      default:
-        return status;
-    }
-  };
-
   // Pending/Processing Summarization Message Component
   const PendingSummarizationMessage = () => {
     // Show processing state if contract is being processed
@@ -551,38 +521,30 @@ const ContractDetailsPage = () => {
                 {isContractExpired ? 'Expiré' : getStatusLabel(contract.status)}
               </span>
 
-              {/* Summarization status badge */}
-              {contract?.summarizeStatus && (
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getSummarizeStatusColor(contract.summarizeStatus)}`}>
-                  {getSummarizeStatusLabel(contract.summarizeStatus)}
-                </span>
-              )}
+              {/* Summarization status */}
+              <ContractSummarizationStatus summarizeStatus={contract?.summarizeStatus} className="px-3 py-1" />
 
               {/* Action buttons */}
               <div className="flex items-center space-x-1">
-                {/* Summarize button */}
-                <div className="relative group">
-                  <button
-                    onClick={handleSummarize}
-                    disabled={isSummarizing || contract?.summarizeStatus !== 'pending'}
-                    className="p-2 text-gray-600 hover:text-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSummarizing || contract?.summarizeStatus === 'ongoing' ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                    ) : (
-                      <FaFileAlt className="h-4 w-4" />
-                    )}
-                  </button>
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                    {isSummarizing || contract?.summarizeStatus === 'ongoing'
-                      ? 'Génération en cours...'
-                      : contract?.summarizeStatus === 'done'
-                        ? 'Résumé déjà généré'
-                        : contract?.summarizeStatus === 'failed'
-                          ? 'Échec de la génération'
-                          : 'Générer le résumé'}
+                {/* Summarize button - Only show when status is pending */}
+                {contract?.summarizeStatus === 'pending' && (
+                  <div className="relative group">
+                    <button
+                      onClick={handleSummarize}
+                      disabled={isSummarizing}
+                      className="p-2 text-gray-600 hover:text-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSummarizing ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                      ) : (
+                        <FaFileAlt className="h-4 w-4" />
+                      )}
+                    </button>
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                      {isSummarizing ? 'Génération en cours...' : 'Générer le résumé'}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Edit button */}
                 <div className="relative group">
@@ -727,78 +689,220 @@ const ContractDetailsPage = () => {
             </TabPanel>
 
             {/* Garanties */}
-            <TabPanel>
-              <div className="max-w-7xl mx-auto">
+            <TabPanel className="p-4">
+              <div className="max-w-6xl mx-auto">
                 {/* Show pending message if summarizeStatus is pending */}
                 {contract?.summarizeStatus === 'pending' ? (
                   <PendingSummarizationMessage />
                 ) : contract.guarantees && contract.guarantees.length > 0 ? (
-                  <div className="bg-white rounded-lg border border-gray-200">
-                    {contract.guarantees.map((garantie, index) => (
-                      <div key={garantie.id} className={`flex items-center space-x-4 p-4 ${index !== contract.guarantees.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                        {/* Number */}
-                        <div className="w-6 h-6 bg-[#1e51ab] text-white rounded-full flex items-center justify-center text-sm font-medium">{index + 1}</div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-base font-medium text-gray-900 mb-2">{capitalizeFirst(garantie.title)}</h3>
-
-                          {/* Details */}
-                          {garantie.details && Array.isArray(garantie.details) && garantie.details.length > 0 && (
-                            <div className="space-y-2">
-                              {garantie.details.map((detail, detailIndex) => (
-                                <div key={detailIndex} className="space-y-1">
-                                  {/* Service */}
-                                  {detail.service && detail.service.trim() !== '' && <p className="text-sm text-gray-600">{detail.service}</p>}
-
-                                  {/* Limit */}
-                                  {detail.limit && detail.limit.trim() !== '' && (
-                                    <div className="flex items-center space-x-2">
-                                      <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                                        {detail.limit}
-                                      </span>
-                                    </div>
-                                  )}
-
-                                  {/* Coverages */}
-                                  {detail.coverages && detail.coverages.length > 0 && (
-                                    <div className="flex flex-wrap gap-1">
-                                      {detail.coverages.map((coverage, coverageIndex) => (
-                                        <span
-                                          key={coverageIndex}
-                                          className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${
-                                            coverage.type === 'covered' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                          }`}
-                                        >
-                                          {coverage.type === 'covered' ? '✓' : '✗'} {coverage.description}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                  <div className="space-y-4">
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+                      <div className="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg border border-green-200">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                            <FaShieldAlt className="h-3 w-3 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-base font-bold text-green-800">{contract.guarantees.length}</p>
+                            <p className="text-xs text-green-600">
+                              Garantie{contract.guarantees.length > 1 ? 's' : ''} souscrite{contract.guarantees.length > 1 ? 's' : ''}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    ))}
+
+                      <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-lg border border-blue-200">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                            <FaCheck className="h-3 w-3 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-base font-bold text-blue-800">
+                              {contract.guarantees.reduce((total, garantie) => {
+                                return (
+                                  total +
+                                  (garantie.details?.reduce((detailTotal, detail) => {
+                                    return detailTotal + (detail.coverages?.filter((c) => c.type === 'covered').length || 0);
+                                  }, 0) || 0)
+                                );
+                              }, 0)}
+                            </p>
+                            <p className="text-xs text-blue-600">Couvertures incluses</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-red-50 to-red-100 p-3 rounded-lg border border-red-200">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                            <FaExclamationTriangle className="h-3 w-3 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-base font-bold text-red-800">
+                              {contract.guarantees.reduce((total, garantie) => {
+                                return (
+                                  total +
+                                  (garantie.details?.reduce((detailTotal, detail) => {
+                                    return detailTotal + (detail.coverages?.filter((c) => c.type === 'excluded').length || 0);
+                                  }, 0) || 0)
+                                );
+                              }, 0)}
+                            </p>
+                            <p className="text-xs text-red-600">Exclusions</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Guarantees List */}
+                    <div className="space-y-4">
+                      {contract.guarantees.map((garantie, index) => (
+                        <div key={garantie.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                          {/* Header */}
+                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-200">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-[#1e51ab] text-white rounded-full flex items-center justify-center text-sm font-bold">{index + 1}</div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-gray-900">{capitalizeFirst(garantie.title)}</h3>
+                                {garantie.details && garantie.details.length > 0 && (
+                                  <p className="text-xs text-gray-600 mt-1">
+                                    {garantie.details.length} détail{garantie.details.length > 1 ? 's' : ''}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Content */}
+                          <div className="p-4">
+                            {garantie.details && Array.isArray(garantie.details) && garantie.details.length > 0 ? (
+                              <div className="space-y-4">
+                                {garantie.details.map((detail, detailIndex) => (
+                                  <div key={detailIndex} className="border border-gray-100 rounded-lg p-4 bg-gray-50">
+                                    {/* Service Title */}
+                                    {detail.service && detail.service.trim() !== '' && (
+                                      <div className="mb-3">
+                                        <h4 className="text-base font-medium text-gray-900 mb-1">{detail.service}</h4>
+                                      </div>
+                                    )}
+
+                                    {/* Financial Info Cards */}
+                                    {(detail.plafond || detail.franchise || detail.limit) && (
+                                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+                                        {/* Plafond */}
+                                        {detail.plafond && detail.plafond.trim() !== '' && (
+                                          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                            <div className="flex items-center space-x-2 mb-1">
+                                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                                              <span className="text-xs font-medium text-blue-700 uppercase tracking-wide">Plafond</span>
+                                            </div>
+                                            <p className="text-sm font-semibold text-blue-900">
+                                              {!isNaN(parseFloat(detail.plafond)) ? `${parseFloat(detail.plafond).toLocaleString('fr-FR')} €` : detail.plafond}
+                                            </p>
+                                          </div>
+                                        )}
+
+                                        {/* Franchise */}
+                                        {detail.franchise && detail.franchise.trim() !== '' && (
+                                          <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                                            <div className="flex items-center space-x-2 mb-1">
+                                              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                                              <span className="text-xs font-medium text-purple-700 uppercase tracking-wide">Franchise</span>
+                                            </div>
+                                            <p className="text-sm font-semibold text-purple-900">
+                                              {!isNaN(parseFloat(detail.franchise)) ? `${parseFloat(detail.franchise).toLocaleString('fr-FR')} €` : detail.franchise}
+                                            </p>
+                                          </div>
+                                        )}
+
+                                        {/* Limite */}
+                                        {detail.limit && detail.limit.trim() !== '' && (
+                                          <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
+                                            <div className="flex items-center space-x-2 mb-1">
+                                              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
+                                              <span className="text-xs font-medium text-indigo-700 uppercase tracking-wide">Limite</span>
+                                            </div>
+                                            <p className="text-sm font-semibold text-indigo-900">{detail.limit}</p>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+
+                                    {/* Coverages */}
+                                    {detail.coverages && detail.coverages.length > 0 && (
+                                      <div className="space-y-2">
+                                        {/* Included Coverages */}
+                                        {detail.coverages.filter((c) => c.type === 'covered').length > 0 && (
+                                          <div>
+                                            <h5 className="text-xs font-medium text-green-700 mb-2 flex items-center">
+                                              <FaCheck className="h-3 w-3 mr-1" />
+                                              Inclus ({detail.coverages.filter((c) => c.type === 'covered').length})
+                                            </h5>
+                                            <div className="space-y-1">
+                                              {detail.coverages
+                                                .filter((coverage) => coverage.type === 'covered')
+                                                .map((coverage, coverageIndex) => (
+                                                  <div key={coverageIndex} className="flex items-start space-x-2 p-2 bg-green-50 rounded-lg border border-green-200">
+                                                    <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                      <FaCheck className="h-2 w-2 text-white" />
+                                                    </div>
+                                                    <p className="text-xs text-green-800 leading-relaxed">{coverage.description}</p>
+                                                  </div>
+                                                ))}
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        {/* Excluded Coverages */}
+                                        {detail.coverages.filter((c) => c.type === 'excluded').length > 0 && (
+                                          <div>
+                                            <h5 className="text-xs font-medium text-red-700 mb-2 flex items-center">
+                                              <FaTimes className="h-3 w-3 mr-1" />
+                                              Exclu ({detail.coverages.filter((c) => c.type === 'excluded').length})
+                                            </h5>
+                                            <div className="space-y-1">
+                                              {detail.coverages
+                                                .filter((coverage) => coverage.type === 'excluded')
+                                                .map((coverage, coverageIndex) => (
+                                                  <div key={coverageIndex} className="flex items-start space-x-2 p-2 bg-red-50 rounded-lg border border-red-200">
+                                                    <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                      <FaTimes className="h-2 w-2 text-white" />
+                                                    </div>
+                                                    <p className="text-xs text-red-800 leading-relaxed">{coverage.description}</p>
+                                                  </div>
+                                                ))}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center py-6">
+                                <FaShieldAlt className="h-8 w-8 text-gray-300 mx-auto mb-3" />
+                                <p className="text-sm text-gray-500">Aucun détail disponible pour cette garantie</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   /* Empty State */
                   <div className="text-center py-12">
-                    <FaShieldAlt className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Aucune garantie spécifiée</p>
-                  </div>
-                )}
-
-                {/* Simple Summary */}
-                {contract.guarantees && contract.guarantees.length > 0 && (
-                  <div className="mt-4 text-center">
-                    <p className="text-sm text-gray-500">
-                      {contract.guarantees.length} garantie
-                      {contract.guarantees.length > 1 ? 's' : ''} souscrite
-                      {contract.guarantees.length > 1 ? 's' : ''}
-                    </p>
+                    <div className="max-w-sm mx-auto">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <FaShieldAlt className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune garantie spécifiée</h3>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        Ce contrat ne contient pas encore d'informations détaillées sur les garanties. Lancez l'analyse IA pour générer ces informations.
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
