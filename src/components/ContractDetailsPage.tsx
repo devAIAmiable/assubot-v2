@@ -755,11 +755,7 @@ const ContractDetailsPage = () => {
                                   {detail.limit && detail.limit.trim() !== '' && (
                                     <div className="flex items-center space-x-2">
                                       <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                                        {detail.limit === 'Valeur du véhicule'
-                                          ? 'Valeur du véhicule'
-                                          : !isNaN(parseFloat(detail.limit))
-                                            ? `${parseFloat(detail.limit).toLocaleString('fr-FR')}€`
-                                            : detail.limit}
+                                        {detail.limit}
                                       </span>
                                     </div>
                                   )}
