@@ -197,6 +197,7 @@ export interface ContractListItem {
   name: string;
   insurerName: string | null;
   category: ContractCategory;
+  formula?: string;
   startDate: Date | null;
   endDate: Date | null;
   annualPremiumCents: number;
@@ -315,6 +316,7 @@ export interface BackendContractListItem {
   name: string;
   insurerName: string | null;
   category: ContractCategory;
+  formula?: string;
   startDate: string | null; // ISO string from backend
   endDate: string | null; // ISO string from backend
   annualPremiumCents: number;

@@ -319,6 +319,56 @@ export const contractsApi = createApi({
 				code: response.data.error.code,
 			}),
 		}),
+
+		// Summarize contract
+		summarizeContract: builder.mutation<{ message: string }, string>({
+			query: (contractId) => ({
+				url: `/${contractId}/summarize`,
+				method: 'POST',
+			}),
+			transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+				status: response.status,
+				message: response.data.error.message,
+				code: response.data.error.code,
+			}),
+			// Optimistically update the contract status to 'ongoing'
+			async onQueryStarted(contractId, { dispatch, queryFulfilled, getState }) {
+				const patchResults: Array<{ undo: () => void }> = [];
+
+				// Update the single contract cache
+				const singleContractPatch = dispatch(
+					contractsApi.util.updateQueryData('getContractById', contractId, (draft) => {
+						draft.summarizeStatus = 'ongoing';
+					})
+				);
+				patchResults.push(singleContractPatch);
+
+				// Update all contract list caches
+				const state = getState() as { contractsApi: { queries: Record<string, unknown> } };
+				const queries = state.contractsApi.queries;
+				
+				Object.keys(queries).forEach((key) => {
+					if (key.startsWith('getContracts(')) {
+						const listPatch = dispatch(
+							contractsApi.util.updateQueryData('getContracts', JSON.parse(key.slice('getContracts('.length, -1)), (draft) => {
+								const contract = draft.data.find((c) => c.id === contractId);
+								if (contract) {
+									contract.summarizeStatus = 'ongoing';
+								}
+							})
+						);
+						patchResults.push(listPatch);
+					}
+				});
+
+				try {
+					await queryFulfilled;
+				} catch {
+					// Revert all optimistic updates on error
+					patchResults.forEach((patch) => patch.undo());
+				}
+			},
+		}),
 	}),
 });
 
@@ -334,6 +384,7 @@ export const {
 	useInitContractMutation,
 	useNotifyMutation,
 	useGetDashboardStatsQuery,
+	useSummarizeContractMutation,
 } = contractsApi;
 
 // Combined hook for the complete upload process

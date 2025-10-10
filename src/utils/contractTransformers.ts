@@ -203,6 +203,7 @@ export function transformBackendContractListItem(backendContract: BackendContrac
     name: backendContract.name,
     insurerName: backendContract.insurerName,
     category: backendContract.category,
+    formula: backendContract.formula,
     startDate: backendContract.startDate ? new Date(backendContract.startDate) : null,
     endDate: backendContract.endDate ? new Date(backendContract.endDate) : null,
     annualPremiumCents: backendContract.annualPremiumCents,
