@@ -812,15 +812,35 @@ const ContractDetailsPage = () => {
                                             </p>
                                           </div>
                                         )}
+                                        {/* Franchise */}
+                                        {detail.deductible && detail.deductible.trim() !== '' && (
+                                          <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
+                                            <div className="flex items-center space-x-2 mb-1">
+                                              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
+                                              <span className="text-xs font-medium text-indigo-700 uppercase tracking-wide">Franchise</span>
+                                            </div>
+                                            <p className="text-sm font-semibold text-indigo-900">{detail.deductible}</p>
+                                          </div>
+                                        )}
 
-                                        {/* Limite */}
+                                        {/* Plafond */}
                                         {detail.limit && detail.limit.trim() !== '' && (
                                           <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
                                             <div className="flex items-center space-x-2 mb-1">
                                               <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
-                                              <span className="text-xs font-medium text-indigo-700 uppercase tracking-wide">Limite</span>
+                                              <span className="text-xs font-medium text-indigo-700 uppercase tracking-wide">Plafond</span>
                                             </div>
                                             <p className="text-sm font-semibold text-indigo-900">{detail.limit}</p>
+                                          </div>
+                                        )}
+                                        {/* Limitation */}
+                                        {detail.limitation && detail.limitation.trim() !== '' && (
+                                          <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
+                                            <div className="flex items-center space-x-2 mb-1">
+                                              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
+                                              <span className="text-xs font-medium text-indigo-700 uppercase tracking-wide">Limite(s)</span>
+                                            </div>
+                                            <p className="text-sm font-semibold text-indigo-900">{detail.limitation}</p>
                                           </div>
                                         )}
                                       </div>
