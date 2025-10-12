@@ -700,27 +700,27 @@ const ContractDetailsPage = () => {
                   <div className="space-y-4">
                     {/* Summary Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
-                      <div className="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg border border-green-200">
+                      <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-lg border border-blue-200">
                         <div className="flex items-center space-x-2">
-                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                             <FaShieldAlt className="h-3 w-3 text-white" />
                           </div>
                           <div>
-                            <p className="text-base font-bold text-green-800">{contract.guarantees.length}</p>
-                            <p className="text-xs text-green-600">
+                            <p className="text-base font-bold text-blue-800">{contract.guarantees.length}</p>
+                            <p className="text-xs text-blue-600">
                               Garantie{contract.guarantees.length > 1 ? 's' : ''} souscrite{contract.guarantees.length > 1 ? 's' : ''}
                             </p>
                           </div>
                         </div>
                       </div>
 
-                      <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-lg border border-blue-200">
+                      <div className="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg border border-green-200">
                         <div className="flex items-center space-x-2">
-                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                             <FaCheck className="h-3 w-3 text-white" />
                           </div>
                           <div>
-                            <p className="text-base font-bold text-blue-800">
+                            <p className="text-base font-bold text-green-800">
                               {contract.guarantees.reduce((total, garantie) => {
                                 return (
                                   total +
@@ -730,7 +730,7 @@ const ContractDetailsPage = () => {
                                 );
                               }, 0)}
                             </p>
-                            <p className="text-xs text-blue-600">Couvertures incluses</p>
+                            <p className="text-xs text-green-600">Couvertures incluses</p>
                           </div>
                         </div>
                       </div>
@@ -746,7 +746,7 @@ const ContractDetailsPage = () => {
                                 return (
                                   total +
                                   (garantie.details?.reduce((detailTotal, detail) => {
-                                    return detailTotal + (detail.coverages?.filter((c) => c.type === 'excluded').length || 0);
+                                    return detailTotal + (detail.coverages?.filter((c) => c.type === 'not_covered').length || 0);
                                   }, 0) || 0)
                                 );
                               }, 0)}
@@ -852,15 +852,15 @@ const ContractDetailsPage = () => {
                                         )}
 
                                         {/* Excluded Coverages */}
-                                        {detail.coverages.filter((c) => c.type === 'excluded').length > 0 && (
+                                        {detail.coverages.filter((c) => c.type === 'not_covered').length > 0 && (
                                           <div>
                                             <h5 className="text-xs font-medium text-red-700 mb-2 flex items-center">
                                               <FaTimes className="h-3 w-3 mr-1" />
-                                              Exclu ({detail.coverages.filter((c) => c.type === 'excluded').length})
+                                              Exclu ({detail.coverages.filter((c) => c.type === 'not_covered').length})
                                             </h5>
                                             <div className="space-y-1">
                                               {detail.coverages
-                                                .filter((coverage) => coverage.type === 'excluded')
+                                                .filter((coverage) => coverage.type === 'not_covered')
                                                 .map((coverage, coverageIndex) => (
                                                   <div key={coverageIndex} className="flex items-start space-x-2 p-2 bg-red-50 rounded-lg border border-red-200">
                                                     <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
