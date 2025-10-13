@@ -4,7 +4,7 @@ import 'dayjs/locale/fr';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { CreateChatRequest, QuickAction } from '../types/chat';
 import { FaArrowLeft, FaCheck, FaEdit, FaEllipsisV, FaPaperPlane, FaPlus, FaRobot, FaSearch, FaSpinner, FaTimes, FaTrash } from 'react-icons/fa';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useGetChatMessagesQuery, useGetChatsQuery } from '../store/chatsApi';
 
 import ChatListLoader from './ui/ChatListLoader';
@@ -22,6 +22,19 @@ import { useGetContractsQuery } from '../store/contractsApi';
 import { useSendMessage } from '../hooks/useSendMessage';
 
 dayjs.locale('fr');
+
+// Fonction pour nettoyer le contenu des messages de l'assistant
+const cleanAssistantMessage = (content: string): string => {
+  // Supprimer "Document(s) utilisés" et tout ce qui suit
+  const patterns = [/Document\(s\) utilisé.*$/is, /Documents? utilisés?.*$/is];
+
+  let cleanedContent = content;
+  for (const pattern of patterns) {
+    cleanedContent = cleanedContent.replace(pattern, '');
+  }
+
+  return cleanedContent.trim();
+};
 
 const ChatModule: React.FC = () => {
   const { currentChat, loading, error, createNewChat, updateChatById, deleteChatById, selectChat, clearChatError, getChatQuickActions, clearChatQuickActions } = useChats();
@@ -46,7 +59,7 @@ const ChatModule: React.FC = () => {
   const currentUser = useAppSelector((state) => state.user.currentUser);
 
   // Get the messages array
-  const messages = messagesData?.messages || [];
+  const messages = useMemo(() => messagesData?.messages || [], [messagesData?.messages]);
 
   // États locaux
   const [showNewChatModal, setShowNewChatModal] = useState(false);
@@ -367,7 +380,7 @@ const ChatModule: React.FC = () => {
                                       br: () => <span> </span>,
                                     }}
                                   >
-                                    {chat.lastMessage.content}
+                                    {chat.lastMessage.role === 'assistant' ? cleanAssistantMessage(chat.lastMessage.content) : chat.lastMessage.content}
                                   </ReactMarkdown>
                                 ) : (
                                   'Aucun message'
@@ -574,7 +587,7 @@ const ChatModule: React.FC = () => {
                                 br: () => <br />,
                               }}
                             >
-                              {message.content}
+                              {message.role === 'assistant' ? cleanAssistantMessage(message.content) : message.content}
                             </ReactMarkdown>
                           </div>
                           <p className={`text-xs mt-1 ${message.role === 'user' ? 'text-blue-200' : 'text-gray-500'}`}>{dayjs(message.createdAt).format('HH:mm')}</p>
