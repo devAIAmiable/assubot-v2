@@ -416,6 +416,8 @@ export interface BackendGuaranteeDetail {
   limit?: string;
   plafond?: string;
   franchise?: string;
+  deductible?: string;
+  limitation?: string;
   coverages?: BackendCoverage[];
 }
 

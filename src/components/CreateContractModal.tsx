@@ -102,7 +102,7 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
                         <div className="flex items-center space-x-3 py-2">
                           <FaClock className="text-xl text-blue-500 w-5 flex-shrink-0 mx-2" />
                           <span className="text-gray-700">
-                            Temps de traitement : <strong className="text-gray-900">3 minutes</strong>
+                            Temps de traitement moyen: <strong className="text-gray-900">3 minutes</strong>
                           </span>
                         </div>
                         <div className="flex items-center space-x-3 py-2">

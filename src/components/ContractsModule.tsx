@@ -149,7 +149,7 @@ const ContractsModule = () => {
         <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Primes totales</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">Primes annuelle</p>
               <p className="text-3xl font-bold text-gray-900">
                 {(contractStats.totalPremium / 100).toLocaleString('fr-FR', {
                   minimumFractionDigits: 2,
