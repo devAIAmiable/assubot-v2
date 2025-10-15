@@ -284,14 +284,12 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, title,
                         .map((highlight, index) => (
                           <div
                             key={index}
-                            className="absolute border-1 border-yellow-400 bg-yellow-300 bg-opacity-50 pointer-events-none "
+                            className="absolute border border-yellow-400 bg-yellow-300 bg-opacity-20 pointer-events-none"
                             style={{
-                              left: `${highlight.x}px`,
-                              top: `${highlight.y}px`,
-                              width: `${highlight.width}px`,
-                              height: `${highlight.height}px`,
-                              transform: `scale(${scale})`,
-                              transformOrigin: 'top left',
+                              left: `${highlight.x * scale}px`,
+                              top: `${highlight.y * scale}px`,
+                              width: `${highlight.width * scale}px`,
+                              height: `${highlight.height * scale}px`,
                               opacity: 0.2,
                             }}
                           />
