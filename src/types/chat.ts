@@ -15,6 +15,23 @@ export interface Chat {
   };
 }
 
+export interface DocumentPageReference {
+  page: number;
+  coordinates: {
+    x0: string;
+    y0: string;
+    x1: string;
+    y1: string;
+  };
+}
+
+export interface DocumentReference {
+  id: string;
+  contractId: string;
+  type: string;
+  pages: DocumentPageReference[];
+}
+
 export interface ChatMessage {
   id: string;
   chatId: string;
@@ -23,6 +40,7 @@ export interface ChatMessage {
   createdAt: string;
   updatedAt: string;
   metadata?: Record<string, unknown>;
+  documentReferences?: DocumentReference[];
 }
 
 export interface Contract {
@@ -64,6 +82,7 @@ export interface SendMessageResponse {
   actions?: QuickAction[];
   usedCredits?: number;
   remainingCredits?: number;
+  documentReferences?: DocumentReference[];
 }
 
 export interface CreateChatResponse {
@@ -131,6 +150,7 @@ export interface SendMessageApiResponse {
   chat: Chat;
   usedCredits?: number;
   remainingCredits?: number;
+  documentReferences?: DocumentReference[];
 }
 
 export interface ChatState {

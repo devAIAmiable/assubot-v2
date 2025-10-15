@@ -7,6 +7,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# PDF.js worker file (generated from node_modules)
+public/pdf.worker.min.js
+
 node_modules
 dist
 dist-ssr

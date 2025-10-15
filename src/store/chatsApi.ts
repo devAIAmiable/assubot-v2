@@ -211,6 +211,7 @@ export const chatsApi = createApi({
             chat: response.data.chat,
             usedCredits: response.data.usedCredits,
             remainingCredits: response.data.remainingCredits,
+            documentReferences: response.data.documentReferences || [],
           };
         }
         // Fallback to original structure if different
@@ -266,10 +267,11 @@ export const chatsApi = createApi({
                 );
 
                 if (!assistantExists) {
-                  // Ensure the assistant message has the correct role
+                  // Ensure the assistant message has the correct role and document references
                   const assistantMessage = {
                     ...data.message,
                     role: 'assistant' as const,
+                    documentReferences: data.documentReferences || [],
                   };
                   draft.messages.push(assistantMessage);
                   // Sort messages by creation time to ensure proper order

@@ -8,6 +8,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useGetChatMessagesQuery, useGetChatsQuery } from '../store/chatsApi';
 
 import ChatListLoader from './ui/ChatListLoader';
+import DocumentReferences from './DocumentReferences';
 import Loader from './ui/Loader';
 import MessageLoader from './ui/MessageLoader';
 import ReactMarkdown from 'react-markdown';
@@ -591,6 +592,11 @@ const ChatModule: React.FC = () => {
                             </ReactMarkdown>
                           </div>
                           <p className={`text-xs mt-1 ${message.role === 'user' ? 'text-blue-200' : 'text-gray-500'}`}>{dayjs(message.createdAt).format('HH:mm')}</p>
+
+                          {/* Document References for Assistant Messages */}
+                          {message.role === 'assistant' && message.documentReferences && message.documentReferences.length > 0 && (
+                            <DocumentReferences references={message.documentReferences} className="mt-3" />
+                          )}
                         </div>
                         {message.role === 'user' && <UserAvatar user={currentUser} size="md" />}
                       </div>
