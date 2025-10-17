@@ -2,6 +2,7 @@ import { FaCheckCircle, FaUpload } from 'react-icons/fa';
 import React, { useCallback, useState } from 'react';
 
 import type { ContractFormData } from '../../../types';
+import Input from '../../ui/Input';
 import { motion } from 'framer-motion';
 
 interface DocumentsStepProps {
@@ -13,7 +14,12 @@ interface DocumentsStepProps {
 const DocumentsStep: React.FC<DocumentsStepProps> = ({ onDataUpdate, onFileRefsUpdate, initialData }) => {
   const [dragStates, setDragStates] = useState<Record<string, boolean>>({});
   const [localFileRefs, setLocalFileRefs] = useState<Record<string, File>>({});
-
+  const handleInputChange = useCallback(
+    (field: keyof ContractFormData, value: string | boolean | number) => {
+      onDataUpdate({ [field]: value });
+    },
+    [onDataUpdate]
+  );
   // Utility functions
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -131,9 +137,19 @@ const DocumentsStep: React.FC<DocumentsStepProps> = ({ onDataUpdate, onFileRefsU
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-      <div className="text-center">
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">Documents du contrat</h3>
-        <p className="text-gray-600">Ajoutez les documents nécessaires à votre contrat</p>
+      <div className="space-y-6">
+        <div className="gap-6">
+          <div>
+            <Input
+              label="Nom du contrat *"
+              type="text"
+              required
+              value={initialData.name || ''}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+              placeholder="Ex: Assurance Auto Tous Risques"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="space-y-6">
