@@ -1,5 +1,4 @@
 import { ComposableMap, Geographies, Geography, Graticule, Marker, ZoomableGroup } from 'react-simple-maps';
-import type { ContractListItem, ObligationType } from '../types';
 import {
   FaArrowLeft,
   FaCheck,
@@ -25,11 +24,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import ContractSummarizationStatus from './ui/ContractSummarizationStatus';
 import EditContractModal from './EditContractModal';
 import InsufficientCreditsModal from './ui/InsufficientCreditsModal';
+import type { ObligationType } from '../types';
 import ReactMarkdown from 'react-markdown';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { selectIsContractProcessing } from '../store/contractProcessingSlice';
-import { transformBackendContract } from '../utils/contractTransformers';
+// No transformation needed - using backend data directly
 import { useAppSelector } from '../store/hooks';
 import { useContractDownload } from '../hooks/useContractDownload';
 import { useContractSummarize } from '../hooks/useContractSummarize';
@@ -270,8 +270,8 @@ const ContractDetailsPage = () => {
     skip: !contractId,
   });
 
-  // Transform contract data
-  const contract = contractData ? transformBackendContract(contractData) : undefined;
+  // Use contract data directly (no transformation needed)
+  const contract = contractData;
 
   // Listen for contract processing events to trigger refetch
   // Using a custom event on window to avoid duplicate socket listeners
@@ -306,6 +306,11 @@ const ContractDetailsPage = () => {
   const isProcessing = useAppSelector((state) => selectIsContractProcessing(state, contractId || ''));
 
   const isContractExpired = contract ? (contract.endDate ? new Date(contract.endDate) < new Date() : false) : false;
+
+  // Scroll to top when component mounts or contractId changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [contractId]);
 
   // Show loading state for initial data fetch
   if (isLoading) {
@@ -382,29 +387,8 @@ const ContractDetailsPage = () => {
     navigate('/app/contrats');
   };
 
-  // Transform ContractWithRelations to ContractListItem for the edit modal
-  const transformContractForEdit = (): ContractListItem | null => {
-    if (!contract) return null;
-
-    return {
-      id: contract.id,
-      name: contract.name,
-      insurerName: contract.insurerName || null,
-      category: contract.category,
-      startDate: contract.startDate || null,
-      endDate: contract.endDate || null,
-      annualPremiumCents: contract.annualPremiumCents,
-      status: contract.status,
-      formula: contract.formula || '',
-      createdAt: contract.createdAt,
-      updatedAt: contract.updatedAt,
-      documents: contract.documents.map((doc) => ({
-        id: doc.id,
-        type: doc.type,
-        fileUrl: doc.fileUrl,
-      })),
-    };
-  };
+  // Use contract data directly for the edit modal (no transformation needed)
+  const contractForEdit = contract;
 
   const handleDownload = async (type: DocumentType) => {
     if (!contractId) return;
@@ -503,8 +487,8 @@ const ContractDetailsPage = () => {
               </button>
               <div className="flex items-center space-x-3">
                 {/* Insurer logo or type icon */}
-                {getInsurerLogo(contract.insurerName!) ? (
-                  <img src={getInsurerLogo(contract.insurerName!)} alt={contract.insurerName!} className="w-12 h-12 object-contain rounded bg-white border border-gray-100" />
+                {contract?.insurer?.name && getInsurerLogo(contract.insurer.name) ? (
+                  <img src={getInsurerLogo(contract.insurer.name)} alt={contract.insurer.name} className="w-12 h-12 object-contain rounded bg-white border border-gray-100" />
                 ) : (
                   <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
                     {(() => {
@@ -516,7 +500,7 @@ const ContractDetailsPage = () => {
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">{contract.name}</h1>
                   <p className="text-gray-600">
-                    {getDisplayValue(contract.insurerName)} - {getTypeLabel(contract.category)}
+                    {getDisplayValue(contract.insurer?.name)} - {getTypeLabel(contract.category)}
                   </p>
                 </div>
               </div>
@@ -619,14 +603,8 @@ const ContractDetailsPage = () => {
                         </div>
                         <div className="flex items-center justify-between py-3 border-b border-blue-200">
                           <span className="text-gray-600 font-medium">Renouvellement tacite</span>
-                          <span className="font-semibold text-gray-900">{contract.tacitRenewal ? 'Oui' : 'Non'}</span>
+                          <span className="font-semibold text-gray-900">Non spécifié</span>
                         </div>
-                        {contract.tacitRenewal && contract.cancellationDeadline && (
-                          <div className="flex items-center justify-between py-3">
-                            <span className="text-gray-600 font-medium">Date limite</span>
-                            <span className="font-semibold text-gray-900">{formatDateForDisplayFR(contract.cancellationDeadline)}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -760,150 +738,23 @@ const ContractDetailsPage = () => {
                     {/* Guarantees List */}
                     <div className="space-y-4">
                       {contract.guarantees.map((garantie, index) => (
-                        <div key={garantie.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                        <div key={garantie.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden cursor-pointer">
                           {/* Header */}
                           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-200">
                             <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-[#1e51ab] text-white rounded-full flex items-center justify-center text-sm font-bold">{index + 1}</div>
+                              <div className="w-6 h-6 bg-[#1e51ab] text-white rounded-full flex items-center justify-center text-sm font-bold">{index + 1}</div>
                               <div>
-                                <h3 className="text-lg font-semibold text-gray-900">{capitalizeFirst(garantie.title)}</h3>
+                                <h3 className="text-sm font-semibold text-gray-900">{capitalizeFirst(garantie.title)}</h3>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <button className="text-gray-500 hover:text-[#1e51ab] text-sm font-medium">
+                                  <FaEye className="inline h-4 w-4" />
+                                </button>
                               </div>
                             </div>
                           </div>
 
-                          {/* Content */}
-                          <div className="p-4">
-                            {garantie.details && Array.isArray(garantie.details) && garantie.details.length > 0 ? (
-                              <div className="space-y-4">
-                                {garantie.details.map((detail, detailIndex) => (
-                                  <div key={detailIndex} className="border border-gray-100 rounded-lg p-4 bg-gray-50">
-                                    {/* Service Title */}
-                                    {detail.service && detail.service.trim() !== '' && (
-                                      <div className="mb-3">
-                                        <h4 className="text-base font-medium text-gray-900 mb-1">{detail.service}</h4>
-                                      </div>
-                                    )}
-
-                                    {/* Financial Info Cards */}
-                                    {(detail.plafond || detail.franchise || detail.limit) && (
-                                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
-                                        {/* Plafond */}
-                                        {detail.plafond && detail.plafond.trim() !== '' && (
-                                          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                                            <div className="flex items-center space-x-2 mb-1">
-                                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                                              <span className="text-xs font-medium text-blue-700 uppercase tracking-wide">Plafond</span>
-                                            </div>
-                                            <p className="text-sm font-semibold text-blue-900">
-                                              {!isNaN(parseFloat(detail.plafond)) ? `${parseFloat(detail.plafond).toLocaleString('fr-FR')} €` : detail.plafond}
-                                            </p>
-                                          </div>
-                                        )}
-
-                                        {/* Franchise */}
-                                        {detail.franchise && detail.franchise.trim() !== '' && (
-                                          <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
-                                            <div className="flex items-center space-x-2 mb-1">
-                                              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
-                                              <span className="text-xs font-medium text-purple-700 uppercase tracking-wide">Franchise</span>
-                                            </div>
-                                            <p className="text-sm font-semibold text-purple-900">
-                                              {!isNaN(parseFloat(detail.franchise)) ? `${parseFloat(detail.franchise).toLocaleString('fr-FR')} €` : detail.franchise}
-                                            </p>
-                                          </div>
-                                        )}
-                                        {/* Franchise */}
-                                        {detail.deductible && detail.deductible.trim() !== '' && (
-                                          <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
-                                            <div className="flex items-center space-x-2 mb-1">
-                                              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
-                                              <span className="text-xs font-medium text-indigo-700 uppercase tracking-wide">Franchise</span>
-                                            </div>
-                                            <p className="text-sm font-semibold text-indigo-900">{detail.deductible}</p>
-                                          </div>
-                                        )}
-
-                                        {/* Plafond */}
-                                        {detail.limit && detail.limit.trim() !== '' && (
-                                          <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
-                                            <div className="flex items-center space-x-2 mb-1">
-                                              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
-                                              <span className="text-xs font-medium text-indigo-700 uppercase tracking-wide">Plafond</span>
-                                            </div>
-                                            <p className="text-sm font-semibold text-indigo-900">{detail.limit}</p>
-                                          </div>
-                                        )}
-                                        {/* Limitation */}
-                                        {detail.limitation && detail.limitation.trim() !== '' && (
-                                          <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
-                                            <div className="flex items-center space-x-2 mb-1">
-                                              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
-                                              <span className="text-xs font-medium text-indigo-700 uppercase tracking-wide">Limite(s)</span>
-                                            </div>
-                                            <p className="text-sm font-semibold text-indigo-900">{detail.limitation}</p>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-
-                                    {/* Coverages */}
-                                    {detail.coverages && detail.coverages.length > 0 && (
-                                      <div className="space-y-2">
-                                        {/* Included Coverages */}
-                                        {detail.coverages.filter((c) => c.type === 'covered').length > 0 && (
-                                          <div>
-                                            <h5 className="text-xs font-medium text-green-700 mb-2 flex items-center">
-                                              <FaCheck className="h-3 w-3 mr-1" />
-                                              Inclus ({detail.coverages.filter((c) => c.type === 'covered').length})
-                                            </h5>
-                                            <div className="space-y-1">
-                                              {detail.coverages
-                                                .filter((coverage) => coverage.type === 'covered')
-                                                .map((coverage, coverageIndex) => (
-                                                  <div key={coverageIndex} className="flex items-start space-x-2 p-2 bg-green-50 rounded-lg border border-green-200">
-                                                    <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                      <FaCheck className="h-2 w-2 text-white" />
-                                                    </div>
-                                                    <p className="text-xs text-green-800 leading-relaxed">{coverage.description}</p>
-                                                  </div>
-                                                ))}
-                                            </div>
-                                          </div>
-                                        )}
-
-                                        {/* Excluded Coverages */}
-                                        {detail.coverages.filter((c) => c.type === 'not_covered').length > 0 && (
-                                          <div>
-                                            <h5 className="text-xs font-medium text-red-700 mb-2 flex items-center">
-                                              <FaTimes className="h-3 w-3 mr-1" />
-                                              Exclu ({detail.coverages.filter((c) => c.type === 'not_covered').length})
-                                            </h5>
-                                            <div className="space-y-1">
-                                              {detail.coverages
-                                                .filter((coverage) => coverage.type === 'not_covered')
-                                                .map((coverage, coverageIndex) => (
-                                                  <div key={coverageIndex} className="flex items-start space-x-2 p-2 bg-red-50 rounded-lg border border-red-200">
-                                                    <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                      <FaTimes className="h-2 w-2 text-white" />
-                                                    </div>
-                                                    <p className="text-xs text-red-800 leading-relaxed">{coverage.description}</p>
-                                                  </div>
-                                                ))}
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="text-center py-6">
-                                <FaShieldAlt className="h-8 w-8 text-gray-300 mx-auto mb-3" />
-                                <p className="text-sm text-gray-500">Aucun détail disponible pour cette garantie</p>
-                              </div>
-                            )}
-                          </div>
+                
                         </div>
                       ))}
                     </div>
@@ -1246,7 +1097,7 @@ const ContractDetailsPage = () => {
       </TabGroup>
 
       {/* Edit Contract Modal */}
-      {contract && <EditContractModal contract={transformContractForEdit()!} isOpen={isEditModalOpen} onClose={handleCloseEditModal} onSuccess={handleEditSuccess} />}
+      {contract && <EditContractModal contract={contractForEdit!} isOpen={isEditModalOpen} onClose={handleCloseEditModal} onSuccess={handleEditSuccess} />}
 
       {/* Insufficient Credits Modal */}
       <InsufficientCreditsModal

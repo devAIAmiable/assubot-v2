@@ -45,6 +45,41 @@ interface BatchUploadUrlResponse {
   }>;
 }
 
+// Admin upload request type
+interface AdminUploadUrlRequest {
+  insurerId: string;
+  version: string;
+  category: 'auto' | 'health' | 'home' | 'moto' | 'electronic_devices' | 'other';
+  files: Array<{
+    fileName: string;
+    contentType: string;
+    documentType: 'CP' | 'CG' | 'AA' | 'OTHER';
+  }>;
+}
+
+interface AdminUploadUrlResponse {
+  contractId: string;
+  uploadUrls: Array<{
+    fileName: string;
+    documentType: 'CP' | 'CG' | 'AA' | 'OTHER';
+    uploadUrl: string;
+    blobName: string;
+  }>;
+}
+
+// Admin contract init request type
+interface AdminContractInitRequest {
+  contractId: string;
+  name: string;
+  insurerId: string;
+  version: string;
+  category: 'auto' | 'health' | 'home' | 'moto' | 'electronic_devices' | 'other';
+  documents: Array<{
+    blobPath: string;
+    documentType: 'CP' | 'CG' | 'AA' | 'OTHER';
+  }>;
+}
+
 // Single document download response
 interface SingleDocumentDownloadResponse {
   status: string;
@@ -214,6 +249,142 @@ export const contractsApi = createApi({
         message: response.data.error.message,
         code: response.data.error.code,
       }),
+    }),
+
+    // Generate admin upload URLs (simplified schema)
+    generateAdminUploadUrls: builder.mutation<AdminUploadUrlResponse, AdminUploadUrlRequest>({
+      query: (uploadRequest) => ({
+        url: '/admin/upload-url',
+        method: 'POST',
+        body: uploadRequest,
+      }),
+      transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+        status: response.status,
+        message: response.data.error.message,
+        code: response.data.error.code,
+      }),
+    }),
+
+    // Initialize admin contract
+    initAdminContract: builder.mutation<ContractInitResponse, AdminContractInitRequest>({
+      query: (initRequest) => ({
+        url: '/admin/init',
+        method: 'POST',
+        body: initRequest,
+      }),
+      transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+        status: response.status,
+        message: response.data.error.message,
+        code: response.data.error.code,
+      }),
+    }),
+
+    // Get admin template contracts
+    getAdminTemplateContracts: builder.query<GetContractsResponse, GetContractsParams>({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        
+        if (params.page) searchParams.append('page', params.page.toString());
+        if (params.limit) searchParams.append('limit', params.limit.toString());
+        if (params.search) searchParams.append('search', params.search);
+        if (params.insurerId) searchParams.append('insurerId', params.insurerId);
+        if (params.category) searchParams.append('category', params.category);
+        if (params.sortBy) searchParams.append('sortBy', params.sortBy);
+        if (params.sortOrder) searchParams.append('sortOrder', params.sortOrder);
+
+        const queryString = searchParams.toString();
+        return {
+          url: queryString ? `/admin/templates?${queryString}` : '/admin/templates',
+          method: 'GET',
+        };
+      },
+      transformResponse: (response: GetContractsResponse) => response,
+      transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+        status: response.status,
+        message: response.data.error.message,
+        code: response.data.error.code,
+      }),
+      providesTags: ['Contract'],
+    }),
+
+    // Summarize admin template contract
+    summarizeAdminTemplateContract: builder.mutation<{ message: string; taskId: string }, string>({
+      query: (contractId) => ({
+        url: `/admin/templates/${contractId}/summarize`,
+        method: 'POST',
+      }),
+      transformResponse: (response: { status: string; data: { message: string; taskId: string } }) => ({
+        message: response.data.message,
+        taskId: response.data.taskId,
+      }),
+      transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+        status: response.status,
+        message: response.data.error.message,
+        code: response.data.error.code,
+      }),
+      // Optimistically update the contract status to 'ongoing'
+      async onQueryStarted(contractId, { dispatch, queryFulfilled }) {
+        const patchResults: Array<{ undo: () => void }> = [];
+
+        // Update the admin template contracts cache
+        const adminTemplatesPatch = dispatch(
+          contractsApi.util.updateQueryData('getAdminTemplateContracts', {}, (draft) => {
+            const contract = draft.data?.find((c) => c.id === contractId);
+            if (contract) {
+              contract.summarizeStatus = 'ongoing';
+            }
+          })
+        );
+        patchResults.push(adminTemplatesPatch);
+
+        try {
+          await queryFulfilled;
+        } catch {
+          // Revert optimistic updates on error
+          patchResults.forEach((patch) => patch.undo());
+        }
+      },
+    }),
+
+    // Delete admin template contract
+    deleteAdminTemplateContract: builder.mutation<{ message: string }, string>({
+      query: (contractId) => ({
+        url: `/admin/templates/${contractId}`,
+        method: 'DELETE',
+      }),
+      transformResponse: (response: { status: string; data: { message: string } }) => ({
+        message: response.data.message,
+      }),
+      transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+        status: response.status,
+        message: response.data.error.message,
+        code: response.data.error.code,
+      }),
+      // Optimistically remove the contract from the cache
+      async onQueryStarted(contractId, { dispatch, queryFulfilled }) {
+        const patchResults: Array<{ undo: () => void }> = [];
+
+        // Remove from admin template contracts cache
+        const adminTemplatesPatch = dispatch(
+          contractsApi.util.updateQueryData('getAdminTemplateContracts', {}, (draft) => {
+            if (draft.data) {
+              draft.data = draft.data.filter((c) => c.id !== contractId);
+              // Update pagination
+              if (draft.pagination) {
+                draft.pagination.total = Math.max(0, draft.pagination.total - 1);
+              }
+            }
+          })
+        );
+        patchResults.push(adminTemplatesPatch);
+
+        try {
+          await queryFulfilled;
+        } catch {
+          // Revert optimistic updates on error
+          patchResults.forEach((patch) => patch.undo());
+        }
+      },
     }),
 
     // Legacy single upload URL (for backward compatibility)
@@ -393,6 +564,11 @@ export const {
   useDeleteContractMutation,
   useGenerateDownloadUrlsMutation,
   useGenerateBatchUploadUrlsMutation,
+  useGenerateAdminUploadUrlsMutation,
+  useInitAdminContractMutation,
+  useGetAdminTemplateContractsQuery,
+  useSummarizeAdminTemplateContractMutation,
+  useDeleteAdminTemplateContractMutation,
   useGenerateUploadUrlMutation,
   useUploadToAzureMutation,
   useInitContractMutation,

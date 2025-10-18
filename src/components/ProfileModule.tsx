@@ -8,6 +8,7 @@ import {
 	FaLock,
 	FaMapMarkerAlt,
 	FaSave,
+	FaUserShield,
 	FaTimes,
 	FaUser,
 } from 'react-icons/fa';
@@ -745,6 +746,39 @@ const ProfileModule = () => {
 					</div>
 				</div>
 			</motion.div>
+
+			{/* Section Admin */}
+			{currentUser?.email?.endsWith('@a-lamiable.com') && (
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.6, delay: 0.5 }}
+					className="mt-8 pt-6 border-t border-gray-100"
+				>
+					<div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+						<div className="flex items-center justify-between">
+							<div className="flex items-center space-x-3">
+							<div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+								<FaUserShield className="text-blue-600" />
+							</div>
+								<div>
+									<h3 className="text-lg font-semibold text-gray-900">Zone d'administration</h3>
+									<p className="text-sm text-gray-600">Outils réservés aux administrateurs</p>
+								</div>
+							</div>
+							<Button
+								variant="primary"
+								size="sm"
+								onClick={() => navigate('/app/admin')}
+								className="bg-blue-600 hover:bg-blue-700"
+							>
+								<FaUserShield className="mr-2" />
+								Panneau d'administration
+							</Button>
+						</div>
+					</div>
+				</motion.div>
+			)}
 
 			{/* Legal Footer */}
 			<motion.div

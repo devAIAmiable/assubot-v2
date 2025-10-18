@@ -19,12 +19,12 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
   const { updateContract, isUpdating, updateError } = useContractOperations();
   const [formData, setFormData] = useState<UpdateContractRequest>({
     name: contract.name,
-    insurerName: contract.insurerName || '',
+    insurerId: contract.insurerId,
     category: contract.category,
     formula: contract.formula || '',
     annualPremiumCents: contract.annualPremiumCents || 0,
-    startDate: contract.startDate ? formatDateForInput(contract.startDate.toISOString()) : '',
-    endDate: contract.endDate ? formatDateForInput(contract.endDate.toISOString()) : '',
+    startDate: contract.startDate ? formatDateForInput(contract.startDate) : '',
+    endDate: contract.endDate ? formatDateForInput(contract.endDate) : '',
   });
 
   const handleInputChange = (field: keyof UpdateContractRequest, value: string | number | boolean) => {
@@ -126,10 +126,11 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                       <label className="block text-sm font-medium text-gray-700 mb-2">Assureur</label>
                       <input
                         type="text"
-                        value={formData.insurerName || ''}
-                        onChange={(e) => handleInputChange('insurerName', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
+                        value={contract.insurer?.name || ''}
+                        disabled
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-gray-500"
                       />
+                      <p className="text-xs text-gray-500 mt-1">L'assureur ne peut pas être modifié</p>
                     </div>
 
                     <div>

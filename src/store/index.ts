@@ -11,6 +11,8 @@ import contractsReducer from './contractsSlice';
 import { creditPacksApi } from './creditPacksApi';
 import { creditTransactionsApi } from './creditTransactionsApi';
 import { generalTermsApi } from './generalTermsApi';
+import { insurersApi } from './insurersApi';
+import { notificationsApi } from './notificationsApi';
 import storage from 'redux-persist/lib/storage';
 import userReducer from './userSlice';
 
@@ -39,6 +41,8 @@ const rootReducer = combineReducers({
   [creditPacksApi.reducerPath]: creditPacksApi.reducer,
   [creditTransactionsApi.reducerPath]: creditTransactionsApi.reducer,
   [generalTermsApi.reducerPath]: generalTermsApi.reducer,
+  [insurersApi.reducerPath]: insurersApi.reducer,
+  [notificationsApi.reducerPath]: notificationsApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -50,7 +54,15 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
-    }).concat(contractsApi.middleware, chatsApi.middleware, creditPacksApi.middleware, creditTransactionsApi.middleware, generalTermsApi.middleware),
+    }).concat(
+      contractsApi.middleware,
+      chatsApi.middleware,
+      creditPacksApi.middleware,
+      creditTransactionsApi.middleware,
+      generalTermsApi.middleware,
+      insurersApi.middleware,
+      notificationsApi.middleware
+    ),
 });
 
 export const persistor = persistStore(store);

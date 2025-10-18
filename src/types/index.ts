@@ -170,10 +170,8 @@ export type ContactType = 'management' | 'assistance' | 'emergency';
 // Contract document from database
 export interface ContractDocument {
   id: string;
-  contractId: string;
   type: DocumentType;
   fileUrl: string;
-  createdAt: string;
 }
 
 export interface ContractGuarantee {
@@ -228,25 +226,32 @@ export interface ContractContact {
   createdAt: string;
 }
 
-// Updated Contract type to match Prisma schema
+// Updated Contract type to match new API structure
 export interface Contract {
   id: string;
-  userId: string;
-  insurerName: string;
   name: string;
+  insurerId: string;
+  version?: string | null;
+  isTemplate: boolean;
   category: ContractCategory;
+  startDate?: string;
+  endDate?: string;
   formula?: string;
-  startDate: string;
-  endDate: string;
   annualPremiumCents: number;
-  monthlyPremiumCents?: number;
-  tacitRenewal: boolean;
-  cancellationDeadline?: string;
   status: ContractStatus;
   createdAt: string;
   updatedAt: string;
 
-  // Relations (optional includes)
+  // Optional summarization fields
+  summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';
+  summarizedAt?: string | null;
+
+  // Relations
+  insurer?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
   documents?: ContractDocument[];
   guarantees?: ContractGuarantee[];
   exclusions?: ContractExclusion[];
@@ -256,20 +261,26 @@ export interface Contract {
   contacts?: ContractContact[];
 }
 
+export interface AdminContractFormData {
+  insurerId: string;
+  category: ContractCategory;
+  version: string;
+  cgFile: ContractDocumentUpload[];
+}
+
 export interface ContractFormData {
   // Step 1: General Information
-  insurerName: string;
   name: string;
   category: ContractCategory;
+  insurerId?: string;
+  version?: string;
+  isTemplate?: boolean;
 
   // Step 2: Details & Specifics
   formula?: string;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   annualPremiumCents: number;
-  monthlyPremiumCents?: number;
-  tacitRenewal: boolean;
-  cancellationDeadline?: string;
 
   // Step 3: Documents
   documents: ContractDocumentUpload[];

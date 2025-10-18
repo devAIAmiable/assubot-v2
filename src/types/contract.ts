@@ -40,30 +40,32 @@ export type DocumentType = (typeof DocumentType)[keyof typeof DocumentType];
 export type ObligationType = (typeof ObligationType)[keyof typeof ObligationType];
 export type ContactType = (typeof ContactType)[keyof typeof ContactType];
 
-// Core contract model
+// Core contract model (matches backend response exactly)
 export interface Contract {
   id: string;
-  userId: string;
-  insurerName?: string;
   name: string;
+  insurerId: string;
+  version?: string | null;
+  isTemplate: boolean;
   category: ContractCategory;
+  startDate?: string;
+  endDate?: string;
   formula?: string;
-  startDate?: Date;
-  endDate?: Date;
   annualPremiumCents: number;
-  monthlyPremiumCents?: number;
-  tacitRenewal: boolean;
-  cancellationDeadline?: Date;
   status: ContractStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 
   // Optional summarization fields
   summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';
-  summarizedAt?: Date;
+  summarizedAt?: string | null;
 
-  // Relations (optional for partial data)
-  user?: User;
+  // Relations
+  insurer?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
   documents?: ContractDocument[];
   guarantees?: ContractGuarantee[];
   exclusions?: ContractExclusion[];
@@ -76,13 +78,8 @@ export interface Contract {
 // Contract document model
 export interface ContractDocument {
   id: string;
-  contractId: string;
   type: DocumentType;
   fileUrl: string;
-  createdAt: Date;
-
-  // Relations
-  contract?: Contract;
 }
 
 // Contract guarantee model
@@ -191,38 +188,46 @@ export interface ContractWithRelations extends Contract {
   contacts: ContractContact[];
 }
 
-// Lightweight contract interface for list endpoints
+// Lightweight contract interface for list endpoints (matches backend response exactly)
 export interface ContractListItem {
   id: string;
   name: string;
-  insurerName: string | null;
+  insurerId: string;
+  version?: string | null;
+  isTemplate: boolean;
   category: ContractCategory;
+  startDate?: string;
+  endDate?: string;
   formula?: string;
-  startDate: Date | null;
-  endDate: Date | null;
   annualPremiumCents: number;
   status: ContractStatus;
-  createdAt: Date;
-  updatedAt: Date;
-  documents: Omit<ContractDocument, 'contractId' | 'createdAt'>[];
+  createdAt: string;
+  updatedAt: string;
 
   // Optional summarization fields
   summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';
-  summarizedAt?: Date;
+  summarizedAt?: string | null;
+
+  // Relations
+  insurer?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  documents?: ContractDocument[];
 }
 
 // Utility types for form handling
 export interface ContractFormData {
   name: string;
   category: ContractCategory;
-  insurerName?: string;
+  insurerId?: string;
+  version?: string;
+  isTemplate?: boolean;
   formula?: string;
   startDate?: Date;
   endDate?: Date;
   annualPremiumCents: number;
-  monthlyPremiumCents?: number;
-  tacitRenewal: boolean;
-  cancellationDeadline?: Date;
   documents?: File[];
 }
 
@@ -265,16 +270,13 @@ export interface GetContractsResponse {
 
 // Update contract request
 export interface UpdateContractRequest {
-  insurerName?: string;
+  insurerId?: string;
   name?: string;
   category?: ContractCategory;
   formula?: string;
   startDate?: string;
   endDate?: string;
   annualPremiumCents?: number;
-  monthlyPremiumCents?: number;
-  tacitRenewal?: boolean;
-  cancellationDeadline?: string;
 }
 
 // Update contract response
@@ -314,39 +316,49 @@ export interface ContractMetadata {
 export interface BackendContractListItem {
   id: string;
   name: string;
-  insurerName: string | null;
+  insurerId: string;
+  version?: string | null;
+  isTemplate: boolean;
   category: ContractCategory;
   formula?: string;
-  startDate: string | null; // ISO string from backend
-  endDate: string | null; // ISO string from backend
+  startDate?: string; // ISO string from backend
+  endDate?: string; // ISO string from backend
   annualPremiumCents: number;
   status: ContractStatus;
   createdAt: string; // ISO string from backend
   updatedAt: string; // ISO string from backend
-  documents: Omit<BackendContractDocument, 'contractId' | 'createdAt'>[];
-
-  // Optional summarization fields
   summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';
-  summarizedAt?: string; // ISO string from backend
+  summarizedAt?: string | null; // ISO string from backend
+  insurer?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  documents?: BackendContractDocument[];
 }
 
-// Backend contract response for single contract
+// Backend contract response for single contract (matches actual API response)
 export interface GetContractByIdResponse {
-  status: string;
-  message: string;
   id: string;
-  userId: string;
   name: string;
-  insurerName?: string;
+  insurerId: string;
+  version?: string | null;
+  isTemplate: boolean;
   category: ContractCategory;
   formula?: string;
   startDate?: string;
   endDate?: string;
   annualPremiumCents: number;
-  monthlyPremiumCents?: number;
-  tacitRenewal: boolean;
-  cancellationDeadline?: string | null;
-  documentLabel?: string;
+  status: ContractStatus;
+  createdAt: string;
+  updatedAt: string;
+  summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';
+  summarizedAt?: string | null;
+  insurer?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
   documents: BackendContractDocument[];
   guarantees?: BackendContractGuarantee[];
   exclusions?: BackendContractExclusion[];
@@ -354,10 +366,6 @@ export interface GetContractByIdResponse {
   zones?: BackendContractZone[];
   cancellations?: BackendContractCancellation[];
   contacts?: BackendContractContact[];
-  createdAt: string;
-  updatedAt: string;
-  summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';
-  summarizedAt?: string;
 }
 
 // Backend contract model (matches API response)
@@ -473,6 +481,7 @@ export interface GetContractsParams {
   search?: string;
   category?: ContractCategory | 'all';
   status?: ContractStatus[];
+  insurerId?: string;
 }
 
 // Dashboard statistics types

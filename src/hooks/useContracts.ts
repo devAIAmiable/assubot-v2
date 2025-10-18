@@ -1,7 +1,7 @@
 import type { ContractCategory, ContractListItem, ContractStatus } from '../types/contract';
 import { useCallback, useMemo, useState } from 'react';
 
-import { transformBackendContractListItems } from '../utils/contractTransformers';
+// No transformation needed - using backend data directly
 import { useGetContractsQuery } from '../store/contractsApi';
 
 interface UseContractsOptions {
@@ -10,7 +10,7 @@ interface UseContractsOptions {
   initialCategory?: ContractCategory | 'all';
   initialStatus?: ContractStatus | 'all';
   initialSearch?: string;
-  initialSortBy?: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status';
+  initialSortBy?: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status';
   initialSortOrder?: 'asc' | 'desc';
 }
 
@@ -35,7 +35,7 @@ interface UseContractsReturn {
   searchQuery: string;
   selectedCategory: ContractCategory | 'all';
   selectedStatus: ContractStatus | 'all';
-  selectedSortBy: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status';
+  selectedSortBy: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status';
   selectedSortOrder: 'asc' | 'desc';
 
   // Actions
@@ -44,7 +44,7 @@ interface UseContractsReturn {
   setSearchQuery: (query: string) => void;
   setCategory: (category: ContractCategory | 'all') => void;
   setStatus: (status: ContractStatus | 'all') => void;
-  setSortBy: (sortBy: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status') => void;
+  setSortBy: (sortBy: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status') => void;
   setSortOrder: (sortOrder: 'asc' | 'desc') => void;
   resetFilters: () => void;
 
@@ -76,7 +76,7 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
   const [selectedCategory, setSelectedCategory] = useState<ContractCategory | 'all'>(initialCategory);
   const [selectedStatus, setSelectedStatus] = useState<ContractStatus | 'all'>(initialStatus);
   const [selectedSortBy, setSelectedSortBy] = useState<
-    'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status'
+    'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status'
   >(initialSortBy);
   const [selectedSortOrder, setSelectedSortOrder] = useState<'asc' | 'desc'>(initialSortOrder);
 
@@ -90,10 +90,10 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
     sortOrder: selectedSortOrder,
   });
 
-  // Extract data from API response
+  // Use backend data directly (no transformation needed)
   const contracts = useMemo(() => {
     if (!data?.data) return [];
-    return transformBackendContractListItems(data.data);
+    return data.data;
   }, [data]);
 
   const pagination = useMemo(() => {
@@ -114,7 +114,7 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
   const filteredContracts = useMemo(() => {
     return contracts.filter((contract) => {
       const matchesSearch =
-        searchQuery === '' || contract.name.toLowerCase().includes(searchQuery.toLowerCase()) || contract.insurerName?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
+        searchQuery === '' || contract.name.toLowerCase().includes(searchQuery.toLowerCase()) || contract.insurer?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
 
       const matchesCategory = selectedCategory === 'all' || contract.category === selectedCategory;
 
@@ -167,7 +167,7 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
   }, []);
 
   const setSortByHandler = useCallback(
-    (sortBy: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'monthlyPremiumCents' | 'name' | 'insurerName' | 'category' | 'status') => {
+    (sortBy: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status') => {
       setSelectedSortBy(sortBy);
       setPage(1); // Reset to first page when changing sort
     },

@@ -8,9 +8,10 @@ import { motion } from 'framer-motion';
 
 interface ContractCreationFormProps {
   onSubmit: (fileObjects: Record<string, File>, formData: ContractFormData) => Promise<void>;
+  isAdmin?: boolean;
 }
 
-const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit }) => {
+const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit, isAdmin = false }) => {
   const [formData, setFormData] = useState<Partial<ContractFormData>>({
     documents: [],
   });
@@ -26,6 +27,12 @@ const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit })
   const handleSubmit = useCallback(async () => {
     setError(null);
 
+    // Validation du nom du contrat
+    if (!formData.name || !formData.name.trim()) {
+      setError('Le nom du contrat est obligatoire');
+      return;
+    }
+
     const documents = formData.documents;
     if (!documents || documents.length === 0) {
       setError('Au moins un document est requis');
@@ -35,7 +42,8 @@ const ContractCreationForm: React.FC<ContractCreationFormProps> = ({ onSubmit })
     const hasCP = documents.some((doc) => doc.type === 'CP');
     const hasCG = documents.some((doc) => doc.type === 'CG');
 
-    if (!hasCP) {
+    // Pour les admins, les CP ne sont pas obligatoires
+    if (!isAdmin && !hasCP) {
       setError('Les conditions particulières (CP) sont obligatoires');
       return;
     }

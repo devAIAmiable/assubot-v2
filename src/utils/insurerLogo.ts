@@ -1,4 +1,5 @@
-export const getInsurerLogo = (insurer: string): string | undefined => {
+export const getInsurerLogo = (insurer: string | undefined): string | undefined => {
+  if (!insurer) return undefined;
   const normalized = insurer
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '') // remove non-alphanum

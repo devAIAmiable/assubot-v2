@@ -107,15 +107,37 @@ describe('Real-time Updates', () => {
     expect(screen.getByTestId('is-connected')).toBeInTheDocument();
   });
 
-  it('should render contract summarization status component', () => {
+  it('should render contract summarization status component with pending status', () => {
     render(
       <Provider store={store}>
-        <ContractSummarizationStatus contractId="test-contract-id" />
+        <ContractSummarizationStatus summarizeStatus="pending" />
       </Provider>
     );
 
-    // Should not show anything when idle
-    expect(screen.queryByText('Génération du résumé en cours...')).not.toBeInTheDocument();
+    // Should show pending status
+    expect(screen.getByText('Résumé en attente')).toBeInTheDocument();
+  });
+
+  it('should render contract summarization status component with ongoing status', () => {
+    render(
+      <Provider store={store}>
+        <ContractSummarizationStatus summarizeStatus="ongoing" />
+      </Provider>
+    );
+
+    // Should show ongoing status
+    expect(screen.getByText('Génération du résumé...')).toBeInTheDocument();
+  });
+
+  it('should not render anything when no status is provided', () => {
+    const { container } = render(
+      <Provider store={store}>
+        <ContractSummarizationStatus />
+      </Provider>
+    );
+
+    // Should not render anything
+    expect(container.firstChild).toBeNull();
   });
 });
 

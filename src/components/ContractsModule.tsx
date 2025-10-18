@@ -233,9 +233,7 @@ const ContractsModule = () => {
                       | 'startDate'
                       | 'endDate'
                       | 'annualPremiumCents'
-                      | 'monthlyPremiumCents'
                       | 'name'
-                      | 'insurerName'
                       | 'category'
                       | 'status'
                   )
@@ -247,9 +245,7 @@ const ContractsModule = () => {
                 <option value="startDate">Date de début</option>
                 <option value="endDate">Date de fin</option>
                 <option value="annualPremiumCents">Prime annuelle</option>
-                <option value="monthlyPremiumCents">Prime mensuelle</option>
                 <option value="name">Nom du contrat</option>
-                <option value="insurerName">Nom de l'assureur</option>
                 <option value="category">Catégorie</option>
                 <option value="status">Statut</option>
               </select>
@@ -339,7 +335,7 @@ const ContractsModule = () => {
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Assureur</span>
-                      <span className="text-sm font-medium text-gray-900">{getContractListItemInsurer(contract) || 'Non spécifié'}</span>
+                      <span className="text-sm font-medium text-gray-900">{contract.insurer?.name || 'Non spécifié'}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Prime annuelle</span>
@@ -350,7 +346,7 @@ const ContractsModule = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Échéance</span>
                       <span className={`text-sm font-medium ${isPending ? 'text-gray-400' : 'text-gray-900'}`}>
-                        {isPending ? '-' : contract.endDate ? contract.endDate.toLocaleDateString('fr-FR') : 'Non spécifiée'}
+                        {isPending ? '-' : contract.endDate ? new Date(contract.endDate).toLocaleDateString('fr-FR') : 'Non spécifiée'}
                       </span>
                     </div>
                   </div>

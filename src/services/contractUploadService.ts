@@ -91,16 +91,15 @@ export class ContractUploadService {
 			// Step 3: Initialize contract processing with contractId
 			const contractInitData = {
 				contractId: uploadUrlsResponse.contractId,
-				insurerName: formData.insurerName,
+				insurerId: formData.insurerId,
 				name: formData.name,
 				category: formData.category,
+				version: formData.version,
+				isTemplate: formData.isTemplate || false,
 				formula: formData.formula,
 				startDate: formData.startDate,
 				endDate: formData.endDate,
 				annualPremiumCents: formData.annualPremiumCents,
-				monthlyPremiumCents: formData.monthlyPremiumCents,
-				tacitRenewal: formData.tacitRenewal,
-				cancellationDeadline: formData.cancellationDeadline,
 				documents: uploadUrlsResponse.uploadUrls.map(urlData => ({
 					blobPath: urlData.blobName,
 					documentType: urlData.documentType,
@@ -201,14 +200,22 @@ export class ContractUploadService {
 	/**
 	 * Validate required documents
 	 */
-	validateRequiredDocuments(fileObjects: Record<string, File>): { valid: boolean; error?: string } {
+	validateRequiredDocuments(fileObjects: Record<string, File>, isAdmin: boolean = false): { valid: boolean; error?: string } {
 		const hasCP = 'CP' in fileObjects;
 		const hasCG = 'CG' in fileObjects;
 
-		if (!hasCP || !hasCG) {
+		// Pour les admins, les CP ne sont pas obligatoires
+		if (!isAdmin && !hasCP) {
 			return {
 				valid: false,
-				error: 'Les conditions particulières (CP) et générales (CG) sont obligatoires',
+				error: 'Les conditions particulières (CP) sont obligatoires',
+			};
+		}
+
+		if (!hasCG) {
+			return {
+				valid: false,
+				error: 'Les conditions générales (CG) sont obligatoires',
 			};
 		}
 

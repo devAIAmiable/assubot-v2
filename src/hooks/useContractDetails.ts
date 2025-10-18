@@ -1,5 +1,5 @@
-import type { ContractWithRelations } from '../types/contract';
-import { transformBackendContract } from '../utils/contractTransformers';
+import type { GetContractByIdResponse } from '../types/contract';
+// No transformation needed - using backend data directly
 import { useGetContractByIdQuery } from '../store/contractsApi';
 import { useMemo } from 'react';
 
@@ -9,7 +9,7 @@ interface UseContractDetailsOptions {
 }
 
 interface UseContractDetailsReturn {
-  contract: ContractWithRelations | undefined;
+  contract: GetContractByIdResponse | undefined;
   isLoading: boolean;
   isFetching: boolean;
   error: unknown;
@@ -23,7 +23,7 @@ export function useContractDetails({ contractId, enabled = true }: UseContractDe
 
   const contract = useMemo(() => {
     if (!data) return undefined;
-    return transformBackendContract(data);
+    return data; // Use backend data directly
   }, [data]);
 
   return {

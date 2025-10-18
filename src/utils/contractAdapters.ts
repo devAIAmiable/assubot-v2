@@ -7,7 +7,8 @@ import type { ContactType, Contract, ContractListItem } from '../types';
 
 // Convert Contract to legacy properties for display
 export const getContractInsurer = (contract: Contract): string => {
-  return contract.insurerName;
+  console.log("🚀 ~ getContractInsurer ~ contract:", contract)
+  return contract.insurer?.name || 'Assureur inconnu';
 };
 
 export const getContractType = (contract: Contract): string => {
@@ -30,11 +31,11 @@ export const getContractPremium = (contract: Contract): number => {
 // Create a legacy-style overview object
 export const getContractOverview = (contract: Contract) => {
   return {
-    startDate: new Date(contract.startDate).toLocaleDateString('fr-FR'),
-    endDate: new Date(contract.endDate).toLocaleDateString('fr-FR'),
+    startDate: contract.startDate ? new Date(contract.startDate).toLocaleDateString('fr-FR') : 'Non défini',
+    endDate: contract.endDate ? new Date(contract.endDate).toLocaleDateString('fr-FR') : 'Non défini',
     annualPremium: `${(contract.annualPremiumCents / 100).toFixed(2)}€`,
-    hasTacitRenewal: contract.tacitRenewal,
-    tacitRenewalDeadline: contract.cancellationDeadline ? new Date(contract.cancellationDeadline).toLocaleDateString('fr-FR') : '',
+    hasTacitRenewal: false, // Not available in new structure
+    tacitRenewalDeadline: '', // Not available in new structure
     planType: contract.formula || 'Formule standard',
     subscribedCoverages: contract.guarantees?.map((g) => g.title) || [],
   };
@@ -50,19 +51,19 @@ export const getContractDocuments = (contract: Contract) => {
     generalConditions: {
       name: cgDoc?.fileUrl.split('/').pop() || 'Conditions Générales',
       url: cgDoc?.fileUrl || '',
-      uploadDate: cgDoc?.createdAt || contract.createdAt,
+      uploadDate: contract.createdAt,
       required: true,
     },
     particularConditions: {
       name: cpDoc?.fileUrl.split('/').pop() || 'Conditions Particulières',
       url: cpDoc?.fileUrl || '',
-      uploadDate: cpDoc?.createdAt || contract.createdAt,
+      uploadDate: contract.createdAt,
       required: true,
     },
     otherDocs: otherDocs.map((doc) => ({
       name: doc.fileUrl.split('/').pop() || 'Document annexe',
       url: doc.fileUrl,
-      uploadDate: doc.createdAt,
+      uploadDate: contract.createdAt,
       required: false,
     })),
   };
@@ -155,15 +156,12 @@ export const getContractContacts = (contract: Contract) => {
 
 // Helper to get monthly premium
 export const getContractMonthlyPremium = (contract: Contract): number => {
-  if (contract.monthlyPremiumCents) {
-    return contract.monthlyPremiumCents / 100;
-  }
-  return contract.annualPremiumCents / 100 / 12;
+  return contract.annualPremiumCents / 100 / 12; // Calculate from annual premium
 };
 
 // Adapter functions for ContractListItem (lightweight contract for lists)
 export const getContractListItemInsurer = (contract: ContractListItem): string => {
-  return contract.insurerName || '';
+  return contract.insurer?.slug || 'Assureur inconnu';
 };
 
 export const getContractListItemType = (contract: ContractListItem): string => {
