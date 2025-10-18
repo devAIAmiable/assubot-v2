@@ -24,11 +24,7 @@ const AdminContractsTable: React.FC = () => {
     sortOrder: 'asc',
   });
 
-  const {
-    data,
-    isLoading,
-    error,
-  } = useGetAdminTemplateContractsQuery({
+  const { data, isLoading, error } = useGetAdminTemplateContractsQuery({
     page: currentPage,
     limit: 10,
     search: searchQuery.trim().length >= 2 ? searchQuery.trim() : undefined,
@@ -44,23 +40,29 @@ const AdminContractsTable: React.FC = () => {
     return data?.pagination?.totalPages || 1;
   }, [data?.pagination?.totalPages]);
 
-  const handleDelete = useCallback(async (contractId: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce contrat template ? Cette action est irréversible.')) {
-      try {
-        await deleteAdminTemplateContract(contractId).unwrap();
-      } catch (error) {
-        console.error('Failed to delete admin template contract:', error);
+  const handleDelete = useCallback(
+    async (contractId: string) => {
+      if (window.confirm('Êtes-vous sûr de vouloir supprimer ce contrat template ? Cette action est irréversible.')) {
+        try {
+          await deleteAdminTemplateContract(contractId).unwrap();
+        } catch (error) {
+          console.error('Failed to delete admin template contract:', error);
+        }
       }
-    }
-  }, [deleteAdminTemplateContract]);
+    },
+    [deleteAdminTemplateContract]
+  );
 
-  const handleSummarize = useCallback(async (contractId: string) => {
-    try {
-      await summarizeAdminTemplateContract(contractId).unwrap();
-    } catch (error) {
-      console.error('Failed to summarize admin template contract:', error);
-    }
-  }, [summarizeAdminTemplateContract]);
+  const handleSummarize = useCallback(
+    async (contractId: string) => {
+      try {
+        await summarizeAdminTemplateContract(contractId).unwrap();
+      } catch (error) {
+        console.error('Failed to summarize admin template contract:', error);
+      }
+    },
+    [summarizeAdminTemplateContract]
+  );
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -75,7 +77,6 @@ const AdminContractsTable: React.FC = () => {
     setSelectedInsurer(insurerId);
     setCurrentPage(1); // Reset to first page when filtering
   }, []);
-
 
   // const getStatusColor = (status: string) => {
   //   switch (status) {
@@ -135,11 +136,7 @@ const AdminContractsTable: React.FC = () => {
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          {searchQuery.length > 0 && searchQuery.length < 2 && (
-            <p className="mt-1 text-xs text-amber-600">
-              Minimum 2 caractères requis pour la recherche
-            </p>
-          )}
+          {searchQuery.length > 0 && searchQuery.length < 2 && <p className="mt-1 text-xs text-amber-600">Minimum 2 caractères requis pour la recherche</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Assureur</label>
@@ -164,109 +161,72 @@ const AdminContractsTable: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contrat
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Assureur
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Catégorie
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Version
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date de création
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Statut
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Résumé
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contrat</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assureur</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de création</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Résumé</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {contracts.map((contract: BackendContractListItem) => (
-                <motion.tr
-                  key={contract.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="hover:bg-gray-50 transition-colors"
-                >
+                <motion.tr key={contract.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{contract.name}</div>
-                      {contract.version && (
-                        <div className="text-sm text-gray-500">Version: {contract.version}</div>
-                      )}
+                      {contract.version && <div className="text-sm text-gray-500">Version: {contract.version}</div>}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{contract.insurer?.name || 'Assureur inconnu'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {getCategoryLabel(contract.category)}
-                    </span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{getCategoryLabel(contract.category)}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {contract.version || 'N/A'}
-                    </div>
+                    <div className="text-sm text-gray-900">{contract.version || 'N/A'}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(contract.createdAt).toLocaleDateString('fr-FR')}
-                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(contract.createdAt).toLocaleDateString('fr-FR')}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      contract.status === 'active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : contract.status === 'expired' 
-                        ? 'bg-red-100 text-red-800' 
-                        : contract.status === 'pending' 
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {contract.status === 'active' 
-                        ? 'Actif' 
-                        : contract.status === 'expired' 
-                        ? 'Expiré' 
-                        : contract.status === 'pending' 
-                        ? 'En attente' 
-                        : 'Inconnu'
-                      }
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        contract.status === 'active'
+                          ? 'bg-green-100 text-green-800'
+                          : contract.status === 'expired'
+                            ? 'bg-red-100 text-red-800'
+                            : contract.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {contract.status === 'active' ? 'Actif' : contract.status === 'expired' ? 'Expiré' : contract.status === 'pending' ? 'En attente' : 'Inconnu'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col space-y-1">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        contract.summarizeStatus === 'done' 
-                          ? 'bg-green-100 text-green-800' 
-                          : contract.summarizeStatus === 'ongoing' 
-                          ? 'bg-blue-100 text-blue-800' 
-                          : contract.summarizeStatus === 'failed' 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {contract.summarizeStatus === 'done' 
-                          ? 'Terminé' 
-                          : contract.summarizeStatus === 'ongoing' 
-                          ? 'En cours' 
-                          : contract.summarizeStatus === 'failed' 
-                          ? 'Échec' 
-                          : 'Non résumé'
-                        }
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          contract.summarizeStatus === 'done'
+                            ? 'bg-green-100 text-green-800'
+                            : contract.summarizeStatus === 'ongoing'
+                              ? 'bg-blue-100 text-blue-800'
+                              : contract.summarizeStatus === 'failed'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {contract.summarizeStatus === 'done'
+                          ? 'Terminé'
+                          : contract.summarizeStatus === 'ongoing'
+                            ? 'En cours'
+                            : contract.summarizeStatus === 'failed'
+                              ? 'Échec'
+                              : 'Non résumé'}
                       </span>
-                      {contract.summarizedAt && (
-                        <span className="text-xs text-gray-500">
-                          {new Date(contract.summarizedAt).toLocaleDateString('fr-FR')}
-                        </span>
-                      )}
+                      {contract.summarizedAt && <span className="text-xs text-gray-500">{new Date(contract.summarizedAt).toLocaleDateString('fr-FR')}</span>}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -277,33 +237,19 @@ const AdminContractsTable: React.FC = () => {
                         onClick={() => handleSummarize(contract.id)}
                         disabled={isSummarizing || contract.summarizeStatus !== 'pending' || contract.status === 'pending'}
                         className={`${
-                          contract.summarizeStatus === 'pending' && contract.status !== 'pending'
-                            ? 'text-green-600 hover:text-green-800' 
-                            : 'text-gray-400 cursor-not-allowed'
+                          contract.summarizeStatus === 'pending' && contract.status !== 'pending' ? 'text-green-600 hover:text-green-800' : 'text-gray-400 cursor-not-allowed'
                         }`}
                       >
-                        {isSummarizing ? (
-                          <FaSpinner className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <FaRobot className="h-4 w-4" />
-                        )}
+                        {isSummarizing ? <FaSpinner className="h-4 w-4 animate-spin" /> : <FaRobot className="h-4 w-4" />}
                       </Button>
                       <Button
                         variant="secondary"
                         size="sm"
                         onClick={() => handleDelete(contract.id)}
                         disabled={isDeleting || contract.status === 'pending'}
-                        className={`${
-                          contract.status === 'pending'
-                            ? 'text-gray-400 cursor-not-allowed'
-                            : 'text-red-600 hover:text-red-800'
-                        }`}
+                        className={`${contract.status === 'pending' ? 'text-gray-400 cursor-not-allowed' : 'text-red-600 hover:text-red-800'}`}
                       >
-                        {isDeleting ? (
-                          <FaSpinner className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <FaTrash className="h-4 w-4" />
-                        )}
+                        {isDeleting ? <FaSpinner className="h-4 w-4 animate-spin" /> : <FaTrash className="h-4 w-4" />}
                       </Button>
                     </div>
                   </td>
@@ -337,11 +283,9 @@ const AdminContractsTable: React.FC = () => {
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm text-gray-700">
-                  Affichage de <span className="font-medium">{((currentPage - 1) * 10) + 1}</span> à{' '}
-                  <span className="font-medium">
-                    {Math.min(currentPage * 10, data?.pagination?.total || 0)}
-                  </span>{' '}
-                  sur <span className="font-medium">{data?.pagination?.total || 0}</span> résultats
+                  Affichage de <span className="font-medium">{(currentPage - 1) * 10 + 1}</span> à{' '}
+                  <span className="font-medium">{Math.min(currentPage * 10, data?.pagination?.total || 0)}</span> sur{' '}
+                  <span className="font-medium">{data?.pagination?.total || 0}</span> résultats
                 </p>
               </div>
               <div>
@@ -359,7 +303,7 @@ const AdminContractsTable: React.FC = () => {
                     return (
                       <Button
                         key={page}
-                        variant={currentPage === page ? "primary" : "secondary"}
+                        variant={currentPage === page ? 'primary' : 'secondary'}
                         onClick={() => handlePageChange(page)}
                         className="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
                       >

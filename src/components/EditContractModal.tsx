@@ -124,12 +124,7 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Assureur</label>
-                      <input
-                        type="text"
-                        value={contract.insurer?.name || ''}
-                        disabled
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-gray-500"
-                      />
+                      <input type="text" value={contract.insurer?.name || ''} disabled className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-gray-500" />
                       <p className="text-xs text-gray-500 mt-1">L'assureur ne peut pas être modifié</p>
                     </div>
 

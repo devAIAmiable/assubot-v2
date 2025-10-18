@@ -75,9 +75,7 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedCategory, setSelectedCategory] = useState<ContractCategory | 'all'>(initialCategory);
   const [selectedStatus, setSelectedStatus] = useState<ContractStatus | 'all'>(initialStatus);
-  const [selectedSortBy, setSelectedSortBy] = useState<
-    'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status'
-  >(initialSortBy);
+  const [selectedSortBy, setSelectedSortBy] = useState<'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status'>(initialSortBy);
   const [selectedSortOrder, setSelectedSortOrder] = useState<'asc' | 'desc'>(initialSortOrder);
 
   // API query
@@ -166,13 +164,10 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRet
     setPage(1); // Reset to first page when changing status
   }, []);
 
-  const setSortByHandler = useCallback(
-    (sortBy: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status') => {
-      setSelectedSortBy(sortBy);
-      setPage(1); // Reset to first page when changing sort
-    },
-    []
-  );
+  const setSortByHandler = useCallback((sortBy: 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status') => {
+    setSelectedSortBy(sortBy);
+    setPage(1); // Reset to first page when changing sort
+  }, []);
 
   const setSortOrderHandler = useCallback((sortOrder: 'asc' | 'desc') => {
     setSelectedSortOrder(sortOrder);

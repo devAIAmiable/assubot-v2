@@ -71,7 +71,7 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
         currentPage,
         dataLength: insurersData.data.length,
         hasNext: insurersData.pagination?.hasNext,
-        totalData: insurersData.data
+        totalData: insurersData.data,
       });
 
       if (currentPage === 1) {
@@ -85,7 +85,7 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
           console.log('🔗 Appending:', {
             prevLength: prev.length,
             newInsurersLength: newInsurers.length,
-            totalAfter: prev.length + newInsurers.length
+            totalAfter: prev.length + newInsurers.length,
           });
           return [...prev, ...newInsurers];
         });
@@ -141,7 +141,7 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
           isLoadingMore,
           insurersLoading,
           currentPage,
-          allInsurersLength: allInsurers.length
+          allInsurersLength: allInsurers.length,
         });
 
         if (isNearBottom && hasMore && !isLoadingMore && !insurersLoading) {

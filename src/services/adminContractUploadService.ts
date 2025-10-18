@@ -25,9 +25,7 @@ export class AdminContractUploadService {
     return AdminContractUploadService.instance;
   }
 
-  async uploadAdminContract(
-    formData: AdminContractUploadData
-  ): Promise<AdminUploadResult> {
+  async uploadAdminContract(formData: AdminContractUploadData): Promise<AdminUploadResult> {
     try {
       // Step 1: Generate admin upload URLs
       const uploadUrlsResponse = await store
@@ -49,10 +47,7 @@ export class AdminContractUploadService {
 
       // Step 2: Upload file to Azure
       const uploadUrl = uploadUrlsResponse.uploadUrls[0];
-      await this.uploadToAzureWithProgress(
-        uploadUrl.uploadUrl,
-        formData.cgFile
-      );
+      await this.uploadToAzureWithProgress(uploadUrl.uploadUrl, formData.cgFile);
 
       // Step 3: Initialize contract processing
       const contractInitData = {
@@ -69,9 +64,7 @@ export class AdminContractUploadService {
         ],
       };
 
-      const contractResult = await store
-        .dispatch(contractsApi.endpoints.initAdminContract.initiate(contractInitData))
-        .unwrap();
+      const contractResult = await store.dispatch(contractsApi.endpoints.initAdminContract.initiate(contractInitData)).unwrap();
 
       return {
         success: true,
@@ -87,10 +80,7 @@ export class AdminContractUploadService {
     }
   }
 
-  private async uploadToAzureWithProgress(
-    uploadUrl: string,
-    file: File
-  ): Promise<void> {
+  private async uploadToAzureWithProgress(uploadUrl: string, file: File): Promise<void> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
 

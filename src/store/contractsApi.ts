@@ -283,7 +283,7 @@ export const contractsApi = createApi({
     getAdminTemplateContracts: builder.query<GetContractsResponse, GetContractsParams>({
       query: (params) => {
         const searchParams = new URLSearchParams();
-        
+
         if (params.page) searchParams.append('page', params.page.toString());
         if (params.limit) searchParams.append('limit', params.limit.toString());
         if (params.search) searchParams.append('search', params.search);

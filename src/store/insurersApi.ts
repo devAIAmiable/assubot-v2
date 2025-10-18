@@ -67,7 +67,7 @@ export const insurersApi = createApi({
       keepUnusedDataFor: 5 * 60, // 5 minutes in seconds (shorter cache for search results)
       query: (params) => {
         const searchParams = new URLSearchParams();
-        
+
         if (params?.page) searchParams.append('page', params.page.toString());
         if (params?.limit) searchParams.append('limit', params.limit.toString());
         if (params?.search) searchParams.append('search', params.search);
@@ -94,7 +94,4 @@ export const insurersApi = createApi({
   }),
 });
 
-export const {
-  useGetInsurersQuery,
-  useLazyGetInsurersQuery,
-} = insurersApi;
+export const { useGetInsurersQuery, useLazyGetInsurersQuery } = insurersApi;

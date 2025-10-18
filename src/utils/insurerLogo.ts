@@ -21,4 +21,4 @@ export const getInsurerLogo = (insurer: string | undefined): string | undefined 
   if (normalized.includes('sg') || normalized.includes('sgassurance') || normalized.includes('societegenerale')) return '/insurances/sg.png';
   if (normalized.includes('harmonie')) return '/insurances/maif.png'; // fallback for Harmonie Mutuelle
   return undefined;
-}; 
+};

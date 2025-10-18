@@ -93,7 +93,7 @@ export const notificationsApi = createApi({
     getNotifications: builder.query<GetNotificationsResponse, GetNotificationsParams | void>({
       query: (params) => {
         const searchParams = new URLSearchParams();
-        
+
         // Handle params being void or undefined
         if (params) {
           if (params.isRead !== undefined) {
@@ -214,7 +214,7 @@ export const notificationsApi = createApi({
             if (index !== -1) {
               const wasUnread = !draft.data[index].isRead;
               draft.data.splice(index, 1);
-              
+
               // Update unread count if the deleted notification was unread
               if (wasUnread) {
                 dispatch(
@@ -240,11 +240,4 @@ export const notificationsApi = createApi({
   }),
 });
 
-export const {
-  useGetNotificationsQuery,
-  useGetUnreadCountQuery,
-  useMarkAsReadMutation,
-  useMarkAllReadMutation,
-  useDeleteNotificationMutation,
-} = notificationsApi;
-
+export const { useGetNotificationsQuery, useGetUnreadCountQuery, useMarkAsReadMutation, useMarkAllReadMutation, useDeleteNotificationMutation } = notificationsApi;

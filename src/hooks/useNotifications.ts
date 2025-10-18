@@ -16,13 +16,13 @@ interface UseNotificationsReturn {
   isLoading: boolean;
   isFetching: boolean;
   error: string | null;
-  
+
   // Actions
   markAsRead: (id: string) => Promise<void>;
   markAllRead: () => Promise<void>;
   deleteNotification: (id: string) => Promise<void>;
   refetch: () => void;
-  
+
   // Loading states for mutations
   isMarkingAsRead: boolean;
   isMarkingAllRead: boolean;
@@ -51,10 +51,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}): UseNoti
   } = useGetNotificationsQuery(filters, { skip });
 
   // Fetch unread count
-  const {
-    data: unreadCountData,
-    isLoading: isLoadingCount,
-  } = useGetUnreadCountQuery(undefined, { skip });
+  const { data: unreadCountData, isLoading: isLoadingCount } = useGetUnreadCountQuery(undefined, { skip });
 
   // Mutations
   const [markAsReadMutation, { isLoading: isMarkingAsRead }] = useMarkAsReadMutation();
@@ -147,4 +144,3 @@ export const useUnreadNotificationsCount = () => {
   const { data } = useGetUnreadCountQuery();
   return data?.data.count || 0;
 };
-

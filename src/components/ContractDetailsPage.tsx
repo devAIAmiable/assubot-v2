@@ -753,8 +753,6 @@ const ContractDetailsPage = () => {
                               </div>
                             </div>
                           </div>
-
-                
                         </div>
                       ))}
                     </div>

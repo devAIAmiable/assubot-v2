@@ -225,19 +225,7 @@ const ContractsModule = () => {
               <span className="px-3 py-2 text-sm font-medium text-gray-600">Trier par:</span>
               <select
                 value={selectedSortBy}
-                onChange={(e) =>
-                  setSortBy(
-                    e.target.value as
-                      | 'createdAt'
-                      | 'updatedAt'
-                      | 'startDate'
-                      | 'endDate'
-                      | 'annualPremiumCents'
-                      | 'name'
-                      | 'category'
-                      | 'status'
-                  )
-                }
+                onChange={(e) => setSortBy(e.target.value as 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status')}
                 className="appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors text-sm"
               >
                 <option value="createdAt">Date de création</option>

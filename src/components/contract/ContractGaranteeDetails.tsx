@@ -1,6 +1,5 @@
 // import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 
-
 // {/* <div className="p-4">
 // {garantie.details && Array.isArray(garantie.details) && garantie.details.length > 0 ? (
 //   <div className="space-y-4">
