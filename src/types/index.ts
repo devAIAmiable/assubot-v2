@@ -1,3 +1,4 @@
+import type { ContractCategory } from './contract';
 import type React from 'react';
 import type { User } from '../store/userSlice';
 
@@ -161,7 +162,6 @@ export interface InsuranceStats {
 }
 
 // Contract Creation Types - matching Prisma schema
-export type ContractCategory = 'auto' | 'health' | 'home' | 'moto' | 'electronic_devices' | 'other';
 export type DocumentType = 'CP' | 'CG' | 'OTHER';
 export type ContractStatus = 'active' | 'expired' | 'pending';
 export type ObligationType = 'subscription' | 'during_contract' | 'claim';
@@ -234,6 +234,7 @@ export interface Contract {
   version?: string | null;
   isTemplate: boolean;
   category: ContractCategory;
+  subject?: string | null;
   startDate?: string;
   endDate?: string;
   formula?: string;

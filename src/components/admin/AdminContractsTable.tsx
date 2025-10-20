@@ -4,6 +4,7 @@ import { useDeleteAdminTemplateContractMutation, useGetAdminTemplateContractsQue
 
 import type { BackendContractListItem } from '../../types/contract';
 import Button from '../ui/Button';
+import { getCategoryLabel } from '../../config/categories';
 // import InsurerDropdown from '../ui/InsurerDropdown';
 import { motion } from 'framer-motion';
 import { useGetInsurersQuery } from '../../store/insurersApi';
@@ -91,18 +92,6 @@ const AdminContractsTable: React.FC = () => {
   //   }
   // };
 
-  const getCategoryLabel = (category: string) => {
-    const labels: Record<string, string> = {
-      auto: 'Auto',
-      health: 'Santé',
-      home: 'Habitation',
-      moto: 'Moto',
-      electronic_devices: 'Objets Électroniques',
-      other: 'Autre',
-    };
-    return labels[category] || category;
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -177,6 +166,7 @@ const AdminContractsTable: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{contract.name}</div>
+                      {contract.subject && <div className="text-sm text-gray-500 italic">{contract.subject}</div>}
                       {contract.version && <div className="text-sm text-gray-500">Version: {contract.version}</div>}
                     </div>
                   </td>

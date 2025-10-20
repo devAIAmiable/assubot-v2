@@ -86,8 +86,8 @@ export const insurersApi = createApi({
       transformResponse: (response: InsurerListResponse) => response,
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
       providesTags: ['Insurer'],
     }),

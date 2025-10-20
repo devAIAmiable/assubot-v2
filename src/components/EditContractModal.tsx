@@ -21,6 +21,7 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
     name: contract.name,
     insurerId: contract.insurerId,
     category: contract.category,
+    subject: contract.subject || '',
     formula: contract.formula || '',
     annualPremiumCents: contract.annualPremiumCents || 0,
     startDate: contract.startDate ? formatDateForInput(contract.startDate) : '',
@@ -118,6 +119,20 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                         value={formData.name || ''}
                         onChange={(e) => handleInputChange('name', e.target.value)}
                         required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Bénéficiaire
+                        <span className="text-gray-500 text-xs ml-1">(optionnel)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.subject || ''}
+                        onChange={(e) => handleInputChange('subject', e.target.value)}
+                        placeholder="Ex: BMW X4, Appartement Paris 75001"
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
                       />
                     </div>

@@ -6,6 +6,14 @@ export const ContractCategory = {
   MOTORCYCLE: 'moto',
   ELECTRONIC_DEVICES: 'electronic_devices',
   OTHER: 'other',
+  LOAN: 'loan',
+  TRAVEL: 'travel',
+  LIFE: 'life',
+  PROFESSIONAL: 'professional',
+  LEGAL: 'legal',
+  AGRICULTURE: 'agriculture',
+  EVENT: 'event',
+  PET: 'pet',
 } as const;
 
 export const ContractStatus = {
@@ -48,6 +56,7 @@ export interface Contract {
   version?: string | null;
   isTemplate: boolean;
   category: ContractCategory;
+  subject?: string | null;
   startDate?: string;
   endDate?: string;
   formula?: string;
@@ -196,6 +205,7 @@ export interface ContractListItem {
   version?: string | null;
   isTemplate: boolean;
   category: ContractCategory;
+  subject?: string | null;
   startDate?: string;
   endDate?: string;
   formula?: string;
@@ -221,6 +231,7 @@ export interface ContractListItem {
 export interface ContractFormData {
   name: string;
   category: ContractCategory;
+  subject?: string;
   insurerId?: string;
   version?: string;
   isTemplate?: boolean;
@@ -273,6 +284,7 @@ export interface UpdateContractRequest {
   insurerId?: string;
   name?: string;
   category?: ContractCategory;
+  subject?: string;
   formula?: string;
   startDate?: string;
   endDate?: string;
@@ -320,6 +332,7 @@ export interface BackendContractListItem {
   version?: string | null;
   isTemplate: boolean;
   category: ContractCategory;
+  subject?: string | null;
   formula?: string;
   startDate?: string; // ISO string from backend
   endDate?: string; // ISO string from backend
@@ -345,6 +358,7 @@ export interface GetContractByIdResponse {
   version?: string | null;
   isTemplate: boolean;
   category: ContractCategory;
+  subject?: string | null;
   formula?: string;
   startDate?: string;
   endDate?: string;

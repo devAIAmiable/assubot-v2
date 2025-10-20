@@ -156,8 +156,8 @@ export const contractsApi = createApi({
       transformResponse: (response: GetContractsResponse) => response,
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
       providesTags: ['Contract'],
     }),
@@ -172,8 +172,8 @@ export const contractsApi = createApi({
       transformResponse: (response: GetContractByIdResponse) => response,
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
       providesTags: (_result, _error, contractId) => [{ type: 'Contract', id: contractId }],
     }),
@@ -188,8 +188,8 @@ export const contractsApi = createApi({
       transformResponse: (response: UpdateContractResponse) => response,
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
       invalidatesTags: (_result, _error, { contractId }) => [{ type: 'Contract', id: contractId }, { type: 'Contract' }],
     }),
@@ -203,8 +203,8 @@ export const contractsApi = createApi({
       transformResponse: (response: DeleteContractResponse) => response,
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
       invalidatesTags: (_result, _error, contractId) => [{ type: 'Contract', id: contractId }, { type: 'Contract' }],
     }),
@@ -218,8 +218,8 @@ export const contractsApi = createApi({
       transformResponse: (response: ContractDownloadResponse) => response,
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
     }),
 
@@ -232,8 +232,8 @@ export const contractsApi = createApi({
       transformResponse: (response: SingleDocumentDownloadResponse) => response,
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
     }),
 
@@ -246,8 +246,8 @@ export const contractsApi = createApi({
       }),
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
     }),
 
@@ -260,8 +260,8 @@ export const contractsApi = createApi({
       }),
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
     }),
 
@@ -274,8 +274,8 @@ export const contractsApi = createApi({
       }),
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
     }),
 
@@ -301,8 +301,8 @@ export const contractsApi = createApi({
       transformResponse: (response: GetContractsResponse) => response,
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
       providesTags: ['Contract'],
     }),
@@ -313,14 +313,23 @@ export const contractsApi = createApi({
         url: `/admin/templates/${contractId}/summarize`,
         method: 'POST',
       }),
-      transformResponse: (response: { status: string; data: { message: string; taskId: string } }) => ({
-        message: response.data.message,
-        taskId: response.data.taskId,
-      }),
+      transformResponse: (response: { message: string; taskId: string } | { status: string; data: { message: string; taskId: string } }) => {
+        // Handle both direct response and wrapped response formats
+        if ('data' in response) {
+          return {
+            message: response.data.message,
+            taskId: response.data.taskId,
+          };
+        }
+        return {
+          message: response.message,
+          taskId: response.taskId,
+        };
+      },
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
       // Optimistically update the contract status to 'ongoing'
       async onQueryStarted(contractId, { dispatch, queryFulfilled }) {
@@ -352,13 +361,21 @@ export const contractsApi = createApi({
         url: `/admin/templates/${contractId}`,
         method: 'DELETE',
       }),
-      transformResponse: (response: { status: string; data: { message: string } }) => ({
-        message: response.data.message,
-      }),
+      transformResponse: (response: { message: string } | { status: string; data: { message: string } }) => {
+        // Handle both direct response and wrapped response formats
+        if ('data' in response) {
+          return {
+            message: response.data.message,
+          };
+        }
+        return {
+          message: response.message,
+        };
+      },
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
       // Optimistically remove the contract from the cache
       async onQueryStarted(contractId, { dispatch, queryFulfilled }) {
@@ -412,8 +429,8 @@ export const contractsApi = createApi({
       },
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
     }),
 
@@ -462,8 +479,8 @@ export const contractsApi = createApi({
       },
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
       invalidatesTags: ['Contract'],
     }),
@@ -484,8 +501,8 @@ export const contractsApi = createApi({
       },
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
       invalidatesTags: ['Contract'],
     }),
@@ -500,8 +517,8 @@ export const contractsApi = createApi({
       transformResponse: (response: DashboardStats) => response,
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
     }),
 
@@ -513,8 +530,8 @@ export const contractsApi = createApi({
       }),
       transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
         status: response.status,
-        message: response.data.error.message,
-        code: response.data.error.code,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
       // Optimistically update the contract status to 'ongoing'
       async onQueryStarted(contractId, { dispatch, queryFulfilled, getState }) {

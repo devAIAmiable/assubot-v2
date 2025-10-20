@@ -1,4 +1,4 @@
-import type { ContactType, Contract, ContractListItem } from '../types';
+import type { ContactType, Contract, ContractCategory, ContractListItem } from '../types';
 
 /**
  * Adapter functions to work with Contract in legacy components
@@ -12,16 +12,24 @@ export const getContractInsurer = (contract: Contract): string => {
 };
 
 export const getContractType = (contract: Contract): string => {
-  // Map new categories to legacy type strings
-  const typeMap: Record<typeof contract.category, string> = {
+  // Map new categories to legacy type strings for backward compatibility
+  const legacyTypeMap: Record<ContractCategory, string> = {
     auto: 'auto',
     health: 'sante',
     home: 'habitation',
     moto: 'moto',
     electronic_devices: 'electronique',
     other: 'autre',
+    loan: 'pret',
+    travel: 'voyage',
+    life: 'vie',
+    professional: 'professionnel',
+    legal: 'juridique',
+    agriculture: 'agricole',
+    event: 'evenement',
+    pet: 'animaux',
   };
-  return typeMap[contract.category] || 'autre';
+  return legacyTypeMap[contract.category as ContractCategory] || 'autre';
 };
 
 export const getContractPremium = (contract: Contract): number => {
@@ -165,16 +173,24 @@ export const getContractListItemInsurer = (contract: ContractListItem): string =
 };
 
 export const getContractListItemType = (contract: ContractListItem): string => {
-  // Map new categories to legacy type strings
-  const typeMap: Record<typeof contract.category, string> = {
+  // Map new categories to legacy type strings for backward compatibility
+  const legacyTypeMap: Record<ContractCategory, string> = {
     auto: 'auto',
     health: 'sante',
     home: 'habitation',
     moto: 'moto',
     electronic_devices: 'electronique',
     other: 'autre',
+    loan: 'pret',
+    travel: 'voyage',
+    life: 'vie',
+    professional: 'professionnel',
+    legal: 'juridique',
+    agriculture: 'agricole',
+    event: 'evenement',
+    pet: 'animaux',
   };
-  return typeMap[contract.category] || 'autre';
+  return legacyTypeMap[contract.category as ContractCategory] || 'autre';
 };
 
 export const getContractListItemPremium = (contract: ContractListItem): number => {

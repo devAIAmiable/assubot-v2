@@ -7,6 +7,7 @@ import Dropdown, { type DropdownOption } from '../ui/Dropdown';
 import Input from '../ui/Input';
 import InsurerDropdown from '../ui/InsurerDropdown';
 import { motion } from 'framer-motion';
+import { CATEGORY_CONFIG } from '../../config/categories';
 
 interface AdminContractFormData {
   insurer: string;
@@ -42,14 +43,10 @@ const AdminContractForm: React.FC<AdminContractFormProps> = ({ onSubmit }) => {
   } = methods;
 
   // Options pour les types d'assurance
-  const insuranceTypeOptions: DropdownOption[] = [
-    { value: 'auto', label: 'Assurance Auto' },
-    { value: 'health', label: 'Assurance Santé' },
-    { value: 'home', label: 'Assurance Habitation' },
-    { value: 'moto', label: 'Assurance Moto' },
-    { value: 'electronic_devices', label: 'Assurance Objets Électroniques' },
-    { value: 'other', label: 'Autre' },
-  ];
+  const insuranceTypeOptions: DropdownOption[] = Object.entries(CATEGORY_CONFIG).map(([value, config]) => ({
+    value,
+    label: config.label,
+  }));
 
   const handleFileUpload = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
