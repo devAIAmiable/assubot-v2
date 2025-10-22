@@ -1,4 +1,7 @@
+import { AnimatePresence, motion } from 'framer-motion';
+import type { BackendContractGuarantee, ObligationType } from '../types';
 import { ComposableMap, Geographies, Geography, Graticule, Marker, ZoomableGroup } from 'react-simple-maps';
+import { Disclosure, Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import {
   FaArrowLeft,
   FaCheck,
@@ -19,8 +22,6 @@ import {
   FaShieldAlt,
   FaTimes,
 } from 'react-icons/fa';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Disclosure, Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { formatDateForDisplayFR, getDisplayValue } from '../utils/dateHelpers';
 import { getContactTypeLabel, getObligationTypeLabel, getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../utils/contract';
 import { useEffect, useState } from 'react';
@@ -30,7 +31,6 @@ import ContractSummarizationStatus from './ui/ContractSummarizationStatus';
 import EditContractModal from './EditContractModal';
 import GuaranteeDetailModal from './contract/GuaranteeDetailModal';
 import InsufficientCreditsModal from './ui/InsufficientCreditsModal';
-import type { ObligationType, BackendContractGuarantee } from '../types';
 import ReactMarkdown from 'react-markdown';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';

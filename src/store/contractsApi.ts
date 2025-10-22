@@ -307,6 +307,22 @@ export const contractsApi = createApi({
       providesTags: ['Contract'],
     }),
 
+    // Get a specific admin template contract by ID
+    getAdminTemplateContractById: builder.query<GetContractByIdResponse, string>({
+      keepUnusedDataFor: 30 * 60, // 30 minutes in seconds
+      query: (contractId) => ({
+        url: `/admin/templates/${contractId}`,
+        method: 'GET',
+      }),
+      transformResponse: (response: GetContractByIdResponse) => response,
+      transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+        status: response.status,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
+      }),
+      providesTags: (_result, _error, contractId) => [{ type: 'Contract', id: `admin-${contractId}` }],
+    }),
+
     // Summarize admin template contract
     summarizeAdminTemplateContract: builder.mutation<{ message: string; taskId: string }, string>({
       query: (contractId) => ({
@@ -584,6 +600,7 @@ export const {
   useGenerateAdminUploadUrlsMutation,
   useInitAdminContractMutation,
   useGetAdminTemplateContractsQuery,
+  useGetAdminTemplateContractByIdQuery,
   useSummarizeAdminTemplateContractMutation,
   useDeleteAdminTemplateContractMutation,
   useGenerateUploadUrlMutation,

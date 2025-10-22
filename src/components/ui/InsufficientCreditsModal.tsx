@@ -32,7 +32,7 @@ export const InsufficientCreditsModal: React.FC<InsufficientCreditsModalProps> =
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 backdrop-blur-sm" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }} />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">

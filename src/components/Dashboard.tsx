@@ -2,7 +2,6 @@ import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import {
   FaArrowDown,
   FaArrowRight,
-  FaArrowUp,
   FaBell,
   FaBrain,
   FaCalendarAlt,
@@ -261,7 +260,7 @@ const Dashboard = () => {
       id: 3,
       type: 'payment',
       title: 'Paiement effectué',
-      description: 'Prime mensuelle MAIF Auto - 45,80€',
+      description: 'Dépenses mensuelle MAIF Auto - 45,80€',
       time: '3j',
       priority: 'low',
     },
@@ -349,47 +348,36 @@ const Dashboard = () => {
             <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-600 mb-1">Contrats Actifs</p>
+                  <p className="text-xs font-medium text-gray-600 mb-1">Total des contrats</p>
                   <p className="text-2xl font-bold text-gray-900">{contractStats.active}</p>
                 </div>
                 <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
                   <FaShieldAlt className="h-6 w-6 text-[#1e51ab]" />
                 </div>
               </div>
-              <div className="flex items-center mt-4 text-sm">
-                <FaArrowUp className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-green-600 font-medium">+{contractStats.total - contractStats.active}</span>
-                <span className="text-gray-500 ml-1">total</span>
-              </div>
             </div>
 
             <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-600 mb-1">Primes Mensuelles</p>
+                  <p className="text-xs font-medium text-gray-600 mb-1">Dépenses mensuelle</p>
                   <p className="text-2xl font-bold text-gray-900">{contractStats.monthlyPremium.toFixed(0)}€</p>
                 </div>
                 <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
                   <FaEuroSign className="h-6 w-6 text-green-600" />
                 </div>
               </div>
-              <div className="flex items-center mt-4 text-sm">
-                <span className="text-gray-500">Par mois</span>
-              </div>
             </div>
 
             <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-600 mb-1">Dépenses Annuelles</p>
+                  <p className="text-xs font-medium text-gray-600 mb-1">Dépenses annuelle</p>
                   <p className="text-2xl font-bold text-gray-900">{totalAnnual.toLocaleString()}€</p>
                 </div>
                 <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
                   <FaChartPie className="h-6 w-6 text-purple-600" />
                 </div>
-              </div>
-              <div className="flex items-center mt-4 text-sm">
-                <span className="text-gray-500">Total par an</span>
               </div>
             </div>
 
@@ -405,7 +393,7 @@ const Dashboard = () => {
               </div>
               <div className="flex items-center mt-4 text-sm">
                 <FaCalendarAlt className="h-4 w-4 text-amber-500 mr-1" />
-                <span className="text-amber-600 font-medium">Dans 60 jours</span>
+                <span className="text-amber-600 font-medium">Dans moins de 60 jours</span>
               </div>
             </div>
           </motion.div>
@@ -451,7 +439,7 @@ const Dashboard = () => {
 
                 {/* Legend and Details */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Détails par type</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Détails par produit d'assurance</h3>
                   {insuranceBudget
                     .filter((item) => item.amount > 0)
                     .map((item, index) => (

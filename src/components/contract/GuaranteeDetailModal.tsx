@@ -125,7 +125,7 @@ const GuaranteeDetailModal: React.FC<GuaranteeDetailModalProps> = ({ isOpen, onC
                                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {detail.limit && (
                                           <div className="bg-gray-50 rounded-lg p-3">
-                                            <div className="text-xs text-gray-600 font-medium mb-1">Limite</div>
+                                            <div className="text-xs text-gray-600 font-medium mb-1">Plafond</div>
                                             <div className="text-sm text-gray-900 font-semibold">{detail.limit}</div>
                                           </div>
                                         )}
@@ -137,23 +137,16 @@ const GuaranteeDetailModal: React.FC<GuaranteeDetailModalProps> = ({ isOpen, onC
                                           </div>
                                         )}
 
-                                        {detail.franchise && (
-                                          <div className="bg-gray-50 rounded-lg p-3">
-                                            <div className="text-xs text-gray-600 font-medium mb-1">Franchise</div>
-                                            <div className="text-sm text-gray-900 font-semibold">{detail.franchise}</div>
-                                          </div>
-                                        )}
-
                                         {detail.deductible && (
                                           <div className="bg-gray-50 rounded-lg p-3">
-                                            <div className="text-xs text-gray-600 font-medium mb-1">Déductible</div>
+                                            <div className="text-xs text-gray-600 font-medium mb-1">Franchise</div>
                                             <div className="text-sm text-gray-900 font-semibold">{detail.deductible}</div>
                                           </div>
                                         )}
 
                                         {detail.limitation && (
                                           <div className="bg-gray-50 rounded-lg p-3 sm:col-span-2">
-                                            <div className="text-xs text-gray-600 font-medium mb-1">Limitation</div>
+                                            <div className="text-xs text-gray-600 font-medium mb-1">Limite</div>
                                             <div className="text-sm text-gray-900 font-semibold">{detail.limitation}</div>
                                           </div>
                                         )}

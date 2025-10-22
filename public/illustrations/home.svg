@@ -1,0 +1,118 @@
+<svg width="240" height="200" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="homeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0FDF4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DCFCE7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="houseBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#047857;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="roof" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#DC2626;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B91C1C;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="windowGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#DBEAFE;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#BFDBFE;stop-opacity:0.7" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="240" height="200" fill="url(#homeBg)" rx="16"/>
+  
+  <!-- Ground/grass -->
+  <path d="M0 170 L240 170 L240 200 L0 200 Z" fill="#F0FDF4"/>
+  
+  <!-- House shadow -->
+  <ellipse cx="120" cy="170" rx="45" ry="10" fill="#D1D5DB" opacity="0.3"/>
+  
+  <!-- Main house body -->
+  <path d="M70 140 L170 140 L170 180 L70 180 Z" fill="url(#houseBody)"/>
+  
+  <!-- House walls -->
+  <path d="M80 120 L80 140 L160 140 L160 120 L150 100 L90 100 Z" fill="url(#houseBody)"/>
+  
+  <!-- Roof -->
+  <path d="M80 120 L120 80 L160 120 Z" fill="url(#roof)"/>
+  
+  <!-- Roof tiles pattern -->
+  <g opacity="0.3">
+    <path d="M85 115 L115 85 L120 85 L90 115 Z" fill="#EF4444"/>
+    <path d="M125 85 L155 115 L150 115 L120 85 Z" fill="#EF4444"/>
+    <path d="M90 110 L120 80 L125 80 L95 110 Z" fill="#EF4444"/>
+    <path d="M125 80 L155 110 L150 110 L120 80 Z" fill="#EF4444"/>
+  </g>
+  
+  <!-- Door -->
+  <rect x="105" y="140" width="20" height="40" fill="#1F2937"/>
+  <rect x="107" y="142" width="16" height="36" fill="#374151"/>
+  <circle cx="118" cy="160" r="2" fill="#6B7280"/>
+  <rect x="105" y="135" width="20" height="8" fill="#374151" rx="4"/>
+  
+  <!-- Windows -->
+  <rect x="90" y="110" width="18" height="18" fill="url(#windowGlass)" rx="2"/>
+  <rect x="132" y="110" width="18" height="18" fill="url(#windowGlass)" rx="2"/>
+  
+  <!-- Window frames -->
+  <rect x="90" y="110" width="18" height="18" fill="none" stroke="#1E40AF" stroke-width="1.5" rx="2"/>
+  <rect x="132" y="110" width="18" height="18" fill="none" stroke="#1E40AF" stroke-width="1.5" rx="2"/>
+  
+  <!-- Window cross frames -->
+  <line x1="99" y1="110" x2="99" y2="128" stroke="#1E40AF" stroke-width="1"/>
+  <line x1="90" y1="119" x2="108" y2="119" stroke="#1E40AF" stroke-width="1"/>
+  <line x1="141" y1="110" x2="141" y2="128" stroke="#1E40AF" stroke-width="1"/>
+  <line x1="132" y1="119" x2="150" y2="119" stroke="#1E40AF" stroke-width="1"/>
+  
+  <!-- Chimney -->
+  <rect x="130" y="90" width="15" height="25" fill="#374151"/>
+  <rect x="128" y="88" width="19" height="6" fill="#6B7280" rx="3"/>
+  
+  <!-- Smoke -->
+  <g opacity="0.6">
+    <circle cx="137" cy="85" r="4" fill="#9CA3AF"/>
+    <circle cx="142" cy="78" r="3" fill="#9CA3AF"/>
+    <circle cx="147" cy="72" r="2" fill="#9CA3AF"/>
+    <circle cx="152" cy="68" r="1.5" fill="#9CA3AF"/>
+  </g>
+  
+  <!-- Garden plants -->
+  <g opacity="0.8">
+    <ellipse cx="90" cy="175" rx="12" ry="6" fill="#16A34A"/>
+    <ellipse cx="110" cy="178" rx="10" ry="5" fill="#16A34A"/>
+    <ellipse cx="130" cy="175" rx="8" ry="4" fill="#16A34A"/>
+    <ellipse cx="150" cy="178" rx="11" ry="5" fill="#16A34A"/>
+  </g>
+  
+  <!-- Tree -->
+  <rect x="45" y="160" width="6" height="20" fill="#374151"/>
+  <circle cx="48" cy="150" r="15" fill="#16A34A"/>
+  <circle cx="42" cy="145" r="8" fill="#22C55E"/>
+  <circle cx="54" cy="145" r="8" fill="#22C55E"/>
+  
+  <!-- Insurance shield icon -->
+  <g transform="translate(20, 30)">
+    <circle cx="20" cy="20" r="18" fill="#059669" opacity="0.1"/>
+    <path d="M20 5 L30 10 L30 25 Q30 35 20 40 Q10 35 10 25 L10 10 Z" fill="#059669"/>
+    <path d="M16 22 L19 25 L24 18" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Sun -->
+  <g transform="translate(200, 30)">
+    <circle cx="20" cy="20" r="15" fill="#FBBF24" opacity="0.3"/>
+    <circle cx="20" cy="20" r="12" fill="#F59E0B" opacity="0.5"/>
+    <circle cx="20" cy="20" r="8" fill="#F59E0B"/>
+    <!-- Sun rays -->
+    <g opacity="0.4">
+      <line x1="20" y1="0" x2="20" y2="8" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+      <line x1="20" y1="32" x2="20" y2="40" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+      <line x1="0" y1="20" x2="8" y2="20" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+      <line x1="32" y1="20" x2="40" y2="20" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+      <line x1="5" y1="5" x2="10" y2="10" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+      <line x1="30" y1="30" x2="35" y2="35" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+      <line x1="35" y1="5" x2="30" y2="10" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+      <line x1="10" y1="30" x2="5" y2="35" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

@@ -53,6 +53,7 @@ interface GetInsurersParams {
   country?: string;
   isActive?: boolean;
   supportedProducts?: string;
+  category?: 'auto' | 'home' | 'health' | 'life' | 'disability';
   sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'rating' | 'country' | 'isActive';
   sortOrder?: 'asc' | 'desc';
 }
@@ -74,6 +75,7 @@ export const insurersApi = createApi({
         if (params?.country) searchParams.append('country', params.country);
         if (params?.isActive !== undefined) searchParams.append('isActive', params.isActive.toString());
         if (params?.supportedProducts) searchParams.append('supportedProducts', params.supportedProducts);
+        if (params?.category) searchParams.append('category', params.category);
         if (params?.sortBy) searchParams.append('sortBy', params.sortBy);
         if (params?.sortOrder) searchParams.append('sortOrder', params.sortOrder);
 

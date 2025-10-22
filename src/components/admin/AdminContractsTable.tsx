@@ -1,6 +1,7 @@
 import { FaChevronLeft, FaChevronRight, FaRobot, FaSearch, FaSpinner, FaTrash } from 'react-icons/fa';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDeleteAdminTemplateContractMutation, useGetAdminTemplateContractsQuery, useSummarizeAdminTemplateContractMutation } from '../../store/contractsApi';
+import { useNavigate } from 'react-router-dom';
 
 import type { BackendContractListItem } from '../../types/contract';
 import Button from '../ui/Button';
@@ -13,6 +14,7 @@ const AdminContractsTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInsurer, setSelectedInsurer] = useState<string>('');
+  const navigate = useNavigate();
 
   const [summarizeAdminTemplateContract, { isLoading: isSummarizing }] = useSummarizeAdminTemplateContractMutation();
   const [deleteAdminTemplateContract, { isLoading: isDeleting }] = useDeleteAdminTemplateContractMutation();
@@ -162,7 +164,13 @@ const AdminContractsTable: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {contracts.map((contract: BackendContractListItem) => (
-                <motion.tr key={contract.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-gray-50 transition-colors">
+                <motion.tr
+                  key={contract.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  onClick={() => navigate(`/app/admin/templates/${contract.id}`)}
+                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{contract.name}</div>
@@ -224,7 +232,10 @@ const AdminContractsTable: React.FC = () => {
                       <Button
                         variant="secondary"
                         size="sm"
-                        onClick={() => handleSummarize(contract.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSummarize(contract.id);
+                        }}
                         disabled={isSummarizing || contract.summarizeStatus !== 'pending' || contract.status === 'pending'}
                         className={`${
                           contract.summarizeStatus === 'pending' && contract.status !== 'pending' ? 'text-green-600 hover:text-green-800' : 'text-gray-400 cursor-not-allowed'
@@ -235,7 +246,10 @@ const AdminContractsTable: React.FC = () => {
                       <Button
                         variant="secondary"
                         size="sm"
-                        onClick={() => handleDelete(contract.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(contract.id);
+                        }}
                         disabled={isDeleting || contract.status === 'pending'}
                         className={`${contract.status === 'pending' ? 'text-gray-400 cursor-not-allowed' : 'text-red-600 hover:text-red-800'}`}
                       >

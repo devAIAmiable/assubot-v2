@@ -137,7 +137,7 @@ const ContractsModule = () => {
         <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Contrats actifs</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">Contrat(s) actif(s)</p>
               <p className="text-3xl font-bold text-green-600">{contractStats.active}</p>
             </div>
             <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
@@ -149,7 +149,7 @@ const ContractsModule = () => {
         <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Primes annuelle</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">Prime annuelle</p>
               <p className="text-3xl font-bold text-gray-900">
                 {(contractStats.totalPremium / 100).toLocaleString('fr-FR', {
                   minimumFractionDigits: 2,
@@ -162,15 +162,12 @@ const ContractsModule = () => {
               <FaEuroSign className="h-6 w-6 text-purple-600" />
             </div>
           </div>
-          <div className="flex items-center mt-4 text-sm">
-            <span className="text-gray-500">Par an</span>
-          </div>
         </div>
 
         <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Expirés</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">Expiré(s)</p>
               <p className="text-3xl font-bold text-red-600">{contractStats.expired}</p>
             </div>
             <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
@@ -209,7 +206,7 @@ const ContractsModule = () => {
                 onChange={(e) => handleTypeFilter(e.target.value)}
                 className="appearance-none bg-white border border-gray-300 rounded-xl px-4 py-3 pr-8 focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors"
               >
-                <option value="all">Tous les types</option>
+                <option value="all">Tous les produits</option>
                 <option value="auto">Automobile</option>
                 <option value="home">Habitation</option>
                 <option value="health">Santé</option>
