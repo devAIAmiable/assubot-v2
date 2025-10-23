@@ -33,6 +33,7 @@ import GuaranteeDetailModal from './contract/GuaranteeDetailModal';
 import InsufficientCreditsModal from './ui/InsufficientCreditsModal';
 import ReactMarkdown from 'react-markdown';
 import { capitalizeFirst } from '../utils/text';
+import { getContractListItemInsurer } from '../utils/contractAdapters';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { selectIsContractProcessing } from '../store/contractProcessingSlice';
 // No transformation needed - using backend data directly
@@ -270,7 +271,7 @@ const ContractDetailsPage = () => {
 
   // Get contract details using RTK Query directly to access refetch
   const {
-    data: contractData,
+    data: contract,
     isLoading,
     isError,
     error,
@@ -278,9 +279,6 @@ const ContractDetailsPage = () => {
   } = useGetContractByIdQuery(contractId!, {
     skip: !contractId,
   });
-
-  // Use contract data directly (no transformation needed)
-  const contract = contractData;
 
   // Listen for contract processing events to trigger refetch
   // Using a custom event on window to avoid duplicate socket listeners
@@ -513,8 +511,12 @@ const ContractDetailsPage = () => {
               </button>
               <div className="flex items-center space-x-3">
                 {/* Insurer logo or type icon */}
-                {contract?.insurer?.name && getInsurerLogo(contract.insurer.name) ? (
-                  <img src={getInsurerLogo(contract.insurer.name)} alt={contract.insurer.name} className="w-12 h-12 object-contain rounded bg-white border border-gray-100" />
+                {contract?.insurer?.name ? (
+                  <img
+                    src={getInsurerLogo(getContractListItemInsurer(contract))}
+                    alt={contract.insurer.name}
+                    className="w-12 h-12 object-contain rounded bg-white border border-gray-100"
+                  />
                 ) : (
                   <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
                     {(() => {
@@ -628,7 +630,7 @@ const ContractDetailsPage = () => {
                         <div className="space-y-4">
                           <div className="flex items-center justify-between py-3 border-b border-blue-200">
                             <span className="text-gray-600 font-medium">Renouvellement tacite</span>
-                            <span className="font-semibold text-gray-900">Non spécifié</span>
+                            <span className="font-semibold text-gray-900">{contract.tacitRenewal ? 'Oui' : 'Non'}</span>
                           </div>
                           <div className="flex items-center justify-between py-3 border-b border-blue-200">
                             <span className="text-gray-600 font-medium">Début de contrat</span>

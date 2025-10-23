@@ -13,9 +13,11 @@ import {
   FaEnvelope,
   FaExclamationTriangle,
   FaEye,
+  FaFileAlt,
   FaFilePdf,
   FaGlobe,
   FaPhone,
+  FaRobot,
   FaShieldAlt,
   FaTimes,
 } from 'react-icons/fa';
@@ -24,10 +26,14 @@ import { getContactTypeLabel, getObligationTypeLabel, getStatusColor, getStatusL
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import ContractSummarizationStatus from '../components/ui/ContractSummarizationStatus';
 import GuaranteeDetailModal from '../components/contract/GuaranteeDetailModal';
 import ReactMarkdown from 'react-markdown';
 import { capitalizeFirst } from '../utils/text';
 import { getInsurerLogo } from '../utils/insurerLogo';
+import { selectIsContractProcessing } from '../store/contractProcessingSlice';
+import { useAdminContractSummarize } from '../hooks/useAdminContractSummarize';
+import { useAppSelector } from '../store/hooks';
 import { useContractDownload } from '../hooks/useContractDownload';
 import { useGetAdminTemplateContractByIdQuery } from '../store/contractsApi';
 
@@ -263,6 +269,7 @@ const AdminTemplateContractDetails = () => {
     isLoading,
     isError,
     error,
+    refetch,
   } = useGetAdminTemplateContractByIdQuery(contractId!, {
     skip: !contractId,
   });
@@ -270,12 +277,35 @@ const AdminTemplateContractDetails = () => {
   // Contract download functionality
   const { generateDownloadUrls, isGenerating } = useContractDownload();
 
+  // Admin contract summarization
+  const { summarizeContract, isSummarizing } = useAdminContractSummarize();
+  const isProcessing = useAppSelector((state) => selectIsContractProcessing(state, contractId || ''));
+
   const isContractExpired = contract ? (contract.endDate ? new Date(contract.endDate) < new Date() : false) : false;
 
   // Scroll to top when component mounts or contractId changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [contractId]);
+
+  // WebSocket event listener for contract summarization
+  useEffect(() => {
+    const handleContractProcessed = (event: Event) => {
+      const customEvent = event as CustomEvent<{ contractId: string; status: string }>;
+      const data = customEvent.detail;
+
+      if (data.contractId === contractId && data.status === 'success') {
+        console.log('🔄 Refetching admin contract after successful processing...');
+        refetch();
+      }
+    };
+
+    window.addEventListener('contract_summarized', handleContractProcessed as EventListener);
+
+    return () => {
+      window.removeEventListener('contract_summarized', handleContractProcessed as EventListener);
+    };
+  }, [contractId, refetch]);
 
   // Show loading state for initial data fetch
   if (isLoading) {
@@ -372,6 +402,72 @@ const AdminTemplateContractDetails = () => {
     }
   };
 
+  const handleSummarize = async () => {
+    if (!contractId) return;
+    try {
+      await summarizeContract(contractId);
+    } catch (error) {
+      console.error('Failed to summarize admin contract:', error);
+    }
+  };
+
+  // Pending/Processing Summarization Message Component
+  const PendingSummarizationMessage = () => {
+    // Show processing loader if status is ongoing
+    if (contract?.summarizeStatus === 'ongoing' || isProcessing) {
+      return (
+        <div className="text-center py-12">
+          <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
+            <div className="relative mb-6">
+              <FaRobot className="h-16 w-16 text-[#1e51ab] mx-auto animate-pulse" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-[#1e51ab]"></div>
+              </div>
+            </div>
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en cours</h4>
+            <p className="text-gray-600 leading-relaxed">Notre IA analyse votre contrat et génère les informations détaillées...</p>
+            <p className="text-sm text-gray-500 mt-2">Cela peut prendre quelques instants</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Show pending state with button to start analysis (only when status is pending)
+    if (contract?.summarizeStatus === 'pending') {
+      return (
+        <div className="text-center py-12">
+          <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
+            <FaRobot className="h-16 w-16 text-[#1e51ab] mx-auto mb-4" />
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en attente</h4>
+            <p className="text-gray-600 leading-relaxed mb-6">
+              Les données détaillées de cette section seront disponibles après l'analyse de votre contrat par notre IA. Cliquez sur le bouton ci-dessous pour lancer l'analyse.
+            </p>
+            <button
+              onClick={handleSummarize}
+              disabled={isSummarizing}
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-[#1e51ab] text-white font-medium rounded-lg hover:bg-[#163d82] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSummarizing ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Démarrage...</span>
+                </>
+              ) : (
+                <>
+                  <FaRobot className="h-5 w-5" />
+                  <span>Lancer l'analyse</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Return null for other statuses (shouldn't reach here, but safety fallback)
+    return null;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -409,26 +505,29 @@ const AdminTemplateContractDetails = () => {
                 {isContractExpired ? 'Expiré' : getStatusLabel(contract.status)}
               </span>
 
-              {/* Summarization status */}
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  contract?.summarizeStatus === 'done'
-                    ? 'bg-green-100 text-green-800'
-                    : contract?.summarizeStatus === 'ongoing'
-                      ? 'bg-blue-100 text-blue-800'
-                      : contract?.summarizeStatus === 'failed'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-gray-100 text-gray-800'
-                }`}
-              >
-                {contract?.summarizeStatus === 'done'
-                  ? 'Résumé disponible'
-                  : contract?.summarizeStatus === 'ongoing'
-                    ? 'Résumé en cours'
-                    : contract?.summarizeStatus === 'failed'
-                      ? 'Échec du résumé'
-                      : 'Non résumé'}
-              </span>
+              {/* Contract Summarization Status */}
+              <ContractSummarizationStatus summarizeStatus={contract?.summarizeStatus} />
+
+              {/* Summarize button */}
+              {contract?.summarizeStatus === 'pending' && (
+                <button
+                  onClick={handleSummarize}
+                  disabled={isSummarizing}
+                  className="inline-flex items-center space-x-2 px-3 py-2 bg-[#1e51ab] text-white text-sm font-medium rounded-lg hover:bg-[#163d82] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSummarizing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Démarrage...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaFileAlt className="h-4 w-4" />
+                      <span>Résumer</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -566,7 +665,9 @@ const AdminTemplateContractDetails = () => {
               {/* Garanties */}
               <TabPanel className="p-4 sm:p-6">
                 <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
-                  {contract.guarantees && contract.guarantees.length > 0 ? (
+                  {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
+                    <PendingSummarizationMessage />
+                  ) : contract.guarantees && contract.guarantees.length > 0 ? (
                     <div className="space-y-4 sm:space-y-6">
                       {/* Header with inline stats */}
                       <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
@@ -661,316 +762,336 @@ const AdminTemplateContractDetails = () => {
               {/* Exclusions */}
               <TabPanel className="p-4 sm:p-6">
                 <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
-                  <div className="bg-gradient-to-br from-red-50 to-orange-50 p-4 sm:p-8 rounded-2xl border border-red-100">
-                    <h3 className="text-lg sm:text-2xl font-semibold mb-4 sm:mb-6 flex items-center">
-                      <FaExclamationTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 mr-2 sm:mr-3" />
-                      Exclusions générales
-                    </h3>
-                    <div className="space-y-3 sm:space-y-4">
-                      {contract.exclusions && contract.exclusions.length > 0 ? (
-                        contract.exclusions.map((exclusion) => (
-                          <div key={exclusion.id} className="flex items-start space-x-4 p-4 sm:p-6 bg-white rounded-2xl border border-red-100">
-                            <span className="text-gray-900 font-medium text-sm sm:text-base">{capitalizeFirst(exclusion.description)}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center text-gray-500 py-4">Aucune exclusion spécifiée</div>
-                      )}
+                  {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
+                    <PendingSummarizationMessage />
+                  ) : (
+                    <div className="bg-gradient-to-br from-red-50 to-orange-50 p-4 sm:p-8 rounded-2xl border border-red-100">
+                      <h3 className="text-lg sm:text-2xl font-semibold mb-4 sm:mb-6 flex items-center">
+                        <FaExclamationTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 mr-2 sm:mr-3" />
+                        Exclusions générales
+                      </h3>
+                      <div className="space-y-3 sm:space-y-4">
+                        {contract.exclusions && contract.exclusions.length > 0 ? (
+                          contract.exclusions.map((exclusion) => (
+                            <div key={exclusion.id} className="flex items-start space-x-4 p-4 sm:p-6 bg-white rounded-2xl border border-red-100">
+                              <span className="text-gray-900 font-medium text-sm sm:text-base">{capitalizeFirst(exclusion.description)}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center text-gray-500 py-4">Aucune exclusion spécifiée</div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </TabPanel>
 
               {/* Zone géographique */}
               <TabPanel className="p-4 sm:p-6">
                 <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-8 rounded-2xl border border-blue-100">
-                    {contract.zones && contract.zones.length > 0 ? (
-                      <div className="space-y-6 sm:space-y-8">
-                        {/* World Map */}
-                        <div className="">
-                          <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Zones couvertes</h4>
-                          <div className="w-full h-[300px] sm:h-[400px] lg:h-[600px] bg-white rounded-lg border border-blue-200 shadow-inner overflow-hidden">
-                            <ComposableMap
-                              projection="geoEqualEarth"
-                              projectionConfig={{
-                                scale: 190,
-                                center: [0, 15],
-                              }}
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                              }}
-                            >
-                              <ZoomableGroup>
-                                {/* Graticule */}
-                                <Graticule stroke="#e2e8f0" strokeWidth={1} />
+                  {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
+                    <PendingSummarizationMessage />
+                  ) : (
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-8 rounded-2xl border border-blue-100">
+                      {contract.zones && contract.zones.length > 0 ? (
+                        <div className="space-y-6 sm:space-y-8">
+                          {/* World Map */}
+                          <div className="">
+                            <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Zones couvertes</h4>
+                            <div className="w-full h-[300px] sm:h-[400px] lg:h-[600px] bg-white rounded-lg border border-blue-200 shadow-inner overflow-hidden">
+                              <ComposableMap
+                                projection="geoEqualEarth"
+                                projectionConfig={{
+                                  scale: 190,
+                                  center: [0, 15],
+                                }}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                }}
+                              >
+                                <ZoomableGroup>
+                                  {/* Graticule */}
+                                  <Graticule stroke="#e2e8f0" strokeWidth={1} />
 
-                                {/* World Countries */}
-                                <Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
-                                  {({ geographies }) =>
-                                    geographies.map((geo) => {
-                                      // Check if this country/region matches any of the contract zones
-                                      const isHighlighted = contract.zones?.some((zone) => {
-                                        const countryName = geo.properties.name?.toLowerCase();
-                                        const zoneName = zone.label.toLowerCase();
+                                  {/* World Countries */}
+                                  <Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
+                                    {({ geographies }) =>
+                                      geographies.map((geo) => {
+                                        // Check if this country/region matches any of the contract zones
+                                        const isHighlighted = contract.zones?.some((zone) => {
+                                          const countryName = geo.properties.name?.toLowerCase();
+                                          const zoneName = zone.label.toLowerCase();
 
-                                        // Direct name matching only
-                                        const isMatch = countryName === zoneName;
-                                        return isMatch;
-                                      });
+                                          // Direct name matching only
+                                          const isMatch = countryName === zoneName;
+                                          return isMatch;
+                                        });
 
-                                      return (
-                                        <g key={geo.rsmKey} style={{ cursor: 'crosshair' }}>
-                                          <title>{geo.properties.name}</title>
-                                          <Geography
-                                            geography={geo}
-                                            fill={isHighlighted ? '#1e51ab' : '#cedaf0'}
-                                            stroke="#fff"
-                                            strokeWidth={1}
+                                        return (
+                                          <g key={geo.rsmKey} style={{ cursor: 'crosshair' }}>
+                                            <title>{geo.properties.name}</title>
+                                            <Geography
+                                              geography={geo}
+                                              fill={isHighlighted ? '#1e51ab' : '#cedaf0'}
+                                              stroke="#fff"
+                                              strokeWidth={1}
+                                              style={{
+                                                default: { outline: 'none' },
+                                                hover: {
+                                                  fill: isHighlighted ? '#163d82' : '#e2e8f0',
+                                                  outline: 'none',
+                                                },
+                                                pressed: { outline: 'none' },
+                                              }}
+                                            />
+                                          </g>
+                                        );
+                                      })
+                                    }
+                                  </Geographies>
+
+                                  {/* Zone Markers */}
+                                  {contract.zones?.map((zone) => {
+                                    const coordinates = getZoneCoordinates(zone.label);
+                                    if (!coordinates) return null;
+
+                                    return (
+                                      <Marker key={zone.id} coordinates={coordinates}>
+                                        <g>
+                                          {/* Background circle */}
+                                          <circle r="2" fill="#1e51ab" stroke="#fff" strokeWidth="1" />
+                                          {/* Zone label */}
+                                          <text
+                                            textAnchor="middle"
+                                            y="-15"
                                             style={{
-                                              default: { outline: 'none' },
-                                              hover: {
-                                                fill: isHighlighted ? '#163d82' : '#e2e8f0',
-                                                outline: 'none',
-                                              },
-                                              pressed: { outline: 'none' },
+                                              fontFamily: 'system-ui',
+                                              fill: '#1e51ab',
+                                              fontSize: '12px',
+                                              fontWeight: 'bold',
+                                              textShadow: '1px 1px 2px rgba(255,255,255,0.8)',
                                             }}
-                                          />
+                                          >
+                                            {zone.label}
+                                          </text>
                                         </g>
-                                      );
-                                    })
-                                  }
-                                </Geographies>
-
-                                {/* Zone Markers */}
-                                {contract.zones?.map((zone) => {
-                                  const coordinates = getZoneCoordinates(zone.label);
-                                  if (!coordinates) return null;
-
-                                  return (
-                                    <Marker key={zone.id} coordinates={coordinates}>
-                                      <g>
-                                        {/* Background circle */}
-                                        <circle r="2" fill="#1e51ab" stroke="#fff" strokeWidth="1" />
-                                        {/* Zone label */}
-                                        <text
-                                          textAnchor="middle"
-                                          y="-15"
-                                          style={{
-                                            fontFamily: 'system-ui',
-                                            fill: '#1e51ab',
-                                            fontSize: '12px',
-                                            fontWeight: 'bold',
-                                            textShadow: '1px 1px 2px rgba(255,255,255,0.8)',
-                                          }}
-                                        >
-                                          {zone.label}
-                                        </text>
-                                      </g>
-                                    </Marker>
-                                  );
-                                })}
-                              </ZoomableGroup>
-                            </ComposableMap>
+                                      </Marker>
+                                    );
+                                  })}
+                                </ZoomableGroup>
+                              </ComposableMap>
+                            </div>
+                            <div className="mt-4 text-sm text-gray-600 text-center">💡 Utilisez la molette de votre souris pour zoomer et dézoomer sur la carte</div>
                           </div>
-                          <div className="mt-4 text-sm text-gray-600 text-center">💡 Utilisez la molette de votre souris pour zoomer et dézoomer sur la carte</div>
-                        </div>
 
-                        {/* Zone List */}
-                        <div className="bg-white rounded-xl p-4 sm:p-6 border border-blue-100">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-                            {contract.zones.map((zone) => (
-                              <div key={zone.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center">
-                                <span className="text-sm font-medium text-gray-700">{capitalizeFirst(zone.label)}</span>
-                              </div>
-                            ))}
+                          {/* Zone List */}
+                          <div className="bg-white rounded-xl p-4 sm:p-6 border border-blue-100">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+                              {contract.zones.map((zone) => (
+                                <div key={zone.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                                  <span className="text-sm font-medium text-gray-700">{capitalizeFirst(zone.label)}</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="text-center text-gray-500 py-12">
-                        <div className="w-full max-w-md mx-auto bg-white rounded-xl border border-blue-200 p-6 sm:p-8 shadow-lg">
-                          <FaGlobe className="h-16 w-16 sm:h-20 sm:w-20 text-gray-300 mx-auto mb-4 sm:mb-6" />
-                          <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Aucune zone géographique spécifiée</h4>
-                          <p className="text-sm sm:text-base text-gray-600 leading-relaxed">Ce contrat template ne spécifie pas de zones de couverture géographique.</p>
+                      ) : (
+                        <div className="text-center text-gray-500 py-12">
+                          <div className="w-full max-w-md mx-auto bg-white rounded-xl border border-blue-200 p-6 sm:p-8 shadow-lg">
+                            <FaGlobe className="h-16 w-16 sm:h-20 sm:w-20 text-gray-300 mx-auto mb-4 sm:mb-6" />
+                            <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Aucune zone géographique spécifiée</h4>
+                            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">Ce contrat template ne spécifie pas de zones de couverture géographique.</p>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </TabPanel>
 
               {/* Obligations */}
               <TabPanel className="p-4 sm:p-6">
                 <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                      <FaClipboardList className="text-blue-600 mr-3" />
-                      Obligations du template
-                    </h3>
+                  {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
+                    <PendingSummarizationMessage />
+                  ) : (
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                        <FaClipboardList className="text-blue-600 mr-3" />
+                        Obligations du template
+                      </h3>
 
-                    {contract.obligations && contract.obligations.length > 0 ? (
-                      (() => {
-                        // Group obligations by type
-                        const groupedObligations = contract.obligations.reduce(
-                          (groups, obligation) => {
-                            const type = obligation.type;
-                            if (!groups[type]) {
-                              groups[type] = [];
-                            }
-                            groups[type].push(obligation);
-                            return groups;
-                          },
-                          {} as Record<string, typeof contract.obligations>
-                        );
-
-                        // Render grouped obligations with accordion
-                        return Object.entries(groupedObligations).map(([type, obligations]) => {
-                          const isExpanded = expandedObligations[type] || false;
-
-                          return (
-                            <div key={type} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                              {/* Header - Always visible */}
-                              <button onClick={() => toggleObligationExpansion(type)} className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                    <FaClipboardList className="text-blue-600" />
-                                  </div>
-                                  <div className="text-left">
-                                    <h4 className="font-semibold text-gray-900">{getObligationTypeLabel(type as ObligationType)}</h4>
-                                    <p className="text-sm text-gray-500">
-                                      {obligations.length} obligation{obligations.length > 1 ? 's' : ''}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                  <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full">{obligations.length}</span>
-                                  {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
-                                </div>
-                              </button>
-
-                              {/* Content - Expandable */}
-                              <AnimatePresence>
-                                {isExpanded && (
-                                  <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
-                                    <div className="p-4 pt-0 border-t border-gray-100">
-                                      <ul className="space-y-3">
-                                        {obligations.map((obligation) => (
-                                          <li key={obligation.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                            <FaCheck className="text-blue-600 mt-1 flex-shrink-0" />
-                                            <span className="text-gray-900">{obligation.description}</span>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
+                      {contract.obligations && contract.obligations.length > 0 ? (
+                        (() => {
+                          // Group obligations by type
+                          const groupedObligations = contract.obligations.reduce(
+                            (groups, obligation) => {
+                              const type = obligation.type;
+                              if (!groups[type]) {
+                                groups[type] = [];
+                              }
+                              groups[type].push(obligation);
+                              return groups;
+                            },
+                            {} as Record<string, typeof contract.obligations>
                           );
-                        });
-                      })()
-                    ) : (
-                      <div className="text-center text-gray-500 py-8">Aucune obligation spécifiée</div>
-                    )}
-                  </div>
+
+                          // Render grouped obligations with accordion
+                          return Object.entries(groupedObligations).map(([type, obligations]) => {
+                            const isExpanded = expandedObligations[type] || false;
+
+                            return (
+                              <div key={type} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                {/* Header - Always visible */}
+                                <button onClick={() => toggleObligationExpansion(type)} className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                      <FaClipboardList className="text-blue-600" />
+                                    </div>
+                                    <div className="text-left">
+                                      <h4 className="font-semibold text-gray-900">{getObligationTypeLabel(type as ObligationType)}</h4>
+                                      <p className="text-sm text-gray-500">
+                                        {obligations.length} obligation{obligations.length > 1 ? 's' : ''}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full">{obligations.length}</span>
+                                    {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                                  </div>
+                                </button>
+
+                                {/* Content - Expandable */}
+                                <AnimatePresence>
+                                  {isExpanded && (
+                                    <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
+                                      <div className="p-4 pt-0 border-t border-gray-100">
+                                        <ul className="space-y-3">
+                                          {obligations.map((obligation) => (
+                                            <li key={obligation.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                              <FaCheck className="text-blue-600 mt-1 flex-shrink-0" />
+                                              <span className="text-gray-900">{obligation.description}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            );
+                          });
+                        })()
+                      ) : (
+                        <div className="text-center text-gray-500 py-8">Aucune obligation spécifiée</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </TabPanel>
 
               {/* Résiliation */}
               <TabPanel className="p-4 sm:p-6">
                 <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
-                  <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 sm:p-8 rounded-2xl border border-yellow-100">
-                    <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
-                      <FaExclamationTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600 mr-2 sm:mr-3" />
-                      Questions fréquentes sur la résiliation
-                    </h3>
-                    <div className="space-y-3 sm:space-y-4">
-                      {contract.cancellations && contract.cancellations.length > 0 ? (
-                        contract.cancellations.map((termination) => (
-                          <Disclosure key={termination.id}>
-                            {({ open }) => (
-                              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                                <Disclosure.Button className="w-full p-3 sm:p-4 text-left hover:bg-gray-50 transition-colors">
-                                  <div className="flex items-center justify-between gap-3">
-                                    <span className="font-medium text-sm sm:text-base text-gray-900">{termination.question}</span>
-                                    {open ? <FaChevronUp className="text-gray-400 flex-shrink-0" /> : <FaChevronDown className="text-gray-400 flex-shrink-0" />}
-                                  </div>
-                                </Disclosure.Button>
-                                <Disclosure.Panel className="p-3 sm:p-4 pt-0 border-t border-gray-100">
-                                  <div className="prose prose-sm max-w-none text-sm sm:text-base text-gray-700 leading-relaxed">
-                                    <ReactMarkdown>{termination.response}</ReactMarkdown>
-                                  </div>
-                                </Disclosure.Panel>
-                              </div>
-                            )}
-                          </Disclosure>
-                        ))
-                      ) : (
-                        <div className="text-center text-gray-500 py-8">
-                          <FaExclamationTriangle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                          <p>Aucune information de résiliation disponible</p>
-                        </div>
-                      )}
+                  {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
+                    <PendingSummarizationMessage />
+                  ) : (
+                    <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 sm:p-8 rounded-2xl border border-yellow-100">
+                      <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
+                        <FaExclamationTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600 mr-2 sm:mr-3" />
+                        Questions fréquentes sur la résiliation
+                      </h3>
+                      <div className="space-y-3 sm:space-y-4">
+                        {contract.cancellations && contract.cancellations.length > 0 ? (
+                          contract.cancellations.map((termination) => (
+                            <Disclosure key={termination.id}>
+                              {({ open }) => (
+                                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                  <Disclosure.Button className="w-full p-3 sm:p-4 text-left hover:bg-gray-50 transition-colors">
+                                    <div className="flex items-center justify-between gap-3">
+                                      <span className="font-medium text-sm sm:text-base text-gray-900">{termination.question}</span>
+                                      {open ? <FaChevronUp className="text-gray-400 flex-shrink-0" /> : <FaChevronDown className="text-gray-400 flex-shrink-0" />}
+                                    </div>
+                                  </Disclosure.Button>
+                                  <Disclosure.Panel className="p-3 sm:p-4 pt-0 border-t border-gray-100">
+                                    <div className="prose prose-sm max-w-none text-sm sm:text-base text-gray-700 leading-relaxed">
+                                      <ReactMarkdown>{termination.response}</ReactMarkdown>
+                                    </div>
+                                  </Disclosure.Panel>
+                                </div>
+                              )}
+                            </Disclosure>
+                          ))
+                        ) : (
+                          <div className="text-center text-gray-500 py-8">
+                            <FaExclamationTriangle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                            <p>Aucune information de résiliation disponible</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </TabPanel>
 
               {/* Contacts */}
               <TabPanel className="p-4 sm:p-6">
                 <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
-                  <>
-                    <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-6 sm:mb-8 flex items-center">
-                      <FaPhone className="h-5 w-5 sm:h-6 sm:w-6 text-[#1e51ab] mr-2 sm:mr-3" />
-                      Qui contacter
-                    </h3>
+                  {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
+                    <PendingSummarizationMessage />
+                  ) : (
+                    <>
+                      <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-6 sm:mb-8 flex items-center">
+                        <FaPhone className="h-5 w-5 sm:h-6 sm:w-6 text-[#1e51ab] mr-2 sm:mr-3" />
+                        Qui contacter
+                      </h3>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                      {contract.contacts && contract.contacts.length > 0 ? (
-                        contract.contacts.map((contact) => (
-                          <div key={contact.id} className="bg-blue-50 p-4 sm:p-6 rounded-2xl border border-blue-100">
-                            <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
-                              <FaClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2" />
-                              {getContactTypeLabel(contact.type)}
-                            </h4>
-                            <div className="space-y-3 sm:space-y-4">
-                              {contact.name && (
-                                <div>
-                                  <p className="font-semibold text-gray-900 text-sm sm:text-base">{contact.name}</p>
-                                </div>
-                              )}
-                              {contact.phone && (
-                                <div className="flex items-center space-x-3">
-                                  <FaPhone className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                  <a href={`tel:${contact.phone}`} className="font-medium text-gray-900 text-sm sm:text-base hover:text-blue-600 transition-colors">
-                                    {contact.phone}
-                                  </a>
-                                </div>
-                              )}
-                              {contact.email && (
-                                <div className="flex items-center space-x-3">
-                                  <FaEnvelope className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                  <a href={`mailto:${contact.email}`} className="font-medium text-gray-900 text-sm sm:text-base hover:text-blue-600 transition-colors">
-                                    {contact.email}
-                                  </a>
-                                </div>
-                              )}
-                              {contact.openingHours && (
-                                <div className="flex items-center space-x-3">
-                                  <FaClock className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                  <span className="font-medium text-gray-900 text-sm sm:text-base">{contact.openingHours}</span>
-                                </div>
-                              )}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                        {contract.contacts && contract.contacts.length > 0 ? (
+                          contract.contacts.map((contact) => (
+                            <div key={contact.id} className="bg-blue-50 p-4 sm:p-6 rounded-2xl border border-blue-100">
+                              <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
+                                <FaClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2" />
+                                {getContactTypeLabel(contact.type)}
+                              </h4>
+                              <div className="space-y-3 sm:space-y-4">
+                                {contact.name && (
+                                  <div>
+                                    <p className="font-semibold text-gray-900 text-sm sm:text-base">{contact.name}</p>
+                                  </div>
+                                )}
+                                {contact.phone && (
+                                  <div className="flex items-center space-x-3">
+                                    <FaPhone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                    <a href={`tel:${contact.phone}`} className="font-medium text-gray-900 text-sm sm:text-base hover:text-blue-600 transition-colors">
+                                      {contact.phone}
+                                    </a>
+                                  </div>
+                                )}
+                                {contact.email && (
+                                  <div className="flex items-center space-x-3">
+                                    <FaEnvelope className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                    <a href={`mailto:${contact.email}`} className="font-medium text-gray-900 text-sm sm:text-base hover:text-blue-600 transition-colors">
+                                      {contact.email}
+                                    </a>
+                                  </div>
+                                )}
+                                {contact.openingHours && (
+                                  <div className="flex items-center space-x-3">
+                                    <FaClock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                    <span className="font-medium text-gray-900 text-sm sm:text-base">{contact.openingHours}</span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="col-span-full text-center text-gray-500 py-8">Aucun contact disponible</div>
-                      )}
-                    </div>
-                  </>
+                          ))
+                        ) : (
+                          <div className="col-span-full text-center text-gray-500 py-8">Aucun contact disponible</div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </TabPanel>
             </div>

@@ -1,14 +1,13 @@
 import { FaChevronLeft, FaChevronRight, FaRobot, FaSearch, FaSpinner, FaTrash } from 'react-icons/fa';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDeleteAdminTemplateContractMutation, useGetAdminTemplateContractsQuery, useSummarizeAdminTemplateContractMutation } from '../../store/contractsApi';
-import { useNavigate } from 'react-router-dom';
 
 import type { BackendContractListItem } from '../../types/contract';
 import Button from '../ui/Button';
 import { getCategoryLabel } from '../../config/categories';
-// import InsurerDropdown from '../ui/InsurerDropdown';
 import { motion } from 'framer-motion';
 import { useGetInsurersQuery } from '../../store/insurersApi';
+import { useNavigate } from 'react-router-dom';
 
 const AdminContractsTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);

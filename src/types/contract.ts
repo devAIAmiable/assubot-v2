@@ -430,6 +430,8 @@ export interface BackendContractDocument {
 export interface BackendContractGuarantee {
   id: string;
   title: string;
+  deductible?: string | null;
+  limitation?: string | null;
   details?: BackendGuaranteeDetail[];
 }
 

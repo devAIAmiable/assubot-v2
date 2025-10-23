@@ -23,6 +23,8 @@ interface DropdownProps {
   onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
+  id?: string;
+  'aria-labelledby'?: string;
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -41,6 +43,8 @@ const Dropdown: React.FC<DropdownProps> = ({
   onScroll,
   hasMore = false,
   isLoadingMore = false,
+  id,
+  'aria-labelledby': ariaLabelledBy,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -67,6 +71,8 @@ const Dropdown: React.FC<DropdownProps> = ({
         {({ open }) => (
           <div className="relative">
             <Listbox.Button
+              id={id}
+              aria-labelledby={ariaLabelledBy}
               onClick={() => setIsOpen(!isOpen)}
               className={`relative w-full cursor-default rounded-lg bg-white py-2.5 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
                 error ? 'border border-red-300 focus:ring-red-500' : 'border border-gray-300 hover:border-gray-400'

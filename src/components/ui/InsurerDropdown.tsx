@@ -1,9 +1,10 @@
 import { FaSpinner, FaSearch } from 'react-icons/fa';
-import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useDebounce, useDebouncedCallback } from 'use-debounce';
 
 import Dropdown, { type DropdownOption } from './Dropdown';
-import { useGetInsurersQuery, type Insurer } from '../../store/insurersApi';
+import { usePaginatedInsurers } from '../../hooks/usePaginatedInsurers';
 
 interface InsurerDropdownProps {
   name: string;
@@ -25,89 +26,38 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
   className = '',
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [allInsurers, setAllInsurers] = useState<Insurer[]>([]);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const { setValue, watch } = useFormContext();
 
-  const isMountedRef = useRef(true);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Debounce search query
+  const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  const shouldSkipQuery = false;
-
+  // Use the new paginated insurers hook
   const {
-    data: insurersData,
-    isLoading: insurersLoading,
+    insurers,
+    hasMore,
+    loadMore,
+    isLoading,
+    isLoadingMore,
     error: insurersError,
-  } = useGetInsurersQuery(
-    {
-      page: currentPage,
-      limit: 20,
-      search: debouncedSearchQuery.trim() || undefined,
-      isActive: true,
-      sortBy: 'name',
-      sortOrder: 'asc',
-    },
-    {
-      skip: shouldSkipQuery,
-    }
-  );
+  } = usePaginatedInsurers({
+    searchQuery: debouncedSearchQuery,
+    limit: 20,
+    isActive: true,
+    sortBy: 'name',
+    sortOrder: 'asc',
+  });
+
   const selectedValue = watch(name);
 
-  useEffect(() => {
-    if (insurersData?.data && isMountedRef.current) {
-      console.log('📊 Data received:', {
-        currentPage,
-        dataLength: insurersData.data.length,
-        hasNext: insurersData.pagination?.hasNext,
-        totalData: insurersData.data,
-      });
-
-      if (currentPage === 1) {
-        console.log('🔄 First page - replacing all insurers');
-        setAllInsurers(insurersData.data);
-      } else {
-        console.log('➕ Subsequent page - appending insurers');
-        setAllInsurers((prev) => {
-          const existingIds = new Set(prev.map((insurer) => insurer.id));
-          const newInsurers = insurersData.data.filter((insurer) => !existingIds.has(insurer.id));
-          console.log('🔗 Appending:', {
-            prevLength: prev.length,
-            newInsurersLength: newInsurers.length,
-            totalAfter: prev.length + newInsurers.length,
-          });
-          return [...prev, ...newInsurers];
-        });
-      }
-      setHasMore(insurersData.pagination?.hasNext || false);
-    }
-  }, [insurersData, currentPage]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-    setAllInsurers([]);
-  }, [debouncedSearchQuery]);
-
+  // Transform insurers to dropdown options (API already returns sorted data)
   const insurerOptions: DropdownOption[] = useMemo(() => {
-    return allInsurers
+    return insurers
       .filter((insurer) => insurer.isActive)
       .map((insurer) => ({
         value: insurer.id,
         label: insurer.name,
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label));
-  }, [allInsurers]);
+      }));
+  }, [insurers]);
 
   const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);
@@ -119,59 +69,29 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
     },
     [setValue, name]
   );
-  const handleScroll = useCallback(
-    (event: React.UIEvent<HTMLDivElement>) => {
-      if (!isMountedRef.current) return;
 
-      // Clear previous timeout to debounce scroll events
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
+  // Simplified scroll handler using useDebouncedCallback
+  const handleScroll = useDebouncedCallback((event: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
+    const isNearBottom = scrollTop + clientHeight >= scrollHeight - 10;
 
-      scrollTimeoutRef.current = setTimeout(() => {
-        const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
-        const isNearBottom = scrollTop + clientHeight >= scrollHeight - 10;
-
-        console.log('🔍 Scroll Debug:', {
-          scrollTop,
-          scrollHeight,
-          clientHeight,
-          isNearBottom,
-          hasMore,
-          isLoadingMore,
-          insurersLoading,
-          currentPage,
-          allInsurersLength: allInsurers.length,
-        });
-
-        if (isNearBottom && hasMore && !isLoadingMore && !insurersLoading) {
-          console.log('📄 Loading next page:', currentPage + 1);
-          setIsLoadingMore(true);
-          setCurrentPage((prev) => prev + 1);
-        }
-      }, 100); // 100ms debounce for scroll
-    },
-    [hasMore, isLoadingMore, insurersLoading, currentPage, allInsurers.length]
-  );
-
-  useEffect(() => {
-    if (insurersData && isLoadingMore && isMountedRef.current) {
-      setIsLoadingMore(false);
+    if (isNearBottom && hasMore && !isLoadingMore) {
+      loadMore();
     }
-  }, [insurersData, isLoadingMore]);
+  }, 100);
 
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-      setIsLoadingMore(false);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, []);
+  // Enhanced error message extraction
+  const getErrorMessage = () => {
+    if (!insurersError) return error;
+    if (typeof insurersError === 'object' && insurersError && 'data' in insurersError) {
+      const errorData = (insurersError as { data?: { message?: string } }).data;
+      return errorData?.message || 'Impossible de charger la liste des assureurs';
+    }
+    return 'Impossible de charger la liste des assureurs';
+  };
 
   const getPlaceholder = () => {
-    if (insurersLoading) return 'Chargement des assureurs...';
+    if (isLoading) return 'Chargement des assureurs...';
     if (insurersError) return 'Erreur de chargement';
     if (searchQuery.trim()) return `Recherche: "${searchQuery}"`;
     return placeholder;
@@ -179,10 +99,10 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700">
+      <label htmlFor={`${name}-dropdown`} id={`${name}-label`} className="block text-sm font-medium text-gray-700">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
-        {insurersLoading && (
+        {isLoading && insurers.length === 0 && (
           <span className="ml-2 text-xs text-blue-600">
             <FaSpinner className="inline animate-spin mr-1" />
             Chargement...
@@ -191,12 +111,14 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
       </label>
 
       <Dropdown
+        id={`${name}-dropdown`}
+        aria-labelledby={`${name}-label`}
         options={insurerOptions}
         value={selectedValue}
         onChange={handleValueChange}
         placeholder={getPlaceholder()}
-        error={error}
-        disabled={disabled || insurersLoading}
+        error={getErrorMessage()}
+        disabled={disabled || (isLoading && insurers.length === 0)}
         searchable
         onSearchChange={handleSearchChange}
         searchPlaceholder="Rechercher un assureur..."
@@ -206,8 +128,6 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
         isLoadingMore={isLoadingMore}
       />
 
-      {(error || insurersError) && <p className="text-xs text-red-600">⚠️ {error || 'Impossible de charger la liste des assureurs'}</p>}
-
       {isLoadingMore && (
         <div className="flex items-center justify-center py-2 text-xs text-gray-500">
           <FaSpinner className="animate-spin mr-2" />
@@ -215,7 +135,7 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
         </div>
       )}
 
-      {searchQuery.trim() && insurerOptions.length === 0 && !insurersLoading && (
+      {searchQuery.trim() && insurerOptions.length === 0 && !isLoading && (
         <p className="text-xs text-gray-500">
           <FaSearch className="inline mr-1" />
           Aucun résultat pour "{searchQuery}". Essayez un autre terme de recherche.
