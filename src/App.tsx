@@ -6,6 +6,7 @@ import { persistor, store } from './store/index';
 import AdminContractUpload from './pages/AdminContractUpload';
 import AdminPanel from './pages/AdminPanel';
 import AdminTemplateContractDetails from './pages/AdminTemplateContractDetails';
+import AdminTemplateContractEdit from './pages/AdminTemplateContractEdit';
 import AppLayout from './components/AppLayout';
 import AuthInitializer from './components/AuthInitializer';
 import ChatModule from './components/ChatModule';
@@ -88,6 +89,7 @@ function App() {
                   <Route path="profil" element={<ProfileModule />} />
                   <Route path="admin" element={<AdminPanel />} />
                   <Route path="admin/upload-contract" element={<AdminContractUpload />} />
+                  <Route path="admin/templates/:contractId/edit" element={<AdminTemplateContractEdit />} />
                   <Route path="admin/templates/:contractId" element={<AdminTemplateContractDetails />} />
                 </Route>
 

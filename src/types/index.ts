@@ -11,6 +11,40 @@ export * from './chat';
 // Re-export User for compatibility
 export type { User };
 
+// Admin Edit Types
+export interface EditTemplateContractRequest {
+  name?: string;
+  category?: string;
+  version?: string;
+  guarantees?: Array<{
+    title?: string;
+    deductible?: string;
+    limitation?: string;
+    coverages?: Array<{
+      type?: 'covered' | 'not_covered';
+      description?: string;
+    }>;
+    details?: Array<{
+      service?: string;
+      limit?: string;
+      plafond?: string;
+      franchise?: string;
+      deductible?: string;
+      limitation?: string;
+      coverages?: Array<{
+        type?: 'covered' | 'not_covered';
+        description?: string;
+      }>;
+    }>;
+  }>;
+  exclusions?: Array<{ description?: string; type?: string }>;
+  obligations?: Array<{ description?: string; type?: string }>;
+  zones?: Array<{ type?: string; value?: string }>;
+  terminations?: Array<{ description?: string }>;
+  cancellations?: Array<{ description?: string; deadline?: string }>;
+  contacts?: Array<{ type?: string; value?: string }>;
+}
+
 // Application State Types
 export interface UserState {
   currentUser: User | null;
@@ -242,6 +276,7 @@ export interface Contract {
   status: ContractStatus;
   createdAt: string;
   updatedAt: string;
+  tacitRenewal: boolean;
 
   // Optional summarization fields
   summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';

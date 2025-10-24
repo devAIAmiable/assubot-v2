@@ -19,6 +19,12 @@ export const CATEGORY_CONFIG = {
   pet: { label: 'Animaux', icon: FaPaw, description: 'Assurance animaux' },
 } as const;
 
+// Comparison-specific category mapping
+export const COMPARISON_CATEGORY_CONFIG = {
+  auto: { label: 'Auto', icon: FaCar, description: 'Assurance automobile' },
+  home: { label: 'Habitation', icon: FaHome, description: 'Assurance habitation' },
+} as const;
+
 export const getCategoryLabel = (category: ContractCategory): string => {
   return CATEGORY_CONFIG[category]?.label || category;
 };
@@ -33,4 +39,21 @@ export const getCategoryDescription = (category: ContractCategory): string => {
 
 export const getAllCategories = () => {
   return Object.keys(CATEGORY_CONFIG) as ContractCategory[];
+};
+
+// Comparison category utilities
+export const getComparisonCategoryLabel = (category: 'auto' | 'home'): string => {
+  return COMPARISON_CATEGORY_CONFIG[category]?.label || category;
+};
+
+export const getComparisonCategoryIcon = (category: 'auto' | 'home') => {
+  return COMPARISON_CATEGORY_CONFIG[category]?.icon || FaBuilding;
+};
+
+export const getComparisonCategoryDescription = (category: 'auto' | 'home'): string => {
+  return COMPARISON_CATEGORY_CONFIG[category]?.description || '';
+};
+
+export const getComparisonCategories = () => {
+  return Object.keys(COMPARISON_CATEGORY_CONFIG) as ('auto' | 'home')[];
 };

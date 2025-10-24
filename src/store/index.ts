@@ -3,6 +3,7 @@ import { persistReducer, persistStore } from 'redux-persist';
 
 import chatReducer from './chatSlice';
 import { chatsApi } from './chatsApi';
+import { comparisonApi } from './comparisonApi';
 import comparisonsReducer from './comparisonsSlice';
 import contractCreationReducer from './contractCreationSlice';
 import contractProcessingReducer from './contractProcessingSlice';
@@ -36,6 +37,7 @@ const rootReducer = combineReducers({
   user: persistReducer(userPersistConfig, userReducer),
   chat: chatReducer,
   comparisons: comparisonsReducer,
+  [comparisonApi.reducerPath]: comparisonApi.reducer,
   [contractsApi.reducerPath]: contractsApi.reducer,
   [chatsApi.reducerPath]: chatsApi.reducer,
   [creditPacksApi.reducerPath]: creditPacksApi.reducer,
@@ -55,6 +57,7 @@ export const store = configureStore({
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
     }).concat(
+      comparisonApi.middleware,
       contractsApi.middleware,
       chatsApi.middleware,
       creditPacksApi.middleware,

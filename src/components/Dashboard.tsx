@@ -260,7 +260,7 @@ const Dashboard = () => {
       id: 3,
       type: 'payment',
       title: 'Paiement effectué',
-      description: 'Dépenses mensuelle MAIF Auto - 45,80€',
+      description: 'Dépenses mensuelles MAIF Auto - 45,80€',
       time: '3j',
       priority: 'low',
     },
@@ -360,7 +360,7 @@ const Dashboard = () => {
             <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-600 mb-1">Dépenses mensuelle</p>
+                  <p className="text-xs font-medium text-gray-600 mb-1">Dépenses mensuelles</p>
                   <p className="text-2xl font-bold text-gray-900">{contractStats.monthlyPremium.toFixed(0)}€</p>
                 </div>
                 <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
@@ -372,7 +372,7 @@ const Dashboard = () => {
             <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-600 mb-1">Dépenses annuelle</p>
+                  <p className="text-xs font-medium text-gray-600 mb-1">Dépenses annuelles</p>
                   <p className="text-2xl font-bold text-gray-900">{totalAnnual.toLocaleString()}€</p>
                 </div>
                 <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
@@ -439,7 +439,7 @@ const Dashboard = () => {
 
                 {/* Legend and Details */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Détails par produit d'assurance</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Par produit d'assurance</h3>
                   {insuranceBudget
                     .filter((item) => item.amount > 0)
                     .map((item, index) => (
