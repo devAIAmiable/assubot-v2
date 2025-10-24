@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import type { BackendContractGuarantee, DocumentType, ObligationType } from '../types';
+import type { BackendContractGuarantee, ObligationType } from '../types';
 import { ComposableMap, Geographies, Geography, Graticule, Marker, ZoomableGroup } from 'react-simple-maps';
 import { Disclosure, Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import {
@@ -10,18 +10,16 @@ import {
   FaChevronUp,
   FaClipboardList,
   FaClock,
+  FaEdit,
   FaEnvelope,
   FaExclamationTriangle,
-  FaEye,
   FaFileAlt,
-  FaFilePdf,
   FaGlobe,
   FaPhone,
   FaRobot,
   FaShieldAlt,
   FaTimes,
 } from 'react-icons/fa';
-import { formatDateForDisplayFR, getDisplayValue } from '../utils/dateHelpers';
 import { getContactTypeLabel, getObligationTypeLabel, getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../utils/contract';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -30,11 +28,12 @@ import ContractSummarizationStatus from '../components/ui/ContractSummarizationS
 import GuaranteeDetailModal from '../components/contract/GuaranteeDetailModal';
 import ReactMarkdown from 'react-markdown';
 import { capitalizeFirst } from '../utils/text';
+import { getDisplayValue } from '../utils/dateHelpers';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { selectIsContractProcessing } from '../store/contractProcessingSlice';
 import { useAdminContractSummarize } from '../hooks/useAdminContractSummarize';
 import { useAppSelector } from '../store/hooks';
-import { useContractDownload } from '../hooks/useContractDownload';
+// import { useContractDownload } from '../hooks/useContractDownload';
 import { useGetAdminTemplateContractByIdQuery } from '../store/contractsApi';
 
 function getZoneCoordinates(zoneLabel: string): [number, number] | null {
@@ -275,7 +274,7 @@ const AdminTemplateContractDetails = () => {
   });
 
   // Contract download functionality
-  const { generateDownloadUrls, isGenerating } = useContractDownload();
+  // const { generateDownloadUrls } = useContractDownload();
 
   // Admin contract summarization
   const { summarizeContract, isSummarizing } = useAdminContractSummarize();
@@ -356,7 +355,7 @@ const AdminTemplateContractDetails = () => {
   }
 
   const tabs = [
-    { name: "Vue d'ensemble", icon: FaEye },
+    // { name: "Vue d'ensemble", icon: FaEye },
     { name: 'Garanties', icon: FaShieldAlt },
     { name: 'Exclusions', icon: FaExclamationTriangle },
     { name: 'Zone géographique', icon: FaGlobe },
@@ -386,21 +385,21 @@ const AdminTemplateContractDetails = () => {
     navigate('/app/admin');
   };
 
-  const handleDownload = async (type: DocumentType) => {
-    if (!contractId) return;
+  // const handleDownload = async (type: DocumentType) => {
+  //   if (!contractId) return;
 
-    try {
-      // generateDownloadUrls generates links for all documents but we only need to open the one we clicked on
-      const downloadDocuments = await generateDownloadUrls(contractId);
-      const docDownload = downloadDocuments.find((d) => (d.type as unknown as DocumentType) === type);
-      if (docDownload) {
-        window.open(docDownload.url, '_blank');
-      }
-    } catch (error) {
-      console.error('Failed to download contract documents:', error);
-      // You could add a toast notification here
-    }
-  };
+  //   try {
+  //     // generateDownloadUrls generates links for all documents but we only need to open the one we clicked on
+  //     const downloadDocuments = await generateDownloadUrls(contractId);
+  //     const docDownload = downloadDocuments.find((d) => (d.type as unknown as DocumentType) === type);
+  //     if (docDownload) {
+  //       window.open(docDownload.url, '_blank');
+  //     }
+  //   } catch (error) {
+  //     console.error('Failed to download contract documents:', error);
+  //     // You could add a toast notification here
+  //   }
+  // };
 
   const handleSummarize = async () => {
     if (!contractId) return;
@@ -508,6 +507,15 @@ const AdminTemplateContractDetails = () => {
               {/* Contract Summarization Status */}
               <ContractSummarizationStatus summarizeStatus={contract?.summarizeStatus} />
 
+              {/* Edit button */}
+              <button
+                onClick={() => navigate(`/app/admin/templates/${contractId}/edit`)}
+                className="inline-flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <FaEdit className="h-4 w-4" />
+                <span>Modifier</span>
+              </button>
+
               {/* Summarize button */}
               {contract?.summarizeStatus === 'pending' && (
                 <button
@@ -560,108 +568,6 @@ const AdminTemplateContractDetails = () => {
           <TabPanels className="h-full">
             {/* Add bottom padding for mobile action bar */}
             <div className="pb-20 lg:pb-0">
-              {/* Vue d'ensemble */}
-              <TabPanel className="p-4 sm:p-6">
-                <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
-                  {/* Mon contrat en un coup d'œil */}
-                  <div className="mb-6 sm:mb-8">
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-8 rounded-2xl border border-blue-100">
-                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
-                        <FaShieldAlt className="h-5 w-5 sm:h-6 sm:w-6 text-[#1e51ab] mr-2 sm:mr-3" />
-                        Template de contrat en un coup d'œil
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Bénéficiaire</span>
-                            <span className="font-semibold text-gray-900">{contract.subject || 'Non spécifié'}</span>
-                          </div>
-                          <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Formule</span>
-                            <span className="font-semibold text-gray-900">{contract.formula ? capitalizeFirst(contract.formula) : 'Non spécifiée'}</span>
-                          </div>
-                          <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Prime annuelle</span>
-                            <span className="font-semibold text-[#1e51ab]">{(contract.annualPremiumCents / 100).toFixed(2)} €</span>
-                          </div>
-                        </div>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Version</span>
-                            <span className="font-semibold text-gray-900">{contract.version || 'Non spécifiée'}</span>
-                          </div>
-                          <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Début de contrat</span>
-                            <span className="font-semibold text-gray-900">{contract.startDate ? formatDateForDisplayFR(contract.startDate) : '-'}</span>
-                          </div>
-                          <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Fin de contrat</span>
-                            <span className="font-semibold text-gray-900">{contract.endDate ? formatDateForDisplayFR(contract.endDate) : '-'}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Garanties souscrites + Sidebar */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                    {/* Garanties souscrites (2/3) */}
-                    <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-                      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
-                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Garanties souscrites</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                          {contract.guarantees && contract.guarantees.length > 0 ? (
-                            contract.guarantees.map((garantie) => (
-                              <div key={garantie.id} className="flex items-center space-x-3 p-3 sm:p-4 bg-green-50 rounded-xl border border-green-100">
-                                <FaCheck className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
-                                <span className="font-medium text-gray-900 text-sm sm:text-base">{capitalizeFirst(garantie.title)}</span>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="col-span-2 text-center text-gray-500 py-4">Aucune garantie spécifiée</div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Sidebar (1/3) */}
-                    <div className="space-y-4 sm:space-y-6">
-                      {/* Documents - Chat-style references */}
-                      <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <h3 className="text-lg font-semibold mb-4">Documents</h3>
-                        <div className="space-y-2">
-                          {contract.documents && contract.documents.length > 0 ? (
-                            contract.documents.map((doc) => (
-                              <div key={doc.id} className="bg-white border border-blue-100 rounded-lg">
-                                <div className="flex items-center justify-between p-3 hover:bg-blue-50 transition-colors">
-                                  <div className="flex items-center gap-3">
-                                    <FaFilePdf className="text-red-600 text-lg flex-shrink-0" />
-                                    <div>
-                                      <h4 className="text-sm font-medium">{doc.type}</h4>
-                                      <p className="text-xs text-gray-500">PDF Document</p>
-                                    </div>
-                                  </div>
-                                  <button
-                                    onClick={() => handleDownload(doc.type as unknown as DocumentType)}
-                                    disabled={isGenerating}
-                                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                  >
-                                    {isGenerating ? <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div> : <FaEye />}
-                                    Ouvrir
-                                  </button>
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="text-center text-gray-500 py-4">Aucun document disponible</div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </TabPanel>
-
               {/* Garanties */}
               <TabPanel className="p-4 sm:p-6">
                 <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">

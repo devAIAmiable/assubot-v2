@@ -1,8 +1,8 @@
+import { FaCheck, FaTimes } from 'react-icons/fa';
 import { calculateFinancialSummary, calculateGuaranteeStats, getGuaranteeHighlights } from '../../utils/guaranteeCalculations';
 
 import type { BackendContractGuarantee } from '../../types/contract';
 import ExpandableText from './ExpandableText';
-import { FaCheck } from 'react-icons/fa';
 import React from 'react';
 
 interface GuaranteeOverviewProps {
@@ -13,6 +13,11 @@ const GuaranteeOverview: React.FC<GuaranteeOverviewProps> = ({ guarantee }) => {
   const stats = calculateGuaranteeStats(guarantee);
   const financial = calculateFinancialSummary(guarantee);
   const highlights = getGuaranteeHighlights(guarantee);
+
+  // Separate guarantee-level coverage from service-level coverage
+  const guaranteeCoverage = guarantee.coverages || [];
+  const coveredItems = guaranteeCoverage.filter((c) => c.type === 'covered');
+  const excludedItems = guaranteeCoverage.filter((c) => c.type === 'not_covered');
 
   return (
     <div className="space-y-4">
@@ -55,7 +60,7 @@ const GuaranteeOverview: React.FC<GuaranteeOverviewProps> = ({ guarantee }) => {
 
                 {financial.hasGeneralLimitation && (
                   <div className="text-sm">
-                    <span className="text-gray-600">Limitation: </span>
+                    <span className="text-gray-600">Limite: </span>
                     <ExpandableText text={financial.generalLimitation!} className="text-gray-900 font-medium inline" maxLength={60} />
                   </div>
                 )}
@@ -64,6 +69,49 @@ const GuaranteeOverview: React.FC<GuaranteeOverviewProps> = ({ guarantee }) => {
           )}
         </div>
       </div>
+
+      {/* Guarantee-Level Coverage */}
+      {guaranteeCoverage.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Couverture générale</h3>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Covered Items */}
+            <div className="space-y-3">
+              <h5 className="text-sm font-medium text-green-700 flex items-center">Éléments couverts ({coveredItems.length})</h5>
+              {coveredItems.length > 0 ? (
+                <div className="space-y-2">
+                  {coveredItems.map((coverage, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-100 hover:bg-green-100 transition-colors">
+                      <FaCheck className="text-green-600 mt-0.5 flex-shrink-0 text-sm" />
+                      <ExpandableText text={coverage.description} className="text-gray-900 text-sm leading-relaxed" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500 text-sm">Aucun élément couvert spécifié</div>
+              )}
+            </div>
+
+            {/* Excluded Items */}
+            <div className="space-y-3">
+              <h5 className="text-sm font-medium text-red-700 flex items-center">Éléments non couverts ({excludedItems.length})</h5>
+              {excludedItems.length > 0 ? (
+                <div className="space-y-2">
+                  {excludedItems.map((coverage, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 transition-colors">
+                      <FaTimes className="text-red-600 mt-0.5 flex-shrink-0 text-sm" />
+                      <ExpandableText text={coverage.description} className="text-gray-900 text-sm leading-relaxed" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500 text-sm">Aucune exclusion spécifiée</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Highlights - Compact */}
       {highlights.length > 0 && (

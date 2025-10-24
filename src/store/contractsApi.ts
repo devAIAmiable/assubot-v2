@@ -1,10 +1,12 @@
 import type {
+  BackendContract,
   ContractDownloadResponse,
   ContractInitResponse,
   ContractNotificationRequest,
   DashboardStats,
   DeleteContractResponse,
   DocumentType,
+  EditTemplateContractRequest,
   GetContractByIdResponse,
   GetContractsParams,
   GetContractsResponse,
@@ -277,6 +279,57 @@ export const contractsApi = createApi({
         message: response.data?.error?.message || 'Une erreur est survenue',
         code: response.data?.error?.code || 'UNKNOWN_ERROR',
       }),
+    }),
+
+    // Update admin template contract
+    updateTemplateContract: builder.mutation<ApiResponse<BackendContract>, { id: string; data: EditTemplateContractRequest }>({
+      query: ({ id, data }) => ({
+        url: `/admin/templates/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      transformResponse: (response: ApiResponse<BackendContract>) => response,
+      transformErrorResponse: (response: { status: number; data: ApiErrorResponse }) => ({
+        status: response.status,
+        message: response.data?.error?.message || 'Une erreur est survenue',
+        code: response.data?.error?.code || 'UNKNOWN_ERROR',
+      }),
+      // Optimistically update the contract in the cache
+      async onQueryStarted({ id, data }, { dispatch, queryFulfilled }) {
+        const patchResults: Array<{ undo: () => void }> = [];
+
+        // Update the single contract cache
+        const singleContractPatch = dispatch(
+          contractsApi.util.updateQueryData('getAdminTemplateContractById', id, (draft) => {
+            if (draft) {
+              Object.assign(draft, data);
+            }
+          })
+        );
+        patchResults.push(singleContractPatch);
+
+        // Update the admin template contracts cache
+        const adminTemplatesPatch = dispatch(
+          contractsApi.util.updateQueryData('getAdminTemplateContracts', {}, (draft) => {
+            const contract = draft.data?.find((c) => c.id === id);
+            if (contract) {
+              Object.assign(contract, data);
+            }
+          })
+        );
+        patchResults.push(adminTemplatesPatch);
+
+        try {
+          await queryFulfilled;
+        } catch {
+          // Revert optimistic updates on error
+          patchResults.forEach((patch) => patch.undo());
+        }
+      },
+      invalidatesTags: (_, __, { id }) => [
+        { type: 'Contract', id },
+        { type: 'Contract', id: 'ADMIN_TEMPLATES' },
+      ],
     }),
 
     // Get admin template contracts
@@ -603,6 +656,7 @@ export const {
   useGetAdminTemplateContractByIdQuery,
   useSummarizeAdminTemplateContractMutation,
   useDeleteAdminTemplateContractMutation,
+  useUpdateTemplateContractMutation,
   useGenerateUploadUrlMutation,
   useUploadToAzureMutation,
   useInitContractMutation,

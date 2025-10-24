@@ -73,25 +73,39 @@ const ProfileModule = () => {
     },
   });
 
-  // Check if personal form is valid using form state
-  const isPersonalFormValid = personalForm.formState.isValid;
+  // Check if personal form is valid - simplified approach
+  const isPersonalFormValid = !profileLoading && Object.keys(personalForm.formState.errors).length === 0;
+
+  // Debug form state (remove in production)
+  // console.log('Form state:', {
+  //   isValid: personalForm.formState.isValid,
+  //   errors: personalForm.formState.errors,
+  //   values: personalForm.getValues(),
+  //   isDirty: personalForm.formState.isDirty,
+  //   isSubmitting: personalForm.formState.isSubmitting,
+  //   errorCount: Object.keys(personalForm.formState.errors).length
+  // });
 
   // Update form state when currentUser changes
   useEffect(() => {
     if (currentUser) {
-      personalForm.reset({
+      const personalData = {
         firstName: currentUser.firstName || '',
         lastName: currentUser.lastName || '',
         birthDate: formatDateForInput(currentUser.birthDate),
         gender: currentUser.gender || '',
         professionalCategory: currentUser.professionalCategory || '',
-      });
+      };
 
-      addressForm.reset({
+      personalForm.reset(personalData);
+
+      const addressData = {
         address: currentUser.address || '',
         city: currentUser.city || '',
         zip: currentUser.zip || '',
-      });
+      };
+
+      addressForm.reset(addressData);
     }
   }, [currentUser, personalForm, addressForm]);
 

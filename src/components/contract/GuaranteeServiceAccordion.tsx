@@ -67,7 +67,7 @@ const GuaranteeServiceAccordion: React.FC<GuaranteeServiceAccordionProps> = ({ d
                     )}
                     {detail.deductible && (
                       <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
-                        <div className="text-xs text-amber-600 font-medium mb-1">Deductible</div>
+                        <div className="text-xs text-amber-600 font-medium mb-1">Franchise</div>
                         <div className="text-sm text-amber-900 font-semibold">{formatFinancialValue(detail.deductible)}</div>
                       </div>
                     )}

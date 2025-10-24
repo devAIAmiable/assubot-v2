@@ -149,7 +149,7 @@ const ContractsModule = () => {
         <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Prime annuelle</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">Dépenses annuelles</p>
               <p className="text-3xl font-bold text-gray-900">
                 {(contractStats.totalPremium / 100).toLocaleString('fr-FR', {
                   minimumFractionDigits: 2,
@@ -229,7 +229,7 @@ const ContractsModule = () => {
                 <option value="updatedAt">Date de modification</option>
                 <option value="startDate">Date de début</option>
                 <option value="endDate">Date de fin</option>
-                <option value="annualPremiumCents">Prime annuelle</option>
+                <option value="annualPremiumCents">Dépenses annuelles</option>
                 <option value="name">Nom du contrat</option>
                 <option value="category">Catégorie</option>
                 <option value="status">Statut</option>
@@ -324,7 +324,7 @@ const ContractsModule = () => {
                       <span className="text-sm font-medium text-gray-900">{contract.insurer?.name || 'Non spécifié'}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Prime annuelle</span>
+                      <span className="text-sm text-gray-600">Dépenses annuelles</span>
                       <span className={`text-sm font-bold ${isPending ? 'text-gray-400' : 'text-[#1e51ab]'}`}>
                         {isPending ? '-' : `${getContractListItemPremium(contract).toLocaleString()}€`}
                       </span>
