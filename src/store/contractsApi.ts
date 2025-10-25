@@ -17,6 +17,7 @@ import type {
 } from '../types';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+import type { ContractCategory } from '../types/contract';
 import { config } from '../config/env';
 
 // Define the API response wrapper type based on backend spec
@@ -51,7 +52,7 @@ interface BatchUploadUrlResponse {
 interface AdminUploadUrlRequest {
   insurerId: string;
   version: string;
-  category: 'auto' | 'health' | 'home' | 'moto' | 'electronic_devices' | 'other';
+  category: ContractCategory;
   files: Array<{
     fileName: string;
     contentType: string;
@@ -75,7 +76,7 @@ interface AdminContractInitRequest {
   name: string;
   insurerId: string;
   version: string;
-  category: 'auto' | 'health' | 'home' | 'moto' | 'electronic_devices' | 'other';
+  category: ContractCategory;
   documents: Array<{
     blobPath: string;
     documentType: 'CP' | 'CG' | 'AA' | 'OTHER';
@@ -285,7 +286,7 @@ export const contractsApi = createApi({
     updateTemplateContract: builder.mutation<ApiResponse<BackendContract>, { id: string; data: EditTemplateContractRequest }>({
       query: ({ id, data }) => ({
         url: `/admin/templates/${id}`,
-        method: 'PUT',
+        method: 'PATCH',
         body: data,
       }),
       transformResponse: (response: ApiResponse<BackendContract>) => response,

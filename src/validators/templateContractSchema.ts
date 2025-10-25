@@ -69,8 +69,11 @@ export const cancellationSchema = z.object({
 
 // Contact Schema
 export const contactSchema = z.object({
-  type: z.string().optional(),
-  value: z.string().optional(),
+  type: z.enum(['management', 'assistance', 'emergency']).optional(),
+  name: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+  openingHours: z.string().optional(),
 });
 
 // Other Sections Step Schema

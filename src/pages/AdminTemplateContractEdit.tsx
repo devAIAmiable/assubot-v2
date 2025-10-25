@@ -87,7 +87,10 @@ const AdminTemplateContractEdit: React.FC = () => {
         contacts:
           contract.contacts?.map((c) => ({
             type: c.type,
-            value: c.phone || c.email || '',
+            name: c.name || undefined,
+            phone: c.phone || undefined,
+            email: c.email || undefined,
+            openingHours: c.openingHours || undefined,
           })) || [],
       };
 

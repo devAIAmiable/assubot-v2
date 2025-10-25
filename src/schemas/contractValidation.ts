@@ -1,7 +1,12 @@
 import { z } from 'zod';
 
-// Contract category enum validation
-export const contractCategorySchema = z.enum(['auto', 'health', 'home', 'moto', 'other', 'electronic_devices'], {
+import { ContractCategory } from '../types/contract';
+
+// Get all category values from ContractCategory const object
+const categoryValues = Object.values(ContractCategory) as [string, ...string[]];
+
+// Contract category enum validation - dynamically derived from ContractCategory
+export const contractCategorySchema = z.enum(categoryValues, {
   message: 'La catégorie est obligatoire',
 });
 

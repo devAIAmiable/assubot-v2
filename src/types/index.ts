@@ -42,7 +42,13 @@ export interface EditTemplateContractRequest {
   zones?: Array<{ type?: string; value?: string }>;
   terminations?: Array<{ description?: string }>;
   cancellations?: Array<{ description?: string; deadline?: string }>;
-  contacts?: Array<{ type?: string; value?: string }>;
+  contacts?: Array<{
+    type?: 'management' | 'assistance' | 'emergency';
+    name?: string;
+    phone?: string;
+    email?: string;
+    openingHours?: string;
+  }>;
 }
 
 // Application State Types

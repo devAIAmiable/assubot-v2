@@ -6,7 +6,7 @@ export interface Chat {
   contractIds: string[];
   isDeleted: boolean;
   userId: string;
-  contracts?: Contract[];
+  contracts?: ChatContract[];
   lastMessage?: {
     id: string;
     content: string;
@@ -51,6 +51,14 @@ export interface Contract {
   status: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ChatContract {
+  id: string;
+  chatId: string;
+  contractId: string;
+  createdAt: string;
+  contract: Contract;
 }
 
 export interface CreateChatRequest {

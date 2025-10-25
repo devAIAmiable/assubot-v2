@@ -32,7 +32,7 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
     { name: 'Contacts', icon: FaPhone, color: 'gray' },
   ];
 
-  const renderExclusionItem = (item: { description?: string; type?: string }, index: number) => (
+  const renderExclusionItem = (_item: unknown, index: number) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -55,7 +55,7 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
     </div>
   );
 
-  const renderObligationItem = (item: { description?: string }, index: number) => (
+  const renderObligationItem = (_item: unknown, index: number) => (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
       <textarea
@@ -67,7 +67,7 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
     </div>
   );
 
-  const renderZoneItem = (item: { type?: string; value?: string }, index: number) => (
+  const renderZoneItem = (_item: unknown, index: number) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
@@ -90,7 +90,7 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
     </div>
   );
 
-  const renderTerminationItem = (item: { description?: string }, index: number) => (
+  const renderTerminationItem = (_item: unknown, index: number) => (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
       <textarea
@@ -102,7 +102,7 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
     </div>
   );
 
-  const renderCancellationItem = (item: { description?: string; deadline?: string }, index: number) => (
+  const renderCancellationItem = (_item: unknown, index: number) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -125,24 +125,52 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
     </div>
   );
 
-  const renderContactItem = (item: { type?: string; value?: string }, index: number) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  const renderContactItem = (_item: unknown, index: number) => (
+    <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Type de contact</label>
         <select {...register(`contacts.${index}.type`)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-          <option value="phone">Téléphone</option>
-          <option value="email">Email</option>
-          <option value="address">Adresse</option>
-          <option value="website">Site web</option>
+          <option value="management">Gestion du contrat</option>
+          <option value="assistance">Assistance</option>
+          <option value="emergency">Urgence</option>
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Valeur</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
         <input
-          {...register(`contacts.${index}.value`)}
+          {...register(`contacts.${index}.name`)}
           type="text"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Ex: +33 1 23 45 67 89"
+          placeholder="Ex: Service client"
+        />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+          <input
+            {...register(`contacts.${index}.phone`)}
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Ex: +33 1 23 45 67 89"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input
+            {...register(`contacts.${index}.email`)}
+            type="email"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Ex: contact@assureur.fr"
+          />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Heures d'ouverture</label>
+        <input
+          {...register(`contacts.${index}.openingHours`)}
+          type="text"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Ex: Lun-Ven 9h-18h"
         />
       </div>
     </div>

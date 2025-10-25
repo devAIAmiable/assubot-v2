@@ -24,6 +24,7 @@ import { getContactTypeLabel, getObligationTypeLabel, getStatusColor, getStatusL
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import Avatar from '../components/ui/Avatar';
 import ContractSummarizationStatus from '../components/ui/ContractSummarizationStatus';
 import GuaranteeDetailModal from '../components/contract/GuaranteeDetailModal';
 import ReactMarkdown from 'react-markdown';
@@ -436,7 +437,7 @@ const AdminTemplateContractDetails = () => {
       return (
         <div className="text-center py-12">
           <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
-            <FaRobot className="h-16 w-16 text-[#1e51ab] mx-auto mb-4" />
+            <Avatar size="xl" isAssistant />
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en attente</h4>
             <p className="text-gray-600 leading-relaxed mb-6">
               Les données détaillées de cette section seront disponibles après l'analyse de votre contrat par notre IA. Cliquez sur le bouton ci-dessous pour lancer l'analyse.

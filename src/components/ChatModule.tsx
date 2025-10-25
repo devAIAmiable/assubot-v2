@@ -2,11 +2,12 @@ import './ChatModule.css';
 import 'dayjs/locale/fr';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import type { CreateChatRequest, QuickAction } from '../types/chat';
-import { FaArrowLeft, FaCheck, FaEdit, FaEllipsisV, FaPaperPlane, FaPlus, FaRobot, FaSearch, FaSpinner, FaTimes, FaTrash } from 'react-icons/fa';
+import type { ChatContract, CreateChatRequest, QuickAction } from '../types/chat';
+import { FaArrowLeft, FaCheck, FaEdit, FaPaperPlane, FaPlus, FaSearch, FaSpinner, FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useGetChatMessagesQuery, useGetChatsQuery } from '../store/chatsApi';
 
+import Avatar from './ui/Avatar';
 import ChatListLoader from './ui/ChatListLoader';
 import DocumentReferences from './DocumentReferences';
 import Loader from './ui/Loader';
@@ -64,6 +65,8 @@ const ChatModule: React.FC = () => {
 
   // États locaux
   const [showNewChatModal, setShowNewChatModal] = useState(false);
+  const [currentContractNames, setCurrentContractNames] = useState('');
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [chatToDelete, setChatToDelete] = useState<string | null>(null);
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
@@ -77,6 +80,14 @@ const ChatModule: React.FC = () => {
   // Get quick actions from Redux for current chat
   const quickActions = currentChat ? getChatQuickActions(currentChat.id) : [];
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (currentChat) {
+      setCurrentContractNames(currentChat.contracts?.map((item: ChatContract) => item.contract?.name).join(', ') || '');
+    } else {
+      setCurrentContractNames('');
+    }
+  }, [currentChat]);
 
   // Récupération des contrats pour la sélection
   const { data: contractsData } = useGetContractsQuery({
@@ -291,7 +302,7 @@ const ChatModule: React.FC = () => {
           ) : paginatedChats.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <FaRobot className="text-gray-400 text-2xl" />
+                <Avatar isAssistant />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune conversation</h3>
               <p className="text-gray-500 text-sm mb-4">Commencez une nouvelle conversation pour voir vos discussions ici.</p>
@@ -313,7 +324,7 @@ const ChatModule: React.FC = () => {
                     <div className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <FaRobot className="text-gray-500 text-sm" />
+                          <Avatar isAssistant />
                         </div>
                         <div className="flex-1">
                           <input
@@ -388,7 +399,7 @@ const ChatModule: React.FC = () => {
                                 )}
                               </div>
                               {chat.contracts && chat.contracts.length > 0 && (
-                                <p className="text-xs text-gray-400 truncate mt-1">{chat.contracts.map((contract) => contract.name).join(', ')}</p>
+                                <p className="text-xs text-gray-400 truncate mt-1">{chat.contracts.map((item: ChatContract) => item.contract?.name).join(', ')}</p>
                               )}
                             </div>
 
@@ -474,22 +485,21 @@ const ChatModule: React.FC = () => {
                   <FaArrowLeft />
                 </button>
                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                  <FaRobot className="text-[#1e51ab]" />
+                  {/* <FaRobot className="text-[#1e51ab]" /> */}
+                  <Avatar isLogo />
                 </div>
                 <div>
                   <h1 className="text-white font-medium">{currentChat.title}</h1>
-                  {currentChat.contracts && currentChat.contracts.length > 0 && (
-                    <p className="text-xs text-blue-100 mt-1">{currentChat.contracts.map((contract) => contract.name).join(', ')}</p>
-                  )}
+                  {currentChat.contracts && currentChat.contracts.length > 0 && <p className="text-xs text-blue-100 mt-1">{currentContractNames}</p>}
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="p-2 text-blue-200 hover:text-white hover:bg-blue-600 rounded-full">
+                {/* <button className="p-2 text-blue-200 hover:text-white hover:bg-blue-600 rounded-full">
                   <FaSearch />
                 </button>
                 <button className="p-2 text-blue-200 hover:text-white hover:bg-blue-600 rounded-full">
                   <FaEllipsisV />
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -507,11 +517,7 @@ const ChatModule: React.FC = () => {
                 {!messagesLoading && !isInitialMessageLoad && messages.length > 0
                   ? messages.map((message) => (
                       <div key={message.id} className={`flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        {message.role === 'assistant' && (
-                          <div className="w-8 h-8 bg-[#1e51ab] rounded-full flex items-center justify-center flex-shrink-0">
-                            <FaRobot className="text-white text-sm" />
-                          </div>
-                        )}
+                        {message.role === 'assistant' && <Avatar isAssistant />}
                         <div
                           className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg shadow-sm border ${
                             message.role === 'user' ? 'bg-[#1e51ab] text-white rounded-br-sm' : 'bg-white text-gray-900 rounded-tl-sm border-gray-200'
@@ -606,9 +612,7 @@ const ChatModule: React.FC = () => {
                     messages.length === 0 && (
                       <div className="flex justify-center py-8">
                         <div className="text-center">
-                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <FaRobot className="text-gray-400 text-2xl" />
-                          </div>
+                          <Avatar isAssistant />
                           <p className="text-gray-500 text-sm">Aucun message dans cette conversation</p>
                         </div>
                       </div>
@@ -687,7 +691,7 @@ const ChatModule: React.FC = () => {
           <div className="flex-1 flex items-center justify-center bg-gray-50">
             <div className="text-center max-w-md px-4">
               <div className="w-32 h-32 bg-[#1e51ab] rounded-full flex items-center justify-center mx-auto mb-6">
-                <FaRobot className="text-white text-4xl" />
+                <Avatar isAssistant />
               </div>
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">AI'A</h2>
               <p className="text-gray-600 mb-8 leading-relaxed">

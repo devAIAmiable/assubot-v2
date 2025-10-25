@@ -1,10 +1,11 @@
 import { contractsApi } from '../store/contractsApi';
 import { store } from '../store';
+import type { ContractCategory } from '../types/contract';
 
 export interface AdminContractUploadData {
   insurerId: string;
   version: string;
-  category: 'auto' | 'health' | 'home' | 'moto' | 'electronic_devices' | 'other';
+  category: ContractCategory;
   cgFile: File;
 }
 

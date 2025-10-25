@@ -3,6 +3,7 @@ import { FaInfoCircle } from 'react-icons/fa';
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import Dropdown, { type DropdownOption } from '../../ui/Dropdown';
+import { getAllCategories, getCategoryLabel } from '../../../config/categories';
 
 interface BasicInfoStepProps {
   onNext: () => void;
@@ -14,14 +15,11 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ onNext, onPrevious }) => 
   console.log('🚀 ~ BasicInfoStep ~ control:', control);
   console.log('🚀 ~ BasicInfoStep ~ register:', register('name'));
 
-  const categories: DropdownOption[] = [
-    { value: 'AUTO', label: 'Automobile' },
-    { value: 'HOME', label: 'Habitation' },
-    { value: 'HEALTH', label: 'Santé' },
-    { value: 'LIFE', label: 'Vie' },
-    { value: 'TRAVEL', label: 'Voyage' },
-    { value: 'BUSINESS', label: 'Professionnel' },
-  ];
+  // Get all categories from config and convert to dropdown options
+  const categories: DropdownOption[] = getAllCategories().map((category) => ({
+    value: category,
+    label: getCategoryLabel(category),
+  }));
 
   return (
     <div className="space-y-6">
