@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { FaChevronDown, FaChevronUp, FaExternalLinkAlt, FaEye, FaFilePdf } from 'react-icons/fa';
+import { FaChevronDown, FaChevronUp, FaExternalLinkAlt, FaFilePdf } from 'react-icons/fa';
 import React, { useState } from 'react';
 
 import type { DocumentReference } from '../types/chat';
@@ -74,6 +74,11 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
     return documentRef.pages?.length || 0;
   };
 
+  // Get a unique key for the document (handle null id for internal docs)
+  const getDocumentKey = (documentRef: DocumentReference) => {
+    return documentRef.id || documentRef.url || documentRef.type;
+  };
+
   // Filter out documents with no pages
   const allDocuments = references.filter((doc) => doc.pages && doc.pages.length > 0);
 
@@ -97,16 +102,17 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
 
           <div className="space-y-2">
             {allDocuments.map((documentRef) => {
-              const isExpanded = expandedRefs[documentRef.id] || false;
+              const documentKey = getDocumentKey(documentRef);
+              const isExpanded = expandedRefs[documentKey] || false;
               const referenceCount = getReferenceCount(documentRef);
 
               // Skip documents with no references
               if (referenceCount === 0) return null;
 
               return (
-                <div key={documentRef.id} className="bg-white border border-blue-100 rounded-lg">
+                <div key={documentKey} className="bg-white border border-blue-100 rounded-lg">
                   {/* Document Header */}
-                  <div className="flex items-center justify-between p-3 cursor-pointer hover:bg-blue-50 transition-colors" onClick={() => toggleExpanded(documentRef.id)}>
+                  <div className="flex items-center justify-between p-3 cursor-pointer hover:bg-blue-50 transition-colors" onClick={() => toggleExpanded(documentKey)}>
                     <div className="flex items-center gap-3">
                       <FaFilePdf className="text-red-600 text-sm flex-shrink-0" />
                       <div>
@@ -118,7 +124,7 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <button
+                      {/* <button
                         onClick={(e) => {
                           e.stopPropagation();
                           openPdfViewer(documentRef);
@@ -127,7 +133,7 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
                       >
                         <FaEye className="text-xs" />
                         Ouvrir
-                      </button>
+                      </button> */}
 
                       <div className="text-gray-400">{isExpanded ? <FaChevronUp className="text-xs" /> : <FaChevronDown className="text-xs" />}</div>
                     </div>
@@ -199,7 +205,7 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
           onClose={closePdfViewer}
           title={getDocumentName(pdfViewer.documentRef.type)}
           documentReference={pdfViewer.documentRef}
-          contractId={pdfViewer.documentRef.contractId}
+          contractId={pdfViewer.documentRef.contractId || ''}
           highlightPage={pdfViewer.highlightPage}
           highlightCoords={pdfViewer.highlightCoords}
         />

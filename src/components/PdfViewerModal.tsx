@@ -18,7 +18,7 @@ interface PdfViewerModalProps {
   onClose: () => void;
   title: string;
   documentReference: DocumentReference;
-  contractId: string;
+  contractId?: string;
   highlightPage?: number;
   highlightCoords?: [number, number, number, number];
 }
