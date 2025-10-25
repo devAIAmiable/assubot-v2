@@ -55,6 +55,9 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
       CP: 'Conditions Particulières',
       CG: 'Conditions Générales',
       AA: 'Annexe Assurance',
+      code_mutualite: 'Code de la Mutualité',
+      code_assurance: "Code de l'Assurance",
+      code_securite_sociale: 'Code de la Sécurité Sociale',
       OTHER: 'Document',
     };
 

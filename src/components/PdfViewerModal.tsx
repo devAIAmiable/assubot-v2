@@ -32,7 +32,7 @@ interface HighlightRect {
 }
 
 const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, title, documentReference, contractId, highlightPage, highlightCoords }) => {
-  const { downloadDocumentByType, isDownloading } = useDocumentDownloadByType();
+  const { downloadDocumentByType, downloadInternalDocument, isDownloading } = useDocumentDownloadByType();
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,25 +73,33 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, title,
       setLoading(true);
       setError(null);
 
-      // Use the new API to download document by type
-      // Use contractId from document reference
-      const contractIdToUse = documentReference.contractId;
-      const documentData = await downloadDocumentByType(contractIdToUse, documentReference.type as 'CP' | 'CG' | 'OTHER');
-      setPdfUrl(documentData.url);
+      // Check if this is an internal document (id is null and url is present)
+      const isInternalDocument = !documentReference.id && !documentReference.contractId && documentReference.url;
+
+      if (isInternalDocument && documentReference.url) {
+        // Use the internal document download API
+        const documentData = await downloadInternalDocument(documentReference.url, documentReference.type);
+        setPdfUrl(documentData.url);
+      } else {
+        // Use the contract document download API
+        const contractIdToUse = documentReference.contractId || contractId;
+        const documentData = await downloadDocumentByType(contractIdToUse!, documentReference.type as 'CP' | 'CG' | 'OTHER');
+        setPdfUrl(documentData.url);
+      }
     } catch (err) {
       console.error('Error loading PDF:', err);
       setError('Erreur lors du chargement du document');
     } finally {
       setLoading(false);
     }
-  }, [documentReference.contractId, documentReference.type, downloadDocumentByType]);
+  }, [documentReference.id, documentReference.contractId, documentReference.url, documentReference.type, contractId, downloadDocumentByType, downloadInternalDocument]);
 
   // Load PDF document when modal opens
   useEffect(() => {
-    if (isOpen && contractId) {
+    if (isOpen && (contractId || (!documentReference.id && !documentReference.contractId && documentReference.url))) {
       loadPdfDocument();
     }
-  }, [isOpen, contractId, documentReference.id, loadPdfDocument]);
+  }, [isOpen, contractId, documentReference.id, documentReference.contractId, documentReference.url, loadPdfDocument]);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);

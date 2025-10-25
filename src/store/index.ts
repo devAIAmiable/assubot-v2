@@ -13,6 +13,7 @@ import { creditPacksApi } from './creditPacksApi';
 import { creditTransactionsApi } from './creditTransactionsApi';
 import { generalTermsApi } from './generalTermsApi';
 import { insurersApi } from './insurersApi';
+import { internalDocumentApi } from './internalDocumentApi';
 import { notificationsApi } from './notificationsApi';
 import storage from 'redux-persist/lib/storage';
 import userReducer from './userSlice';
@@ -44,6 +45,7 @@ const rootReducer = combineReducers({
   [creditTransactionsApi.reducerPath]: creditTransactionsApi.reducer,
   [generalTermsApi.reducerPath]: generalTermsApi.reducer,
   [insurersApi.reducerPath]: insurersApi.reducer,
+  [internalDocumentApi.reducerPath]: internalDocumentApi.reducer,
   [notificationsApi.reducerPath]: notificationsApi.reducer,
 });
 
@@ -64,6 +66,7 @@ export const store = configureStore({
       creditTransactionsApi.middleware,
       generalTermsApi.middleware,
       insurersApi.middleware,
+      internalDocumentApi.middleware,
       notificationsApi.middleware
     ),
 });

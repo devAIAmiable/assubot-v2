@@ -26,9 +26,10 @@ export interface DocumentPageReference {
 }
 
 export interface DocumentReference {
-  id: string;
-  contractId: string;
+  id: string | null;
+  contractId: string | null;
   type: string;
+  url?: string;
   pages: DocumentPageReference[];
 }
 
