@@ -70,7 +70,7 @@ const AdminContractUpload: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-3">
                   <Avatar isAssistant size="md" />
-                  <span className="text-gray-700">AssuBot analysera automatiquement vos documents</span>
+                  <span className="text-gray-700">AI'A analysera automatiquement vos documents</span>
                 </div>
               </div>
               <p className="mt-4 text-gray-600 text-sm leading-relaxed">
