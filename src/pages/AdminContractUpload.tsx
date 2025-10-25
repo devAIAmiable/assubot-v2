@@ -1,10 +1,11 @@
-import { FaBell, FaCheck, FaClock, FaRobot, FaUserShield } from 'react-icons/fa';
+import { FaBell, FaCheck, FaClock, FaUserShield } from 'react-icons/fa';
 import { useCallback, useState } from 'react';
 
 import AdminContractForm from '../components/contract/AdminContractForm';
 import AdminGuard from '../components/AdminGuard';
 import { adminContractUploadService, type AdminContractUploadData } from '../services/adminContractUploadService';
 import { motion } from 'framer-motion';
+import Avatar from '../components/ui/Avatar';
 
 const AdminContractUpload: React.FC = () => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -68,7 +69,7 @@ const AdminContractUpload: React.FC = () => {
                   <span className="text-gray-700">Vous serez notifié dès que votre contrat sera disponible</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <FaRobot className="text-xl text-blue-500 w-5 flex-shrink-0 mx-2" />
+                  <Avatar isAssistant size="md" />
                   <span className="text-gray-700">AssuBot analysera automatiquement vos documents</span>
                 </div>
               </div>

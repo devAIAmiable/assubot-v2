@@ -126,7 +126,7 @@ const ContractsModule = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">Total des contrats</p>
-              <p className="text-3xl font-bold text-gray-900">{isFetching ? '...' : contractStats.total}</p>
+              <p className="text-2xl font-bold text-gray-900">{isFetching ? '...' : contractStats.total}</p>
             </div>
             <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
               <FaFileContract className="h-6 w-6 text-[#1e51ab]" />
@@ -138,7 +138,7 @@ const ContractsModule = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">Contrat(s) actif(s)</p>
-              <p className="text-3xl font-bold text-green-600">{contractStats.active}</p>
+              <p className="text-2xl font-bold text-green-600">{contractStats.active}</p>
             </div>
             <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
               <FaFileContract className="h-6 w-6 text-green-600" />
@@ -150,13 +150,7 @@ const ContractsModule = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">Dépenses annuelles</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {(contractStats.totalPremium / 100).toLocaleString('fr-FR', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                €
-              </p>
+              <p className="text-2xl font-bold text-gray-900">{(contractStats.totalPremium / 100).toLocaleString('fr-FR')}€</p>
             </div>
             <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
               <FaEuroSign className="h-6 w-6 text-purple-600" />
@@ -168,7 +162,7 @@ const ContractsModule = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">Expiré(s)</p>
-              <p className="text-3xl font-bold text-red-600">{contractStats.expired}</p>
+              <p className="text-2xl font-bold text-red-600">{contractStats.expired}</p>
             </div>
             <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
               <FaCalendarAlt className="h-6 w-6 text-red-600" />

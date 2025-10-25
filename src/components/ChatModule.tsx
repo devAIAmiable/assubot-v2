@@ -301,9 +301,7 @@ const ChatModule: React.FC = () => {
             </div>
           ) : paginatedChats.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <Avatar isAssistant />
-              </div>
+              <Avatar isAssistant />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune conversation</h3>
               <p className="text-gray-500 text-sm mb-4">Commencez une nouvelle conversation pour voir vos discussions ici.</p>
               <button onClick={() => setShowNewChatModal(true)} className="px-4 py-2 bg-[#1e51ab] text-white rounded-lg hover:bg-[#1a4599] transition-colors text-sm">
@@ -690,9 +688,7 @@ const ChatModule: React.FC = () => {
         ) : (
           <div className="flex-1 flex items-center justify-center bg-gray-50">
             <div className="text-center max-w-md px-4">
-              <div className="w-32 h-32 bg-[#1e51ab] rounded-full flex items-center justify-center mx-auto mb-6">
-                <Avatar isAssistant />
-              </div>
+              <Avatar isAssistant size="xl" />
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">AI'A</h2>
               <p className="text-gray-600 mb-8 leading-relaxed">
                 Commencez une conversation avec AI'A.

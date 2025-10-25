@@ -1,7 +1,8 @@
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
-import { FaBell, FaCheck, FaClock, FaRobot, FaTimes } from 'react-icons/fa';
+import { FaBell, FaCheck, FaClock, FaTimes } from 'react-icons/fa';
 import { Fragment, useCallback, useState } from 'react';
 
+import Avatar from './ui/Avatar';
 import ContractCreationForm from './contract/ContractCreationForm';
 import type { ContractFormData } from '../types';
 import React from 'react';
@@ -101,7 +102,7 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
                           <span className="text-gray-700">Vous serez notifié dès que votre contrat sera disponible</span>
                         </div>
                         <div className="flex items-center space-x-3">
-                          <FaRobot className="text-xl text-blue-500 w-5 flex-shrink-0 mx-2" />
+                          <Avatar isAssistant />
                           <span className="text-gray-700">AssuBot analysera automatiquement vos documents</span>
                         </div>
                       </div>

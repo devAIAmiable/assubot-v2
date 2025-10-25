@@ -1,6 +1,7 @@
 import type { ComparisonCategory, ComparisonOffer } from '../../types/comparison';
-import { FaChevronLeft, FaChevronRight, FaRobot, FaStar } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaStar } from 'react-icons/fa';
 
+import Avatar from '../ui/Avatar';
 import React from 'react';
 import { motion } from 'framer-motion';
 
@@ -302,7 +303,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
       {/* AI Questions Section - TODO: Phase 2 */}
       <div className="bg-gray-50 rounded-lg p-6 mt-8">
         <div className="flex items-center mb-4">
-          <FaRobot className="h-6 w-6 text-[#1e51ab] mr-2" />
+          <Avatar isAssistant size="md" />
           <h3 className="text-lg font-semibold text-gray-900">Questions IA</h3>
           <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Bientôt disponible</span>
         </div>

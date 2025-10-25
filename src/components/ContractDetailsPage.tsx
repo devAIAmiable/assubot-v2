@@ -18,7 +18,6 @@ import {
   FaFilePdf,
   FaGlobe,
   FaPhone,
-  FaRobot,
   FaShieldAlt,
   FaTimes,
 } from 'react-icons/fa';
@@ -451,7 +450,7 @@ const ContractDetailsPage = () => {
         <div className="text-center py-12">
           <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
             <div className="relative mb-6">
-              <FaRobot className="h-16 w-16 text-[#1e51ab] mx-auto animate-pulse" />
+              <Avatar isAssistant size="xl" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-[#1e51ab]"></div>
               </div>
@@ -469,7 +468,6 @@ const ContractDetailsPage = () => {
       return (
         <div className="text-center py-12">
           <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
-            <FaRobot className="h-16 w-16 text-[#1e51ab] mx-auto mb-4" />
             <Avatar isAssistant />
             <p className="text-gray-600 leading-relaxed mb-6">
               Les données détaillées de cette section seront disponibles après l'analyse de votre contrat par notre IA. Cliquez sur le bouton ci-dessous pour lancer l'analyse.
@@ -486,7 +484,6 @@ const ContractDetailsPage = () => {
                 </>
               ) : (
                 <>
-                  <FaRobot className="h-5 w-5" />
                   <span>Lancer l'analyse</span>
                 </>
               )}
@@ -1166,7 +1163,7 @@ const ContractDetailsPage = () => {
           disabled={isSummarizing || contract?.summarizeStatus !== 'pending'}
           className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <FaRobot />
+          <Avatar isAssistant />
           <span className="text-sm font-medium">Résumer</span>
         </button>
         <button onClick={handleEdit} className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg">

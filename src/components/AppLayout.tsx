@@ -1,4 +1,4 @@
-import { FaBell, FaBrain, FaChartLine, FaCog, FaCoins, FaFolder, FaPlay, FaQuestionCircle, FaRobot, FaSignOutAlt, FaUser } from 'react-icons/fa';
+import { FaBell, FaBrain, FaChartLine, FaCog, FaCoins, FaFolder, FaPlay, FaQuestionCircle, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import { Fragment, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Avatar from './ui/Avatar';
 import type { DropdownOption } from './ui/Dropdown';
 import VideoModal from './ui/VideoModal';
+import { VscRobot } from 'react-icons/vsc';
 import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
@@ -52,7 +53,7 @@ const AppLayout = () => {
     {
       name: "AI'A",
       path: '/app/chatbot',
-      icon: FaRobot,
+      icon: VscRobot,
       current: getCurrentModule() === 'chatbot',
     },
     {

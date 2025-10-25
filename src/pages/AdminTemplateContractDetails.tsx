@@ -16,7 +16,6 @@ import {
   FaFileAlt,
   FaGlobe,
   FaPhone,
-  FaRobot,
   FaShieldAlt,
   FaTimes,
 } from 'react-icons/fa';
@@ -419,7 +418,7 @@ const AdminTemplateContractDetails = () => {
         <div className="text-center py-12">
           <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
             <div className="relative mb-6">
-              <FaRobot className="h-16 w-16 text-[#1e51ab] mx-auto animate-pulse" />
+              <Avatar size="xl" isAssistant />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-[#1e51ab]"></div>
               </div>
@@ -454,7 +453,6 @@ const AdminTemplateContractDetails = () => {
                 </>
               ) : (
                 <>
-                  <FaRobot className="h-5 w-5" />
                   <span>Lancer l'analyse</span>
                 </>
               )}
