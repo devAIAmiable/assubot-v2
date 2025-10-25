@@ -420,7 +420,7 @@ const AdminTemplateContractDetails = () => {
             <div className="relative mb-6">
               <Avatar size="xl" isAssistant />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-[#1e51ab]"></div>
+                <div className="animate-spin rounded-full h-25 w-25 border-t-2 border-b-2 border-[#1e51ab]"></div>
               </div>
             </div>
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en cours</h4>
