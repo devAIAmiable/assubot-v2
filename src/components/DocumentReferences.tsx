@@ -16,7 +16,7 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
     isOpen: boolean;
     documentRef: DocumentReference | null;
     highlightPage?: number;
-    highlightCoords?: [number, number, number, number];
+    highlightCoords?: [number, number, number, number][];
   }>({
     isOpen: false,
     documentRef: null,
@@ -33,7 +33,7 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
     }));
   };
 
-  const openPdfViewer = (documentRef: DocumentReference, page?: number, coords?: [number, number, number, number]) => {
+  const openPdfViewer = (documentRef: DocumentReference, page?: number, coords?: [number, number, number, number][]) => {
     setPdfViewer({
       isOpen: true,
       documentRef: documentRef,
@@ -71,7 +71,28 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
   };
 
   const getReferenceCount = (documentRef: DocumentReference) => {
-    return documentRef.pages?.length || 0;
+    // Count unique pages, not total coordinate regions
+    const uniquePages = new Set(documentRef.pages?.map((p) => p.page) || []);
+    return uniquePages.size;
+  };
+
+  // Group pages by page number
+  const groupPagesByPageNumber = (pages: DocumentReference['pages']) => {
+    if (!pages) return [];
+
+    const grouped = new Map<number, typeof pages>();
+
+    pages.forEach((page) => {
+      if (!grouped.has(page.page)) {
+        grouped.set(page.page, []);
+      }
+      grouped.get(page.page)!.push(page);
+    });
+
+    return Array.from(grouped.entries()).map(([pageNumber, regions]) => ({
+      page: pageNumber,
+      regions: regions,
+    }));
   };
 
   // Get a unique key for the document (handle null id for internal docs)
@@ -151,37 +172,45 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
                       >
                         <div className="border-t border-blue-100 p-3 bg-blue-25">
                           <div className="space-y-2">
-                            {documentRef.pages?.map((ref, refIndex) => (
-                              <div
-                                key={`${documentRef.id}-${refIndex}`}
-                                className="flex items-center justify-between p-2 bg-white border border-blue-100 rounded hover:bg-blue-50 transition-colors"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <span className="text-xs font-medium text-blue-700">{refIndex + 1}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-sm text-gray-700">{getPageDisplayText(ref.page)}</span>
-                                    {ref.coordinates && <span className="text-xs text-gray-500 ml-2">Zone surlignée</span>}
-                                  </div>
-                                </div>
-
-                                <button
-                                  onClick={() =>
-                                    openPdfViewer(documentRef, ref.page, [
-                                      parseFloat(ref.coordinates.x0),
-                                      parseFloat(ref.coordinates.y0),
-                                      parseFloat(ref.coordinates.x1),
-                                      parseFloat(ref.coordinates.y1),
-                                    ])
-                                  }
-                                  className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                            {groupPagesByPageNumber(documentRef.pages).map((groupedPage, refIndex) => {
+                              const regionCount = groupedPage.regions.length;
+                              return (
+                                <div
+                                  key={`${documentRef.id}-page-${groupedPage.page}`}
+                                  className="flex items-center justify-between p-2 bg-white border border-blue-100 rounded hover:bg-blue-50 transition-colors"
                                 >
-                                  <FaExternalLinkAlt className="text-xs" />
-                                  Voir
-                                </button>
-                              </div>
-                            ))}
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                      <span className="text-xs font-medium text-blue-700">{refIndex + 1}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-sm text-gray-700">{getPageDisplayText(groupedPage.page)}</span>
+                                      {regionCount > 1 && <span className="text-xs text-gray-500 ml-2">{regionCount} zones surlignées</span>}
+                                      {regionCount === 1 && <span className="text-xs text-gray-500 ml-2">Zone surlignée</span>}
+                                    </div>
+                                  </div>
+
+                                  <button
+                                    onClick={() => {
+                                      const allCoords = groupedPage.regions.map(
+                                        (region) =>
+                                          [
+                                            parseFloat(region.coordinates.x0),
+                                            parseFloat(region.coordinates.y0),
+                                            parseFloat(region.coordinates.x1),
+                                            parseFloat(region.coordinates.y1),
+                                          ] as [number, number, number, number]
+                                      );
+                                      openPdfViewer(documentRef, groupedPage.page, allCoords);
+                                    }}
+                                    className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                                  >
+                                    <FaExternalLinkAlt className="text-xs" />
+                                    Voir
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       </motion.div>

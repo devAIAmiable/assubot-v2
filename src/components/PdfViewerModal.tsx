@@ -20,7 +20,7 @@ interface PdfViewerModalProps {
   documentReference: DocumentReference;
   contractId?: string;
   highlightPage?: number;
-  highlightCoords?: [number, number, number, number];
+  highlightCoords?: [number, number, number, number][];
 }
 
 interface HighlightRect {
@@ -56,15 +56,14 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, title,
   // Process highlights when coordinates are provided
   useEffect(() => {
     if (highlightCoords && highlightPage) {
-      setHighlights([
-        {
-          x: highlightCoords[0],
-          y: highlightCoords[1],
-          width: highlightCoords[2] - highlightCoords[0],
-          height: highlightCoords[3] - highlightCoords[1],
-          page: highlightPage,
-        },
-      ]);
+      const newHighlights = highlightCoords.map((coords) => ({
+        x: coords[0],
+        y: coords[1],
+        width: coords[2] - coords[0],
+        height: coords[3] - coords[1],
+        page: highlightPage,
+      }));
+      setHighlights(newHighlights);
     }
   }, [highlightCoords, highlightPage]);
 
