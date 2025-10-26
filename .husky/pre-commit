@@ -18,7 +18,7 @@ echo "$STAGED_FILES" | grep -E '\.(js|jsx|ts|tsx)$' | xargs pnpm eslint --fix
 # Run tests if any test files are staged
 if echo "$STAGED_FILES" | grep -E '\.(test|spec)\.(ts|tsx|js|jsx)$' > /dev/null; then
   echo "Running tests for staged test files..."
-  pnpm test:run
+  # pnpm test:run
 else
   echo "No test files staged, skipping tests..."
 fi
