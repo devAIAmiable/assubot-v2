@@ -424,7 +424,7 @@ const AdminTemplateContractDetails = () => {
               </div>
             </div>
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en cours</h4>
-            <p className="text-gray-600 leading-relaxed">AI'A analyse votre contrat et génère les informations détaillées...</p>
+            <p className="text-gray-600 leading-relaxed">J'ai analyse ton contrat et génère les informations détaillées...</p>
             <p className="text-sm text-gray-500 mt-2">Cela peut prendre quelques instants</p>
           </div>
         </div>
