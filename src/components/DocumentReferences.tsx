@@ -173,7 +173,7 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
                         <div className="border-t border-blue-100 p-3 bg-blue-25">
                           <div className="space-y-2">
                             {groupPagesByPageNumber(documentRef.pages).map((groupedPage, refIndex) => {
-                              const regionCount = groupedPage.regions.length;
+                              // const regionCount = groupedPage.regions.length;
                               return (
                                 <div
                                   key={`${documentRef.id}-page-${groupedPage.page}`}
@@ -185,8 +185,8 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
                                     </div>
                                     <div>
                                       <span className="text-sm text-gray-700">{getPageDisplayText(groupedPage.page)}</span>
-                                      {regionCount > 1 && <span className="text-xs text-gray-500 ml-2">{regionCount} zones surlignées</span>}
-                                      {regionCount === 1 && <span className="text-xs text-gray-500 ml-2">Zone surlignée</span>}
+                                      {/* {regionCount > 1 && <span className="text-xs text-gray-500 ml-2">{regionCount} zones surlignées</span>}
+                                      {regionCount === 1 && <span className="text-xs text-gray-500 ml-2">Zone surlignée</span>} */}
                                     </div>
                                   </div>
 
