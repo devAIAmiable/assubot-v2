@@ -424,7 +424,7 @@ const AdminTemplateContractDetails = () => {
               </div>
             </div>
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en cours</h4>
-            <p className="text-gray-600 leading-relaxed">Notre IA analyse votre contrat et génère les informations détaillées...</p>
+            <p className="text-gray-600 leading-relaxed">AI'A analyse votre contrat et génère les informations détaillées...</p>
             <p className="text-sm text-gray-500 mt-2">Cela peut prendre quelques instants</p>
           </div>
         </div>
@@ -438,9 +438,7 @@ const AdminTemplateContractDetails = () => {
           <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
             <Avatar size="xl" isAssistant />
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en attente</h4>
-            <p className="text-gray-600 leading-relaxed mb-6">
-              Les données détaillées de cette section seront disponibles après l'analyse de votre contrat par notre IA. Cliquez sur le bouton ci-dessous pour lancer l'analyse.
-            </p>
+            <p className="text-gray-600 leading-relaxed mb-6">Je t’affiche les détails dès que j’ai analysé ton contrat. Clique sur « Lancer l’analyse » pour démarrer</p>
             <button
               onClick={handleSummarize}
               disabled={isSummarizing}

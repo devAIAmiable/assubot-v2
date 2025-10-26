@@ -25,7 +25,7 @@ const InteractiveDemo: React.FC = () => {
     {
       title: 'Analyse du contrat',
       subtitle: 'Extraction automatique',
-      description: 'Notre IA analyse et extrait les informations clés',
+      description: "AI'A analyse et extrait les informations clés",
       mockup: (
         <div className="bg-white rounded-lg p-8 shadow-lg">
           <div className="flex items-center gap-6 mb-6">

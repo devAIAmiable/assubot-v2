@@ -1,9 +1,10 @@
 import { FaCalculator, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { getComparisonCategoryIcon } from '../../config/categories';
 
 import type { ComparisonCategory } from '../../types/comparison';
 import React from 'react';
 import type { User } from '../../store/userSlice';
+import { getComparisonCategoryIcon } from '../../config/categories';
+import { getInsurerLogo } from '../../utils/insurerLogo';
 import { motion } from 'framer-motion';
 import { useComparisons } from '../../hooks/useComparisons';
 
@@ -42,19 +43,6 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, history
   };
 
   // Helper function to get insurer logo
-  const getInsurerLogo = (insurerName: string) => {
-    const logoMap: { [key: string]: string } = {
-      'Direct Assurance': '/insurances/direct.png',
-      Allianz: '/insurances/allianz.png',
-      MAIF: '/insurances/maif.png',
-      AXA: '/insurances/axa.png',
-      Generali: '/insurances/generali.png',
-      Groupama: '/insurances/groupama.png',
-      MACIF: '/insurances/macif.png',
-      kenko: '/insurances/kenko.png',
-    };
-    return logoMap[insurerName] || null;
-  };
 
   return (
     <div className="space-y-8">

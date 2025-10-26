@@ -3,6 +3,7 @@ import { FaChevronLeft, FaChevronRight, FaEye, FaStar } from 'react-icons/fa';
 
 import Avatar from '../ui/Avatar';
 import React from 'react';
+import { getInsurerLogo } from '../../utils/insurerLogo';
 import { motion } from 'framer-motion';
 
 interface Filters {
@@ -58,18 +59,6 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   setCurrentPage,
 }) => {
   // Helper function to get insurer logo
-  const getInsurerLogo = (insurerName: string) => {
-    const logoMap: { [key: string]: string } = {
-      'Direct Assurance': '/insurances/direct.png',
-      Allianz: '/insurances/allianz.png',
-      MAIF: '/insurances/maif.png',
-      AXA: '/insurances/axa.png',
-      Generali: '/insurances/generali.png',
-      Groupama: '/insurances/groupama.png',
-      MACIF: '/insurances/macif.png',
-    };
-    return logoMap[insurerName] || null;
-  };
 
   // Render star rating
   const renderStars = (rating: number) => {
