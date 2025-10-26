@@ -37,7 +37,7 @@ const ComparateurModule = () => {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isFilteringResults, setIsFilteringResults] = useState(false);
   const [comparisonResults] = useState<ComparisonOffer[]>([]);
-  const [askedQuestions] = useState<AskedQuestion[]>([]);
+  const [askedQuestions, setAskedQuestions] = useState<AskedQuestion[]>([]);
   const [comparisonError] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     priceRange: [0, 200],
@@ -213,7 +213,7 @@ const ComparateurModule = () => {
       timestamp: new Date(),
     };
 
-    setAskedQuestions((prev) => [...prev, newQuestion]);
+    setAskedQuestions((prev: AskedQuestion[]) => [...prev, newQuestion]);
 
     // Simulate AI processing
     setTimeout(() => {

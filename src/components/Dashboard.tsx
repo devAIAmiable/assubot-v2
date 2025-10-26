@@ -44,6 +44,7 @@ const Dashboard = () => {
     expiring:
       dashboardStats?.expiringSoonContracts ||
       contracts.filter((c) => {
+        if (!c.endDate) return false;
         const endDate = new Date(c.endDate);
         const now = new Date();
         const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));

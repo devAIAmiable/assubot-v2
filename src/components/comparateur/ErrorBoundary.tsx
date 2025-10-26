@@ -1,4 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -52,7 +53,7 @@ class ComparisonErrorBoundary extends Component<Props, State> {
                   Réessayer
                 </button>
               </div>
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {import.meta.env.DEV && this.state.error && (
                 <details className="mt-4 p-3 bg-gray-100 rounded text-xs">
                   <summary className="cursor-pointer font-medium">Détails de l'erreur</summary>
                   <pre className="mt-2 whitespace-pre-wrap">

@@ -6,15 +6,21 @@ import { contractPreferenceFields, preferenceFields } from './commonFields';
 describe('Auto Form Definition Structure', () => {
   describe('Form Definition Composition', () => {
     it('should include auto-specific fields', () => {
-      expect(autoFormDefinition).toContain(...autoSpecificFields);
+      autoSpecificFields.forEach((field) => {
+        expect(autoFormDefinition).toContainEqual(field);
+      });
     });
 
     it('should include contract preference fields', () => {
-      expect(autoFormDefinition).toContain(...contractPreferenceFields);
+      contractPreferenceFields.forEach((field) => {
+        expect(autoFormDefinition).toContainEqual(field);
+      });
     });
 
     it('should include general preference fields', () => {
-      expect(autoFormDefinition).toContain(...preferenceFields);
+      preferenceFields.forEach((field) => {
+        expect(autoFormDefinition).toContainEqual(field);
+      });
     });
 
     it('should have all required field types', () => {

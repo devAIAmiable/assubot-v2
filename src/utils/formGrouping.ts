@@ -48,11 +48,11 @@ export function getVisibleSubsectionGroups(fields: FormField[], formData: Record
     const dependencyValue = formData?.[dependencyField];
 
     if (equals !== undefined) {
-      return dependencyValue === equals;
+      return String(dependencyValue) === String(equals);
     }
 
     if (inArray !== undefined) {
-      return Array.isArray(inArray) && inArray.includes(dependencyValue);
+      return Array.isArray(inArray) && inArray.some((val) => String(val) === String(dependencyValue));
     }
 
     return true;
@@ -97,11 +97,11 @@ export function shouldShowField(field: FormField, formData: Record<string, unkno
   const dependencyValue = formData?.[dependencyField];
 
   if (equals !== undefined) {
-    return dependencyValue === equals;
+    return String(dependencyValue) === String(equals);
   }
 
   if (inArray !== undefined) {
-    return Array.isArray(inArray) && inArray.includes(dependencyValue);
+    return Array.isArray(inArray) && inArray.some((val) => String(val) === String(dependencyValue));
   }
 
   return true;
@@ -150,7 +150,7 @@ export function validateField(field: FormField, value: unknown): string | null {
       return `Maximum ${maxLength} caractères autorisés`;
     }
 
-    if (pattern && !new RegExp(pattern).test(value)) {
+    if (pattern && typeof pattern === 'string' && !new RegExp(pattern).test(value)) {
       return 'Format invalide';
     }
   }

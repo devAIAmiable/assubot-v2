@@ -41,12 +41,20 @@ export const ContactType = {
   EMERGENCY: 'emergency',
 } as const;
 
+export const ZoneType = {
+  COUNTRY: 'country',
+  ZONE: 'zone',
+  REGION: 'region',
+  CITY: 'city',
+} as const;
+
 // Type definitions for the constants
 export type ContractCategory = (typeof ContractCategory)[keyof typeof ContractCategory];
 export type ContractStatus = (typeof ContractStatus)[keyof typeof ContractStatus];
 export type DocumentType = (typeof DocumentType)[keyof typeof DocumentType];
 export type ObligationType = (typeof ObligationType)[keyof typeof ObligationType];
 export type ContactType = (typeof ContactType)[keyof typeof ContactType];
+export type ZoneType = (typeof ZoneType)[keyof typeof ZoneType];
 
 // Core contract model (matches backend response exactly)
 export interface Contract {
@@ -132,6 +140,7 @@ export interface ContractObligation {
 export interface ContractZone {
   id: string;
   contractId: string;
+  type: ZoneType;
   label: string;
   coordinates?: Record<string, unknown>; // JSON data for coordinates
   createdAt: Date;
@@ -233,12 +242,16 @@ export interface ContractFormData {
   category: ContractCategory;
   subject?: string;
   insurerId?: string;
+  insurerName?: string;
   version?: string;
   isTemplate?: boolean;
   formula?: string;
   startDate?: Date;
   endDate?: Date;
   annualPremiumCents: number;
+  monthlyPremiumCents?: number;
+  tacitRenewal?: boolean;
+  cancellationDeadline?: string;
   documents?: File[];
 }
 
@@ -363,6 +376,7 @@ export interface GetContractByIdResponse {
   startDate?: string;
   endDate?: string;
   annualPremiumCents: number;
+  tacitRenewal?: boolean;
   status: ContractStatus;
   createdAt: string;
   updatedAt: string;
@@ -467,8 +481,8 @@ export interface BackendContractObligation {
 // Backend zone model
 export interface BackendContractZone {
   id: string;
+  type: ZoneType;
   label: string;
-  type: 'country' | 'zone';
   coordinates?: Record<string, unknown>;
 }
 

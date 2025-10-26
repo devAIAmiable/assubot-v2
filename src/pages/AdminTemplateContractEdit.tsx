@@ -14,7 +14,6 @@ import { showToast } from '../components/ui/Toast';
 import BasicInfoStep from '../components/admin/edit-steps/BasicInfoStep';
 import GuaranteesStep from '../components/admin/edit-steps/GuaranteesStep';
 import OtherSectionsStep from '../components/admin/edit-steps/OtherSectionsStep';
-import ReviewStep from '../components/admin/edit-steps/ReviewStep';
 
 const AdminTemplateContractEdit: React.FC = () => {
   const { contractId } = useParams<{ contractId: string }>();
@@ -30,7 +29,6 @@ const AdminTemplateContractEdit: React.FC = () => {
     { name: 'Informations de base', component: BasicInfoStep },
     { name: 'Garanties', component: GuaranteesStep },
     { name: 'Autres sections', component: OtherSectionsStep },
-    { name: 'Récapitulatif', component: ReviewStep },
   ];
 
   const form = useForm<TemplateContractEditFormData>({
@@ -76,13 +74,13 @@ const AdminTemplateContractEdit: React.FC = () => {
         zones:
           contract.zones?.map((z) => ({
             type: z.type,
-            value: z.label,
+            label: z.label,
           })) || [],
         terminations: [],
         cancellations:
           contract.cancellations?.map((c) => ({
-            description: c.question,
-            deadline: c.response,
+            question: c.question,
+            response: c.response,
           })) || [],
         contacts:
           contract.contacts?.map((c) => ({
@@ -138,10 +136,12 @@ const AdminTemplateContractEdit: React.FC = () => {
         data: changedFields as EditTemplateContractRequest,
       }).unwrap();
 
-      // Navigate back to contract details
+      // Navigate back to contract details only on success
       navigate(`/app/admin/templates/${contractId}`);
     } catch (error) {
       console.error('Failed to update contract:', error);
+      showToast.error('Échec de la sauvegarde. Veuillez réessayer.');
+      // Don't reset the form - keep the user's changes
     }
   };
 
@@ -187,7 +187,7 @@ const AdminTemplateContractEdit: React.FC = () => {
                 <FaArrowLeft className="h-5 w-5" />
               </button>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">Modifier le contrat template</h1>
+                <h1 className="text-xl font-semibold text-gray-900">Modifier les informations des conditions générales</h1>
                 <p className="text-sm text-gray-600">{contract.name}</p>
               </div>
             </div>
@@ -227,13 +227,37 @@ const AdminTemplateContractEdit: React.FC = () => {
               {steps.map((step, index) => (
                 <div key={index} className="flex items-center">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                      index <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setCurrentStep(index)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setCurrentStep(index);
+                      }
+                    }}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium cursor-pointer transition-colors ${
+                      index <= currentStep ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                     }`}
                   >
                     {index + 1}
                   </div>
-                  <span className={`ml-2 text-sm font-medium ${index <= currentStep ? 'text-blue-600' : 'text-gray-500'}`}>{step.name}</span>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setCurrentStep(index)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setCurrentStep(index);
+                      }
+                    }}
+                    className={`ml-2 text-sm font-medium cursor-pointer transition-colors ${
+                      index <= currentStep ? 'text-blue-600 hover:text-blue-700' : 'text-gray-500 hover:text-gray-600'
+                    }`}
+                  >
+                    {step.name}
+                  </span>
                   {index < steps.length - 1 && <div className="w-8 h-0.5 bg-gray-200 mx-4" />}
                 </div>
               ))}
@@ -249,7 +273,7 @@ const AdminTemplateContractEdit: React.FC = () => {
             <div className="p-6">
               <AnimatePresence mode="wait">
                 <motion.div key={currentStep} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
-                  <CurrentStepComponent onNext={handleNext} onPrevious={handlePrevious} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+                  <CurrentStepComponent onNext={handleNext} onPrevious={handlePrevious} onSubmit={handleSubmit} isSubmitting={isSubmitting} originalData={originalData} />
                 </motion.div>
               </AnimatePresence>
             </div>

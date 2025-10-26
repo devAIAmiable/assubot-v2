@@ -120,19 +120,12 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, history
                   }`}
                   onClick={() => {
                     // Prefill form with past comparison data
-                    const category = comparison.category || comparison.insuranceType;
-                    const mappedCategory = category === 'habitation' ? 'home' : (category as ComparisonCategory);
-                    setSelectedType(mappedCategory);
+                    const category = comparison.category;
+                    setSelectedType(category);
 
-                    // Set form data from comparison criteria and form data
+                    // Set form data from comparison form data
                     setFormData({
                       ...comparison.formData,
-                      age: comparison.criteria.age,
-                      profession: comparison.criteria.profession,
-                      monthlyBudget: comparison.criteria.monthlyBudget,
-                      location: comparison.criteria.location,
-                      vehicleType: comparison.criteria.vehicleType || '',
-                      coverageLevel: comparison.criteria.coverageLevel || '',
                     });
                     setCurrentStep('form');
                   }}
@@ -140,15 +133,10 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, history
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
-                        {React.createElement(
-                          getComparisonCategoryIcon(comparison.category || comparison.insuranceType === 'habitation' ? 'home' : (comparison.insuranceType as ComparisonCategory)),
-                          { className: 'h-6 w-6 text-[#1e51ab]' }
-                        )}
+                        {React.createElement(getComparisonCategoryIcon(comparison.category), { className: 'h-6 w-6 text-[#1e51ab]' })}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-[#1e51ab] transition-colors">
-                          {getInsuranceTypeName(comparison.category || comparison.insuranceType)}
-                        </h3>
+                        <h3 className="font-semibold text-gray-900 group-hover:text-[#1e51ab] transition-colors">{getInsuranceTypeName(comparison.category)}</h3>
                         <div className="flex items-center space-x-2 text-sm text-gray-600">
                           <span>{formatDate(comparison.date)}</span>
                           {isExpiringSoon && (
@@ -164,11 +152,11 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, history
                       <div className="text-sm text-gray-500 mb-1">{comparison.resultsCount} offres trouvées</div>
                       {comparison.topOffer && (
                         <div className="text-sm flex items-center">
-                          {getInsurerLogo(comparison.topOffer.insurer) && (
-                            <img src={getInsurerLogo(comparison.topOffer.insurer)!} alt={comparison.topOffer.insurer} className="w-4 h-4 object-contain mr-2" />
+                          {getInsurerLogo(comparison.topOffer.insurerName) && (
+                            <img src={getInsurerLogo(comparison.topOffer.insurerName)!} alt={comparison.topOffer.insurerName} className="w-4 h-4 object-contain mr-2" />
                           )}
-                          <span className="font-medium text-[#1e51ab]">{comparison.topOffer.insurer}</span>
-                          <span className="text-gray-600 ml-2">{comparison.topOffer.price}€/mois</span>
+                          <span className="font-medium text-[#1e51ab]">{comparison.topOffer.insurerName}</span>
+                          <span className="text-gray-600 ml-2">{Math.round(comparison.topOffer.annualPremium / 12)}€/mois</span>
                         </div>
                       )}
                     </div>
@@ -176,11 +164,7 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, history
 
                   <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
                     <div className="flex items-center space-x-4">
-                      <span>{comparison.criteria.profession}</span>
-                      <span>•</span>
-                      <span>{comparison.criteria.location}</span>
-                      <span>•</span>
-                      <span>Budget: {comparison.criteria.monthlyBudget}€/mois</span>
+                      <span>{comparison.category}</span>
                     </div>
                     <div className="text-[#1e51ab] opacity-0 group-hover:opacity-100 transition-opacity">Relancer cette comparaison →</div>
                   </div>

@@ -49,11 +49,11 @@ export function calculateGuaranteeStats(guarantee: BackendContractGuarantee): Gu
   const totalItems = totalCoverages + totalExclusions;
   const coveragePercentage = totalItems > 0 ? Math.round((totalCoverages / totalItems) * 100) : 0;
   const servicesCount = guarantee.details?.length || 0;
-  const hasFinancialInfo =
+  const hasFinancialInfo = Boolean(
     guarantee.deductible ||
-    guarantee.limitation ||
-    guarantee.details?.some((detail) => detail.limit || detail.plafond || detail.franchise || detail.deductible || detail.limitation) ||
-    false;
+      guarantee.limitation ||
+      guarantee.details?.some((detail) => detail.limit || detail.plafond || detail.franchise || detail.deductible || detail.limitation)
+  );
 
   return {
     totalCoverages,

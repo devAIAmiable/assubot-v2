@@ -1,3 +1,5 @@
+import { ContactType, ObligationType, ZoneType } from '../types/contract';
+
 import { z } from 'zod';
 
 // Basic Info Step Schema
@@ -47,13 +49,13 @@ export const exclusionSchema = z.object({
 // Obligation Schema
 export const obligationSchema = z.object({
   description: z.string().optional(),
-  type: z.string().optional(),
+  type: z.enum([ObligationType.SUBSCRIPTION, ObligationType.DURING_CONTRACT, ObligationType.CLAIM] as const).optional(),
 });
 
 // Zone Schema
 export const zoneSchema = z.object({
-  type: z.string().optional(),
-  value: z.string().optional(),
+  type: z.enum([ZoneType.COUNTRY, ZoneType.ZONE, ZoneType.REGION, ZoneType.CITY] as const).optional(),
+  label: z.string().optional(),
 });
 
 // Termination Schema
@@ -63,13 +65,13 @@ export const terminationSchema = z.object({
 
 // Cancellation Schema
 export const cancellationSchema = z.object({
-  description: z.string().optional(),
-  deadline: z.string().optional(),
+  question: z.string().optional(),
+  response: z.string().optional(),
 });
 
 // Contact Schema
 export const contactSchema = z.object({
-  type: z.enum(['management', 'assistance', 'emergency']).optional(),
+  type: z.enum([ContactType.MANAGEMENT, ContactType.ASSISTANCE, ContactType.EMERGENCY] as const).optional(),
   name: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().optional(),

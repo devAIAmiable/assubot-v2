@@ -4,10 +4,12 @@ import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import Dropdown, { type DropdownOption } from '../../ui/Dropdown';
 import { getAllCategories, getCategoryLabel } from '../../../config/categories';
+import AIDisclaimer from '../../ui/AIDisclaimer';
 
 interface BasicInfoStepProps {
   onNext: () => void;
   onPrevious?: () => void;
+  originalData?: unknown;
 }
 
 const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ onNext, onPrevious }) => {
@@ -33,6 +35,9 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ onNext, onPrevious }) => 
           <p className="text-sm text-gray-600">Définissez les informations générales du contrat</p>
         </div>
       </div>
+
+      {/* AI Disclaimer */}
+      <AIDisclaimer />
 
       {/* Form Fields */}
       <div className="space-y-6">

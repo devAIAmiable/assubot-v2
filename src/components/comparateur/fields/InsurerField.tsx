@@ -19,7 +19,7 @@ const InsurerField: React.FC<InsurerFieldProps> = ({ field, value, onChange, err
   const [isOpen, setIsOpen] = useState(false);
 
   const [getInsurers] = useLazyGetInsurersQuery();
-  const debounceTimeoutRef = useRef<NodeJS.Timeout>();
+  const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Debounced search
   useEffect(() => {

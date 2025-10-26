@@ -1,14 +1,14 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useFormContext } from 'react-hook-form';
 import { FaChevronDown, FaChevronRight, FaMinus, FaPlus } from 'react-icons/fa';
 import React, { useState } from 'react';
 
 import type { BackendGuaranteeDetail } from '../../../types/contract';
+import { useFormContext } from 'react-hook-form';
 
 interface GuaranteeEditorProps {
   guaranteeIndex: number;
   guarantee: {
-    title: string;
+    title?: string;
     deductible?: string;
     limitation?: string;
     details?: BackendGuaranteeDetail[];
@@ -17,12 +17,12 @@ interface GuaranteeEditorProps {
 
 const GuaranteeEditor: React.FC<GuaranteeEditorProps> = ({ guaranteeIndex, guarantee }) => {
   const { register, watch, setValue } = useFormContext();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const guaranteeDetails = watch(`guarantees.${guaranteeIndex}.details`) || [];
+  const guaranteeDetails: BackendGuaranteeDetail[] = watch(`guarantees.${guaranteeIndex}.details`) || [];
 
   const addDetail = () => {
-    const currentDetails = guaranteeDetails || [];
+    const currentDetails: BackendGuaranteeDetail[] = guaranteeDetails || [];
     setValue(`guarantees.${guaranteeIndex}.details`, [
       ...currentDetails,
       {
@@ -38,15 +38,15 @@ const GuaranteeEditor: React.FC<GuaranteeEditorProps> = ({ guaranteeIndex, guara
   };
 
   const removeDetail = (detailIndex: number) => {
-    const currentDetails = guaranteeDetails || [];
-    const newDetails = currentDetails.filter((_, index) => index !== detailIndex);
+    const currentDetails: BackendGuaranteeDetail[] = guaranteeDetails || [];
+    const newDetails = currentDetails.filter((_: unknown, index: number) => index !== detailIndex);
     setValue(`guarantees.${guaranteeIndex}.details`, newDetails);
   };
 
   const addCoverage = (detailIndex: number) => {
     const currentDetails = guaranteeDetails || [];
     const detail = currentDetails[detailIndex];
-    const newCoverages = [...(detail.coverages || []), { type: 'covered', description: '' }];
+    const newCoverages = [...(detail.coverages || []), { type: 'covered' as const, description: '' }];
 
     const updatedDetails = [...currentDetails];
     updatedDetails[detailIndex] = {
@@ -60,7 +60,7 @@ const GuaranteeEditor: React.FC<GuaranteeEditorProps> = ({ guaranteeIndex, guara
   const removeCoverage = (detailIndex: number, coverageIndex: number) => {
     const currentDetails = guaranteeDetails || [];
     const detail = currentDetails[detailIndex];
-    const newCoverages = (detail.coverages || []).filter((_, index) => index !== coverageIndex);
+    const newCoverages = (detail.coverages || []).filter((_: unknown, index: number) => index !== coverageIndex);
 
     const updatedDetails = [...currentDetails];
     updatedDetails[detailIndex] = {
@@ -184,7 +184,7 @@ const GuaranteeEditor: React.FC<GuaranteeEditorProps> = ({ guaranteeIndex, guara
                         </button>
                       </div>
 
-                      {(detail.coverages || []).map((coverage: { type?: string; description?: string }, coverageIndex: number) => (
+                      {(detail.coverages || []).map((_coverage: { type?: string; description?: string }, coverageIndex: number) => (
                         <div key={coverageIndex} className="flex items-center gap-2">
                           <select
                             {...register(`guarantees.${guaranteeIndex}.details.${detailIndex}.coverages.${coverageIndex}.type`)}

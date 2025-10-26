@@ -1,5 +1,5 @@
 import type { ComparisonCategory, ComparisonOffer } from '../../types/comparison';
-import { FaChevronLeft, FaChevronRight, FaStar } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaEye, FaStar } from 'react-icons/fa';
 
 import Avatar from '../ui/Avatar';
 import React from 'react';

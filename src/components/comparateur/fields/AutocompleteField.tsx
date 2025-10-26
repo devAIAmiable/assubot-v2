@@ -1,6 +1,6 @@
 import { Combobox, Transition } from '@headlessui/react';
 import { FaCheck, FaChevronDown, FaSpinner } from 'react-icons/fa';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { FormField } from '../../../types/comparison';
 import { motion } from 'framer-motion';
@@ -32,6 +32,49 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({ field, value, onC
   // Use RTK Query hook for insurer search
   const { searchInsurers, isLoading: rtkLoading } = useInsurerAutocomplete();
 
+  const performSearch = useCallback(
+    async (searchQuery: string) => {
+      if (!field.autocomplete) return;
+
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      try {
+        // Use RTK Query for insurer endpoint
+        if (field.autocomplete.endpoint === '/insurers') {
+          const result = await searchInsurers(searchQuery);
+          setOptions(result.options);
+          setIsOpen(true);
+          setErrorMessage(result.error || null);
+        } else {
+          // Fallback for other endpoints (could be extended)
+          console.warn(`Autocomplete endpoint not implemented: ${field.autocomplete.endpoint}`);
+          setOptions([]);
+        }
+      } catch (error) {
+        console.error('Autocomplete search failed:', error);
+        setOptions([]);
+        setErrorMessage('Erreur lors de la recherche');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [field.autocomplete, searchInsurers]
+  );
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setQuery(newValue);
+
+    // If the input doesn't match any option, clear the value
+    const matchingOption = options.find((opt) => opt.label.toLowerCase() === newValue.toLowerCase());
+    if (!matchingOption && newValue !== '') {
+      onChange('');
+    } else if (matchingOption) {
+      onChange(matchingOption.value);
+    }
+  };
+
   // Debounce search
   useEffect(() => {
     if (!field.autocomplete || query.length < field.autocomplete.minLength) {
@@ -47,46 +90,6 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({ field, value, onC
 
     return () => clearTimeout(timeoutId);
   }, [query, field.autocomplete, performSearch]);
-
-  const performSearch = async (searchQuery: string) => {
-    if (!field.autocomplete) return;
-
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
-      // Use RTK Query for insurer endpoint
-      if (field.autocomplete.endpoint === '/insurers') {
-        const result = await searchInsurers(searchQuery);
-        setOptions(result.options);
-        setIsOpen(true);
-        setErrorMessage(result.error || null);
-      } else {
-        // Fallback for other endpoints (could be extended)
-        console.warn(`Autocomplete endpoint not implemented: ${field.autocomplete.endpoint}`);
-        setOptions([]);
-      }
-    } catch (error) {
-      console.error('Autocomplete search failed:', error);
-      setOptions([]);
-      setErrorMessage('Erreur lors de la recherche');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setQuery(newValue);
-
-    // If the input doesn't match any option, clear the value
-    const matchingOption = options.find((opt) => opt.label.toLowerCase() === newValue.toLowerCase());
-    if (!matchingOption && newValue !== '') {
-      onChange('');
-    } else if (matchingOption) {
-      onChange(matchingOption.value);
-    }
-  };
 
   const handleOptionSelect = (option: AutocompleteOption) => {
     setQuery(option.label);

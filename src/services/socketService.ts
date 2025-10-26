@@ -31,7 +31,7 @@ class SocketService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private baseReconnectDelay = 1000; // 1 second
-  private reconnectTimer: NodeJS.Timeout | null = null;
+  private reconnectTimer: number | null = null;
   private eventHandlers: SocketEventHandlers = {};
   private listenersSetup = false; // Track if listeners have been setup
 

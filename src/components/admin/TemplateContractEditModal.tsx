@@ -12,7 +12,6 @@ import { templateContractEditSchema, type TemplateContractEditFormData } from '.
 import BasicInfoStep from './edit-steps/BasicInfoStep';
 import GuaranteesStep from './edit-steps/GuaranteesStep';
 import OtherSectionsStep from './edit-steps/OtherSectionsStep';
-import ReviewStep from './edit-steps/ReviewStep';
 
 interface TemplateContractEditModalProps {
   isOpen: boolean;
@@ -29,7 +28,6 @@ const TemplateContractEditModal: React.FC<TemplateContractEditModalProps> = ({ i
     { name: 'Informations de base', component: BasicInfoStep },
     { name: 'Garanties', component: GuaranteesStep },
     { name: 'Autres sections', component: OtherSectionsStep },
-    { name: 'Récapitulatif', component: ReviewStep },
   ];
 
   const form = useForm<TemplateContractEditFormData>({
@@ -58,13 +56,13 @@ const TemplateContractEditModal: React.FC<TemplateContractEditModalProps> = ({ i
       zones:
         contract.zones?.map((z) => ({
           type: z.type,
-          value: z.label,
+          label: z.label,
         })) || [],
       terminations: [],
       cancellations:
         contract.cancellations?.map((c) => ({
-          description: c.question,
-          deadline: c.response,
+          question: c.question,
+          response: c.response,
         })) || [],
       contacts:
         contract.contacts?.map((c) => ({

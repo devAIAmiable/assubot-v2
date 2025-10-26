@@ -1,17 +1,22 @@
+import { ContactType, ObligationType, ZoneType } from '../../../types/contract';
 import { FaExclamationTriangle, FaGlobe, FaPhone, FaTimes, FaUserShield } from 'react-icons/fa';
 import React, { useState } from 'react';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
+import AIDisclaimer from '../../ui/AIDisclaimer';
 import ArrayFieldManager from '../form-fields/ArrayFieldManager';
 import type { OtherSectionsFormData } from '../../../validators/templateContractSchema';
 
 interface OtherSectionsStepProps {
-  onNext: () => void;
+  onNext?: () => void;
   onPrevious: () => void;
+  onSubmit?: () => void;
+  isSubmitting?: boolean;
+  originalData?: unknown;
 }
 
-const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPrevious }) => {
+const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPrevious, onSubmit, isSubmitting }) => {
   const { control, register } = useFormContext<OtherSectionsFormData>();
   const [activeTab, setActiveTab] = useState(0);
 
@@ -19,7 +24,6 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
   const exclusionsArray = useFieldArray({ control, name: 'exclusions' });
   const obligationsArray = useFieldArray({ control, name: 'obligations' });
   const zonesArray = useFieldArray({ control, name: 'zones' });
-  const terminationsArray = useFieldArray({ control, name: 'terminations' });
   const cancellationsArray = useFieldArray({ control, name: 'cancellations' });
   const contactsArray = useFieldArray({ control, name: 'contacts' });
 
@@ -28,42 +32,41 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
     { name: 'Obligations', icon: FaUserShield, color: 'blue' },
     { name: 'Zones', icon: FaGlobe, color: 'green' },
     { name: 'Résiliations', icon: FaExclamationTriangle, color: 'orange' },
-    { name: 'Annulations', icon: FaExclamationTriangle, color: 'purple' },
     { name: 'Contacts', icon: FaPhone, color: 'gray' },
   ];
 
   const renderExclusionItem = (_item: unknown, index: number) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-        <input
-          {...register(`exclusions.${index}.description`)}
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Ex: Dommages intentionnels"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-        <select {...register(`exclusions.${index}.type`)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-          <option value="general">Général</option>
-          <option value="activity">Activité</option>
-          <option value="geographic">Géographique</option>
-          <option value="temporal">Temporel</option>
-        </select>
-      </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+      <textarea
+        {...register(`exclusions.${index}.description`)}
+        rows={3}
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        placeholder="Ex: Dommages intentionnels"
+      />
     </div>
   );
 
   const renderObligationItem = (_item: unknown, index: number) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-      <textarea
-        {...register(`obligations.${index}.description`)}
-        rows={3}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Ex: Déclarer tout sinistre dans les 48h"
-      />
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <textarea
+          {...register(`obligations.${index}.description`)}
+          rows={3}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Ex: Déclarer tout sinistre dans les 48h"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+        <select {...register(`obligations.${index}.type`)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <option value="">Sélectionner un type</option>
+          <option value={ObligationType.SUBSCRIPTION}>À la souscription</option>
+          <option value={ObligationType.DURING_CONTRACT}>En cours de contrat</option>
+          <option value={ObligationType.CLAIM}>En cas de sinistre</option>
+        </select>
+      </div>
     </div>
   );
 
@@ -72,16 +75,14 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
         <select {...register(`zones.${index}.type`)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-          <option value="country">Pays</option>
-          <option value="zone">Zone</option>
-          <option value="region">Région</option>
-          <option value="city">Ville</option>
+          <option value={ZoneType.COUNTRY}>Pays</option>
+          <option value={ZoneType.ZONE}>Zone</option>
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Valeur</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Nom de la zone</label>
         <input
-          {...register(`zones.${index}.value`)}
+          {...register(`zones.${index}.label`)}
           type="text"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Ex: France, Europe, Paris"
@@ -90,36 +91,24 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
     </div>
   );
 
-  const renderTerminationItem = (_item: unknown, index: number) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-      <textarea
-        {...register(`terminations.${index}.description`)}
-        rows={3}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Ex: Résiliation automatique à 80 ans"
-      />
-    </div>
-  );
-
   const renderCancellationItem = (_item: unknown, index: number) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Question</label>
         <textarea
-          {...register(`cancellations.${index}.description`)}
+          {...register(`cancellations.${index}.question`)}
           rows={3}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Ex: Préavis de 30 jours"
+          placeholder="Ex: Comment résilier mon contrat ?"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Délai</label>
-        <input
-          {...register(`cancellations.${index}.deadline`)}
-          type="text"
+        <label className="block text-sm font-medium text-gray-700 mb-1">Réponse</label>
+        <textarea
+          {...register(`cancellations.${index}.response`)}
+          rows={3}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Ex: 30 jours"
+          placeholder="Ex: Préavis de 30 jours avant l'échéance"
         />
       </div>
     </div>
@@ -130,9 +119,9 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Type de contact</label>
         <select {...register(`contacts.${index}.type`)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-          <option value="management">Gestion du contrat</option>
-          <option value="assistance">Assistance</option>
-          <option value="emergency">Urgence</option>
+          <option value={ContactType.MANAGEMENT}>Gestion du contrat</option>
+          <option value={ContactType.ASSISTANCE}>Assistance</option>
+          <option value={ContactType.EMERGENCY}>Urgence</option>
         </select>
       </div>
       <div>
@@ -189,6 +178,9 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
         </div>
       </div>
 
+      {/* AI Disclaimer */}
+      <AIDisclaimer />
+
       {/* Tabs */}
       <TabGroup selectedIndex={activeTab} onChange={setActiveTab}>
         <TabList className="flex space-x-1 rounded-xl bg-gray-100 p-1">
@@ -226,23 +218,13 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
             <ArrayFieldManager fieldArray={zonesArray} renderItem={renderZoneItem} addButtonText="Ajouter une zone" emptyMessage="Aucune zone définie" />
           </TabPanel>
 
-          {/* Terminations */}
-          <TabPanel>
-            <ArrayFieldManager
-              fieldArray={terminationsArray}
-              renderItem={renderTerminationItem}
-              addButtonText="Ajouter une résiliation"
-              emptyMessage="Aucune condition de résiliation définie"
-            />
-          </TabPanel>
-
-          {/* Cancellations */}
+          {/* Résiliations */}
           <TabPanel>
             <ArrayFieldManager
               fieldArray={cancellationsArray}
               renderItem={renderCancellationItem}
-              addButtonText="Ajouter une annulation"
-              emptyMessage="Aucune condition d'annulation définie"
+              addButtonText="Ajouter une résiliation"
+              emptyMessage="Aucune condition de résiliation définie"
             />
           </TabPanel>
 
@@ -255,13 +237,43 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
 
       {/* Navigation */}
       <div className="flex justify-between pt-6 border-t border-gray-200">
-        <button type="button" onClick={onPrevious} className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+        <button
+          type="button"
+          onClick={onPrevious}
+          disabled={isSubmitting}
+          className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Précédent
         </button>
 
-        <button type="button" onClick={onNext} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          Suivant
-        </button>
+        {onSubmit ? (
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Enregistrement...
+              </>
+            ) : (
+              'Enregistrer'
+            )}
+          </button>
+        ) : (
+          <button type="button" onClick={onNext} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            Suivant
+          </button>
+        )}
       </div>
     </div>
   );

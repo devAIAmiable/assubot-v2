@@ -1,13 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
-import TextField from './TextField';
 import type { FormField } from '../../../types/comparison';
+import TextField from './TextField';
+import userEvent from '@testing-library/user-event';
 
 describe('TextField Component', () => {
   const mockOnChange = vi.fn();
-  const mockOnBlur = vi.fn();
 
   const defaultField: FormField = {
     name: 'testField',
@@ -78,14 +77,14 @@ describe('TextField Component', () => {
     });
 
     it('should handle null value', () => {
-      render(<TextField field={defaultField} value={null} onChange={mockOnChange} />);
+      render(<TextField field={defaultField} value="" onChange={mockOnChange} />);
 
       const input = screen.getByRole('textbox');
       expect(input).toHaveValue('');
     });
 
     it('should handle undefined value', () => {
-      render(<TextField field={defaultField} value={undefined} onChange={mockOnChange} />);
+      render(<TextField field={defaultField} value="" onChange={mockOnChange} />);
 
       const input = screen.getByRole('textbox');
       expect(input).toHaveValue('');
@@ -151,13 +150,13 @@ describe('TextField Component', () => {
 
   describe('Error Handling', () => {
     it('should display error message when provided', () => {
-      render(<TextField field={defaultField} value="" onChange={mockOnChange} onBlur={mockOnBlur} error="This is an error" />);
+      render(<TextField field={defaultField} value="" onChange={mockOnChange} error="This is an error" />);
 
       expect(screen.getByText('This is an error')).toBeInTheDocument();
     });
 
     it('should apply error styling when error is present', () => {
-      render(<TextField field={defaultField} value="" onChange={mockOnChange} onBlur={mockOnBlur} error="This is an error" />);
+      render(<TextField field={defaultField} value="" onChange={mockOnChange} error="This is an error" />);
 
       const input = screen.getByRole('textbox');
       expect(input).toHaveClass('border-red-300');
@@ -170,7 +169,7 @@ describe('TextField Component', () => {
     });
 
     it('should not display error when error is null', () => {
-      render(<TextField field={defaultField} value="" onChange={mockOnChange} onBlur={mockOnBlur} error={null} />);
+      render(<TextField field={defaultField} value="" onChange={mockOnChange} error="" />);
 
       expect(screen.queryByText('This is an error')).not.toBeInTheDocument();
     });
@@ -186,7 +185,7 @@ describe('TextField Component', () => {
     });
 
     it('should have correct aria-describedby when error is present', () => {
-      render(<TextField field={defaultField} value="" onChange={mockOnChange} onBlur={mockOnBlur} error="This is an error" />);
+      render(<TextField field={defaultField} value="" onChange={mockOnChange} error="This is an error" />);
 
       const input = screen.getByRole('textbox');
       // aria-describedby is not implemented in current component
@@ -222,7 +221,7 @@ describe('TextField Component', () => {
 
   describe('Input Masking', () => {
     it('should apply input mask when provided', () => {
-      const fieldWithMask = { ...defaultField, mask: '99999' };
+      const fieldWithMask = { ...defaultField, mask: { pattern: '99999', placeholder: '_____', guide: false } };
 
       render(<TextField field={fieldWithMask} value="" onChange={mockOnChange} />);
 
@@ -314,7 +313,7 @@ describe('TextField Component', () => {
       render(<TextField field={defaultField} value="" onChange={mockOnChange} />);
 
       const input = screen.getByRole('textbox');
-      await user.type(input, 'abc', { delay: 0 });
+      await user.type(input, 'abc', {});
 
       expect(mockOnChange).toHaveBeenCalledTimes(3);
     });

@@ -1,10 +1,10 @@
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, type FieldValues } from 'react-hook-form';
 import type { FieldArrayWithId, UseFieldArrayReturn } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface ArrayFieldManagerProps<T> {
+interface ArrayFieldManagerProps<T extends FieldValues> {
   fieldArray: UseFieldArrayReturn<T>;
   renderItem: (item: FieldArrayWithId<T>, index: number) => React.ReactNode;
   addButtonText: string;
@@ -13,7 +13,7 @@ interface ArrayFieldManagerProps<T> {
   className?: string;
 }
 
-function ArrayFieldManager<T>({ fieldArray, renderItem, addButtonText, emptyMessage, maxItems, className = '' }: ArrayFieldManagerProps<T>) {
+function ArrayFieldManager<T extends FieldValues>({ fieldArray, renderItem, addButtonText, emptyMessage, maxItems, className = '' }: ArrayFieldManagerProps<T>) {
   const { fields, append, remove } = fieldArray;
   useFormContext();
 
@@ -21,7 +21,7 @@ function ArrayFieldManager<T>({ fieldArray, renderItem, addButtonText, emptyMess
 
   const handleAdd = () => {
     if (canAddMore) {
-      append({} as T);
+      append({} as FieldArrayWithId<T>);
     }
   };
 

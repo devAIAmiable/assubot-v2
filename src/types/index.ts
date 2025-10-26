@@ -39,9 +39,9 @@ export interface EditTemplateContractRequest {
   }>;
   exclusions?: Array<{ description?: string; type?: string }>;
   obligations?: Array<{ description?: string; type?: string }>;
-  zones?: Array<{ type?: string; value?: string }>;
+  zones?: Array<{ type?: string; label?: string }>;
   terminations?: Array<{ description?: string }>;
-  cancellations?: Array<{ description?: string; deadline?: string }>;
+  cancellations?: Array<{ question?: string; response?: string }>;
   contacts?: Array<{
     type?: 'management' | 'assistance' | 'emergency';
     name?: string;

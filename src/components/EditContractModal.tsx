@@ -160,6 +160,7 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                         value={formData.category || ''}
                         onChange={(e) => handleInputChange('category', e.target.value as ContractCategory)}
                         required
+                        disabled
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
                       >
                         <option value="auto">Automobile</option>
@@ -169,6 +170,7 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                         <option value="electronic_devices">Équipements électroniques</option>
                         <option value="other">Autre</option>
                       </select>
+                      <p className="text-xs text-gray-500 mt-1">Le type de contrat ne peut pas être modifié</p>
                     </div>
 
                     <div>

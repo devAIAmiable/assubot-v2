@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { FaPlus, FaShieldAlt } from 'react-icons/fa';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
+import AIDisclaimer from '../../ui/AIDisclaimer';
 import GuaranteeEditor from '../form-fields/GuaranteeEditor';
 import type { GuaranteesFormData } from '../../../validators/templateContractSchema';
 import React from 'react';
@@ -9,6 +10,7 @@ import React from 'react';
 interface GuaranteesStepProps {
   onNext: () => void;
   onPrevious: () => void;
+  originalData?: unknown;
 }
 
 const GuaranteesStep: React.FC<GuaranteesStepProps> = ({ onNext, onPrevious }) => {
@@ -43,6 +45,9 @@ const GuaranteesStep: React.FC<GuaranteesStepProps> = ({ onNext, onPrevious }) =
           <p className="text-sm text-gray-600">Définissez les garanties et leurs conditions</p>
         </div>
       </div>
+
+      {/* AI Disclaimer */}
+      <AIDisclaimer />
 
       {/* Add Guarantee Button */}
       <div className="flex justify-end">

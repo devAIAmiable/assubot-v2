@@ -25,7 +25,7 @@ const FeatureShowcase: React.FC<FeatureShowcaseProps> = ({ icon, title, subtitle
       transition: {
         duration: 0.6,
         delay: index * 0.2,
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 100,
       },
     },
@@ -39,7 +39,7 @@ const FeatureShowcase: React.FC<FeatureShowcaseProps> = ({ icon, title, subtitle
       transition: {
         duration: 0.5,
         delay: index * 0.2 + 0.3,
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 200,
       },
     },

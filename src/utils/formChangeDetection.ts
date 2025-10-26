@@ -27,7 +27,7 @@ export function deepEqual(obj1: unknown, obj2: unknown): boolean {
     return false;
   }
 
-  if (Array.isArray(obj1)) {
+  if (Array.isArray(obj1) && Array.isArray(obj2)) {
     if (obj1.length !== obj2.length) {
       return false;
     }
@@ -39,23 +39,27 @@ export function deepEqual(obj1: unknown, obj2: unknown): boolean {
     return true;
   }
 
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
+  if (typeof obj1 === 'object' && typeof obj2 === 'object' && !Array.isArray(obj1) && !Array.isArray(obj2)) {
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
 
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
-
-  for (const key of keys1) {
-    if (!keys2.includes(key)) {
+    if (keys1.length !== keys2.length) {
       return false;
     }
-    if (!deepEqual(obj1[key], obj2[key])) {
-      return false;
+
+    for (const key of keys1) {
+      if (!keys2.includes(key)) {
+        return false;
+      }
+      if (!deepEqual((obj1 as Record<string, unknown>)[key], (obj2 as Record<string, unknown>)[key])) {
+        return false;
+      }
     }
+
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 /**
