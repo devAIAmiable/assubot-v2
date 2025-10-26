@@ -125,7 +125,7 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Bénéficiaire
+                        Bien(s)/Bénéficiaire(s)
                         <span className="text-gray-500 text-xs ml-1">(optionnel)</span>
                       </label>
                       <input

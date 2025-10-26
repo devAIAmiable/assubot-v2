@@ -613,7 +613,7 @@ const ContractDetailsPage = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <div className="space-y-4">
                           <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Bénéficiaire</span>
+                            <span className="text-gray-600 font-medium">Bien(s)/Bénéficiaire(s)</span>
                             <span className="font-semibold text-gray-900">{contract.subject}</span>
                           </div>
                           <div className="flex items-center justify-between py-3 border-b border-blue-200">
