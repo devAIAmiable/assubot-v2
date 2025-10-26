@@ -315,6 +315,7 @@ export interface ContractFormData {
   name: string;
   category: ContractCategory;
   insurerId?: string;
+  insurerName?: string;
   version?: string;
   isTemplate?: boolean;
 
@@ -323,6 +324,9 @@ export interface ContractFormData {
   startDate?: string;
   endDate?: string;
   annualPremiumCents: number;
+  monthlyPremiumCents?: number;
+  tacitRenewal?: boolean;
+  cancellationDeadline?: string;
 
   // Step 3: Documents
   documents: ContractDocumentUpload[];

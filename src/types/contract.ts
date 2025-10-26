@@ -237,7 +237,8 @@ export interface ContractListItem {
 }
 
 // Utility types for form handling
-export interface ContractFormData {
+// This interface is for backward compatibility - use ContractFormData from types/index.ts instead
+export interface ContractFormDataLegacy {
   name: string;
   category: ContractCategory;
   subject?: string;
