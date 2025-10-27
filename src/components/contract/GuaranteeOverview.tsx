@@ -52,14 +52,14 @@ const GuaranteeOverview: React.FC<GuaranteeOverviewProps> = ({ guarantee }) => {
             <div>
               <div className="space-y-2">
                 {financial.hasGeneralDeductible && (
-                  <div className="flex justify-between items-center text-sm">
+                  <div className="flex items-center gap-2 text-sm">
                     <span className="text-gray-600">Franchise:</span>
                     <span className="font-semibold text-gray-900">{financial.generalDeductible}</span>
                   </div>
                 )}
 
                 {financial.hasGeneralLimitation && (
-                  <div className="text-sm">
+                  <div className="flex items-center gap-2 text-sm">
                     <span className="text-gray-600">Limite: </span>
                     <ExpandableText text={financial.generalLimitation!} className="text-gray-900 font-medium inline" maxLength={60} />
                   </div>
