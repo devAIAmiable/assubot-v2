@@ -57,21 +57,22 @@ const LandingPage = () => {
       icon: <VscGraph className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300" />,
       title: 'Dashboard utilisateur',
       subtitle: "Votre situation d'assurance en un coup d'œil",
-      description: "Vue d'ensemble visuelle de tous vos contrats, niveaux de couverture, renouvellements à venir et dépenses. Suivi des KPI et intégration avec tous les modules.",
+      description:
+        "Vue d'ensemble visuelle de tous vos contrats, niveaux de couverture, renouvellements à venir et dépenses. Suivi des informations importantes et intégration avec tous les modules.",
     },
     {
       icon: <VscTarget className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300" />,
       title: 'Comparateur intelligent',
       subtitle: 'Comparaison intelligente adaptée à vos besoins',
       description:
-        'Compare vos contrats existants avec les offres du marché, pas seulement sur le prix, mais sur la profondeur de couverture, les exclusions, les niveaux de service, etc.',
+        "Compare vos contrats existants avec les offres du marché, pas seulement sur le prix, mais sur la profondeur de couverture, les exclusions, les niveaux de service, ou d'autres critères personnalisés exprimés en langage naturel.",
     },
     {
       icon: <VscBell className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300" />,
       title: 'Centre de notifications',
       subtitle: 'Ne manquez jamais un événement important',
       description:
-        "Alertes intelligentes pour l'expiration des contrats, de meilleures offres disponibles, et l'exposition aux risques détectée. Notifications configurables multi-canaux.",
+        "Alertes intelligentes pour l'expiration des contrats, de meilleures offres disponibles, détection des doublons et l'exposition aux risques détectée. Notifications configurables multi-canaux.",
     },
   ];
 
@@ -218,6 +219,11 @@ const LandingPage = () => {
               Découvrir toutes les fonctionnalités
             </motion.button>
           </motion.div>
+
+          {/* Note de bas de page */}
+          <motion.div className="mt-8 text-center" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.5 }} viewport={{ once: true }}>
+            <p className="text-sm text-gray-500 italic">* Informations importantes = indicateurs clés de performance et métriques essentielles pour le suivi de vos contrats</p>
+          </motion.div>
         </div>
       </section>
 
@@ -225,21 +231,21 @@ const LandingPage = () => {
       <StatsCounter
         stats={[
           {
-            value: 10000,
+            value: 100,
             suffix: '+',
             label: 'Utilisateurs actifs',
             icon: <VscOrganization />,
             color: 'text-blue-500',
           },
           {
-            value: 50000,
+            value: 250,
             suffix: '+',
             label: 'Contrats analysés',
             icon: <VscShield />,
             color: 'text-green-500',
           },
           {
-            value: 2000000,
+            value: 10000,
             suffix: '€',
             label: 'Économies générées',
             icon: <VscSymbolColor />,
@@ -494,7 +500,7 @@ const LandingPage = () => {
               viewport={{ once: true }}
             >
               <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
-              Feuille de route 2024-2025
+              Feuille de route 2025-2026
             </motion.div>
             <h2 className="text-5xl font-bold text-white mb-6 leading-tight">
               L'avenir de l'<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">assurance</span> vous attend
@@ -508,7 +514,7 @@ const LandingPage = () => {
                 icon: <VscWarning className="text-4xl mb-4 text-yellow-400" />,
                 title: 'e-Risk',
                 desc: 'Scoring de risque personnalisé et conseils',
-                status: 'Q2 2024',
+                status: 'Q2 2025',
                 gradient: 'from-yellow-500/20 to-orange-500/20',
                 borderColor: 'border-yellow-400/30',
               },
@@ -516,7 +522,7 @@ const LandingPage = () => {
                 icon: <VscFile className="text-4xl mb-4 text-green-400" />,
                 title: 'e-Souscription',
                 desc: 'Souscription ou changement direct de police',
-                status: 'Q3 2024',
+                status: 'Q3 2025',
                 gradient: 'from-green-500/20 to-emerald-500/20',
                 borderColor: 'border-green-400/30',
               },
@@ -524,7 +530,7 @@ const LandingPage = () => {
                 icon: <VscGraph className="text-4xl mb-4 text-blue-400" />,
                 title: 'Analytics & Insights',
                 desc: 'Pour les assureurs',
-                status: 'Q4 2024',
+                status: 'Q4 2025',
                 gradient: 'from-blue-500/20 to-cyan-500/20',
                 borderColor: 'border-blue-400/30',
               },
@@ -532,7 +538,7 @@ const LandingPage = () => {
                 icon: <VscPlug className="text-4xl mb-4 text-purple-400" />,
                 title: 'Open API',
                 desc: 'Pour les courtiers ou clients B2B',
-                status: 'Q1 2025',
+                status: 'Q1 2026',
                 gradient: 'from-purple-500/20 to-pink-500/20',
                 borderColor: 'border-purple-400/30',
               },
@@ -625,10 +631,10 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }} className="space-y-8">
               <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
-                <h3 className="text-3xl font-bold text-gray-900 mb-6">Développé par À l'amiable</h3>
+                <h3 className="text-3xl font-bold text-gray-900 mb-6">Développé par A l'Amiable</h3>
                 <div className="space-y-6 text-gray-600 leading-relaxed">
                   <p className="text-lg">
-                    AssuBot est né de la frustration de voir tant de personnes perdues dans le labyrinthe de leurs contrats d'assurance. Chez À l'amiable, nous croyons que la
+                    AssuBot est né de la frustration de voir tant de personnes perdues dans le labyrinthe de leurs contrats d'assurance. Chez A l'Amiable, nous croyons que la
                     technologie doit servir à simplifier la vie, pas à la compliquer.
                   </p>
                   <p className="text-lg">
@@ -683,7 +689,7 @@ const LandingPage = () => {
                   <h4 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                     <VscRocket className="mr-3 text-[#1e51ab]" /> Notre Vision
                   </h4>
-                  <p className="text-gray-600 text-lg leading-relaxed">Un monde où choisir et gérer ses assurances est aussi simple que commander un café en ligne.</p>
+                  <p className="text-gray-600 text-lg leading-relaxed">Un monde où choisir et gérer ses assurances est aussi simple que commander un café.</p>
                 </div>
               </motion.div>
 
@@ -747,22 +753,8 @@ const LandingPage = () => {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white mb-3">Email</h3>
-                    <p className="text-blue-100 mb-1">contact@assubot.fr</p>
-                    <p className="text-blue-100">support@assubot.fr</p>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  className="flex items-start space-x-6 p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-xl">
-                    <span className="text-lg font-bold">📞</span>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-3">Téléphone</h3>
-                    <p className="text-blue-100 mb-1">+33 1 23 45 67 89</p>
-                    <p className="text-blue-200 text-sm">Lundi - Vendredi, 9h - 18h</p>
+                    <p className="text-blue-100 mb-1">contact@a-lamiable.com</p>
+                    <p className="text-blue-100">support@a-lamiable.com</p>
                   </div>
                 </motion.div>
 
@@ -914,10 +906,10 @@ const LandingPage = () => {
                 <img src="/logo.png" alt="AssuBot Logo" className="h-8 w-auto mr-2 brightness-0 invert" />
                 AssuBot
               </div>
-              <p className="text-gray-400">Développé par À l'amiable - Simplifier les décisions d'assurance grâce à l'IA et à l'automatisation.</p>
+              <p className="text-gray-400">Développé par A l'Amiable - Simplifier les décisions d'assurance grâce à l'IA et à l'automatisation.</p>
               <div className="flex space-x-4">
                 <a
-                  href="https://linkedin.com/company/assubot"
+                  href="https://linkedin.com/company/a-lamiable"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
@@ -925,7 +917,7 @@ const LandingPage = () => {
                   <span className="text-sm font-bold">in</span>
                 </a>
                 <a
-                  href="https://instagram.com/assubot"
+                  href="https://instagram.com/aia.alamiable"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
@@ -984,24 +976,24 @@ const LandingPage = () => {
                 </li>
                 <li>
                   <button onClick={() => navigate('/general-terms')} className="hover:text-white transition-colors text-left">
-                    Conditions Générales
+                    Conditions générales d'utilisation et de vente
                   </button>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Documentation API
-                  </a>
+                  <button onClick={() => navigate('/privacy-policy')} className="hover:text-white transition-colors text-left">
+                    Politique de Confidentialité
+                  </button>
                 </li>
                 <li>
-                  <button onClick={() => navigate('/general-terms')} className="hover:text-white transition-colors text-left">
-                    Politique de Confidentialité
+                  <button onClick={() => navigate('/legal-notices')} className="hover:text-white transition-colors text-left">
+                    Mentions légales
                   </button>
                 </li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-            <p>&copy; 2024 AssuBot par À l'amiable. Tous droits réservés.</p>
+            <p>&copy; 2024 AssuBot par A l'Amiable. Tous droits réservés.</p>
           </div>
         </div>
       </footer>

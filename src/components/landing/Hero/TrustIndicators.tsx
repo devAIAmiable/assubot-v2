@@ -1,17 +1,18 @@
+import { FaShieldAlt, FaStar, FaUsers } from 'react-icons/fa';
+
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaStar, FaUsers, FaShieldAlt } from 'react-icons/fa';
 
 const TrustIndicators: React.FC = () => {
   const indicators = [
     {
       icon: <FaUsers className="text-2xl text-[#1e51ab]" />,
-      value: '10,000+',
+      value: '100+',
       label: 'Utilisateurs actifs',
     },
     {
       icon: <FaShieldAlt className="text-2xl text-green-500" />,
-      value: '50,000+',
+      value: '250+',
       label: 'Contrats analysés',
     },
     {
