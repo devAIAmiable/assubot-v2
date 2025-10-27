@@ -1,4 +1,4 @@
-import { FaCheckCircle, FaChevronDown, FaSearch, FaSpinner } from 'react-icons/fa';
+import { FaCheckCircle, FaChevronDown, FaSearch } from 'react-icons/fa';
 import { Listbox, Transition } from '@headlessui/react';
 import React, { useMemo, useState } from 'react';
 
@@ -20,9 +20,6 @@ interface DropdownProps {
   onSearchChange?: (query: string) => void;
   searchPlaceholder?: string;
   noOptionsMessage?: string;
-  onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
-  hasMore?: boolean;
-  isLoadingMore?: boolean;
   id?: string;
   'aria-labelledby'?: string;
 }
@@ -40,9 +37,6 @@ const Dropdown: React.FC<DropdownProps> = ({
   onSearchChange,
   searchPlaceholder = 'Rechercher...',
   noOptionsMessage = 'Aucune option disponible',
-  onScroll,
-  hasMore = false,
-  isLoadingMore = false,
   id,
   'aria-labelledby': ariaLabelledBy,
 }) => {
@@ -82,10 +76,7 @@ const Dropdown: React.FC<DropdownProps> = ({
               </span>
             </Listbox.Button>
             <Transition as={React.Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-              <Listbox.Options
-                className="absolute z-10 mt-1 max-h-80 w-full overflow-y-auto rounded-lg bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                onScroll={onScroll}
-              >
+              <Listbox.Options className="absolute z-10 mt-1 max-h-80 w-full overflow-y-auto rounded-lg bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                 {/* Search input */}
                 {searchable && (
                   <div className="px-3 py-2 border-b border-gray-200">
@@ -127,20 +118,6 @@ const Dropdown: React.FC<DropdownProps> = ({
                   ))
                 ) : (
                   <div className="px-3 py-2 text-sm text-gray-500 text-center">{noOptionsMessage}</div>
-                )}
-
-                {/* Loading more indicator */}
-                {hasMore && (
-                  <div className="px-3 py-2 text-sm text-gray-500 text-center border-t border-gray-200">
-                    {isLoadingMore ? (
-                      <div className="flex items-center justify-center space-x-2">
-                        <FaSpinner className="animate-spin h-4 w-4" />
-                        <span>Chargement...</span>
-                      </div>
-                    ) : (
-                      <span>Faites défiler pour charger plus</span>
-                    )}
-                  </div>
                 )}
               </Listbox.Options>
             </Transition>

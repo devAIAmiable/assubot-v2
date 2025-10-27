@@ -70,7 +70,11 @@ export const usePaginatedInsurers = ({ searchQuery, limit = 20, isActive = true,
           return [...prev, ...newInsurers];
         });
       }
-      setHasMore(insurersData.pagination?.hasNext || false);
+
+      // Only update hasMore if we have pagination data
+      if (insurersData.pagination) {
+        setHasMore(insurersData.pagination.hasNext || false);
+      }
     }
   }, [insurersData, currentPage]);
 
