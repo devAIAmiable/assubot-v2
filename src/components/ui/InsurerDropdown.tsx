@@ -1,7 +1,8 @@
 import { FaSpinner, FaSearch } from 'react-icons/fa';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useDebouncedCallback } from 'use-debounce';
+import { useDebounce, useDebouncedCallback } from 'use-debounce';
+
 import Dropdown, { type DropdownOption } from './Dropdown';
 import { usePaginatedInsurers } from '../../hooks/usePaginatedInsurers';
 
@@ -24,13 +25,13 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
   error,
   className = '',
 }) => {
-  const { setValue, watch } = useFormContext();
   const [searchQuery, setSearchQuery] = useState('');
+  const { setValue, watch } = useFormContext();
 
-  const handleSearchChange = useDebouncedCallback((query: string) => {
-    setSearchQuery(query);
-  }, 300);
+  // Debounce search query
+  const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 
+  // Use the new paginated insurers hook
   const {
     insurers,
     hasMore,
@@ -39,41 +40,55 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
     isLoadingMore,
     error: insurersError,
   } = usePaginatedInsurers({
-    searchQuery,
+    searchQuery: debouncedSearchQuery,
     limit: 20,
     isActive: true,
     sortBy: 'name',
     sortOrder: 'asc',
   });
 
-  const selectedValue = useMemo(() => watch(name), [watch, name]);
+  const selectedValue = watch(name);
 
+  // Transform insurers to dropdown options (API already returns sorted data)
   const insurerOptions: DropdownOption[] = useMemo(() => {
-    return insurers.map((insurer) => ({
-      value: insurer.id,
-      label: insurer.name,
-    }));
+    return insurers
+      .filter((insurer) => insurer.isActive)
+      .map((insurer) => ({
+        value: insurer.id,
+        label: insurer.name,
+      }));
   }, [insurers]);
 
-  const handleValueChange = useCallback((value: string) => setValue(name, value), [setValue, name]);
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
 
-  const handleScroll = useCallback(
-    (event: React.UIEvent<HTMLDivElement>) => {
-      const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
-      // Trigger load more when user scrolls to within 50px of the bottom
-      if (scrollTop + clientHeight >= scrollHeight - 50 && hasMore && !isLoadingMore) {
-        loadMore();
-      }
+  const handleValueChange = useCallback(
+    (value: string) => {
+      setValue(name, value);
     },
-    [hasMore, isLoadingMore, loadMore]
+    [setValue, name]
   );
 
-  const getErrorMessage = useCallback(() => {
+  // Simplified scroll handler using useDebouncedCallback
+  const handleScroll = useDebouncedCallback((event: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
+    const isNearBottom = scrollTop + clientHeight >= scrollHeight - 10;
+
+    if (isNearBottom && hasMore && !isLoadingMore) {
+      loadMore();
+    }
+  }, 100);
+
+  // Enhanced error message extraction
+  const getErrorMessage = () => {
     if (!insurersError) return error;
-    const errorData = insurersError as { data?: { message?: string }; message?: string };
-    const message = errorData?.data?.message || errorData?.message || 'Impossible de charger la liste des assureurs';
-    return message;
-  }, [insurersError, error]);
+    if (typeof insurersError === 'object' && insurersError && 'data' in insurersError) {
+      const errorData = (insurersError as { data?: { message?: string } }).data;
+      return errorData?.message || 'Impossible de charger la liste des assureurs';
+    }
+    return 'Impossible de charger la liste des assureurs';
+  };
 
   const getPlaceholder = () => {
     if (isLoading) return 'Chargement des assureurs...';
@@ -83,19 +98,21 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
   };
 
   return (
-    <div className={`space-y-2 ${className}`} aria-busy={isLoading}>
-      <label htmlFor={`${name}-dropdown`} className="block text-sm font-medium text-gray-700">
+    <div className={`space-y-2 ${className}`}>
+      <label htmlFor={`${name}-dropdown`} id={`${name}-label`} className="block text-sm font-medium text-gray-700">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
         {isLoading && insurers.length === 0 && (
           <span className="ml-2 text-xs text-blue-600">
-            <FaSpinner className="inline animate-spin mr-1" /> Chargement...
+            <FaSpinner className="inline animate-spin mr-1" />
+            Chargement...
           </span>
         )}
       </label>
 
       <Dropdown
         id={`${name}-dropdown`}
+        aria-labelledby={`${name}-label`}
         options={insurerOptions}
         value={selectedValue}
         onChange={handleValueChange}
@@ -121,7 +138,7 @@ const InsurerDropdown: React.FC<InsurerDropdownProps> = ({
       {searchQuery.trim() && insurerOptions.length === 0 && !isLoading && (
         <p className="text-xs text-gray-500">
           <FaSearch className="inline mr-1" />
-          Aucun résultat pour "{searchQuery}".
+          Aucun résultat pour "{searchQuery}". Essayez un autre terme de recherche.
         </p>
       )}
     </div>

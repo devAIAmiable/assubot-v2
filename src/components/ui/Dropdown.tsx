@@ -46,7 +46,6 @@ const Dropdown: React.FC<DropdownProps> = ({
   id,
   'aria-labelledby': ariaLabelledBy,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const selectedOption = options.find((option) => option.value === value);
@@ -73,7 +72,6 @@ const Dropdown: React.FC<DropdownProps> = ({
             <Listbox.Button
               id={id}
               aria-labelledby={ariaLabelledBy}
-              onClick={() => setIsOpen(!isOpen)}
               className={`relative w-full cursor-default rounded-lg bg-white py-2.5 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
                 error ? 'border border-red-300 focus:ring-red-500' : 'border border-gray-300 hover:border-gray-400'
               } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
