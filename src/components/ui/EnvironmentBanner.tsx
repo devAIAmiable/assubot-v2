@@ -12,7 +12,7 @@ const EnvironmentBanner: React.FC<EnvironmentBannerProps> = ({ children }) => {
 
   useEffect(() => {
     // Only show banner for local and dev environments
-    if (config.environment === 'local' || config.environment === 'dev') {
+    if (config.environment === 'local' || config.environment === 'dev' || config.environment === 'development') {
       setIsVisible(true);
     }
   }, []);
@@ -42,6 +42,7 @@ const EnvironmentBanner: React.FC<EnvironmentBannerProps> = ({ children }) => {
           text: 'LOCAL ENVIRONMENT - You are running on localhost',
         };
       case 'dev':
+      case 'development':
         return {
           bgColor: 'bg-blue-600',
           textColor: 'text-white',
