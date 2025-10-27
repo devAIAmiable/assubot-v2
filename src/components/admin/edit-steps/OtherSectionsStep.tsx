@@ -71,22 +71,68 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
   );
 
   const renderZoneItem = (_item: unknown, index: number) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-        <select {...register(`zones.${index}.type`)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-          <option value={ZoneType.COUNTRY}>Pays</option>
-          <option value={ZoneType.ZONE}>Zone</option>
-        </select>
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+          <select {...register(`zones.${index}.type`)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value={ZoneType.COUNTRY}>Pays</option>
+            <option value={ZoneType.ZONE}>Zone</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Nom de la zone</label>
+          <input
+            {...register(`zones.${index}.label`)}
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Ex: France, Europe, Paris"
+          />
+        </div>
       </div>
+
+      {/* Conditions Section */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Nom de la zone</label>
-        <input
-          {...register(`zones.${index}.label`)}
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Ex: France, Europe, Paris"
-        />
+        <label className="block text-sm font-medium text-gray-700 mb-2">Conditions (optionnel)</label>
+        <div className="space-y-2">
+          {zonesArray.fields[index]?.conditions?.map((_, conditionIndex) => (
+            <div key={conditionIndex} className="flex gap-2">
+              <input
+                {...register(`zones.${index}.conditions.${conditionIndex}`)}
+                type="text"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Ex: Couverture limitée aux particuliers"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const currentConditions = zonesArray.fields[index]?.conditions || [];
+                  const newConditions = currentConditions.filter((_, i) => i !== conditionIndex);
+                  zonesArray.update(index, {
+                    ...zonesArray.fields[index],
+                    conditions: newConditions.length > 0 ? newConditions : undefined,
+                  });
+                }}
+                className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <FaTimes className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              const currentConditions = zonesArray.fields[index]?.conditions || [];
+              zonesArray.update(index, {
+                ...zonesArray.fields[index],
+                conditions: [...currentConditions, ''],
+              });
+            }}
+            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+          >
+            <span>+</span> Ajouter une condition
+          </button>
+        </div>
       </div>
     </div>
   );

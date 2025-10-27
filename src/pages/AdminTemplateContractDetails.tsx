@@ -790,10 +790,40 @@ const AdminTemplateContractDetails = () => {
 
                           {/* Zone List */}
                           <div className="bg-white rounded-xl p-4 sm:p-6 border border-blue-100">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                              <FaGlobe className="h-5 w-5 text-blue-600" />
+                              Zones de couverture
+                            </h3>
+                            <div className="space-y-3">
                               {contract.zones.map((zone) => (
-                                <div key={zone.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center">
-                                  <span className="text-sm font-medium text-gray-700">{capitalizeFirst(zone.label)}</span>
+                                <div key={zone.id} className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200 hover:shadow-md transition-shadow">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                        <span className="font-medium text-gray-900">{capitalizeFirst(zone.label)}</span>
+                                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                          {zone.type === 'country' ? 'Pays' : zone.type === 'zone' ? 'Zone' : zone.type === 'region' ? 'Région' : 'Ville'}
+                                        </span>
+                                      </div>
+                                      {zone.conditions && zone.conditions.length > 0 && (
+                                        <div className="mt-3">
+                                          <div className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                                            <FaClipboardList className="h-3 w-3" />
+                                            Conditions spécifiques
+                                          </div>
+                                          <div className="space-y-1">
+                                            {zone.conditions.map((condition, index) => (
+                                              <div key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                                                <span className="text-blue-400 mt-1">•</span>
+                                                <span className="leading-relaxed">{condition}</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
                               ))}
                             </div>

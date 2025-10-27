@@ -75,6 +75,7 @@ const AdminTemplateContractEdit: React.FC = () => {
           contract.zones?.map((z) => ({
             type: z.type,
             label: z.label,
+            conditions: z.conditions || undefined,
           })) || [],
         terminations: [],
         cancellations:

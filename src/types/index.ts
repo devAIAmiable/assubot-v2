@@ -39,7 +39,7 @@ export interface EditTemplateContractRequest {
   }>;
   exclusions?: Array<{ description?: string; type?: string }>;
   obligations?: Array<{ description?: string; type?: string }>;
-  zones?: Array<{ type?: string; label?: string }>;
+  zones?: Array<{ type?: string; label?: string; conditions?: string[] }>;
   terminations?: Array<{ description?: string }>;
   cancellations?: Array<{ question?: string; response?: string }>;
   contacts?: Array<{
@@ -244,6 +244,7 @@ export interface ContractZone {
   contractId: string;
   label: string;
   coordinates?: object; // JSON
+  conditions?: string[] | null;
   createdAt: string;
 }
 

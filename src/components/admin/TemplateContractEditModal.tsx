@@ -57,6 +57,7 @@ const TemplateContractEditModal: React.FC<TemplateContractEditModalProps> = ({ i
         contract.zones?.map((z) => ({
           type: z.type,
           label: z.label,
+          conditions: z.conditions || undefined,
         })) || [],
       terminations: [],
       cancellations:
@@ -97,7 +98,10 @@ const TemplateContractEditModal: React.FC<TemplateContractEditModalProps> = ({ i
         guarantees: formData.guarantees,
         exclusions: formData.exclusions,
         obligations: formData.obligations,
-        zones: formData.zones,
+        zones: formData.zones?.map((zone) => ({
+          ...zone,
+          conditions: zone.conditions || undefined,
+        })),
         terminations: formData.terminations,
         cancellations: formData.cancellations,
         contacts: formData.contacts,

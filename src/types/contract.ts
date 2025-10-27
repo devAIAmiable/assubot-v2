@@ -143,6 +143,7 @@ export interface ContractZone {
   type: ZoneType;
   label: string;
   coordinates?: Record<string, unknown>; // JSON data for coordinates
+  conditions?: string[] | null;
   createdAt: Date;
 
   // Relations
@@ -485,6 +486,7 @@ export interface BackendContractZone {
   type: ZoneType;
   label: string;
   coordinates?: Record<string, unknown>;
+  conditions?: string[] | null;
 }
 
 // Backend termination model
