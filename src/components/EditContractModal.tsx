@@ -29,11 +29,45 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
   });
 
   const handleInputChange = (field: keyof UpdateContractRequest, value: string | number | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const newData = { ...prev, [field]: value };
+
+      // Validate date relationships
+      if (field === 'startDate' && value && newData.endDate) {
+        const startDate = new Date(value as string);
+        const endDate = new Date(newData.endDate);
+        if (startDate > endDate) {
+          // Clear end date if it becomes invalid
+          newData.endDate = '';
+        }
+      }
+
+      if (field === 'endDate' && value && newData.startDate) {
+        const startDate = new Date(newData.startDate);
+        const endDate = new Date(value as string);
+        if (endDate < startDate) {
+          // Don't update end date if it's before start date
+          return prev;
+        }
+      }
+
+      return newData;
+    });
+  };
+
+  // Helper function to check if dates are valid
+  const areDatesValid = () => {
+    if (!formData.startDate || !formData.endDate) return true;
+    return new Date(formData.endDate) >= new Date(formData.startDate);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate date relationships before submission
+    if (!areDatesValid()) {
+      return; // Don't submit if dates are invalid
+    }
 
     try {
       // Convert form data to API format
@@ -194,6 +228,7 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                         onChange={(e) => handleInputChange('startDate', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
                       />
+                      <p className="text-xs text-gray-500 mt-1">La date de fin sera automatiquement effacée si elle devient antérieure à cette date</p>
                     </div>
 
                     <div>
@@ -202,8 +237,12 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                         type="date"
                         value={formData.endDate || ''}
                         onChange={(e) => handleInputChange('endDate', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
+                        min={formData.startDate || undefined}
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent ${
+                          !areDatesValid() ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                        }`}
                       />
+                      {!areDatesValid() && <p className="text-xs text-red-600 mt-1">La date de fin doit être postérieure à la date de début</p>}
                     </div>
                   </div>
                 </div>
@@ -213,7 +252,7 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                   <Button type="button" variant="secondary" onClick={onClose} disabled={isUpdating}>
                     Annuler
                   </Button>
-                  <Button type="submit" disabled={isUpdating} className="px-8">
+                  <Button type="submit" disabled={isUpdating || !areDatesValid()} className="px-8">
                     {isUpdating ? (
                       <>
                         <FaSpinner className="animate-spin h-4 w-4 mr-2" />
