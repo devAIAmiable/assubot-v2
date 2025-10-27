@@ -1,3 +1,4 @@
+import { FaInstagram, FaLinkedin } from 'react-icons/fa';
 import {
   VscBell,
   VscCheck,
@@ -34,8 +35,55 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const { data: creditPacks, isLoading: isLoadingPricing, error: pricingError } = useGetCreditPacksQuery();
 
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    subject: 'Question générale',
+    message: '',
+  });
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const navigateToApp = () => {
     navigate('/app');
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Construct mailto URL
+    const mailtoLink = `mailto:contact@a-lamiable.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(
+      `Nom: ${formData.firstName} ${formData.lastName}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
+    )}`;
+
+    // Open email client
+    window.open(mailtoLink, '_blank');
+
+    // Show success message
+    setShowSuccess(true);
+
+    // Clear form after 2 seconds
+    setTimeout(() => {
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        subject: 'Question générale',
+        message: '',
+      });
+    }, 2000);
+
+    // Hide success message after 5 seconds
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 5000);
   };
 
   const features = [
@@ -58,7 +106,7 @@ const LandingPage = () => {
       title: 'Dashboard utilisateur',
       subtitle: "Votre situation d'assurance en un coup d'œil",
       description:
-        "Vue d'ensemble visuelle de tous vos contrats, niveaux de couverture, renouvellements à venir et dépenses. Suivi des informations importantes et intégration avec tous les modules.",
+        "Vue d'ensemble visuelle de tous vos contrats, niveaux de couverture, renouvellements à venir et dépenses. Suivi des informations importantes de tous les modules.",
     },
     {
       icon: <VscTarget className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300" />,
@@ -754,7 +802,6 @@ const LandingPage = () => {
                   <div>
                     <h3 className="text-xl font-bold text-white mb-3">Email</h3>
                     <p className="text-blue-100 mb-1">contact@a-lamiable.com</p>
-                    <p className="text-blue-100">support@a-lamiable.com</p>
                   </div>
                 </motion.div>
 
@@ -767,8 +814,8 @@ const LandingPage = () => {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white mb-3">Adresse</h3>
-                    <p className="text-blue-100 mb-1">123 Avenue de l'Innovation</p>
-                    <p className="text-blue-100">75001 Paris, France</p>
+                    <p className="text-blue-100 mb-1">59 rue de Ponthieu, Bureau 326</p>
+                    <p className="text-blue-100">75008 Paris, France</p>
                   </div>
                 </motion.div>
               </div>
@@ -801,12 +848,28 @@ const LandingPage = () => {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full -translate-y-12 translate-x-12 opacity-20" />
                 <div className="relative z-10">
                   <h3 className="text-3xl font-bold text-white mb-8">Envoyez-nous un message</h3>
-                  <form className="space-y-6">
+                  {showSuccess && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="mb-6 p-4 bg-green-500/20 border border-green-400/30 rounded-xl text-green-100 backdrop-blur-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        <VscCheck className="h-5 w-5" />
+                        <span>Message envoyé avec succès! Votre client email s'est ouvert.</span>
+                      </div>
+                    </motion.div>
+                  )}
+                  <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-blue-100 mb-2">Prénom</label>
                         <input
                           type="text"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleFormChange}
                           className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-colors"
                           placeholder="Votre prénom"
                         />
@@ -815,6 +878,9 @@ const LandingPage = () => {
                         <label className="block text-sm font-medium text-blue-100 mb-2">Nom</label>
                         <input
                           type="text"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleFormChange}
                           className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-colors"
                           placeholder="Votre nom"
                         />
@@ -824,13 +890,21 @@ const LandingPage = () => {
                       <label className="block text-sm font-medium text-blue-100 mb-2">Email</label>
                       <input
                         type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleFormChange}
                         className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-colors"
                         placeholder="votre.email@exemple.fr"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-blue-100 mb-2">Sujet</label>
-                      <select className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-colors">
+                      <select
+                        name="subject"
+                        value={formData.subject}
+                        onChange={handleFormChange}
+                        className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-colors"
+                      >
                         <option>Question générale</option>
                         <option>Support technique</option>
                         <option>Partenariat</option>
@@ -840,6 +914,9 @@ const LandingPage = () => {
                     <div>
                       <label className="block text-sm font-medium text-blue-100 mb-2">Message</label>
                       <textarea
+                        name="message"
+                        value={formData.message}
+                        onChange={handleFormChange}
                         rows={4}
                         className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-colors"
                         placeholder="Décrivez votre demande..."
@@ -907,14 +984,16 @@ const LandingPage = () => {
                 AssuBot
               </div>
               <p className="text-gray-400">Développé par A l'Amiable - Simplifier les décisions d'assurance grâce à l'IA et à l'automatisation.</p>
-              <div className="flex space-x-4">
+              <div className="flex ">
                 <a
                   href="https://linkedin.com/company/a-lamiable"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
                 >
-                  <span className="text-sm font-bold">in</span>
+                  <span className="text-sm font-bold">
+                    <FaLinkedin />
+                  </span>
                 </a>
                 <a
                   href="https://instagram.com/aia.alamiable"
@@ -922,7 +1001,9 @@ const LandingPage = () => {
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
                 >
-                  <span className="text-sm font-bold">ig</span>
+                  <span className="text-sm font-bold">
+                    <FaInstagram />
+                  </span>
                 </a>
               </div>
             </div>
@@ -984,11 +1065,11 @@ const LandingPage = () => {
                     Politique de Confidentialité
                   </button>
                 </li>
-                <li>
+                {/* <li>
                   <button onClick={() => navigate('/legal-notices')} className="hover:text-white transition-colors text-left">
                     Mentions légales
                   </button>
-                </li>
+                </li> */}
               </ul>
             </div>
           </div>
