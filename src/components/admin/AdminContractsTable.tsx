@@ -235,9 +235,11 @@ const AdminContractsTable: React.FC = () => {
                           e.stopPropagation();
                           handleSummarize(contract.id);
                         }}
-                        disabled={isSummarizing || contract.summarizeStatus !== 'pending' || contract.status === 'pending'}
+                        disabled={isSummarizing || (contract.summarizeStatus !== 'pending' && contract.summarizeStatus !== 'failed') || contract.status === 'pending'}
                         className={`${
-                          contract.summarizeStatus === 'pending' && contract.status !== 'pending' ? 'text-green-600 hover:text-green-800' : 'text-gray-400 cursor-not-allowed'
+                          (contract.summarizeStatus === 'pending' || contract.summarizeStatus === 'failed') && contract.status !== 'pending'
+                            ? 'text-green-600 hover:text-green-800'
+                            : 'text-gray-400 cursor-not-allowed'
                         }`}
                       >
                         {isSummarizing ? <FaSpinner className="h-4 w-4 animate-spin" /> : <FaRobot className="h-4 w-4" />}

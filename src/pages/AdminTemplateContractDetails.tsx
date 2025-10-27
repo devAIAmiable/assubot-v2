@@ -431,14 +431,19 @@ const AdminTemplateContractDetails = () => {
       );
     }
 
-    // Show pending state with button to start analysis (only when status is pending)
-    if (contract?.summarizeStatus === 'pending') {
+    // Show pending or failed state with button to start/retry analysis
+    if (contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'failed') {
+      const isFailed = contract?.summarizeStatus === 'failed';
       return (
         <div className="text-center py-12">
           <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
             <Avatar size="xl" isAssistant />
-            <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en attente</h4>
-            <p className="text-gray-600 leading-relaxed mb-6">Je t’affiche les détails dès que j’ai analysé ton contrat. Clique sur « Lancer l’analyse » pour démarrer</p>
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">{isFailed ? 'Analyse échouée' : 'Analyse en attente'}</h4>
+            <p className="text-gray-600 leading-relaxed mb-6">
+              {isFailed
+                ? "L'analyse du contrat a échoué. Clique sur « Réessayer » pour relancer l'analyse."
+                : "Je t'affiche les détails dès que j'ai analysé ton contrat. Clique sur « Lancer l'analyse » pour démarrer"}
+            </p>
             <button
               onClick={handleSummarize}
               disabled={isSummarizing}
@@ -451,7 +456,7 @@ const AdminTemplateContractDetails = () => {
                 </>
               ) : (
                 <>
-                  <span>Lancer l'analyse</span>
+                  <span>{isFailed ? 'Réessayer' : "Lancer l'analyse"}</span>
                 </>
               )}
             </button>
@@ -514,7 +519,7 @@ const AdminTemplateContractDetails = () => {
               </button>
 
               {/* Summarize button */}
-              {contract?.summarizeStatus === 'pending' && (
+              {(contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'failed') && (
                 <button
                   onClick={handleSummarize}
                   disabled={isSummarizing}
@@ -528,7 +533,7 @@ const AdminTemplateContractDetails = () => {
                   ) : (
                     <>
                       <FaFileAlt className="h-4 w-4" />
-                      <span>Résumer</span>
+                      <span>{contract?.summarizeStatus === 'failed' ? 'Réessayer' : 'Résumer'}</span>
                     </>
                   )}
                 </button>

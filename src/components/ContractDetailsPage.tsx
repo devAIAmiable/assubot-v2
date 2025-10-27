@@ -463,13 +463,19 @@ const ContractDetailsPage = () => {
       );
     }
 
-    // Show pending state with button to start analysis (only when status is pending)
-    if (contract?.summarizeStatus === 'pending') {
+    // Show pending or failed state with button to start/retry analysis
+    if (contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'failed') {
+      const isFailed = contract?.summarizeStatus === 'failed';
       return (
         <div className="text-center py-12">
           <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
             <Avatar isAssistant />
-            <p className="text-gray-600 leading-relaxed mb-6">Je t’affiche les détails dès que j’ai analysé ton contrat. Clique sur « Lancer l’analyse » pour démarrer</p>
+            <h4 className="text-lg font-semibold text-gray-900 mb-3">{isFailed ? 'Analyse échouée' : 'Analyse en attente'}</h4>
+            <p className="text-gray-600 leading-relaxed mb-6">
+              {isFailed
+                ? "L'analyse du contrat a échoué. Clique sur « Réessayer » pour relancer l'analyse."
+                : "Je t'affiche les détails dès que j'ai analysé ton contrat. Clique sur « Lancer l'analyse » pour démarrer"}
+            </p>
             <button
               onClick={handleSummarize}
               disabled={isSummarizing}
@@ -482,7 +488,7 @@ const ContractDetailsPage = () => {
                 </>
               ) : (
                 <>
-                  <span>Lancer l'analyse</span>
+                  <span>{isFailed ? 'Réessayer' : "Lancer l'analyse"}</span>
                 </>
               )}
             </button>
@@ -540,8 +546,8 @@ const ContractDetailsPage = () => {
 
               {/* Action buttons */}
               <div className="flex items-center space-x-1">
-                {/* Summarize button - Only show when status is pending */}
-                {contract?.summarizeStatus === 'pending' && (
+                {/* Summarize button - Only show when status is pending or failed */}
+                {(contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'failed') && (
                   <div className="relative group">
                     <button
                       onClick={handleSummarize}
@@ -551,7 +557,7 @@ const ContractDetailsPage = () => {
                       {isSummarizing ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div> : <FaFileAlt className="h-4 w-4" />}
                     </button>
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                      {isSummarizing ? 'Génération en cours...' : 'Générer le résumé'}
+                      {isSummarizing ? 'Génération en cours...' : contract?.summarizeStatus === 'failed' ? 'Réessayer le résumé' : 'Générer le résumé'}
                     </div>
                   </div>
                 )}
