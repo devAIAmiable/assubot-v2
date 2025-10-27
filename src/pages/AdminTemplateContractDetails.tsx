@@ -312,7 +312,7 @@ const AdminTemplateContractDetails = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e51ab] mx-auto mb-4"></div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Chargement du contrat template...</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Chargement du contrat...</h1>
           <p className="text-gray-600">Veuillez patienter pendant que nous récupérons les détails.</p>
         </div>
       </div>
@@ -324,7 +324,7 @@ const AdminTemplateContractDetails = () => {
     const errorMessage =
       error && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data
         ? String(error.data.message)
-        : 'Une erreur est survenue lors du chargement du contrat template.';
+        : 'Une erreur est survenue lors du chargement du contrat.';
 
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -344,8 +344,8 @@ const AdminTemplateContractDetails = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Contrat template non trouvé</h1>
-          <p className="text-gray-600 mb-6">Le contrat template que vous recherchez n'existe pas.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Contrat non trouvé</h1>
+          <p className="text-gray-600 mb-6">Le contrat que vous recherchez n'existe pas.</p>
           <button onClick={() => navigate('/app/admin')} className="px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-medium hover:bg-[#163d82] transition-colors">
             Retour à l'administration
           </button>
@@ -660,7 +660,7 @@ const AdminTemplateContractDetails = () => {
                           <FaShieldAlt className="h-8 w-8 text-gray-400" />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune garantie spécifiée</h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">Ce contrat template ne contient pas encore d'informations détaillées sur les garanties.</p>
+                        <p className="text-sm text-gray-600 leading-relaxed">Ce contrat ne contient pas encore d'informations détaillées sur les garanties.</p>
                       </div>
                     </div>
                   )}
@@ -839,7 +839,7 @@ const AdminTemplateContractDetails = () => {
                           <div className="w-full max-w-md mx-auto bg-white rounded-xl border border-blue-200 p-6 sm:p-8 shadow-lg">
                             <FaGlobe className="h-16 w-16 sm:h-20 sm:w-20 text-gray-300 mx-auto mb-4 sm:mb-6" />
                             <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Aucune zone géographique spécifiée</h4>
-                            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">Ce contrat template ne spécifie pas de zones de couverture géographique.</p>
+                            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">Ce contrat ne spécifie pas de zones de couverture géographique.</p>
                           </div>
                         </div>
                       )}
@@ -857,7 +857,7 @@ const AdminTemplateContractDetails = () => {
                     <div className="space-y-4">
                       <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                         <FaClipboardList className="text-blue-600 mr-3" />
-                        Obligations du template
+                        Obligations
                       </h3>
 
                       {contract.obligations && contract.obligations.length > 0 ? (

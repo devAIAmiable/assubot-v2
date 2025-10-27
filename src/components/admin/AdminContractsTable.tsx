@@ -44,11 +44,11 @@ const AdminContractsTable: React.FC = () => {
 
   const handleDelete = useCallback(
     async (contractId: string) => {
-      if (window.confirm('Êtes-vous sûr de vouloir supprimer ce contrat template ? Cette action est irréversible.')) {
+      if (window.confirm('Êtes-vous sûr de vouloir supprimer ce contrat ? Cette action est irréversible.')) {
         try {
           await deleteAdminTemplateContract(contractId).unwrap();
         } catch (error) {
-          console.error('Failed to delete admin template contract:', error);
+          console.error('Failed to delete admin contract:', error);
         }
       }
     },
@@ -60,7 +60,7 @@ const AdminContractsTable: React.FC = () => {
       try {
         await summarizeAdminTemplateContract(contractId).unwrap();
       } catch (error) {
-        console.error('Failed to summarize admin template contract:', error);
+        console.error('Failed to summarize admin contract:', error);
       }
     },
     [summarizeAdminTemplateContract]
