@@ -49,14 +49,6 @@ const GuaranteesStep: React.FC<GuaranteesStepProps> = ({ onNext, onPrevious }) =
       {/* AI Disclaimer */}
       <AIDisclaimer />
 
-      {/* Add Guarantee Button */}
-      <div className="flex justify-end">
-        <button type="button" onClick={addGuarantee} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          <FaPlus className="h-4 w-4" />
-          Ajouter une garantie
-        </button>
-      </div>
-
       {/* Guarantees List */}
       <div className="space-y-4">
         <AnimatePresence>
@@ -93,6 +85,14 @@ const GuaranteesStep: React.FC<GuaranteesStepProps> = ({ onNext, onPrevious }) =
             ))
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Add Guarantee Button */}
+      <div className="flex justify-end">
+        <button type="button" onClick={addGuarantee} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <FaPlus className="h-4 w-4" />
+          Ajouter une garantie
+        </button>
       </div>
 
       {/* Information Box */}
