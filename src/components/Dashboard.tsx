@@ -1,19 +1,5 @@
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
-import {
-  FaArrowRight,
-  FaBell,
-  FaBrain,
-  FaCalendarAlt,
-  FaChartLine,
-  FaChartPie,
-  FaClock,
-  FaEuroSign,
-  FaExclamationTriangle,
-  FaFileContract,
-  FaLightbulb,
-  FaRobot,
-  FaShieldAlt,
-} from 'react-icons/fa';
+import { FaArrowRight, FaBell, FaBrain, FaCalendarAlt, FaChartLine, FaChartPie, FaExclamationTriangle, FaFileContract, FaLightbulb, FaRobot } from 'react-icons/fa';
 import { getContractPremium, getContractType } from '../utils/contractAdapters';
 
 import type { ChartOptions } from 'chart.js';
@@ -23,6 +9,7 @@ import { motion } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
 import { useDashboardStats } from '../hooks/useDashboardStats';
 import { useNavigate } from 'react-router-dom';
+import { StatCard, StatsGrid } from './ui';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -256,64 +243,23 @@ const Dashboard = () => {
       {!isLoading && !error && (
         <>
           {/* Stats Cards */}
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Total des contrats</p>
-                  <p className="text-2xl font-bold text-gray-900">{contractStats.active}</p>
+          <StatsGrid>
+            <StatCard label="Total des contrats" value={contractStats.active} type="total-contracts" />
+            <StatCard label="Dépenses mensuelles" value={`${contractStats.monthlyPremium.toFixed(0)}€`} type="monthly-premium" />
+            <StatCard label="Dépenses annuelles" value={`${totalAnnual.toLocaleString()}€`} type="annual-premium" />
+            <StatCard
+              label="Expire Bientôt"
+              value={contractStats.expiring}
+              type="expiring-contracts"
+              valueColor="text-amber-600"
+              footer={
+                <div className="flex items-center text-sm">
+                  <FaCalendarAlt className="h-4 w-4 text-amber-500 mr-1" />
+                  <span className="text-amber-600 font-medium">Dans moins de 60 jours</span>
                 </div>
-                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-                  <FaShieldAlt className="h-6 w-6 text-[#1e51ab]" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Dépenses mensuelles</p>
-                  <p className="text-2xl font-bold text-gray-900">{contractStats.monthlyPremium.toFixed(0)}€</p>
-                </div>
-                <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-                  <FaEuroSign className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Dépenses annuelles</p>
-                  <p className="text-2xl font-bold text-gray-900">{totalAnnual.toLocaleString()}€</p>
-                </div>
-                <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-                  <FaChartPie className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Expire Bientôt</p>
-                  <p className="text-2xl font-bold text-amber-600">{contractStats.expiring}</p>
-                </div>
-                <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center">
-                  <FaClock className="h-6 w-6 text-amber-600" />
-                </div>
-              </div>
-              <div className="flex items-center mt-4 text-sm">
-                <FaCalendarAlt className="h-4 w-4 text-amber-500 mr-1" />
-                <span className="text-amber-600 font-medium">Dans moins de 60 jours</span>
-              </div>
-            </div>
-          </motion.div>
+              }
+            />
+          </StatsGrid>
 
           {/* Insurance Budget Chart */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>

@@ -1,5 +1,5 @@
 import type { ContractCategory, ContractListItem } from '../types/contract';
-import { FaCalendarAlt, FaChevronDown, FaEdit, FaEuroSign, FaEye, FaFileContract, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
+import { FaChevronDown, FaEdit, FaEye, FaFileContract, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
 import { getContractListItemInsurer, getContractListItemPremium, getContractListItemType } from '../utils/contractAdapters';
 import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../utils/contract';
 
@@ -15,6 +15,7 @@ import { motion } from 'framer-motion';
 import { useContractOperations } from '../hooks/useContractOperations';
 import { useContracts } from '../hooks/useContracts';
 import { useState } from 'react';
+import { StatCard, StatsGrid } from './ui';
 
 const ContractsModule = () => {
   const {
@@ -116,60 +117,12 @@ const ContractsModule = () => {
       </motion.div>
 
       {/* Stats Cards */}
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-      >
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total des contrats</p>
-              <p className="text-2xl font-bold text-gray-900">{isFetching ? '...' : contractStats.total}</p>
-            </div>
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-              <FaFileContract className="h-6 w-6 text-[#1e51ab]" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Contrat(s) actif(s)</p>
-              <p className="text-2xl font-bold text-green-600">{contractStats.active}</p>
-            </div>
-            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-              <FaFileContract className="h-6 w-6 text-green-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Dépenses annuelles</p>
-              <p className="text-2xl font-bold text-gray-900">{(contractStats.totalPremium / 100).toLocaleString('fr-FR')}€</p>
-            </div>
-            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-              <FaEuroSign className="h-6 w-6 text-purple-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Expiré(s)</p>
-              <p className="text-2xl font-bold text-red-600">{contractStats.expired}</p>
-            </div>
-            <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
-              <FaCalendarAlt className="h-6 w-6 text-red-600" />
-            </div>
-          </div>
-        </div>
-      </motion.div>
+      <StatsGrid>
+        <StatCard label="Total des contrats" value={contractStats.total} type="total-contracts" isLoading={isFetching} />
+        <StatCard label="Contrat(s) actif(s)" value={contractStats.active} type="active-contracts" valueColor="text-green-600" />
+        <StatCard label="Dépenses annuelles" value={`${(contractStats.totalPremium / 100).toLocaleString('fr-FR')}€`} type="total-premium" />
+        <StatCard label="Expiré(s)" value={contractStats.expired} type="expired-contracts" valueColor="text-red-600" />
+      </StatsGrid>
 
       {/* Search and Filters */}
       <motion.div
