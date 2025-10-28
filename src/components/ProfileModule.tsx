@@ -25,6 +25,7 @@ import {
   type AddressFormData,
   type PasswordChangeFormData,
 } from '../schemas/profileValidation';
+import { getProfessionalCategoryLabel, professionalCategoryOptions } from '../utils/user';
 
 const ProfileModule = () => {
   const navigate = useNavigate();
@@ -117,21 +118,7 @@ const ProfileModule = () => {
     { value: 'other', label: 'Autre' },
   ];
 
-  const professionalCategoryOptions: DropdownOption[] = [
-    { value: '', label: 'Sélectionner une catégorie' },
-    { value: 'executive', label: 'Employé cadre' },
-    { value: 'non-executive', label: 'Employé non cadre' },
-    { value: 'entrepreneur', label: 'Entrepreneur' },
-    { value: 'student', label: 'Étudiant' },
-    { value: 'unemployed', label: 'Sans emploi' },
-  ];
-
   // Helper function to get professional category label
-  const getProfessionalCategoryLabel = (value: string | undefined): string => {
-    if (!value) return 'Non renseigné';
-    const option = professionalCategoryOptions.find((opt) => opt.value === value);
-    return option ? option.label : 'Non renseigné';
-  };
 
   const handlePersonalSubmit = async (data: PersonalInfoFormData) => {
     // Déclencher la validation complète avant la soumission

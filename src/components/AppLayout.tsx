@@ -4,9 +4,9 @@ import { Menu, Transition } from '@headlessui/react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import Avatar from './ui/Avatar';
-import type { DropdownOption } from './ui/Dropdown';
 import VideoModal from './ui/VideoModal';
 import { VscRobot } from 'react-icons/vsc';
+import { getProfessionalCategoryLabel } from '../utils/user';
 import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
@@ -85,19 +85,6 @@ const AppLayout = () => {
       return `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || 'Utilisateur';
     }
     return 'Utilisateur';
-  };
-  const professionalCategoryOptions: DropdownOption[] = [
-    { value: '', label: 'Sélectionner une catégorie' },
-    { value: 'executive', label: 'Employé cadre' },
-    { value: 'non-executive', label: 'Employé non cadre' },
-    { value: 'entrepreneur', label: 'Entrepreneur' },
-    { value: 'student', label: 'Étudiant' },
-    { value: 'unemployed', label: 'Sans emploi' },
-  ];
-  const getProfessionalCategoryLabel = (value: string | undefined): string => {
-    if (!value) return 'Non renseigné';
-    const option = professionalCategoryOptions.find((opt) => opt.value === value);
-    return option ? option.label : 'Non renseigné';
   };
 
   return (
