@@ -17,6 +17,7 @@ import {
   FaFileAlt,
   FaFilePdf,
   FaGlobe,
+  FaMagic,
   FaPhone,
   FaShieldAlt,
   FaTimes,
@@ -515,6 +516,24 @@ const ContractDetailsPage = () => {
     return null;
   };
 
+  // AI Disclaimer Component
+  const AIDisclaimer = () => (
+    <div className="mt-6 text-center">
+      <div className="flex items-center justify-center">
+        <div className="flex-shrink-0">
+          <FaMagic className="h-4 w-4 text-[#1e51ab]" />
+        </div>
+        <div className="ml-2">
+          <p className="text-sm text-gray-500">
+            <span className="font-medium">
+              Votre espace « Contrats » est confidentiel. L'extraction des informations repose sur une IA, veuillez vérifier les informations importantes.
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -627,6 +646,7 @@ const ContractDetailsPage = () => {
                       <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
                         <FaShieldAlt className="h-5 w-5 sm:h-6 sm:w-6 text-[#1e51ab] mr-2 sm:mr-3" />
                         Mon contrat en un coup d'œil
+                        <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <div className="space-y-4">
@@ -666,7 +686,10 @@ const ContractDetailsPage = () => {
                     {/* Garanties souscrites (2/3) */}
                     <div className="lg:col-span-2 space-y-4 sm:space-y-6">
                       <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
-                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Garanties souscrites</h3>
+                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
+                          Garanties souscrites
+                          <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                           {contract.guarantees && contract.guarantees.length > 0 ? (
                             contract.guarantees.map((garantie) => (
@@ -717,6 +740,8 @@ const ContractDetailsPage = () => {
                       </div>
                     </div>
                   </div>
+
+                  <AIDisclaimer />
                 </div>
               </TabPanel>
 
@@ -733,6 +758,7 @@ const ContractDetailsPage = () => {
                         <div className="flex items-center gap-2">
                           <FaShieldAlt className="text-blue-600" />
                           <span className="font-semibold text-gray-900">{contract.guarantees.length} garanties</span>
+                          <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
                         </div>
                         <div className="h-4 w-px bg-gray-300" />
                         <div className="flex items-center gap-2">
@@ -817,6 +843,8 @@ const ContractDetailsPage = () => {
                       </div>
                     </div>
                   )}
+
+                  <AIDisclaimer />
                 </div>
               </TabPanel>
 
@@ -831,6 +859,7 @@ const ContractDetailsPage = () => {
                       <h3 className="text-lg sm:text-2xl font-semibold mb-4 sm:mb-6 flex items-center">
                         <FaExclamationTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 mr-2 sm:mr-3" />
                         Exclusions générales
+                        <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
                       </h3>
                       <div className="space-y-3 sm:space-y-4">
                         {contract.exclusions && contract.exclusions.length > 0 ? (
@@ -845,6 +874,8 @@ const ContractDetailsPage = () => {
                       </div>
                     </div>
                   )}
+
+                  <AIDisclaimer />
                 </div>
               </TabPanel>
 
@@ -860,7 +891,10 @@ const ContractDetailsPage = () => {
                         <div className="space-y-6 sm:space-y-8">
                           {/* World Map */}
                           <div className="">
-                            <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Zones couvertes</h4>
+                            <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center">
+                              Zones couvertes
+                              <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
+                            </h4>
                             <div className="w-full h-[300px] sm:h-[400px] lg:h-[600px] bg-white rounded-lg border border-blue-200 shadow-inner overflow-hidden">
                               <ComposableMap
                                 projection="geoEqualEarth"
@@ -1009,6 +1043,8 @@ const ContractDetailsPage = () => {
                       )}
                     </div>
                   )}
+
+                  <AIDisclaimer />
                 </div>
               </TabPanel>
 
@@ -1023,6 +1059,7 @@ const ContractDetailsPage = () => {
                       <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                         <FaClipboardList className="text-blue-600 mr-3" />
                         Mes obligations
+                        <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
                       </h3>
 
                       {contract.obligations && contract.obligations.length > 0 ? (
@@ -1091,6 +1128,8 @@ const ContractDetailsPage = () => {
                       )}
                     </div>
                   )}
+
+                  <AIDisclaimer />
                 </div>
               </TabPanel>
 
@@ -1105,6 +1144,7 @@ const ContractDetailsPage = () => {
                       <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
                         <FaExclamationTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600 mr-2 sm:mr-3" />
                         Questions fréquentes sur la résiliation
+                        <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
                       </h3>
                       <div className="space-y-3 sm:space-y-4">
                         {contract.cancellations && contract.cancellations.length > 0 ? (
@@ -1136,6 +1176,8 @@ const ContractDetailsPage = () => {
                       </div>
                     </div>
                   )}
+
+                  <AIDisclaimer />
                 </div>
               </TabPanel>
 
@@ -1150,6 +1192,7 @@ const ContractDetailsPage = () => {
                       <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-6 sm:mb-8 flex items-center">
                         <FaPhone className="h-5 w-5 sm:h-6 sm:w-6 text-[#1e51ab] mr-2 sm:mr-3" />
                         Qui contacter
+                        <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
                       </h3>
 
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -1159,6 +1202,7 @@ const ContractDetailsPage = () => {
                               <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
                                 <FaClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2" />
                                 {getContactTypeLabel(contact.type)}
+                                <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
                               </h4>
                               <div className="space-y-3 sm:space-y-4">
                                 {contact.name && (
@@ -1197,6 +1241,8 @@ const ContractDetailsPage = () => {
                       </div>
                     </>
                   )}
+
+                  <AIDisclaimer />
                 </div>
               </TabPanel>
             </div>

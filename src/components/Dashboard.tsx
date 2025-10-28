@@ -19,6 +19,7 @@ import { getContractPremium, getContractType } from '../utils/contractAdapters';
 
 import type { ChartOptions } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
+import { getProfessionalCategoryLabel } from '../utils/user';
 import { motion } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
 import { useDashboardStats } from '../hooks/useDashboardStats';
@@ -507,7 +508,7 @@ const Dashboard = () => {
               </h2>
               <span className="text-sm text-gray-500">
                 Adaptées à votre profil
-                {user?.professionalCategory ? ` (${user.professionalCategory})` : ''}
+                {user?.professionalCategory ? ` (${getProfessionalCategoryLabel(user.professionalCategory)})` : ''}
               </span>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
