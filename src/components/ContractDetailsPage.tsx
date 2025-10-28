@@ -32,6 +32,7 @@ import EditContractModal from './EditContractModal';
 import GuaranteeDetailModal from './contract/GuaranteeDetailModal';
 import InsufficientCreditsModal from './ui/InsufficientCreditsModal';
 import ReactMarkdown from 'react-markdown';
+import SummarizeConfirmationModal from './ui/SummarizeConfirmationModal';
 import { capitalizeFirst } from '../utils/text';
 import { getContractListItemInsurer } from '../utils/contractAdapters';
 import { getInsurerLogo } from '../utils/insurerLogo';
@@ -268,6 +269,7 @@ const ContractDetailsPage = () => {
   const [selectedGuarantee, setSelectedGuarantee] = useState<BackendContractGuarantee | null>(null);
   const [isGuaranteeModalOpen, setIsGuaranteeModalOpen] = useState(false);
   const [expandedObligations, setExpandedObligations] = useState<Record<string, boolean>>({});
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   // Get contract details using RTK Query directly to access refetch
   const {
@@ -311,6 +313,9 @@ const ContractDetailsPage = () => {
 
   // Check if this contract is currently processing (from Redux)
   const isProcessing = useAppSelector((state) => selectIsContractProcessing(state, contractId || ''));
+
+  // Get current user for credit balance
+  const currentUser = useAppSelector((state) => state.user.currentUser);
 
   const isContractExpired = contract ? (contract.endDate ? new Date(contract.endDate) < new Date() : false) : false;
 
@@ -430,8 +435,13 @@ const ContractDetailsPage = () => {
     }
   };
 
-  const handleSummarize = async () => {
+  const handleSummarize = () => {
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmSummarize = async () => {
     if (!contractId) return;
+    setIsConfirmModalOpen(false);
 
     try {
       await summarizeContract(contractId);
@@ -440,6 +450,10 @@ const ContractDetailsPage = () => {
       console.error('Failed to summarize contract:', error);
       // Error handling is done in the hook
     }
+  };
+
+  const handleCloseConfirmModal = () => {
+    setIsConfirmModalOpen(false);
   };
 
   // Pending/Processing Summarization Message Component
@@ -1227,6 +1241,16 @@ const ContractDetailsPage = () => {
         operation={insufficientCredits.errorDetails.operation}
         requiredCredits={insufficientCredits.errorDetails.requiredCredits}
         currentCredits={insufficientCredits.currentCredits}
+      />
+
+      {/* Summarize Confirmation Modal */}
+      <SummarizeConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={handleCloseConfirmModal}
+        onConfirm={handleConfirmSummarize}
+        currentCredits={currentUser?.creditBalance ?? 0}
+        requiredCredits={5}
+        isProcessing={isSummarizing}
       />
     </div>
   );
