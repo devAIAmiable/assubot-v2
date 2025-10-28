@@ -1,6 +1,5 @@
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import {
-  FaArrowDown,
   FaArrowRight,
   FaBell,
   FaBrain,
@@ -175,37 +174,6 @@ const Dashboard = () => {
     },
   };
 
-  const smartSuggestions = [
-    {
-      id: 1,
-      type: 'savings',
-      icon: FaArrowDown,
-      title: 'Économiser 324€/an sur votre assurance auto',
-      description: 'Nous avons trouvé 3 offres moins chères avec une couverture équivalente',
-      action: 'Comparer les offres',
-      priority: 'high',
-      savings: '324€',
-    },
-    {
-      id: 2,
-      type: 'renewal',
-      icon: FaCalendarAlt,
-      title: 'Renouveler votre mutuelle santé',
-      description: 'Votre contrat expire dans 45 jours. Anticipez pour éviter les interruptions',
-      action: 'Voir les options',
-      priority: 'medium',
-    },
-    {
-      id: 3,
-      type: 'coverage',
-      icon: FaShieldAlt,
-      title: 'Améliorer votre couverture responsabilité civile',
-      description: 'Votre couverture actuelle pourrait être insuffisante selon votre profil',
-      action: 'Analyser les risques',
-      priority: 'low',
-    },
-  ];
-
   const quickActions = [
     {
       title: 'Gérer mes contrats',
@@ -240,59 +208,6 @@ const Dashboard = () => {
       borderColor: 'border-amber-200',
     },
   ];
-
-  const recentActivity = [
-    {
-      id: 1,
-      type: 'contract_expiry',
-      title: 'Contrat santé expire bientôt',
-      description: 'Votre contrat Harmonie Mutuelle expire dans 45 jours',
-      time: '2h',
-      priority: 'high',
-    },
-    {
-      id: 2,
-      type: 'new_offer',
-      title: 'Nouvelle offre auto disponible',
-      description: 'Une offre 15% moins chère que votre contrat actuel',
-      time: '1j',
-      priority: 'medium',
-    },
-    {
-      id: 3,
-      type: 'payment',
-      title: 'Paiement effectué',
-      description: 'Dépenses mensuelles MAIF Auto - 45,80€',
-      time: '3j',
-      priority: 'low',
-    },
-  ];
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'border-red-200 bg-red-50';
-      case 'medium':
-        return 'border-amber-200 bg-amber-50';
-      case 'low':
-        return 'border-blue-200 bg-blue-50';
-      default:
-        return 'border-gray-200 bg-gray-50';
-    }
-  };
-
-  const getPriorityIconColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'text-red-600';
-      case 'medium':
-        return 'text-amber-600';
-      case 'low':
-        return 'text-blue-600';
-      default:
-        return 'text-gray-600';
-    }
-  };
 
   // Calculate dashboard stats from contracts
   // const contractStats = useDashboardStats(); // This line is removed as per the edit hint
@@ -507,36 +422,14 @@ const Dashboard = () => {
                 Suggestions intelligentes
               </h2>
               <span className="text-sm text-gray-500">
-                Adaptées à votre profil
+                Adaptées à ton profil
                 {user?.professionalCategory ? ` (${getProfessionalCategoryLabel(user.professionalCategory)})` : ''}
               </span>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {smartSuggestions.map((suggestion) => {
-                const Icon = suggestion.icon;
-                return (
-                  <motion.div
-                    key={suggestion.id}
-                    className={`border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${getPriorityColor(suggestion.priority)}`}
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-white`}>
-                        <Icon className={`h-5 w-5 ${getPriorityIconColor(suggestion.priority)}`} />
-                      </div>
-                      {suggestion.savings && <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Économie: {suggestion.savings}</span>}
-                    </div>
-                    <h3 className="font-semibold text-gray-900 mb-2">{suggestion.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4">{suggestion.description}</p>
-                    <button
-                      onClick={() => handleNavigateToModule('comparateur')}
-                      className="w-full bg-white text-[#1e51ab] border border-[#1e51ab] px-4 py-2 rounded-xl font-medium hover:bg-[#1e51ab] hover:text-white transition-colors text-sm"
-                    >
-                      {suggestion.action}
-                    </button>
-                  </motion.div>
-                );
-              })}
+            <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
+              <FaLightbulb className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune suggestion pour le moment</h3>
+              <p className="text-gray-500 mb-6">AI'A analyse ton profil pour te proposer des recommandations personnalisées</p>
             </div>
           </motion.div>
 
@@ -573,27 +466,10 @@ const Dashboard = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Activité récente</h2>
             <div className="bg-white border border-gray-100 rounded-2xl p-6">
-              <div className="space-y-4">
-                {recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-start space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-colors">
-                    <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                        activity.priority === 'high' ? 'bg-red-50' : activity.priority === 'medium' ? 'bg-amber-50' : 'bg-gray-50'
-                      }`}
-                    >
-                      {activity.type === 'contract_expiry' && <FaExclamationTriangle className={`h-5 w-5 ${activity.priority === 'high' ? 'text-red-600' : 'text-amber-600'}`} />}
-                      {activity.type === 'new_offer' && <FaChartLine className="h-5 w-5 text-emerald-600" />}
-                      {activity.type === 'payment' && <FaEuroSign className="h-5 w-5 text-gray-600" />}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-gray-900">{activity.title}</h4>
-                        <span className="text-xs text-gray-500">Il y a {activity.time}</span>
-                      </div>
-                      <p className="text-gray-600 text-sm mt-1">{activity.description}</p>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-12">
+                <FaChartLine className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune activité récente</h3>
+                <p className="text-sm text-gray-500">Vos dernières activités apparaîtront ici</p>
               </div>
               <div className="mt-6 pt-4 border-t border-gray-100">
                 <button onClick={() => handleNavigateToModule('notifications')} className="w-full text-center text-[#1e51ab] hover:text-[#163d82] font-medium text-sm">

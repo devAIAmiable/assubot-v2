@@ -26,11 +26,7 @@ const AppLayout = () => {
   // Logout hook
   const { logout, loading: logoutLoading } = useLogout();
 
-  const [notifications] = useState([
-    { id: 1, message: 'Votre contrat santé expire dans 45 jours', time: '2h', unread: true },
-    { id: 2, message: 'Nouvelle offre auto disponible', time: '1j', unread: true },
-    { id: 3, message: 'Paiement effectué avec succès', time: '3j', unread: false },
-  ]);
+  const [notifications] = useState<Array<{ id: number; message: string; time: string; unread: boolean }>>([]);
 
   const getCurrentModule = () => {
     const pathParts = location.pathname.split('/');
@@ -156,21 +152,29 @@ const AppLayout = () => {
                       <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
                     </div>
                     <div className="max-h-64 overflow-y-auto">
-                      {notifications.map((notification) => (
-                        <Menu.Item key={notification.id}>
-                          {({ active }) => (
-                            <div className={`px-4 py-3 cursor-pointer ${active ? 'bg-gray-50' : ''} ${notification.unread ? 'bg-blue-50' : ''}`}>
-                              <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                  <p className="text-sm text-gray-900 line-clamp-2">{notification.message}</p>
-                                  <p className="text-xs text-gray-500 mt-1">Il y a {notification.time}</p>
+                      {notifications.length > 0 ? (
+                        notifications.map((notification) => (
+                          <Menu.Item key={notification.id}>
+                            {({ active }) => (
+                              <div className={`px-4 py-3 cursor-pointer ${active ? 'bg-gray-50' : ''} ${notification.unread ? 'bg-blue-50' : ''}`}>
+                                <div className="flex justify-between items-start">
+                                  <div className="flex-1">
+                                    <p className="text-sm text-gray-900 line-clamp-2">{notification.message}</p>
+                                    <p className="text-xs text-gray-500 mt-1">Il y a {notification.time}</p>
+                                  </div>
+                                  {notification.unread && <div className="w-2 h-2 bg-[#1e51ab] rounded-full ml-2 mt-1"></div>}
                                 </div>
-                                {notification.unread && <div className="w-2 h-2 bg-[#1e51ab] rounded-full ml-2 mt-1"></div>}
                               </div>
-                            </div>
-                          )}
-                        </Menu.Item>
-                      ))}
+                            )}
+                          </Menu.Item>
+                        ))
+                      ) : (
+                        <div className="px-4 py-8 text-center">
+                          <FaBell className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                          <p className="text-sm text-gray-500">Aucune notification</p>
+                          <p className="text-xs text-gray-400 mt-1">Vous serez notifié des nouvelles activités</p>
+                        </div>
+                      )}
                     </div>
                     <div className="px-4 py-2 border-t border-gray-100">
                       <button onClick={() => handleNavigate('/app/notifications')} className="text-sm text-[#1e51ab] hover:text-[#163d82] font-medium">
