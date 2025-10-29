@@ -1482,67 +1482,59 @@ const ContractDetailsPage = () => {
               </TabPanel>
 
               {/* Contacts */}
-              <TabPanel className="p-4 sm:p-6">
-                <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
+              <TabPanel className="p-6">
+                <div className="max-w-7xl mx-auto">
                   {/* Show pending/ongoing message if summarizeStatus is pending or ongoing */}
                   {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
                     <PendingSummarizationMessage />
                   ) : (
                     <>
-                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 sm:mb-8 flex items-center">
-                        <FaPhone className="h-5 w-5 sm:h-6 sm:w-6 text-[#1e51ab] mr-2 sm:mr-3" />
+                      <h3 className="text-2xl font-semibold text-gray-900 mb-8 flex items-center">
+                        <FaPhone className="h-6 w-6 text-[#1e51ab] mr-3" />
                         Qui contacter
-                        <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
                       </h3>
 
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {contract.contacts && contract.contacts.length > 0 ? (
                           contract.contacts.map((contact) => (
-                            <div key={contact.id} className="bg-blue-50 p-4 sm:p-6 rounded-2xl border border-blue-100">
-                              <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                                <FaClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2" />
+                            <div key={contact.id} className="bg-blue-50 p-8 rounded-2xl border border-blue-100">
+                              <h4 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                                <FaClipboardList className="h-5 w-5 text-blue-600 mr-2" />
                                 {getContactTypeLabel(contact.type)}
-                                <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
                               </h4>
-                              <div className="space-y-3 sm:space-y-4">
+                              <div className="space-y-4">
                                 {contact.name && (
                                   <div>
-                                    <p className="font-semibold text-gray-900 text-sm sm:text-base">{contact.name}</p>
+                                    <p className="font-semibold text-gray-900">{contact.name}</p>
                                   </div>
                                 )}
                                 {contact.phone && (
                                   <div className="flex items-center space-x-3">
-                                    <FaPhone className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                    <a href={`tel:${contact.phone}`} className="font-medium text-gray-900 text-sm sm:text-base hover:text-blue-600 transition-colors">
-                                      {contact.phone}
-                                    </a>
+                                    <FaPhone className="h-4 w-4 text-gray-400" />
+                                    <span className="font-medium text-gray-900">{contact.phone}</span>
                                   </div>
                                 )}
                                 {contact.email && (
                                   <div className="flex items-center space-x-3">
-                                    <FaEnvelope className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                    <a href={`mailto:${contact.email}`} className="font-medium text-gray-900 text-sm sm:text-base hover:text-blue-600 transition-colors">
-                                      {contact.email}
-                                    </a>
+                                    <FaEnvelope className="h-4 w-4 text-gray-400" />
+                                    <span className="font-medium text-gray-900">{contact.email}</span>
                                   </div>
                                 )}
                                 {contact.openingHours && (
                                   <div className="flex items-center space-x-3">
-                                    <FaClock className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                    <span className="font-medium text-gray-900 text-sm sm:text-base">{contact.openingHours}</span>
+                                    <FaClock className="h-4 w-4 text-gray-400" />
+                                    <span className="font-medium text-gray-900">{contact.openingHours}</span>
                                   </div>
                                 )}
                               </div>
                             </div>
                           ))
                         ) : (
-                          <div className="col-span-full text-sm sm:text-base text-center text-gray-500 py-8">Aucun contact disponible</div>
+                          <div className="col-span-full text-center text-gray-500 py-8">Aucun contact disponible</div>
                         )}
                       </div>
                     </>
                   )}
-
-                  <AIDisclaimer />
                 </div>
               </TabPanel>
             </div>
