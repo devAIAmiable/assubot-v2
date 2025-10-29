@@ -651,30 +651,30 @@ const ContractDetailsPage = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <div className="space-y-4">
                           <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Bien(s)/Bénéficiaire(s)</span>
-                            <span className="font-semibold text-gray-900">{contract.subject}</span>
+                            <span className="text-sm sm:text-base text-gray-600 font-medium">Bien(s)/Bénéficiaire(s)</span>
+                            <span className="text-sm sm:text-base font-semibold text-gray-900">{contract.subject}</span>
                           </div>
                           <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Formule</span>
-                            <span className="font-semibold text-gray-900">{contract.formula ? capitalizeFirst(contract.formula) : 'Non spécifiée'}</span>
+                            <span className="text-sm sm:text-base text-gray-600 font-medium">Formule</span>
+                            <span className="text-sm sm:text-base font-semibold text-gray-900">{contract.formula ? capitalizeFirst(contract.formula) : 'Non spécifiée'}</span>
                           </div>
                           <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Prime annuelle</span>
-                            <span className="font-semibold text-[#1e51ab]">{(contract.annualPremiumCents / 100).toFixed(2)} €</span>
+                            <span className="text-sm sm:text-base text-gray-600 font-medium">Prime annuelle</span>
+                            <span className="text-sm sm:text-base font-semibold text-[#1e51ab]">{(contract.annualPremiumCents / 100).toFixed(2)} €</span>
                           </div>
                         </div>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Renouvellement tacite</span>
-                            <span className="font-semibold text-gray-900">{contract.tacitRenewal ? 'Oui' : 'Non'}</span>
+                            <span className="text-sm sm:text-base text-gray-600 font-medium">Renouvellement tacite</span>
+                            <span className="text-sm sm:text-base font-semibold text-gray-900">{contract.tacitRenewal ? 'Oui' : 'Non'}</span>
                           </div>
                           <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Début de contrat</span>
-                            <span className="font-semibold text-gray-900">{contract.startDate ? formatDateForDisplayFR(contract.startDate) : '-'}</span>
+                            <span className="text-sm sm:text-base text-gray-600 font-medium">Début de contrat</span>
+                            <span className="text-sm sm:text-base font-semibold text-gray-900">{contract.startDate ? formatDateForDisplayFR(contract.startDate) : '-'}</span>
                           </div>
                           <div className="flex items-center justify-between py-3 border-b border-blue-200">
-                            <span className="text-gray-600 font-medium">Fin de contrat</span>
-                            <span className="font-semibold text-gray-900">{contract.endDate ? formatDateForDisplayFR(contract.endDate) : '-'}</span>
+                            <span className="text-sm sm:text-base text-gray-600 font-medium">Fin de contrat</span>
+                            <span className="text-sm sm:text-base font-semibold text-gray-900">{contract.endDate ? formatDateForDisplayFR(contract.endDate) : '-'}</span>
                           </div>
                         </div>
                       </div>
@@ -709,7 +709,7 @@ const ContractDetailsPage = () => {
                     <div className="space-y-4 sm:space-y-6">
                       {/* Documents - Chat-style references */}
                       <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <h3 className="text-lg font-semibold mb-4">Documents</h3>
+                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Documents</h3>
                         <div className="space-y-2">
                           {contract.documents && contract.documents.length > 0 ? (
                             contract.documents.map((doc) => (
@@ -718,14 +718,14 @@ const ContractDetailsPage = () => {
                                   <div className="flex items-center gap-3">
                                     <FaFilePdf className="text-red-600 text-lg flex-shrink-0" />
                                     <div>
-                                      <h4 className="text-sm font-medium">{doc.type}</h4>
-                                      <p className="text-xs text-gray-500">PDF Document</p>
+                                      <h4 className="text-sm sm:text-base font-medium text-gray-900">{doc.type}</h4>
+                                      <p className="text-xs sm:text-sm text-gray-500">PDF Document</p>
                                     </div>
                                   </div>
                                   <button
                                     onClick={() => handleDownload(doc.type as unknown as DocumentType)}
                                     disabled={isGenerating}
-                                    className="flex items-center gap-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex items-center gap-1 px-3 py-1.5 text-xs sm:text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
                                     {isGenerating ? <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div> : <FaEye />}
                                     Ouvrir
@@ -816,8 +816,8 @@ const ContractDetailsPage = () => {
                                     <span className="text-sm font-bold text-blue-600">{index + 1}</span>
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="font-semibold text-gray-900 mb-1">{guarantee.title}</h4>
-                                    <p className="text-xs text-gray-500">
+                                    <h4 className="text-sm sm:text-base font-semibold text-gray-900 mb-1">{guarantee.title}</h4>
+                                    <p className="text-xs sm:text-sm text-gray-500">
                                       {coverageCount} couvertures • {exclusionCount} exclusions
                                     </p>
                                   </div>
@@ -836,8 +836,8 @@ const ContractDetailsPage = () => {
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                           <FaShieldAlt className="h-8 w-8 text-gray-400" />
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune garantie spécifiée</h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
+                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Aucune garantie spécifiée</h3>
+                        <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                           Ce contrat ne contient pas encore d'informations détaillées sur les garanties. Lancez l'analyse IA pour générer ces informations.
                         </p>
                       </div>
@@ -856,7 +856,7 @@ const ContractDetailsPage = () => {
                     <PendingSummarizationMessage />
                   ) : (
                     <div className="bg-gradient-to-br from-red-50 to-orange-50 p-4 sm:p-8 rounded-2xl border border-red-100">
-                      <h3 className="text-lg sm:text-2xl font-semibold mb-4 sm:mb-6 flex items-center">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
                         <FaExclamationTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 mr-2 sm:mr-3" />
                         Exclusions générales
                         <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
@@ -865,11 +865,11 @@ const ContractDetailsPage = () => {
                         {contract.exclusions && contract.exclusions.length > 0 ? (
                           contract.exclusions.map((exclusion) => (
                             <div key={exclusion.id} className="flex items-start space-x-4 p-4 sm:p-6 bg-white rounded-2xl border border-red-100">
-                              <span className="text-gray-900 font-medium text-sm sm:text-base">{capitalizeFirst(exclusion.description)}</span>
+                              <span className="text-sm sm:text-base text-gray-900 font-medium">{capitalizeFirst(exclusion.description)}</span>
                             </div>
                           ))
                         ) : (
-                          <div className="text-center text-gray-500 py-4">Aucune exclusion spécifiée</div>
+                          <div className="text-sm sm:text-base text-center text-gray-500 py-4">Aucune exclusion spécifiée</div>
                         )}
                       </div>
                     </div>
@@ -991,7 +991,7 @@ const ContractDetailsPage = () => {
 
                           {/* Zone List */}
                           <div className="bg-white rounded-xl p-4 sm:p-6 border border-blue-100">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                               <FaGlobe className="h-5 w-5 text-blue-600" />
                               Zones de couverture
                             </h3>
@@ -1002,20 +1002,20 @@ const ContractDetailsPage = () => {
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2 mb-2">
                                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                        <span className="font-medium text-gray-900">{capitalizeFirst(zone.label)}</span>
-                                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                        <span className="text-sm sm:text-base font-medium text-gray-900">{capitalizeFirst(zone.label)}</span>
+                                        <span className="text-xs sm:text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                                           {zone.type === 'country' ? 'Pays' : zone.type === 'zone' ? 'Zone' : zone.type === 'region' ? 'Région' : 'Ville'}
                                         </span>
                                       </div>
                                       {zone.conditions && zone.conditions.length > 0 && (
                                         <div className="mt-3">
-                                          <div className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                                          <div className="text-sm sm:text-base font-medium text-gray-700 mb-2 flex items-center gap-1">
                                             <FaClipboardList className="h-3 w-3" />
                                             Conditions spécifiques
                                           </div>
                                           <div className="space-y-1">
                                             {zone.conditions.map((condition, index) => (
-                                              <div key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                                              <div key={index} className="flex items-start gap-2 text-sm sm:text-base text-gray-600">
                                                 <span className="text-blue-400 mt-1">•</span>
                                                 <span className="leading-relaxed">{condition}</span>
                                               </div>
@@ -1031,7 +1031,7 @@ const ContractDetailsPage = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="text-center text-gray-500 py-12">
+                        <div className="text-center py-12">
                           <div className="w-full max-w-md mx-auto bg-white rounded-xl border border-blue-200 p-6 sm:p-8 shadow-lg">
                             <FaGlobe className="h-16 w-16 sm:h-20 sm:w-20 text-gray-300 mx-auto mb-4 sm:mb-6" />
                             <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Aucune zone géographique spécifiée</h4>
@@ -1056,8 +1056,8 @@ const ContractDetailsPage = () => {
                     <PendingSummarizationMessage />
                   ) : (
                     <div className="space-y-4">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                        <FaClipboardList className="text-blue-600 mr-3" />
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                        <FaClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mr-2 sm:mr-3" />
                         Mes obligations
                         <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
                       </h3>
@@ -1090,8 +1090,8 @@ const ContractDetailsPage = () => {
                                       <FaClipboardList className="text-blue-600" />
                                     </div>
                                     <div className="text-left">
-                                      <h4 className="font-semibold text-gray-900">{getObligationTypeLabel(type as ObligationType)}</h4>
-                                      <p className="text-sm text-gray-500">
+                                      <h4 className="text-sm sm:text-base font-semibold text-gray-900">{getObligationTypeLabel(type as ObligationType)}</h4>
+                                      <p className="text-xs sm:text-sm text-gray-500">
                                         {obligations.length} obligation{obligations.length > 1 ? 's' : ''}
                                       </p>
                                     </div>
@@ -1111,7 +1111,7 @@ const ContractDetailsPage = () => {
                                           {obligations.map((obligation) => (
                                             <li key={obligation.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                                               <FaCheck className="text-blue-600 mt-1 flex-shrink-0" />
-                                              <span className="text-gray-900">{obligation.description}</span>
+                                              <span className="text-sm sm:text-base text-gray-900">{obligation.description}</span>
                                             </li>
                                           ))}
                                         </ul>
@@ -1124,7 +1124,7 @@ const ContractDetailsPage = () => {
                           });
                         })()
                       ) : (
-                        <div className="text-center text-gray-500 py-8">Aucune obligation spécifiée</div>
+                        <div className="text-sm sm:text-base text-center text-gray-500 py-8">Aucune obligation spécifiée</div>
                       )}
                     </div>
                   )}
@@ -1141,7 +1141,7 @@ const ContractDetailsPage = () => {
                     <PendingSummarizationMessage />
                   ) : (
                     <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 sm:p-8 rounded-2xl border border-yellow-100">
-                      <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
                         <FaExclamationTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600 mr-2 sm:mr-3" />
                         Questions fréquentes sur la résiliation
                         <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
@@ -1168,9 +1168,9 @@ const ContractDetailsPage = () => {
                             </Disclosure>
                           ))
                         ) : (
-                          <div className="text-center text-gray-500 py-8">
+                          <div className="text-center py-8">
                             <FaExclamationTriangle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                            <p>Aucune information de résiliation disponible</p>
+                            <p className="text-sm sm:text-base text-gray-500">Aucune information de résiliation disponible</p>
                           </div>
                         )}
                       </div>
@@ -1189,7 +1189,7 @@ const ContractDetailsPage = () => {
                     <PendingSummarizationMessage />
                   ) : (
                     <>
-                      <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-6 sm:mb-8 flex items-center">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 sm:mb-8 flex items-center">
                         <FaPhone className="h-5 w-5 sm:h-6 sm:w-6 text-[#1e51ab] mr-2 sm:mr-3" />
                         Qui contacter
                         <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
@@ -1199,7 +1199,7 @@ const ContractDetailsPage = () => {
                         {contract.contacts && contract.contacts.length > 0 ? (
                           contract.contacts.map((contact) => (
                             <div key={contact.id} className="bg-blue-50 p-4 sm:p-6 rounded-2xl border border-blue-100">
-                              <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
+                              <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center">
                                 <FaClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2" />
                                 {getContactTypeLabel(contact.type)}
                                 <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
@@ -1236,7 +1236,7 @@ const ContractDetailsPage = () => {
                             </div>
                           ))
                         ) : (
-                          <div className="col-span-full text-center text-gray-500 py-8">Aucun contact disponible</div>
+                          <div className="col-span-full text-sm sm:text-base text-center text-gray-500 py-8">Aucun contact disponible</div>
                         )}
                       </div>
                     </>
