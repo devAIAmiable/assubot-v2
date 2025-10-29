@@ -1,10 +1,11 @@
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
-import { FaArrowRight, FaBell, FaBrain, FaCalendarAlt, FaChartLine, FaChartPie, FaExclamationTriangle, FaFileContract, FaLightbulb, FaRobot } from 'react-icons/fa';
+import { FaArrowRight, FaBell, FaBrain, FaCalendarAlt, FaChartLine, FaChartPie, FaExclamationTriangle, FaFileContract, FaLightbulb } from 'react-icons/fa';
 import { StatCard, StatsGrid } from './ui';
 import { getContractPremium, getContractType } from '../utils/contractAdapters';
 
 import type { ChartOptions } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
+import { VscRobot } from 'react-icons/vsc';
 import { getProfessionalCategoryLabel } from '../utils/user';
 import { motion } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
@@ -13,6 +14,24 @@ import { useNavigate } from 'react-router-dom';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
+
+// Category configuration for insurance types
+const CATEGORY_CONFIG: Record<string, { label: string; color: string }> = {
+  auto: { label: 'Automobile', color: '#3b82f6' },
+  health: { label: 'Santé', color: '#ef4444' },
+  home: { label: 'Habitation', color: '#10b981' },
+  moto: { label: 'Moto', color: '#f59e0b' },
+  electronic_devices: { label: 'Appareils électroniques', color: '#8b5cf6' },
+  loan: { label: 'Prêt', color: '#ec4899' },
+  travel: { label: 'Voyage', color: '#06b6d4' },
+  life: { label: 'Vie', color: '#14b8a6' },
+  professional: { label: 'Professionnelle', color: '#6366f1' },
+  legal: { label: 'Juridique', color: '#a855f7' },
+  agriculture: { label: 'Agricole', color: '#84cc16' },
+  event: { label: 'Événement', color: '#f97316' },
+  pet: { label: 'Animaux', color: '#fb923c' },
+  other: { label: 'Autre', color: '#6b7280' },
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -44,34 +63,15 @@ const Dashboard = () => {
 
   // Calculate insurance budget from API data if available, otherwise from Redux contracts data
   const insuranceBudget = dashboardStats?.categoryBreakdown
-    ? Object.entries(dashboardStats.categoryBreakdown).map(([category, data]) => ({
-        type:
-          category === 'auto'
-            ? 'Automobile'
-            : category === 'health'
-              ? 'Santé'
-              : category === 'home'
-                ? 'Habitation'
-                : category === 'moto'
-                  ? 'Moto'
-                  : category === 'electronic_devices'
-                    ? 'Appareils électroniques'
-                    : 'Autre',
-        amount: data.totalAnnualCostCents / 100,
-        color:
-          category === 'auto'
-            ? '#3b82f6'
-            : category === 'health'
-              ? '#ef4444'
-              : category === 'home'
-                ? '#10b981'
-                : category === 'moto'
-                  ? '#f59e0b'
-                  : category === 'electronic_devices'
-                    ? '#8b5cf6'
-                    : '#6b7280',
-        percentage: data.percentage,
-      }))
+    ? Object.entries(dashboardStats.categoryBreakdown).map(([category, data]) => {
+        const config = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.other;
+        return {
+          type: config.label,
+          amount: data.totalAnnualCostCents / 100,
+          color: config.color,
+          percentage: data.percentage,
+        };
+      })
     : [
         {
           type: 'Santé',
@@ -171,9 +171,9 @@ const Dashboard = () => {
       borderColor: 'border-blue-200',
     },
     {
-      title: 'Parler à AssuBot',
-      description: "Posez vos questions sur l'assurance à notre IA",
-      icon: FaRobot,
+      title: "Parler à AI'A",
+      description: "Posez vos questions sur l'assurance",
+      icon: VscRobot,
       module: 'chatbot',
       color: 'bg-purple-50 text-purple-600',
       borderColor: 'border-purple-200',

@@ -844,13 +844,13 @@ const LandingPage = () => {
                   <h3 className="text-2xl font-bold mb-4 flex items-center">
                     <VscRobot className="mr-3 text-yellow-400" /> Besoin d'aide immédiate ?
                   </h3>
-                  <p className="text-blue-100 mb-6 text-lg leading-relaxed">Notre chatbot AssuBot est disponible 24h/24 pour répondre à vos questions.</p>
+                  <p className="text-blue-100 mb-6 text-lg leading-relaxed">Notre chatbot AI'A est disponible 24h/24 pour répondre à vos questions.</p>
                   <motion.button
                     className="bg-white text-[#1e51ab] px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Parler à AssuBot
+                    Parler à AI'A
                   </motion.button>
                 </div>
               </motion.div>
