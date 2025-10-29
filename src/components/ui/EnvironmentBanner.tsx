@@ -44,7 +44,7 @@ const EnvironmentBanner: React.FC<EnvironmentBannerProps> = ({ children }) => {
       case 'dev':
       case 'development':
         return {
-          bgColor: 'bg-blue-600',
+          bgColor: 'bg-green-500',
           textColor: 'text-white',
           icon: <FaInfoCircle className="h-3 w-3" />,
           text: 'DEV ENVIRONMENT - You are running on development server',

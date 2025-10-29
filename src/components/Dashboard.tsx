@@ -1,5 +1,6 @@
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import { FaArrowRight, FaBell, FaBrain, FaCalendarAlt, FaChartLine, FaChartPie, FaExclamationTriangle, FaFileContract, FaLightbulb, FaRobot } from 'react-icons/fa';
+import { StatCard, StatsGrid } from './ui';
 import { getContractPremium, getContractType } from '../utils/contractAdapters';
 
 import type { ChartOptions } from 'chart.js';
@@ -9,7 +10,6 @@ import { motion } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
 import { useDashboardStats } from '../hooks/useDashboardStats';
 import { useNavigate } from 'react-router-dom';
-import { StatCard, StatsGrid } from './ui';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);

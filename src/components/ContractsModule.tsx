@@ -1,5 +1,6 @@
 import type { ContractCategory, ContractListItem } from '../types/contract';
 import { FaChevronDown, FaEdit, FaEye, FaFileContract, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
+import { StatCard, StatsGrid } from './ui';
 import { getContractListItemInsurer, getContractListItemPremium, getContractListItemType } from '../utils/contractAdapters';
 import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../utils/contract';
 
@@ -15,7 +16,6 @@ import { motion } from 'framer-motion';
 import { useContractOperations } from '../hooks/useContractOperations';
 import { useContracts } from '../hooks/useContracts';
 import { useState } from 'react';
-import { StatCard, StatsGrid } from './ui';
 
 const ContractsModule = () => {
   const {
