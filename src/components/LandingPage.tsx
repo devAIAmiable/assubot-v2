@@ -559,18 +559,11 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
-                icon: <VscWarning className="text-4xl mb-4 text-yellow-400" />,
-                title: 'e-Risk',
-                desc: 'Scoring de risque personnalisé et conseils',
-                status: 'Q2 2025',
-                gradient: 'from-yellow-500/20 to-orange-500/20',
-                borderColor: 'border-yellow-400/30',
-              },
-              {
                 icon: <VscFile className="text-4xl mb-4 text-green-400" />,
                 title: 'e-Souscription',
-                desc: 'Souscription ou changement direct de police',
-                status: 'Q3 2025',
+                desc: "Comparateur d'offres",
+                target: 'B2C',
+                status: 'Q4 2025',
                 gradient: 'from-green-500/20 to-emerald-500/20',
                 borderColor: 'border-green-400/30',
               },
@@ -578,15 +571,26 @@ const LandingPage = () => {
                 icon: <VscGraph className="text-4xl mb-4 text-blue-400" />,
                 title: 'Analytics & Insights',
                 desc: 'Pour les assureurs',
+                target: 'B2C',
                 status: 'Q4 2025',
                 gradient: 'from-blue-500/20 to-cyan-500/20',
                 borderColor: 'border-blue-400/30',
               },
               {
+                icon: <VscWarning className="text-4xl mb-4 text-yellow-400" />,
+                title: 'e-Risk',
+                desc: 'Détection des polices silencieuses',
+                target: 'B2B',
+                status: 'Q1 2026',
+                gradient: 'from-yellow-500/20 to-orange-500/20',
+                borderColor: 'border-yellow-400/30',
+              },
+              {
                 icon: <VscPlug className="text-4xl mb-4 text-purple-400" />,
                 title: 'Open API',
                 desc: 'Pour les courtiers ou clients B2B',
-                status: 'Q1 2026',
+                target: 'B2B',
+                status: 'Q3 2026',
                 gradient: 'from-purple-500/20 to-pink-500/20',
                 borderColor: 'border-purple-400/30',
               },
@@ -610,7 +614,16 @@ const LandingPage = () => {
                   </motion.div>
 
                   <div className="mb-4">
-                    <span className="inline-block bg-white/20 text-white px-3 py-1 rounded-full text-xs font-medium mb-3">{item.status}</span>
+                    <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                          item.target === 'B2C' ? 'bg-cyan-500/30 text-cyan-200 border border-cyan-400/40' : 'bg-amber-500/30 text-amber-200 border border-amber-400/40'
+                        }`}
+                      >
+                        {item.target}
+                      </span>
+                      <span className="inline-block bg-white/20 text-white px-3 py-1 rounded-full text-xs font-medium">{item.status}</span>
+                    </div>
                     <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
                   </div>
 
@@ -1011,19 +1024,19 @@ const LandingPage = () => {
               <h3 className="text-white font-semibold mb-4">Plateforme</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <button onClick={() => navigate('/app/contracts')} className="hover:text-white transition-colors text-left">
                     Gestion des Contrats
-                  </a>
+                  </button>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <button onClick={() => navigate('/app/chat')} className="hover:text-white transition-colors text-left">
                     Chatbot IA
-                  </a>
+                  </button>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <button onClick={() => navigate('/app/comparateur')} className="hover:text-white transition-colors text-left">
                     Comparaison Intelligente
-                  </a>
+                  </button>
                 </li>
               </ul>
             </div>
@@ -1031,17 +1044,13 @@ const LandingPage = () => {
               <h3 className="text-white font-semibold mb-4">Entreprise</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <a href="https://a-lamiable.com/" className="hover:text-white transition-colors">
                     À Propos
                   </a>
                 </li>
+
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Carrières
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <a href="#contact" className="hover:text-white transition-colors">
                     Contact
                   </a>
                 </li>
@@ -1074,7 +1083,7 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-            <p>&copy; 2024 AssuBot par A l'Amiable. Tous droits réservés.</p>
+            <p>&copy; 2025 AssuBot par A l'Amiable. Tous droits réservés.</p>
           </div>
         </div>
       </footer>

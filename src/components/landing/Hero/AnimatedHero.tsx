@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+
 import FloatingElements from './FloatingElements';
 import TrustIndicators from './TrustIndicators';
+import { motion } from 'framer-motion';
 
 interface AnimatedHeroProps {
   navigateToApp: () => void;
@@ -85,6 +86,10 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ navigateToApp }) => {
               </motion.button>
 
               <motion.button
+                onClick={() => {
+                  const demoSection = document.getElementById('demo');
+                  demoSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
                 className="border-2 border-[#1e51ab] text-[#1e51ab] px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-50 transition-colors backdrop-blur-sm"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

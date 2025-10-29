@@ -248,6 +248,7 @@ const InteractiveDemo: React.FC = () => {
 
   return (
     <motion.section
+      id="demo"
       className="py-20 bg-gradient-to-br from-gray-50 to-blue-50"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}

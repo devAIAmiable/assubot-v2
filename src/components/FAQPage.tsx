@@ -309,7 +309,18 @@ const FAQPage = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Vous ne trouvez pas votre réponse ?</h2>
           <p className="text-gray-600 mb-4">Notre équipe est là pour vous aider</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button className="bg-[#1e51ab] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#163d82] transition-colors duration-200">Contactez-nous</button>
+            <button
+              onClick={() => {
+                navigate('/');
+                setTimeout(() => {
+                  const contactSection = document.getElementById('contact');
+                  contactSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+              }}
+              className="bg-[#1e51ab] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#163d82] transition-colors duration-200"
+            >
+              Contactez-nous
+            </button>
           </div>
         </div>
       </motion.div>
