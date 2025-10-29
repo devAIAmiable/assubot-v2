@@ -4,7 +4,9 @@ import { ComposableMap, Geographies, Geography, Graticule, Marker, ZoomableGroup
 import { Disclosure, Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import {
   FaArrowLeft,
+  FaBan,
   FaCheck,
+  FaChevronCircleDown,
   FaChevronDown,
   FaChevronRight,
   FaChevronUp,
@@ -16,9 +18,14 @@ import {
   FaEye,
   FaFileAlt,
   FaFilePdf,
+  FaFilter,
+  FaFlag,
   FaGlobe,
+  FaInfoCircle,
   FaMagic,
+  FaMapMarkedAlt,
   FaPhone,
+  FaSearch,
   FaShieldAlt,
   FaTimes,
 } from 'react-icons/fa';
@@ -272,6 +279,13 @@ const ContractDetailsPage = () => {
   const [expandedObligations, setExpandedObligations] = useState<Record<string, boolean>>({});
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
+  // Search and filter state for zones and exclusions
+  const [zoneSearchQuery, setZoneSearchQuery] = useState('');
+  const [zoneTypeFilter, setZoneTypeFilter] = useState<string>('all');
+  const [exclusionSearchQuery, setExclusionSearchQuery] = useState('');
+  const [expandedExclusions, setExpandedExclusions] = useState<Record<string, boolean>>({});
+  const [expandedZones, setExpandedZones] = useState<Record<string, boolean>>({});
+
   // Get contract details using RTK Query directly to access refetch
   const {
     data: contract,
@@ -455,6 +469,55 @@ const ContractDetailsPage = () => {
 
   const handleCloseConfirmModal = () => {
     setIsConfirmModalOpen(false);
+  };
+
+  // Filter and toggle functions for zones and exclusions
+  const filteredZones =
+    contract?.zones?.filter((zone) => {
+      const matchesSearch = zone.label.toLowerCase().includes(zoneSearchQuery.toLowerCase());
+      const matchesType = zoneTypeFilter === 'all' || zone.type === zoneTypeFilter;
+      return matchesSearch && matchesType;
+    }) || [];
+
+  const filteredExclusions =
+    contract?.exclusions?.filter((exclusion) => {
+      return exclusion.description.toLowerCase().includes(exclusionSearchQuery.toLowerCase());
+    }) || [];
+
+  const toggleExclusionExpansion = (id: string) => {
+    setExpandedExclusions((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const toggleZoneExpansion = (id: string) => {
+    setExpandedZones((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const getZoneIcon = (type: string) => {
+    switch (type) {
+      case 'country':
+        return FaFlag;
+      case 'zone':
+        return FaMapMarkedAlt;
+      default:
+        return FaGlobe;
+    }
+  };
+
+  const getZoneTypeLabel = (type: string) => {
+    switch (type) {
+      case 'country':
+        return 'Pays';
+      case 'zone':
+        return 'Zone';
+      default:
+        return 'Zone';
+    }
   };
 
   // Pending/Processing Summarization Message Component
@@ -855,23 +918,115 @@ const ContractDetailsPage = () => {
                   {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
                     <PendingSummarizationMessage />
                   ) : (
-                    <div className="bg-gradient-to-br from-red-50 to-orange-50 p-4 sm:p-8 rounded-2xl border border-red-100">
-                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
-                        <FaExclamationTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 mr-2 sm:mr-3" />
-                        Exclusions générales
-                        <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
-                      </h3>
-                      <div className="space-y-3 sm:space-y-4">
-                        {contract.exclusions && contract.exclusions.length > 0 ? (
-                          contract.exclusions.map((exclusion) => (
-                            <div key={exclusion.id} className="flex items-start space-x-4 p-4 sm:p-6 bg-white rounded-2xl border border-red-100">
-                              <span className="text-sm sm:text-base text-gray-900 font-medium">{capitalizeFirst(exclusion.description)}</span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-sm sm:text-base text-center text-gray-500 py-4">Aucune exclusion spécifiée</div>
-                        )}
+                    <div className="space-y-6">
+                      {/* Header with search */}
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-start sm:items-center gap-3">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-xl bg-amber-100 flex items-center justify-center">
+                            <FaBan className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 flex flex-wrap items-center gap-2">
+                              <span>Exclusions générales</span>
+                              <FaMagic className="h-4 w-4 text-blue-500 flex-shrink-0" title="Généré par IA" />
+                            </h3>
+                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                              {filteredExclusions.length} exclusion{filteredExclusions.length > 1 ? 's' : ''}
+                              {exclusionSearchQuery && ` trouvée${filteredExclusions.length > 1 ? 's' : ''}`}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Search bar */}
+                        <div className="relative w-full">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaSearch className="h-4 w-4 text-gray-400" />
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Rechercher..."
+                            value={exclusionSearchQuery}
+                            onChange={(e) => setExclusionSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                          />
+                          {exclusionSearchQuery && (
+                            <button onClick={() => setExclusionSearchQuery('')} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                              <FaTimes className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                            </button>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Exclusions grid */}
+                      {contract.exclusions && contract.exclusions.length > 0 ? (
+                        filteredExclusions.length > 0 ? (
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {filteredExclusions.map((exclusion) => {
+                              const isExpanded = expandedExclusions[exclusion.id] || false;
+                              const description = capitalizeFirst(exclusion.description);
+                              const isLong = description.length > 150;
+                              const truncatedDescription = isLong && !isExpanded ? description.substring(0, 150) + '...' : description;
+
+                              return (
+                                <motion.div
+                                  key={exclusion.id}
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 hover:shadow-md hover:border-amber-300 transition-all group cursor-pointer"
+                                  onClick={() => isLong && toggleExclusionExpansion(exclusion.id)}
+                                >
+                                  <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0">
+                                      <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                                        <FaBan className="h-5 w-5 text-amber-600" />
+                                      </div>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm sm:text-base text-gray-900 leading-relaxed">{truncatedDescription}</p>
+                                      {isLong && (
+                                        <button
+                                          className="mt-2 text-sm font-medium text-amber-600 hover:text-amber-700 flex items-center gap-1"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleExclusionExpansion(exclusion.id);
+                                          }}
+                                        >
+                                          {isExpanded ? (
+                                            <>
+                                              <FaChevronUp className="h-3 w-3" />
+                                              Voir moins
+                                            </>
+                                          ) : (
+                                            <>
+                                              <FaChevronCircleDown className="h-3 w-3" />
+                                              Voir plus
+                                            </>
+                                          )}
+                                        </button>
+                                      )}
+                                    </div>
+                                    <div className="flex-shrink-0">
+                                      <FaInfoCircle className="h-4 w-4 text-gray-400 group-hover:text-amber-500 transition-colors" />
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                            <FaSearch className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Aucune exclusion trouvée</h4>
+                            <p className="text-sm text-gray-600">Essayez de modifier votre recherche</p>
+                          </div>
+                        )
+                      ) : (
+                        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                          <FaBan className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                          <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Aucune exclusion spécifiée</h4>
+                          <p className="text-sm sm:text-base text-gray-600">Ce contrat ne contient pas d'exclusions générales</p>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -886,150 +1041,295 @@ const ContractDetailsPage = () => {
                   {contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'ongoing' ? (
                     <PendingSummarizationMessage />
                   ) : (
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-8 rounded-2xl border border-blue-100">
+                    <div className="space-y-6">
                       {contract.zones && contract.zones.length > 0 ? (
-                        <div className="space-y-6 sm:space-y-8">
-                          {/* World Map */}
-                          <div className="">
-                            <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center">
-                              Zones couvertes
-                              <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
-                            </h4>
-                            <div className="w-full h-[300px] sm:h-[400px] lg:h-[600px] bg-white rounded-lg border border-blue-200 shadow-inner overflow-hidden">
-                              <ComposableMap
-                                projection="geoEqualEarth"
-                                projectionConfig={{
-                                  scale: 190,
-                                  center: [0, 15],
-                                }}
-                                style={{
-                                  width: '100%',
-                                  height: '100%',
-                                }}
-                              >
-                                <ZoomableGroup>
-                                  {/* Graticule */}
-                                  <Graticule stroke="#e2e8f0" strokeWidth={1} />
-
-                                  {/* World Countries */}
-                                  <Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
-                                    {({ geographies }) =>
-                                      geographies.map((geo) => {
-                                        // Check if this country/region matches any of the contract zones
-                                        const isHighlighted = contract.zones?.some((zone) => {
-                                          const countryName = geo.properties.name?.toLowerCase();
-                                          const zoneName = zone.label.toLowerCase();
-
-                                          // Direct name matching only
-                                          const isMatch = countryName === zoneName;
-                                          if (isMatch) {
-                                            console.log('🚀 ~ zone:', zoneName, countryName);
-                                          }
-                                          return isMatch;
-                                        });
-
-                                        if (isHighlighted) {
-                                          console.log('🚀 ~ geo:', geo);
-                                        }
-
-                                        return (
-                                          <g key={geo.rsmKey} style={{ cursor: 'crosshair' }}>
-                                            <title>{geo.properties.name}</title>
-                                            <Geography
-                                              geography={geo}
-                                              fill={isHighlighted ? '#1e51ab' : '#cedaf0'}
-                                              stroke="#fff"
-                                              strokeWidth={1}
-                                              style={{
-                                                default: { outline: 'none' },
-                                                hover: {
-                                                  fill: isHighlighted ? '#163d82' : '#e2e8f0',
-                                                  outline: 'none',
-                                                },
-                                                pressed: { outline: 'none' },
-                                              }}
-                                            />
-                                          </g>
-                                        );
-                                      })
-                                    }
-                                  </Geographies>
-
-                                  {/* Zone Markers */}
-                                  {contract.zones?.map((zone) => {
-                                    const coordinates = getZoneCoordinates(zone.label);
-                                    if (!coordinates) return null;
-
-                                    return (
-                                      <Marker key={zone.id} coordinates={coordinates}>
-                                        <g>
-                                          {/* Background circle */}
-                                          <circle r="2" fill="#1e51ab" stroke="#fff" strokeWidth="1" />
-                                          {/* Zone label */}
-                                          <text
-                                            textAnchor="middle"
-                                            y="-15"
-                                            style={{
-                                              fontFamily: 'system-ui',
-                                              fill: '#1e51ab',
-                                              fontSize: '12px',
-                                              fontWeight: 'bold',
-                                              textShadow: '1px 1px 2px rgba(255,255,255,0.8)',
-                                            }}
-                                          >
-                                            {zone.label}
-                                          </text>
-                                        </g>
-                                      </Marker>
-                                    );
-                                  })}
-                                </ZoomableGroup>
-                              </ComposableMap>
+                        <>
+                          {/* Header with search and filter */}
+                          <div className="flex flex-col gap-4">
+                            <div className="flex items-start sm:items-center gap-3">
+                              <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-xl bg-blue-100 flex items-center justify-center">
+                                <FaGlobe className="h-5 w-5 sm:h-6 sm:w-6 text-[#1e51ab]" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 flex flex-wrap items-center gap-2">
+                                  <span>Zones géographiques</span>
+                                  <FaMagic className="h-4 w-4 text-blue-500 flex-shrink-0" title="Généré par IA" />
+                                </h3>
+                                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                                  {filteredZones.length} zone{filteredZones.length > 1 ? 's' : ''} de couverture
+                                  {(zoneSearchQuery || zoneTypeFilter !== 'all') && ` (filtré${filteredZones.length > 1 ? 's' : ''})`}
+                                </p>
+                              </div>
                             </div>
-                            <div className="mt-4 text-sm text-gray-600 text-center">💡 Utilisez la molette de votre souris pour zoomer et dézoomer sur la carte</div>
+
+                            {/* Search and Filter */}
+                            <div className="flex flex-col gap-2">
+                              {/* Search */}
+                              <div className="relative w-full">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                  <FaSearch className="h-4 w-4 text-gray-400" />
+                                </div>
+                                <input
+                                  type="text"
+                                  placeholder="Rechercher..."
+                                  value={zoneSearchQuery}
+                                  onChange={(e) => setZoneSearchQuery(e.target.value)}
+                                  className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent text-sm"
+                                />
+                                {zoneSearchQuery && (
+                                  <button onClick={() => setZoneSearchQuery('')} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <FaTimes className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* Filter and Clear */}
+                              <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <FaFilter className="h-4 w-4 text-gray-400" />
+                                  </div>
+                                  <select
+                                    value={zoneTypeFilter}
+                                    onChange={(e) => setZoneTypeFilter(e.target.value)}
+                                    className="w-full pl-10 pr-8 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent text-sm appearance-none bg-white cursor-pointer"
+                                  >
+                                    <option value="all">Tous</option>
+                                    <option value="country">Pays</option>
+                                    <option value="zone">Zones</option>
+                                  </select>
+                                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <FaChevronDown className="h-3 w-3 text-gray-400" />
+                                  </div>
+                                </div>
+
+                                {/* Clear filters */}
+                                {(zoneSearchQuery || zoneTypeFilter !== 'all') && (
+                                  <button
+                                    onClick={() => {
+                                      setZoneSearchQuery('');
+                                      setZoneTypeFilter('all');
+                                    }}
+                                    className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap flex-shrink-0"
+                                  >
+                                    <FaTimes className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
                           </div>
 
-                          {/* Zone List */}
-                          <div className="bg-white rounded-xl p-4 sm:p-6 border border-blue-100">
-                            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                              <FaGlobe className="h-5 w-5 text-blue-600" />
-                              Zones de couverture
-                            </h3>
-                            <div className="space-y-3">
-                              {contract.zones.map((zone) => (
-                                <div key={zone.id} className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200 hover:shadow-md transition-shadow">
-                                  <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                        <span className="text-sm sm:text-base font-medium text-gray-900">{capitalizeFirst(zone.label)}</span>
-                                        <span className="text-xs sm:text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                                          {zone.type === 'country' ? 'Pays' : zone.type === 'zone' ? 'Zone' : zone.type === 'region' ? 'Région' : 'Ville'}
-                                        </span>
+                          {filteredZones.length > 0 ? (
+                            <div className="space-y-6">
+                              {/* Map Section */}
+                              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                <div className="p-4 sm:p-6 border-b border-gray-200">
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                    <h4 className="text-base sm:text-lg font-semibold text-gray-900">Carte interactive des zones</h4>
+                                    {/* Legend */}
+                                    <div className="flex items-center gap-4 text-sm">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded bg-[#1e51ab]"></div>
+                                        <span className="text-gray-600">Zones couvertes</span>
                                       </div>
-                                      {zone.conditions && zone.conditions.length > 0 && (
-                                        <div className="mt-3">
-                                          <div className="text-sm sm:text-base font-medium text-gray-700 mb-2 flex items-center gap-1">
-                                            <FaClipboardList className="h-3 w-3" />
-                                            Conditions spécifiques
-                                          </div>
-                                          <div className="space-y-1">
-                                            {zone.conditions.map((condition, index) => (
-                                              <div key={index} className="flex items-start gap-2 text-sm sm:text-base text-gray-600">
-                                                <span className="text-blue-400 mt-1">•</span>
-                                                <span className="leading-relaxed">{condition}</span>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded bg-gray-300"></div>
+                                        <span className="text-gray-600">Autres régions</span>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              ))}
+                                <div className="w-full h-[300px] sm:h-[400px] lg:h-[550px] bg-gray-50 overflow-hidden relative">
+                                  <ComposableMap
+                                    projection="geoEqualEarth"
+                                    projectionConfig={{
+                                      scale: 190,
+                                      center: [0, 15],
+                                    }}
+                                    style={{
+                                      width: '100%',
+                                      height: '100%',
+                                    }}
+                                  >
+                                    <ZoomableGroup>
+                                      {/* Graticule */}
+                                      <Graticule stroke="#e2e8f0" strokeWidth={1} />
+
+                                      {/* World Countries */}
+                                      <Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
+                                        {({ geographies }) =>
+                                          geographies.map((geo) => {
+                                            // Check if this country/region matches any of the contract zones
+                                            const isHighlighted = filteredZones.some((zone) => {
+                                              const countryName = geo.properties.name?.toLowerCase();
+                                              const zoneName = zone.label.toLowerCase();
+
+                                              // Direct name matching only
+                                              return countryName === zoneName;
+                                            });
+
+                                            return (
+                                              <g key={geo.rsmKey} style={{ cursor: 'crosshair' }}>
+                                                <title>{geo.properties.name}</title>
+                                                <Geography
+                                                  geography={geo}
+                                                  fill={isHighlighted ? '#1e51ab' : '#cedaf0'}
+                                                  stroke="#fff"
+                                                  strokeWidth={1}
+                                                  style={{
+                                                    default: { outline: 'none' },
+                                                    hover: {
+                                                      fill: isHighlighted ? '#163d82' : '#e2e8f0',
+                                                      outline: 'none',
+                                                    },
+                                                    pressed: { outline: 'none' },
+                                                  }}
+                                                />
+                                              </g>
+                                            );
+                                          })
+                                        }
+                                      </Geographies>
+
+                                      {/* Zone Markers */}
+                                      {filteredZones.map((zone) => {
+                                        const coordinates = getZoneCoordinates(zone.label);
+                                        if (!coordinates) return null;
+
+                                        return (
+                                          <Marker key={zone.id} coordinates={coordinates}>
+                                            <g>
+                                              {/* Animated pulse circle */}
+                                              <circle r="8" fill="#1e51ab" opacity="0.2">
+                                                <animate attributeName="r" from="4" to="12" dur="2s" begin="0s" repeatCount="indefinite" />
+                                                <animate attributeName="opacity" from="0.5" to="0" dur="2s" begin="0s" repeatCount="indefinite" />
+                                              </circle>
+                                              {/* Main marker circle */}
+                                              <circle r="3" fill="#1e51ab" stroke="#fff" strokeWidth="1.5" />
+                                              {/* Zone label */}
+                                              <text
+                                                textAnchor="middle"
+                                                y="-15"
+                                                style={{
+                                                  fontFamily: 'system-ui',
+                                                  fill: '#1e51ab',
+                                                  fontSize: '11px',
+                                                  fontWeight: '600',
+                                                  textShadow: '1px 1px 3px rgba(255,255,255,0.9)',
+                                                }}
+                                              >
+                                                {capitalizeFirst(zone.label)}
+                                              </text>
+                                            </g>
+                                          </Marker>
+                                        );
+                                      })}
+                                    </ZoomableGroup>
+                                  </ComposableMap>
+                                </div>
+                                <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+                                  <p className="text-xs sm:text-sm text-gray-600 text-center">Utilisez la molette de votre souris pour zoomer et dézoomer sur la carte</p>
+                                </div>
+                              </div>
+
+                              {/* Zone Cards Grid */}
+                              <div>
+                                <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 px-1">Liste des zones de couverture</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                  {filteredZones.map((zone) => {
+                                    const ZoneIcon = getZoneIcon(zone.type);
+                                    const hasConditions = zone.conditions && zone.conditions.length > 0;
+                                    const isExpanded = expandedZones[zone.id] || false;
+
+                                    return (
+                                      <motion.div
+                                        key={zone.id}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#1e51ab] transition-all group"
+                                      >
+                                        {/* Card Header */}
+                                        <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50">
+                                          <div className="flex items-start justify-between gap-3">
+                                            <div className="flex items-start gap-3 flex-1 min-w-0">
+                                              <div className="flex-shrink-0">
+                                                <div className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                  <ZoneIcon className="h-5 w-5 text-[#1e51ab]" />
+                                                </div>
+                                              </div>
+                                              <div className="flex-1 min-w-0">
+                                                <h5 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{capitalizeFirst(zone.label)}</h5>
+                                                <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-white rounded-full text-xs font-medium text-[#1e51ab]">
+                                                  {getZoneTypeLabel(zone.type)}
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        {/* Card Content */}
+                                        {hasConditions && (
+                                          <div className="p-4">
+                                            <button onClick={() => toggleZoneExpansion(zone.id)} className="w-full flex items-center justify-between text-left group/btn">
+                                              <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                                <FaInfoCircle className="h-3.5 w-3.5 text-[#1e51ab]" />
+                                                Conditions spécifiques
+                                              </span>
+                                              <FaChevronDown className={`h-3.5 w-3.5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                            </button>
+
+                                            <AnimatePresence>
+                                              {isExpanded && (
+                                                <motion.div
+                                                  initial={{ height: 0, opacity: 0 }}
+                                                  animate={{ height: 'auto', opacity: 1 }}
+                                                  exit={{ height: 0, opacity: 0 }}
+                                                  className="overflow-hidden"
+                                                >
+                                                  <div className="mt-3 space-y-2">
+                                                    {zone.conditions!.map((condition, index) => (
+                                                      <div key={index} className="flex items-start gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-2">
+                                                        <FaCheck className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
+                                                        <span className="leading-relaxed">{condition}</span>
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                </motion.div>
+                                              )}
+                                            </AnimatePresence>
+                                          </div>
+                                        )}
+
+                                        {/* No conditions message */}
+                                        {!hasConditions && (
+                                          <div className="px-4 pb-4">
+                                            <p className="text-xs text-gray-500 italic">Aucune condition spécifique</p>
+                                          </div>
+                                        )}
+                                      </motion.div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
+                          ) : (
+                            <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                              <FaSearch className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                              <h4 className="text-lg font-semibold text-gray-900 mb-2">Aucune zone trouvée</h4>
+                              <p className="text-sm text-gray-600 mb-4">Aucune zone ne correspond à vos critères de recherche</p>
+                              <button
+                                onClick={() => {
+                                  setZoneSearchQuery('');
+                                  setZoneTypeFilter('all');
+                                }}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-[#1e51ab] text-white rounded-lg hover:bg-[#163d82] transition-colors"
+                              >
+                                <FaTimes className="h-4 w-4" />
+                                Réinitialiser les filtres
+                              </button>
+                            </div>
+                          )}
+                        </>
                       ) : (
                         <div className="text-center py-12">
                           <div className="w-full max-w-md mx-auto bg-white rounded-xl border border-blue-200 p-6 sm:p-8 shadow-lg">
