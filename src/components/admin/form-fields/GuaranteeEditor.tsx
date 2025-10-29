@@ -93,7 +93,7 @@ const GuaranteeEditor: React.FC<GuaranteeEditorProps> = ({ guaranteeIndex, guara
             {/* Guarantee Basic Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Titre de la garantie</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Intitulé</label>
                 <input
                   {...register(`guarantees.${guaranteeIndex}.title`)}
                   type="text"
@@ -113,7 +113,7 @@ const GuaranteeEditor: React.FC<GuaranteeEditorProps> = ({ guaranteeIndex, guara
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Limitation</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Plafond</label>
                 <textarea
                   {...register(`guarantees.${guaranteeIndex}.limitation`)}
                   rows={2}
@@ -150,7 +150,7 @@ const GuaranteeEditor: React.FC<GuaranteeEditorProps> = ({ guaranteeIndex, guara
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                       <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Service</label>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Intitulé</label>
                         <input
                           {...register(`guarantees.${guaranteeIndex}.details.${detailIndex}.service`)}
                           type="text"
@@ -168,12 +168,30 @@ const GuaranteeEditor: React.FC<GuaranteeEditorProps> = ({ guaranteeIndex, guara
                           placeholder="Ex: 100 000€"
                         />
                       </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Limite</label>
+                        <input
+                          {...register(`guarantees.${guaranteeIndex}.details.${detailIndex}.limitation`)}
+                          type="text"
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Ex: 100 000€"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Franchise</label>
+                        <input
+                          {...register(`guarantees.${guaranteeIndex}.details.${detailIndex}.deductible`)}
+                          type="text"
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Ex: 100 000€"
+                        />
+                      </div>
                     </div>
 
                     {/* Coverages */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <label className="block text-xs font-medium text-gray-600">Couvertures</label>
+                        <label className="block text-xs font-medium text-gray-600">Couvertures/Exclusions</label>
                         <button
                           type="button"
                           onClick={() => addCoverage(detailIndex)}
