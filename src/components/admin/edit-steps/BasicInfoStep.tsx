@@ -14,8 +14,6 @@ interface BasicInfoStepProps {
 
 const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ onNext, onPrevious }) => {
   const { register, control } = useFormContext<BasicInfoFormData>();
-  console.log('🚀 ~ BasicInfoStep ~ control:', control);
-  console.log('🚀 ~ BasicInfoStep ~ register:', register('name'));
 
   // Get all categories from config and convert to dropdown options
   const categories: DropdownOption[] = getAllCategories().map((category) => ({

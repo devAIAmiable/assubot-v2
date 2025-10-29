@@ -7,7 +7,6 @@ import type { ContactType, Contract, ContractCategory, ContractListItem } from '
 
 // Convert Contract to legacy properties for display
 export const getContractInsurer = (contract: Contract): string => {
-  console.log('🚀 ~ getContractInsurer ~ contract:', contract);
   return contract.insurer?.name || 'Assureur inconnu';
 };
 
