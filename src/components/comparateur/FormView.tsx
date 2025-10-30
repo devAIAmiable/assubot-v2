@@ -501,7 +501,7 @@ const FormView: React.FC<FormViewProps> = ({
           value={(value as string) || ''}
           onChange={(val) => handleFieldChange(field.name, val)}
           error={error}
-          category={selectedType || undefined}
+          category={selectedType && selectedType !== 'moto' ? (selectedType as 'auto' | 'home' | 'health' | 'life' | 'disability') : undefined}
         />
       );
     }

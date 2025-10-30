@@ -4,14 +4,12 @@ import React, { useCallback, useState, useEffect, useRef } from 'react';
 import type { FormField } from '../../../types/comparison';
 import { useLazyGetInsurersQuery, type Insurer } from '../../../store/insurersApi';
 
-type InsurerCategory = 'auto' | 'home' | 'health' | 'life' | 'disability' | 'moto';
-
 interface InsurerFieldProps {
   field: FormField;
   value: string;
   onChange: (value: string) => void;
   error?: string;
-  category?: InsurerCategory;
+  category?: 'auto' | 'home' | 'health' | 'life' | 'disability';
 }
 
 const InsurerField: React.FC<InsurerFieldProps> = ({ field, value, onChange, error, category }) => {

@@ -136,11 +136,13 @@ const AdminContractsTable: React.FC = () => {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">Tous les assureurs</option>
-            {insurersData?.data?.map((insurer) => (
-              <option key={insurer.id} value={insurer.id}>
-                {insurer.name}
-              </option>
-            ))}
+            {Array.isArray(insurersData?.data)
+              ? insurersData?.data.map((insurer) => (
+                  <option key={insurer.id} value={insurer.id}>
+                    {insurer.name}
+                  </option>
+                ))
+              : null}
           </select>
         </div>
       </div>
