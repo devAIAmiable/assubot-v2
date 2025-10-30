@@ -249,7 +249,7 @@ const ContractsModule = () => {
                       <div>
                         <h3 className="font-semibold text-gray-900 text-sm">{contract.name}</h3>
                         {contract.subject && <p className="text-xs text-gray-500 italic">{contract.subject}</p>}
-                        <p className="text-xs text-gray-600">{getTypeLabel(getContractListItemType(contract))}</p>
+                        <p className="text-xs text-gray-600">{getTypeLabel(contract.category)}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
