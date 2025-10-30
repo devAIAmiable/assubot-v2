@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import AdminContractUpload from './AdminContractUpload';
 import AdminContractsTable from '../components/admin/AdminContractsTable';
 import AdminGuard from '../components/AdminGuard';
-import { motion } from 'framer-motion';
 import BatchCreateUsersModal from '../components/admin/BatchCreateUsersModal';
+import { motion } from 'framer-motion';
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'upload' | 'contracts'>('contracts');
@@ -51,9 +51,9 @@ const AdminPanel: React.FC = () => {
                     <FaUsers />
                     <span>Créer des utilisateurs en lot</span>
                   </button>
-                <div className="flex items-center space-x-2 text-green-600">
-                  <FaCog className="h-5 w-5" />
-                  <span className="text-sm font-medium">Admin</span>
+                  <div className="flex items-center space-x-2 text-green-600">
+                    <FaCog className="h-5 w-5" />
+                    <span className="text-sm font-medium">Admin</span>
                   </div>
                 </div>
               </div>

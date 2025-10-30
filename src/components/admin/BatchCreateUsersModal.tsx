@@ -1,6 +1,6 @@
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
-import React, { Fragment, useMemo, useState } from 'react';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import React, { Fragment, useState } from 'react';
+import { Controller, useFieldArray, useForm, type Path } from 'react-hook-form';
 import { FaPlus, FaTimes, FaTrash } from 'react-icons/fa';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { usersService } from '../../services/users';
 import { batchUserInputSchema, batchUsersPayloadSchema, type BatchUsersPayload, type BatchUsersResource } from '../../schemas/users';
 
-type FormSchema = z.infer<typeof batchUsersPayloadSchema>;
+type FormSchema = z.input<typeof batchUsersPayloadSchema>;
 
 interface BatchCreateUsersModalProps {
   open: boolean;
@@ -41,10 +41,8 @@ const BatchCreateUsersModal: React.FC<BatchCreateUsersModalProps> = ({ open, onC
   const [result, setResult] = useState<BatchUsersResource | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const resolver = useMemo(() => zodResolver(batchUsersPayloadSchema), []);
-
   const { control, handleSubmit, formState, reset } = useForm<FormSchema>({
-    resolver,
+    resolver: zodResolver(batchUsersPayloadSchema),
     defaultValues: { initialCredits: 0, users: [defaultRow] },
     mode: 'onChange',
   });
@@ -146,14 +144,14 @@ const BatchCreateUsersModal: React.FC<BatchCreateUsersModalProps> = ({ open, onC
                         <tr>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                           {requiredColumns.map((col) => (
-                            <th key={col} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              {col}
+                            <th key={String(col)} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              {String(col)}
                             </th>
                           ))}
                           {showAdvanced &&
                             optionalColumns.map((col) => (
-                              <th key={col} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                {col}
+                              <th key={String(col)} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                {String(col)}
                               </th>
                             ))}
                           <th className="px-3 py-2" />
@@ -164,41 +162,53 @@ const BatchCreateUsersModal: React.FC<BatchCreateUsersModalProps> = ({ open, onC
                           <tr key={field.id}>
                             <td className="px-3 py-2 text-sm text-gray-500">{index + 1}</td>
                             {requiredColumns.map((col) => (
-                              <td key={col} className="px-3 py-2">
+                              <td key={String(col)} className="px-3 py-2">
                                 <Controller
                                   control={control}
-                                  name={`users.${index}.${col}` as const}
+                                  name={`users.${index}.${String(col)}` as Path<FormSchema>}
                                   render={({ field }) => (
                                     <input
                                       type={col === 'password' ? 'password' : 'text'}
                                       className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1e51ab]"
-                                      {...field}
+                                      value={typeof field.value === 'string' || typeof field.value === 'number' ? field.value : ''}
+                                      onChange={(e) => field.onChange(e.target.value)}
+                                      onBlur={field.onBlur}
+                                      name={field.name}
+                                      ref={field.ref}
                                     />
                                   )}
                                 />
-                                {/* @ts-expect-error dynamic path */}
-                                {formState.errors.users?.[index]?.[col]?.message && (
-                                  // @ts-expect-error dynamic path
-                                  <p className="text-red-600 text-xs mt-1">{formState.errors.users?.[index]?.[col]?.message as string}</p>
-                                )}
+                                {(() => {
+                                  const errForRow = formState.errors.users?.[index] as unknown as Record<string, { message?: string }> | undefined;
+                                  const msg = errForRow?.[String(col)]?.message;
+                                  return msg ? <p className="text-red-600 text-xs mt-1">{msg}</p> : null;
+                                })()}
                               </td>
                             ))}
 
                             {showAdvanced &&
                               optionalColumns.map((col) => (
-                                <td key={col} className="px-3 py-2">
+                                <td key={String(col)} className="px-3 py-2">
                                   <Controller
                                     control={control}
-                                    name={`users.${index}.${col}` as const}
+                                    name={`users.${index}.${String(col)}` as Path<FormSchema>}
                                     render={({ field }) => (
-                                      <input type="text" className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1e51ab]" {...field} />
+                                      <input
+                                        type="text"
+                                        className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1e51ab]"
+                                        value={typeof field.value === 'string' || typeof field.value === 'number' ? field.value : ''}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                        onBlur={field.onBlur}
+                                        name={field.name}
+                                        ref={field.ref}
+                                      />
                                     )}
                                   />
-                                  {/* @ts-expect-error dynamic path */}
-                                  {formState.errors.users?.[index]?.[col]?.message && (
-                                    // @ts-expect-error dynamic path
-                                    <p className="text-red-600 text-xs mt-1">{formState.errors.users?.[index]?.[col]?.message as string}</p>
-                                  )}
+                                  {(() => {
+                                    const errForRow = formState.errors.users?.[index] as unknown as Record<string, { message?: string }> | undefined;
+                                    const msg = errForRow?.[String(col)]?.message;
+                                    return msg ? <p className="text-red-600 text-xs mt-1">{msg}</p> : null;
+                                  })()}
                                 </td>
                               ))}
 
@@ -265,7 +275,7 @@ const BatchCreateUsersModal: React.FC<BatchCreateUsersModalProps> = ({ open, onC
                               </tr>
                             </thead>
                             <tbody>
-                              {result.results.map((r) => (
+                              {result.results.map((r: BatchUsersResource['results'][number]) => (
                                 <tr key={r.email} className="text-sm border-t">
                                   <td className="px-2 py-1">{r.email}</td>
                                   <td className="px-2 py-1">{r.success ? '✅' : '❌'}</td>
