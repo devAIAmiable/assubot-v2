@@ -31,6 +31,7 @@ import {
 } from 'react-icons/fa';
 import { formatDateForDisplayFR, getDisplayValue } from '../utils/dateHelpers';
 import { getContactTypeLabel, getObligationTypeLabel, getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../utils/contract';
+import { getContractListItemInsurer, getContractListItemType } from '../utils/contractAdapters';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -42,7 +43,6 @@ import InsufficientCreditsModal from './ui/InsufficientCreditsModal';
 import ReactMarkdown from 'react-markdown';
 import SummarizeConfirmationModal from './ui/SummarizeConfirmationModal';
 import { capitalizeFirst } from '../utils/text';
-import { getContractListItemInsurer } from '../utils/contractAdapters';
 import { getInsurerLogo } from '../utils/insurerLogo';
 import { selectIsContractProcessing } from '../store/contractProcessingSlice';
 // No transformation needed - using backend data directly
@@ -626,7 +626,7 @@ const ContractDetailsPage = () => {
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">{contract.name}</h1>
                   <p className="text-gray-600">
-                    {getDisplayValue(contract.insurer?.name)} - {getTypeLabel(contract.category)}
+                    {getDisplayValue(contract.insurer?.name)} - {getTypeLabel(getContractListItemType(contract))}
                   </p>
                 </div>
               </div>
