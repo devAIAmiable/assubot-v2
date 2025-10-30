@@ -173,6 +173,56 @@ export const contractPreferenceFields: RawFormFieldDefinition[] = [
     ],
   },
   {
+    name: 'optionalGuarantees_assistance0km',
+    type: 'checkbox',
+    required: false,
+    label: 'Assistance 0 km',
+    subsection: {
+      id: 'contract_preferences',
+      label: 'Préférences du contrat',
+    },
+  },
+  {
+    name: 'optionalGuarantees_replacementVehicle',
+    type: 'checkbox',
+    required: false,
+    label: 'Véhicule de remplacement',
+    subsection: {
+      id: 'contract_preferences',
+      label: 'Préférences du contrat',
+    },
+  },
+  {
+    name: 'optionalGuarantees_extendedDriverProtection',
+    type: 'checkbox',
+    required: false,
+    label: 'Protection du conducteur étendue',
+    subsection: {
+      id: 'contract_preferences',
+      label: 'Préférences du contrat',
+    },
+  },
+  {
+    name: 'optionalGuarantees_legalDefense',
+    type: 'checkbox',
+    required: false,
+    label: 'Défense juridique',
+    subsection: {
+      id: 'contract_preferences',
+      label: 'Préférences du contrat',
+    },
+  },
+  {
+    name: 'optionalGuarantees_theftFire',
+    type: 'checkbox',
+    required: false,
+    label: 'Vol & incendie',
+    subsection: {
+      id: 'contract_preferences',
+      label: 'Préférences du contrat',
+    },
+  },
+  {
     name: 'deductiblePreference',
     type: 'radio',
     required: true,

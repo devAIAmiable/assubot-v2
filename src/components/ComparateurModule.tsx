@@ -1,5 +1,6 @@
-import type { ComparisonCategory, ComparisonOffer } from '../types/comparison';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import type { ComparisonCalculationResponse, ComparisonCategory, ComparisonOffer } from '../types/comparison';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import ErrorBoundary from './comparateur/ErrorBoundary';
 import FormView from './comparateur/FormView';
@@ -22,6 +23,7 @@ interface AskedQuestion {
 
 const ComparateurModule = () => {
   const user = useAppSelector((state) => state.user?.currentUser);
+  const navigate = useNavigate();
   const contracts = useAppSelector((state) => state.contracts?.contracts || []);
 
   // State management
@@ -36,19 +38,19 @@ const ComparateurModule = () => {
   const [aiResponse, setAiResponse] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isFilteringResults, setIsFilteringResults] = useState(false);
-  const [comparisonResults] = useState<ComparisonOffer[]>([]);
+  const [comparisonResults, setComparisonResults] = useState<ComparisonOffer[]>([]);
+  const [comparisonScores, setComparisonScores] = useState<Record<string, number>>({});
   const [askedQuestions, setAskedQuestions] = useState<AskedQuestion[]>([]);
-  const [comparisonError] = useState<string | null>(null);
+  const [comparisonError, setComparisonError] = useState<string | null>(null);
+  const [loadingTimer, setLoadingTimer] = useState(0);
+  console.log('🚀 ~ ComparateurModule ~ loadingTimer:', loadingTimer);
+  const [loadingTimerInterval, setLoadingTimerInterval] = useState<ReturnType<typeof setInterval> | null>(null);
   const [filters, setFilters] = useState({
     priceRange: [0, 200],
     insurers: [] as string[],
     rating: 0,
     coverages: [] as string[],
   });
-
-  // History pagination state
-  const [historyPage, setHistoryPage] = useState(1);
-  const [historyItemsPerPage] = useState(4);
 
   // Separate state setters to minimize re-renders
   const updatePriceRange = useCallback((newRange: number[]) => {
@@ -67,16 +69,40 @@ const ComparateurModule = () => {
     setFilters({ priceRange: [0, 200], insurers: [], rating: 0, coverages: [] });
   }, []);
 
+  // Helper to get best formula for an offer (recommended > cheapest > first)
+  const getBestFormula = useCallback((offer: ComparisonOffer) => {
+    if (!offer.formulas || offer.formulas.length === 0) return null;
+
+    // Try recommended first
+    const recommended = offer.formulas.find((f) => f.isRecommended);
+    if (recommended) return recommended;
+
+    // Otherwise get cheapest
+    return offer.formulas.reduce((cheapest, current) => {
+      if (!cheapest) return current;
+      return current.annualPremiumCents < cheapest.annualPremiumCents ? current : cheapest;
+    });
+  }, []);
+
   // Memoize filtered results to prevent unnecessary recalculations
   const filteredResults = useMemo(() => {
     return comparisonResults.filter((offer) => {
-      if (filters.rating > 0 && offer.rating < filters.rating) return false;
-      if (filters.insurers.length > 0 && !filters.insurers.includes(offer.insurerName)) return false;
-      const monthlyPrice = Math.round(offer.annualPremium / 12);
+      const formula = getBestFormula(offer);
+      if (!formula) return false;
+
+      // Filter by rating
+      if (filters.rating > 0 && offer.insurer.rating < filters.rating) return false;
+
+      // Filter by insurer
+      if (filters.insurers.length > 0 && !filters.insurers.includes(offer.insurer.name)) return false;
+
+      // Filter by price (convert cents to euros)
+      const monthlyPrice = Math.round(formula.annualPremiumCents / 100 / 12);
       if (monthlyPrice < filters.priceRange[0] || monthlyPrice > filters.priceRange[1]) return false;
+
       return true;
     });
-  }, [comparisonResults, filters.rating, filters.insurers, filters.priceRange]);
+  }, [comparisonResults, filters.rating, filters.insurers, filters.priceRange, getBestFormula]);
 
   // Separate current contracts from other offers for pagination
   const { currentContracts, otherOffers } = useMemo(() => {
@@ -171,6 +197,14 @@ const ComparateurModule = () => {
     }));
   }, []);
 
+  // Batch update function for test data filling
+  const batchUpdateFormFields = useCallback((fields: Record<string, unknown>) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...fields,
+    }));
+  }, []);
+
   const handleTypeSelection = useCallback(
     (type: ComparisonCategory) => {
       setSelectedType(type);
@@ -201,6 +235,42 @@ const ComparateurModule = () => {
     [contracts, user]
   );
 
+  // Handle comparison results from API response
+  const handleComparisonResults = useCallback(
+    (response: ComparisonCalculationResponse) => {
+      // Keep brief loading to show progression while preparing redirect
+      setCurrentStep('loading');
+      setLoadingTimer(0);
+      setComparisonError(null);
+
+      // Prime local state once to avoid tearing before redirect (and satisfy linter)
+      setComparisonResults(response.offers);
+      setComparisonScores(response.scores);
+      setLoadingTimerInterval(null);
+
+      const sessionId = response.sessionId;
+      // Redirect directly to dedicated results page using API-provided sessionId
+      navigate(`/app/comparateur/${sessionId}/resultats`);
+    },
+    [navigate]
+  );
+
+  // Handle comparison errors
+  const handleComparisonError = useCallback((error: string) => {
+    setComparisonError(error);
+    // Stay on form step so user can fix issues
+    setCurrentStep('form');
+  }, []);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (loadingTimerInterval) {
+        clearInterval(loadingTimerInterval);
+      }
+    };
+  }, [loadingTimerInterval]);
+
   // TODO: Phase 2 - AI question handling
   const handleAiQuestion = useCallback(async () => {
     if (!aiQuestion.trim()) return;
@@ -226,20 +296,19 @@ const ComparateurModule = () => {
   return (
     <ErrorBoundary>
       <div className="space-y-8">
-        {currentStep === 'history' && (
-          <PastComparisonsView
-            user={user}
-            historyPage={historyPage}
-            historyItemsPerPage={historyItemsPerPage}
-            setHistoryPage={setHistoryPage}
-            setCurrentStep={setCurrentStep}
-            setSelectedType={setSelectedType}
-            setFormData={setFormData}
-          />
-        )}
+        {currentStep === 'history' && <PastComparisonsView user={user} setCurrentStep={setCurrentStep} setSelectedType={setSelectedType} setFormData={setFormData} />}
         {currentStep === 'type' && <TypeSelectionView user={user} contracts={contracts} setCurrentStep={setCurrentStep} handleTypeSelection={handleTypeSelection} />}
         {currentStep === 'form' && (
-          <FormView selectedType={selectedType} formData={formData} updateFormField={updateFormField} setCurrentStep={setCurrentStep} comparisonError={comparisonError} />
+          <FormView
+            selectedType={selectedType}
+            formData={formData}
+            updateFormField={updateFormField}
+            batchUpdateFormFields={batchUpdateFormFields}
+            setCurrentStep={setCurrentStep}
+            comparisonError={comparisonError}
+            onComparisonSuccess={handleComparisonResults}
+            onComparisonError={handleComparisonError}
+          />
         )}
         {currentStep === 'loading' && <LoadingView selectedType={selectedType} />}
         {currentStep === 'results' && (
@@ -250,6 +319,8 @@ const ComparateurModule = () => {
             currentPage={currentPage}
             totalPages={totalPages}
             filters={filters}
+            scores={comparisonScores}
+            getBestFormula={getBestFormula}
             aiQuestion={aiQuestion}
             aiResponse={aiResponse}
             isAiLoading={isAiLoading}

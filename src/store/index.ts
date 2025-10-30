@@ -2,11 +2,13 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { persistReducer, persistStore } from 'redux-persist';
 
 import chatReducer from './chatSlice';
+import comparisonSessionsReducer from './comparisonSessions/slice';
 import { chatsApi } from './chatsApi';
 import { comparisonApi } from './comparisonApi';
 import comparisonsReducer from './comparisonsSlice';
 import contractCreationReducer from './contractCreationSlice';
 import contractProcessingReducer from './contractProcessingSlice';
+import nlQueriesReducer from './comparisonSessions/nlQueriesSlice';
 import { contractsApi } from './contractsApi';
 import contractsReducer from './contractsSlice';
 import { creditPacksApi } from './creditPacksApi';
@@ -28,7 +30,7 @@ const userPersistConfig = {
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['chat', 'comparisons'], // Persist chat history and comparisons
+  whitelist: ['chat', 'comparisons', 'comparisonSessions', 'nlQueries'], // Persist chat history and comparisons
 };
 
 const rootReducer = combineReducers({
@@ -38,6 +40,8 @@ const rootReducer = combineReducers({
   user: persistReducer(userPersistConfig, userReducer),
   chat: chatReducer,
   comparisons: comparisonsReducer,
+  comparisonSessions: comparisonSessionsReducer,
+  nlQueries: nlQueriesReducer,
   [comparisonApi.reducerPath]: comparisonApi.reducer,
   [contractsApi.reducerPath]: contractsApi.reducer,
   [chatsApi.reducerPath]: chatsApi.reducer,

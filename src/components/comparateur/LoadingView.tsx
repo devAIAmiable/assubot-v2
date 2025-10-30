@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 
 interface LoadingViewProps {
   selectedType: ComparisonCategory | null;
+  timer?: number;
 }
 
 const LoadingView: React.FC<LoadingViewProps> = ({ selectedType }) => {
@@ -14,8 +15,9 @@ const LoadingView: React.FC<LoadingViewProps> = ({ selectedType }) => {
       <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
         <div className="w-20 h-20 border-4 border-[#1e51ab] border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Recherche des meilleures offres...</h2>
-        <p className="text-gray-600 mb-8">
-          Nous analysons les meilleures offres d'assurance {selectedType === 'auto' ? 'auto' : selectedType === 'home' ? 'habitation' : ''} pour vous
+        <p className="text-gray-600 mb-4">
+          Nous analysons les meilleures offres d'assurance{' '}
+          {selectedType === 'auto' ? 'auto' : selectedType === 'home' ? 'habitation' : selectedType === 'moto' ? 'moto' : selectedType === 'health' ? 'santé' : ''} pour vous
         </p>
         <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
           <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }} className="flex items-center">

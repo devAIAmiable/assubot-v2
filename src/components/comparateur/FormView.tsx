@@ -1,7 +1,9 @@
-import type { ComparisonCategory, FormDefinition, FormField } from '../../types/comparison';
+import type { ComparisonCategory, ComparisonCalculationResponse, FormDefinition, FormField } from '../../types/comparison';
 import { FaArrowLeft, FaArrowRight, FaChevronLeft, FaUser } from 'react-icons/fa';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getVisibleSubsectionGroups, type SubsectionGroup } from '../../utils/formGrouping';
+import { transformFormDataForBackend } from '../../utils/formDataTransform';
+import { generateAutoFormTestData } from '../../utils/testFormData';
 
 import AutocompleteField from './fields/AutocompleteField';
 import CardField from './fields/CardField';
@@ -24,11 +26,23 @@ interface FormViewProps {
   selectedType: ComparisonCategory | null;
   formData: Record<string, unknown>;
   updateFormField: (field: string, value: unknown) => void;
+  batchUpdateFormFields?: (fields: Record<string, unknown>) => void;
   setCurrentStep: (step: 'history' | 'type' | 'form' | 'results' | 'loading') => void;
   comparisonError?: string | null;
+  onComparisonSuccess: (response: ComparisonCalculationResponse) => void;
+  onComparisonError: (error: string) => void;
 }
 
-const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormField, setCurrentStep, comparisonError }) => {
+const FormView: React.FC<FormViewProps> = ({
+  selectedType,
+  formData,
+  updateFormField,
+  batchUpdateFormFields,
+  setCurrentStep,
+  comparisonError,
+  onComparisonSuccess,
+  onComparisonError,
+}) => {
   const user = useAppSelector((state) => state.user?.currentUser);
   const [formDefinition, setFormDefinition] = useState<FormDefinition | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -71,14 +85,19 @@ const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormF
         setErrors({});
         setHasPrefilled(false); // Reset prefilling flag for new form
 
-        // Check for autofill consent and show prompt if needed
-        const storedConsent = localStorage.getItem('autofillConsent');
-        if (storedConsent === null && user && Object.keys(user).length > 0) {
-          // Show autofill prompt if no preference is stored and user has data
-          setShowAutofillPrompt(true);
-        } else if (storedConsent === 'true') {
-          // Auto-prefill if user previously consented
-          setAutofillConsent(true);
+        // Check for autofill consent (for non-test mode)
+        const isTestMode = localStorage.getItem('comparisonTestMode') === 'true';
+        if (!isTestMode) {
+          const storedConsent = localStorage.getItem('autofillConsent');
+          if (storedConsent === null && user && Object.keys(user).length > 0) {
+            // Show autofill prompt if no preference is stored and user has data
+            setShowAutofillPrompt(true);
+          } else if (storedConsent === 'true') {
+            // Auto-prefill if user previously consented
+            setAutofillConsent(true);
+          }
+        } else {
+          setShowAutofillPrompt(false);
         }
       } catch (error) {
         console.error('Error loading form definition:', error);
@@ -88,6 +107,31 @@ const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormF
       }
     }
   }, [selectedType, user]);
+
+  // Separate effect for test mode filling - runs after formDefinition is set
+  // Only depend on hasPrefilled to prevent infinite loops
+  useEffect(() => {
+    const isTestMode = localStorage.getItem('comparisonTestMode') === 'true';
+    if (isTestMode && formDefinition && selectedType === 'auto' && !hasPrefilled) {
+      // Use requestAnimationFrame to ensure form is fully rendered
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const testData = generateAutoFormTestData();
+          // Use batch update if available, otherwise fall back to individual updates
+          if (batchUpdateFormFields) {
+            batchUpdateFormFields(testData);
+          } else {
+            // Fallback: set all fields individually
+            Object.entries(testData).forEach(([fieldName, value]) => {
+              updateFormField(fieldName, value);
+            });
+          }
+          setHasPrefilled(true);
+        }, 100); // Small delay to ensure form is ready
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formDefinition, selectedType, hasPrefilled]); // Intentionally exclude callbacks to prevent loops
 
   // Separate effect to handle prefilling when formDefinition is ready and user has consented
   useEffect(() => {
@@ -182,6 +226,48 @@ const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormF
     }
   }, [formDefinition, user, hasPrefilled, autofillConsent, showAutofillPrompt, updateFormField]);
 
+  // Extract all fields once - memoized to prevent recalculation
+  // MUST BE BEFORE ANY EARLY RETURNS to comply with Rules of Hooks
+  const allFields = useMemo(() => {
+    if (!formDefinition) return [];
+    const fields: FormField[] = [];
+    formDefinition.sections.forEach((section) => {
+      section.fields.forEach((field) => {
+        fields.push(field);
+      });
+    });
+    return fields;
+  }, [formDefinition]);
+
+  // Memoize visible steps to prevent recalculation on every render
+  const visibleSteps = useMemo(() => {
+    if (allFields.length === 0) return [];
+    return getVisibleSubsectionGroups(allFields, formData);
+  }, [allFields, formData]);
+
+  // Ensure currentStepIndex is valid after visibility changes
+  useEffect(() => {
+    if (visibleSteps.length > 0 && currentStepIndex >= visibleSteps.length) {
+      setCurrentStepIndex(Math.max(0, visibleSteps.length - 1));
+    }
+  }, [visibleSteps.length, currentStepIndex]);
+
+  // Memoize form progress
+  const formProgress = useMemo(() => {
+    if (!formDefinition || allFields.length === 0) return 0;
+
+    const requiredFields = allFields.filter((field) => field.required);
+
+    if (requiredFields.length === 0) return 100;
+
+    const filledRequiredFields = requiredFields.filter((field) => {
+      const value = formData?.[field.name];
+      return value !== undefined && value !== null && value !== '';
+    });
+
+    return Math.round((filledRequiredFields.length / requiredFields.length) * 100 * 100) / 100;
+  }, [formDefinition, allFields, formData]);
+
   // Check if a field should be visible based on showWhen conditions
   const isFieldVisible = (field: FormField): boolean => {
     if (!field.showWhen) return true;
@@ -247,33 +333,27 @@ const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormF
     return null;
   };
 
-  // Handle field change
-  const handleFieldChange = (fieldName: string, value: unknown) => {
-    updateFormField(fieldName, value);
+  // Handle field change - memoized to prevent infinite loops
+  const handleFieldChange = useCallback(
+    (fieldName: string, value: unknown) => {
+      updateFormField(fieldName, value);
 
-    // Clear error for this field
-    if (errors[fieldName]) {
+      // Clear error for this field
       setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[fieldName];
-        return newErrors;
+        if (prev[fieldName]) {
+          const newErrors = { ...prev };
+          delete newErrors[fieldName];
+          return newErrors;
+        }
+        return prev;
       });
-    }
-  };
+    },
+    [updateFormField]
+  );
 
   // Wizard navigation handlers
   const handleWizardNext = () => {
-    if (!formDefinition) return;
-
-    // Extract all fields from all sections
-    const allFields: FormField[] = [];
-    formDefinition.sections.forEach((section) => {
-      section.fields.forEach((field) => {
-        allFields.push(field);
-      });
-    });
-
-    const visibleSteps = getVisibleSubsectionGroups(allFields, formData);
+    if (!formDefinition || visibleSteps.length === 0) return;
 
     if (currentStepIndex < visibleSteps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
@@ -320,12 +400,25 @@ const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormF
 
     // Submit to calculateComparison mutation
     try {
-      await calculateComparison(transformedData).unwrap();
-
-      // Handle successful submission - redirect to loading then results
+      // Transition to loading step first
       setCurrentStep('loading');
+
+      // Wait for the API response
+      const response = await calculateComparison(transformedData).unwrap();
+
+      // Pass response to parent for processing
+      onComparisonSuccess(response);
     } catch (error) {
-      // Error handling is done by the mutation's transformErrorResponse
+      // Extract error message
+      const errorMessage =
+        typeof error === 'string'
+          ? error
+          : error instanceof Error
+            ? error.message
+            : (error as { data?: { error?: { message?: string } } })?.data?.error?.message || 'Une erreur est survenue lors du calcul de la comparaison';
+
+      // Pass error to parent for handling
+      onComparisonError(errorMessage);
       console.error('Comparison calculation failed:', error);
     }
   };
@@ -333,42 +426,34 @@ const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormF
   // Transform form data to API format - send as nested structure with formData property
   const transformFormData = (definition: FormDefinition, data: Record<string, unknown>) => {
     // Filter and structure the form data according to API schema
-    const apiFormData: Record<string, unknown> = {};
+    let apiFormData: Record<string, unknown> = {};
 
     // Get all field names from the form definition
     const allFields = definition.sections.flatMap((section) => section.fields);
     const fieldNames = allFields.map((field) => field.name);
 
     // Only include fields that are defined in the form schema
+    // Filter out empty strings and null values for string fields to avoid backend validation errors
     fieldNames.forEach((fieldName) => {
-      if (data[fieldName] !== undefined) {
-        apiFormData[fieldName] = data[fieldName];
+      const value = data[fieldName];
+      if (value !== undefined) {
+        // Skip empty strings for text/string fields - let backend validation handle required fields
+        if (typeof value === 'string' && value === '') {
+          // Skip empty strings - don't include them in the payload
+          return;
+        }
+        apiFormData[fieldName] = value;
       }
     });
 
-    // Ensure required fields have default values if missing
-    const requiredFields = allFields.filter((field) => field.required);
-    requiredFields.forEach((field) => {
-      if (apiFormData[field.name] === undefined) {
-        // Set appropriate default values based on field type
-        switch (field.type) {
-          case 'checkbox':
-            apiFormData[field.name] = false;
-            break;
-          case 'number':
-            apiFormData[field.name] = 0;
-            break;
-          case 'select':
-            apiFormData[field.name] = field.options?.[0]?.value || '';
-            break;
-          default:
-            apiFormData[field.name] = '';
-        }
-      }
-    });
+    // Don't set empty string defaults for required fields
+    // Let the backend transformation handle missing required fields with proper defaults
 
     // Automatically set saveQuote to true
     apiFormData.saveQuote = true;
+
+    // Apply backend schema transformations (date formats, enum mappings, etc.)
+    apiFormData = transformFormDataForBackend(definition.category, apiFormData);
 
     // Special handling for optionalGuarantees - ensure it's an object
     if (apiFormData.optionalGuarantees && typeof apiFormData.optionalGuarantees === 'object') {
@@ -461,6 +546,17 @@ const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormF
     return renderField(field);
   };
 
+  // Helper functions for wizard UI
+  const getCurrentWizardStep = (): SubsectionGroup | null => {
+    if (!formDefinition || visibleSteps.length === 0) return null;
+    return visibleSteps[currentStepIndex] || null;
+  };
+
+  const getTotalVisibleSteps = () => {
+    return visibleSteps.length;
+  };
+
+  // Early returns MUST come after all hooks
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -480,59 +576,6 @@ const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormF
     );
   }
 
-  // Helper functions for wizard UI
-  const getCurrentWizardStep = (): SubsectionGroup | null => {
-    if (!formDefinition) return null;
-
-    // Extract all fields from all sections
-    const allFields: FormField[] = [];
-    formDefinition.sections.forEach((section) => {
-      section.fields.forEach((field) => {
-        allFields.push(field);
-      });
-    });
-
-    const visibleSteps = getVisibleSubsectionGroups(allFields, formData);
-    return visibleSteps[currentStepIndex] || null;
-  };
-
-  const getFormProgress = () => {
-    if (!formDefinition) return 0;
-
-    // Extract all fields from all sections
-    const allFields: FormField[] = [];
-    formDefinition.sections.forEach((section) => {
-      section.fields.forEach((field) => {
-        allFields.push(field);
-      });
-    });
-
-    const requiredFields = allFields.filter((field) => field.required);
-
-    if (requiredFields.length === 0) return 100;
-
-    const filledRequiredFields = requiredFields.filter((field) => {
-      const value = formData?.[field.name];
-      return value !== undefined && value !== null && value !== '';
-    });
-
-    return Math.round((filledRequiredFields.length / requiredFields.length) * 100 * 100) / 100;
-  };
-
-  const getTotalVisibleSteps = () => {
-    if (!formDefinition) return 0;
-
-    // Extract all fields from all sections
-    const allFields: FormField[] = [];
-    formDefinition.sections.forEach((section) => {
-      section.fields.forEach((field) => {
-        allFields.push(field);
-      });
-    });
-
-    return getVisibleSubsectionGroups(allFields, formData).length;
-  };
-
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -549,7 +592,7 @@ const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormF
 
       {/* Progress Bar */}
       <div className="bg-gray-200 rounded-full h-2">
-        <div className="bg-[#1e51ab] h-2 rounded-full transition-all duration-300" style={{ width: `${getFormProgress()}%` }} />
+        <div className="bg-[#1e51ab] h-2 rounded-full transition-all duration-300" style={{ width: `${formProgress}%` }} />
       </div>
 
       {/* Autofill Consent Prompt */}
@@ -616,9 +659,11 @@ const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormF
             </div>
 
             <div className="space-y-6">
-              {getCurrentWizardStep()!.fields.map((field, index) => (
-                <div key={`${getCurrentWizardStep()!.id}-${field.name}-${index}`}>{renderFieldWithHelp(field)}</div>
-              ))}
+              {getCurrentWizardStep()!
+                .fields.filter((field) => isFieldVisible(field))
+                .map((field, index) => (
+                  <div key={`${getCurrentWizardStep()!.id}-${field.name}-${index}`}>{renderFieldWithHelp(field)}</div>
+                ))}
             </div>
 
             {/* Wizard Navigation */}
@@ -663,3 +708,4 @@ const FormView: React.FC<FormViewProps> = ({ selectedType, formData, updateFormF
 };
 
 export default FormView;
+export type { FormViewProps };

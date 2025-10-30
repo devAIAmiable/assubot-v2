@@ -23,15 +23,36 @@ const SelectField: React.FC<SelectFieldProps> = ({ field, value, onChange, error
 
   const selectedOption = field.options?.find((option) => option.value === value);
 
+  // Stable onChange handler to prevent infinite loops
+  // Use refs to track value and onChange to avoid dependency issues
+  const valueRef = React.useRef(value);
+  const onChangeRef = React.useRef(onChange);
+
+  React.useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  React.useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  // Create a stable handleChange that never changes
+  const handleChange = React.useCallback((newValue: string) => {
+    // Only call onChange if value actually changed
+    if (newValue !== valueRef.current) {
+      onChangeRef.current(newValue);
+    }
+  }, []); // Empty deps - this callback never changes
+
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+      <label className="flex text-sm font-medium text-gray-700 items-center gap-2">
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
         <FieldHelpTooltip helpText={field.helpText} tooltip={field.tooltip} example={field.example} />
       </label>
 
-      <Listbox value={value} onChange={onChange}>
+      <Listbox value={value || ''} onChange={handleChange}>
         <div className="relative">
           <Listbox.Button
             className={`relative w-full cursor-default rounded-lg bg-white py-3 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-[#1e51ab] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e51ab] sm:text-sm ${

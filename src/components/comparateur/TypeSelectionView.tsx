@@ -1,5 +1,5 @@
 import { FaChevronLeft } from 'react-icons/fa';
-import { getComparisonCategories, getComparisonCategoryLabel } from '../../config/categories';
+import { getComparisonCategories, getComparisonCategoryLabel, isComparisonCategoryComingSoon } from '../../config/categories';
 import InsuranceTypeCard from '../ui/InsuranceTypeCard';
 
 import type { ComparisonCategory } from '../../types/comparison';
@@ -8,6 +8,7 @@ import React from 'react';
 import type { User } from '../../store/userSlice';
 import { getContractType } from '../../utils/contractAdapters';
 import { motion } from 'framer-motion';
+import { useIsAdmin } from '../../hooks/useIsAdmin';
 
 interface TypeSelectionViewProps {
   user: User | null;
@@ -17,7 +18,10 @@ interface TypeSelectionViewProps {
 }
 
 const TypeSelectionView: React.FC<TypeSelectionViewProps> = ({ user, contracts, setCurrentStep, handleTypeSelection }) => {
-  // Get available comparison categories (auto and home only)
+  // Check if user is admin
+  const isAdmin = useIsAdmin();
+
+  // Get available comparison categories (auto, home, moto, health)
   const comparisonCategories = getComparisonCategories();
 
   // Helper function to get category description
@@ -27,6 +31,10 @@ const TypeSelectionView: React.FC<TypeSelectionViewProps> = ({ user, contracts, 
         return "Comparez les offres d'assurance auto et trouvez la meilleure couverture pour votre véhicule.";
       case 'home':
         return "Protégez votre habitation avec les meilleures offres d'assurance maison disponibles.";
+      case 'moto':
+        return "Comparez les offres d'assurance moto et trouvez la protection idéale pour votre deux-roues.";
+      case 'health':
+        return 'Comparez les mutuelles santé et trouvez la couverture adaptée à vos besoins médicaux.';
       default:
         return "Comparez les offres d'assurance disponibles.";
     }
@@ -36,7 +44,12 @@ const TypeSelectionView: React.FC<TypeSelectionViewProps> = ({ user, contracts, 
   const hasExistingContract = (category: ComparisonCategory): boolean => {
     return contracts.some((c) => {
       const contractType = getContractType(c);
-      const isMatchingContract = contractType === category || (category === 'home' && contractType === 'habitation') || (category === 'auto' && contractType === 'auto');
+      const isMatchingContract =
+        contractType === category ||
+        (category === 'home' && contractType === 'habitation') ||
+        (category === 'auto' && contractType === 'auto') ||
+        (category === 'moto' && contractType === 'moto') ||
+        (category === 'health' && contractType === 'sante');
       return isMatchingContract && c.status === 'active';
     });
   };
@@ -56,19 +69,28 @@ const TypeSelectionView: React.FC<TypeSelectionViewProps> = ({ user, contracts, 
         </button>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {comparisonCategories.map((category, index) => (
-          <InsuranceTypeCard
-            key={category}
-            category={category}
-            label={getComparisonCategoryLabel(category)}
-            description={getCategoryDescription(category)}
-            illustration={`/illustrations/${category}.svg`}
-            hasExistingContract={hasExistingContract(category)}
-            onClick={() => handleTypeSelection(category)}
-            index={index}
-          />
-        ))}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {comparisonCategories.map((category, index) => {
+          // For non-admins, disable all cards
+          // For admins, only disable cards marked as coming soon
+          const isComingSoon = !isAdmin || isComparisonCategoryComingSoon(category);
+          const isDisabled = !isAdmin || isComparisonCategoryComingSoon(category);
+
+          return (
+            <InsuranceTypeCard
+              key={category}
+              category={category}
+              label={getComparisonCategoryLabel(category)}
+              description={getCategoryDescription(category)}
+              illustration={`/illustrations/${category}.svg`}
+              hasExistingContract={hasExistingContract(category)}
+              onClick={() => handleTypeSelection(category)}
+              index={index}
+              disabled={isDisabled}
+              comingSoon={isComingSoon}
+            />
+          );
+        })}
       </motion.div>
     </div>
   );

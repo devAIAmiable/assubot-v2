@@ -23,6 +23,8 @@ export const CATEGORY_CONFIG = {
 export const COMPARISON_CATEGORY_CONFIG = {
   auto: { label: 'Auto', icon: FaCar, description: 'Assurance automobile' },
   home: { label: 'Habitation', icon: FaHome, description: 'Assurance habitation' },
+  moto: { label: 'Moto', icon: FaMotorcycle, description: 'Assurance moto' },
+  health: { label: 'Santé', icon: FaHeart, description: 'Assurance santé' },
 } as const;
 
 export const getCategoryLabel = (category: ContractCategory): string => {
@@ -42,18 +44,22 @@ export const getAllCategories = () => {
 };
 
 // Comparison category utilities
-export const getComparisonCategoryLabel = (category: 'auto' | 'home'): string => {
+export const getComparisonCategoryLabel = (category: 'auto' | 'home' | 'moto' | 'health'): string => {
   return COMPARISON_CATEGORY_CONFIG[category]?.label || category;
 };
 
-export const getComparisonCategoryIcon = (category: 'auto' | 'home') => {
+export const getComparisonCategoryIcon = (category: 'auto' | 'home' | 'moto' | 'health') => {
   return COMPARISON_CATEGORY_CONFIG[category]?.icon || FaBuilding;
 };
 
-export const getComparisonCategoryDescription = (category: 'auto' | 'home'): string => {
+export const getComparisonCategoryDescription = (category: 'auto' | 'home' | 'moto' | 'health'): string => {
   return COMPARISON_CATEGORY_CONFIG[category]?.description || '';
 };
 
 export const getComparisonCategories = () => {
-  return Object.keys(COMPARISON_CATEGORY_CONFIG) as ('auto' | 'home')[];
+  return Object.keys(COMPARISON_CATEGORY_CONFIG) as ('auto' | 'home' | 'moto' | 'health')[];
+};
+
+export const isComparisonCategoryComingSoon = (category: 'auto' | 'home' | 'moto' | 'health'): boolean => {
+  return COMPARISON_CATEGORY_CONFIG[category]?.comingSoon || false;
 };

@@ -1,8 +1,9 @@
 // Comparison system types matching the API guide
 
 // API supports more categories but we're limiting to auto and home for Phase 1
-export type ComparisonCategory = 'auto' | 'home';
-export type FullComparisonCategory = 'auto' | 'home' | 'health' | 'life' | 'disability';
+// Phase 1.5: Adding moto and health (coming soon)
+export type ComparisonCategory = 'auto' | 'home' | 'moto' | 'health';
+export type FullComparisonCategory = 'auto' | 'home' | 'health' | 'life' | 'disability' | 'moto';
 
 export type FormFieldType = 'text' | 'number' | 'select' | 'checkbox' | 'radio' | 'date' | 'textarea' | 'card' | 'slider' | 'autocomplete' | 'object';
 
@@ -168,30 +169,56 @@ export interface ComparisonCalculationRequest {
   includeUserContract: boolean;
 }
 
+// API Format - Direct from backend
+export interface ComparisonFormula {
+  id: string;
+  offerId: string;
+  name: string;
+  slug: string;
+  annualPremiumCents: number;
+  description: string;
+  displayOrder: number;
+  isRecommended: boolean;
+  createdAt: string;
+  updatedAt: string;
+  guarantees: Array<{
+    id: string;
+    formulaId: string;
+    name: string;
+    details: string;
+    limit: number | null;
+    deductible: number | null;
+    createdAt: string;
+  }>;
+}
+
 export interface ComparisonOffer {
   id: string;
-  insurerName: string;
-  offerTitle: string;
-  annualPremium: number;
-  rating: number;
-  matchScore: number;
-  keyFeatures: string[];
-  description?: string;
-  coverage?: Record<string, unknown>;
-  exclusions?: string[];
-  pros?: string[];
-  cons?: string[];
+  insurerId: string;
+  category: string;
+  isActive: boolean;
+  displayOrder: number;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+  insurer: {
+    id: string;
+    name: string;
+    slug: string;
+    logoUrl: string | null;
+    rating: number;
+  };
+  formulas: ComparisonFormula[];
 }
 
 export interface ComparisonCalculationResponse {
+  status: string;
+  message: string;
   sessionId: string;
-  category: string;
-  totalOffers: number;
-  filteredOffers: number;
   offers: ComparisonOffer[];
-  userContract?: ComparisonOffer;
-  expiresAt: string;
-  formData: ComparisonFormData;
+  scores: Record<string, number>;
+  totalOffers: number;
+  filteredCount: number;
 }
 
 // Type guards
@@ -231,7 +258,12 @@ export interface ComparisonApiResponse<T = unknown> {
 }
 
 // Additional types for Phase 2 and extended API functionality
-export type ComparisonSessionStatus = 'active' | 'completed' | 'expired' | 'cancelled';
+export type ComparisonSessionStatus = 'active' | 'completed' | 'expired' | 'cancelled' | 'abandoned';
+
+export interface ComparisonSessionsList {
+  sessions: ComparisonSession[];
+  total: number;
+}
 
 export interface ComparisonSession {
   id: string;

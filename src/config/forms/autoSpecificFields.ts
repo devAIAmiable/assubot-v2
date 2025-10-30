@@ -1284,7 +1284,7 @@ export const autoSpecificFields: RawFormFieldDefinition[] = [
       id: 'additional_drivers',
       label: 'Conducteurs supplémentaires',
     },
-    helperText: 'Y a-t-il d\'autres conducteurs réguliers du véhicule ?',
+    helperText: "Y a-t-il d'autres conducteurs réguliers du véhicule ?",
   },
   {
     name: 'additionalDriverAge',
@@ -1298,11 +1298,12 @@ export const autoSpecificFields: RawFormFieldDefinition[] = [
     showWhen: { field: 'hasAdditionalDrivers', equals: true },
     validation: { min: 16, max: 99 },
   },
+
   {
     name: 'additionalDriverLicenseDate',
     type: 'date',
     required: false,
-    label: 'Date d\'obtention du permis (conducteur supplémentaire)',
+    label: "Date d'obtention du permis (conducteur supplémentaire)",
     subsection: {
       id: 'additional_drivers',
       label: 'Conducteurs supplémentaires',
@@ -1313,31 +1314,5 @@ export const autoSpecificFields: RawFormFieldDefinition[] = [
       placeholder: 'JJ/MM/AAAA',
       guide: true,
     },
-  },
-  {
-    name: 'additionalDriverHistory',
-    type: 'textarea',
-    required: false,
-    label: 'Historique du conducteur supplémentaire',
-    subsection: {
-      id: 'additional_drivers',
-      label: 'Conducteurs supplémentaires',
-    },
-    showWhen: { field: 'hasAdditionalDrivers', equals: true },
-    validation: { maxLength: 200 },
-    placeholder: 'Décrivez l\'historique du conducteur (sinistres, suspension, etc.)',
-  },
-  {
-    name: 'additionalDriverUsage',
-    type: 'textarea',
-    required: false,
-    label: 'Usage par le conducteur supplémentaire',
-    subsection: {
-      id: 'additional_drivers',
-      label: 'Conducteurs supplémentaires',
-    },
-    showWhen: { field: 'hasAdditionalDrivers', equals: true },
-    validation: { maxLength: 200 },
-    placeholder: 'Décrivez l\'usage du véhicule par ce conducteur',
   },
 ];

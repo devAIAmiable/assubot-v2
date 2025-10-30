@@ -1,29 +1,48 @@
+import type { ComparisonCategory, ComparisonSessionStatus } from '../../types/comparison';
 import { FaCalculator, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { useMemo, useState } from 'react';
 
-import type { ComparisonCategory } from '../../types/comparison';
 import React from 'react';
 import type { User } from '../../store/userSlice';
 import { getComparisonCategoryIcon } from '../../config/categories';
-import { getInsurerLogo } from '../../utils/insurerLogo';
 import { motion } from 'framer-motion';
-import { useComparisons } from '../../hooks/useComparisons';
+import { useGetComparisonSessionsQuery } from '../../store/comparisonApi';
+import { useNavigate } from 'react-router-dom';
 
 interface PastComparisonsViewProps {
   user: User | null;
-  historyPage: number;
-  historyItemsPerPage: number;
-  setHistoryPage: (page: number) => void;
   setCurrentStep: (step: 'history' | 'type' | 'form' | 'results' | 'loading') => void;
   setSelectedType: (type: ComparisonCategory) => void;
   setFormData: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
 }
 
-const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, historyPage, historyItemsPerPage, setHistoryPage, setCurrentStep, setSelectedType, setFormData }) => {
-  // Get available comparison categories (auto and home only)
-  const { getPaginatedComparisons, getDaysUntilExpiration, clearExpired } = useComparisons();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, setCurrentStep, setSelectedType: _setSelectedType, setFormData: _setFormData }) => {
+  // Internal state for filters and pagination
+  const [page, setPage] = useState(1);
+  const [category, setCategory] = useState<ComparisonCategory | undefined>(undefined);
+  const [status, setStatus] = useState<ComparisonSessionStatus | undefined>(undefined);
+  const limit = 4;
 
-  // Get paginated comparisons for auto and home categories only
-  const paginatedData = getPaginatedComparisons(historyPage, historyItemsPerPage);
+  // Calculate offset for pagination
+  const offset = useMemo(() => (page - 1) * limit, [page, limit]);
+
+  // Fetch sessions from API
+  const { data, isLoading, error } = useGetComparisonSessionsQuery({
+    category,
+    status,
+    limit,
+    offset,
+  });
+
+  // Calculate pagination info
+  const totalPages = useMemo(() => {
+    if (!data) return 0;
+    return Math.ceil(data.total / limit);
+  }, [data, limit]);
+
+  const hasNextPage = page < totalPages;
+  const hasPreviousPage = page > 1;
 
   // Helper function to get insurance type name
   const getInsuranceTypeName = (type: string) => {
@@ -42,7 +61,39 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, history
     });
   };
 
-  // Helper function to get insurer logo
+  // Helper function to get status badge color
+  const getStatusBadgeColor = (status: ComparisonSessionStatus) => {
+    switch (status) {
+      case 'active':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'expired':
+        return 'bg-gray-100 text-gray-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      case 'abandoned':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Helper function to get days until expiration
+  const getDaysUntilExpiration = (expiresAt: string) => {
+    const now = new Date();
+    const expirationDate = new Date(expiresAt);
+    const diffTime = expirationDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+
+  const navigate = useNavigate();
+
+  // Handle session click -> navigate to session results page
+  const handleSessionClick = (session: { id: string; category: string }) => {
+    navigate(`/app/comparateur/${session.id}/resultats`);
+  };
 
   return (
     <div className="space-y-8">
@@ -56,11 +107,6 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, history
                 : 'Retrouvez vos comparaisons précédentes ou lancez-en une nouvelle.'}
             </p>
           </div>
-          {paginatedData.totalItems > 0 && (
-            <button onClick={() => clearExpired()} className="text-sm text-gray-500 hover:text-[#1e51ab] flex items-center">
-              Nettoyer les comparaisons expirées
-            </button>
-          )}
         </div>
       </motion.div>
 
@@ -80,53 +126,116 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, history
         </button>
       </motion.div>
 
-      {/* Past Comparisons List */}
-      {paginatedData.totalItems > 0 ? (
+      {/* Filters */}
+      {data && data.total > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <div className="flex items-center gap-4">
+            <select
+              value={category || ''}
+              onChange={(e) => {
+                setCategory(e.target.value ? (e.target.value as ComparisonCategory) : undefined);
+                setPage(1);
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1e51ab]"
+            >
+              <option value="">Toutes les catégories</option>
+              <option value="auto">Auto</option>
+              <option value="home">Habitation</option>
+            </select>
+            <select
+              value={status || ''}
+              onChange={(e) => {
+                setStatus(e.target.value ? (e.target.value as ComparisonSessionStatus) : undefined);
+                setPage(1);
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1e51ab]"
+            >
+              <option value="">Tous les statuts</option>
+              <option value="active">Active</option>
+              <option value="completed">Terminée</option>
+              <option value="expired">Expirée</option>
+              <option value="abandoned">Abandonnée</option>
+              <option value="cancelled">Annulée</option>
+            </select>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Loading State */}
+      {isLoading && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FaCalculator className="h-10 w-10 text-gray-400 animate-pulse" />
+          </div>
+          <p className="text-gray-600">Chargement des comparaisons...</p>
+        </motion.div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FaCalculator className="h-10 w-10 text-red-400" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Erreur de chargement</h3>
+          <p className="text-gray-600 mb-6">Impossible de charger vos comparaisons. Veuillez réessayer plus tard.</p>
+        </motion.div>
+      )}
+
+      {/* Sessions List */}
+      {!isLoading && !error && data && data.total > 0 && (
         <div className="space-y-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900">Comparaisons récentes</h2>
               <p className="text-sm text-gray-600">
-                {paginatedData.totalItems} comparaison{paginatedData.totalItems > 1 ? 's' : ''} valide{paginatedData.totalItems > 1 ? 's' : ''}
+                {data.total} comparaison{data.total > 1 ? 's' : ''}
               </p>
             </div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="grid gap-4">
-            {paginatedData.items.map((comparison, index) => {
-              const daysLeft = getDaysUntilExpiration(comparison);
+            {data.sessions.map((session, index) => {
+              const daysLeft = getDaysUntilExpiration(session.expiresAt);
               const isExpiringSoon = daysLeft <= 2;
 
               return (
                 <motion.div
-                  key={comparison.id}
+                  key={session.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
                   className={`bg-white border rounded-xl p-6 hover:shadow-md transition-all cursor-pointer group ${
                     isExpiringSoon ? 'border-orange-200 bg-orange-50' : 'border-gray-200'
                   }`}
-                  onClick={() => {
-                    // Prefill form with past comparison data
-                    const category = comparison.category;
-                    setSelectedType(category);
-
-                    // Set form data from comparison form data
-                    setFormData({
-                      ...comparison.formData,
-                    });
-                    setCurrentStep('form');
-                  }}
+                  onClick={() => handleSessionClick(session)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
-                        {React.createElement(getComparisonCategoryIcon(comparison.category), { className: 'h-6 w-6 text-[#1e51ab]' })}
+                        {React.createElement(getComparisonCategoryIcon(session.category as ComparisonCategory), {
+                          className: 'h-6 w-6 text-[#1e51ab]',
+                        })}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-[#1e51ab] transition-colors">{getInsuranceTypeName(comparison.category)}</h3>
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                          <span>{formatDate(comparison.date)}</span>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-gray-900 group-hover:text-[#1e51ab] transition-colors">{getInsuranceTypeName(session.category)}</h3>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(session.status)}`}>
+                            {session.status === 'active'
+                              ? 'Active'
+                              : session.status === 'completed'
+                                ? 'Terminée'
+                                : session.status === 'expired'
+                                  ? 'Expirée'
+                                  : session.status === 'abandoned'
+                                    ? 'Abandonnée'
+                                    : session.status === 'cancelled'
+                                      ? 'Annulée'
+                                      : session.status}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2 text-sm text-gray-600 mt-1">
+                          <span>{formatDate(session.createdAt)}</span>
                           {isExpiringSoon && (
                             <span className="text-orange-600 font-medium">
                               • Expire dans {daysLeft} jour{daysLeft !== 1 ? 's' : ''}
@@ -137,23 +246,11 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, history
                     </div>
 
                     <div className="text-right">
-                      <div className="text-sm text-gray-500 mb-1">{comparison.resultsCount} offres trouvées</div>
-                      {comparison.topOffer && (
-                        <div className="text-sm flex items-center">
-                          {getInsurerLogo(comparison.topOffer.insurerName) && (
-                            <img src={getInsurerLogo(comparison.topOffer.insurerName)!} alt={comparison.topOffer.insurerName} className="w-4 h-4 object-contain mr-2" />
-                          )}
-                          <span className="font-medium text-[#1e51ab]">{comparison.topOffer.insurerName}</span>
-                          <span className="text-gray-600 ml-2">{Math.round(comparison.topOffer.annualPremium / 12)}€/mois</span>
-                        </div>
-                      )}
+                      <div className="text-sm text-gray-500 mb-1">{session.resultOfferIds.length} offres trouvées</div>
                     </div>
                   </div>
 
                   <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-                    <div className="flex items-center space-x-4">
-                      <span>{comparison.category}</span>
-                    </div>
                     <div className="text-[#1e51ab] opacity-0 group-hover:opacity-100 transition-opacity">Relancer cette comparaison →</div>
                   </div>
                 </motion.div>
@@ -162,29 +259,29 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, history
           </motion.div>
 
           {/* Pagination */}
-          {paginatedData.totalPages > 1 && (
+          {totalPages > 1 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-center space-x-2 mt-8">
               <button
-                onClick={() => setHistoryPage(Math.max(1, historyPage - 1))}
-                disabled={!paginatedData.hasPreviousPage}
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={!hasPreviousPage}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FaChevronLeft className="h-4 w-4" />
               </button>
 
-              {[...Array(paginatedData.totalPages)].map((_, i) => (
+              {[...Array(totalPages)].map((_, i) => (
                 <button
                   key={i + 1}
-                  onClick={() => setHistoryPage(i + 1)}
-                  className={`px-3 py-2 rounded-lg text-sm ${historyPage === i + 1 ? 'bg-[#1e51ab] text-white' : 'border border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                  onClick={() => setPage(i + 1)}
+                  className={`px-3 py-2 rounded-lg text-sm ${page === i + 1 ? 'bg-[#1e51ab] text-white' : 'border border-gray-300 text-gray-600 hover:bg-gray-50'}`}
                 >
                   {i + 1}
                 </button>
               ))}
 
               <button
-                onClick={() => setHistoryPage(Math.min(paginatedData.totalPages, historyPage + 1))}
-                disabled={!paginatedData.hasNextPage}
+                onClick={() => setPage(Math.min(totalPages, page + 1))}
+                disabled={!hasNextPage}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FaChevronRight className="h-4 w-4" />
@@ -192,8 +289,11 @@ const PastComparisonsView: React.FC<PastComparisonsViewProps> = ({ user, history
             </motion.div>
           )}
         </div>
-      ) : (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-center py-12">
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !error && data && data.total === 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-center py-12">
           <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <FaCalculator className="h-10 w-10 text-gray-400" />
           </div>

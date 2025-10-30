@@ -23,6 +23,7 @@ import GoogleCallbackPage from './components/GoogleCallbackPage';
 import LandingPage from './components/LandingPage';
 import LoginForm from './components/LoginForm';
 import NotificationsModule from './components/NotificationsModule';
+import ComparateurResultsPage from './pages/ComparateurResultsPage';
 import PaymentCancelPage from './components/PaymentCancelPage';
 import PaymentSuccessPage from './components/PaymentSuccessPage';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -86,6 +87,7 @@ function App() {
                     <Route path="contrats/:contractId" element={<ContractDetailsPage />} />
                     <Route path="chatbot" element={<ChatModule />} />
                     <Route path="comparateur" element={<ComparateurModule />} />
+                    <Route path="comparateur/:sessionId/resultats" element={<ComparateurResultsPage />} />
                     <Route path="credits" element={<CreditPage />} />
                     <Route path="notifications" element={<NotificationsModule />} />
                     <Route path="profil" element={<ProfileModule />} />

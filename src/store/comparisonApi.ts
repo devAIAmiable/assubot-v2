@@ -8,6 +8,7 @@ import type {
   ComparisonSearchParams,
   ComparisonSession,
   ComparisonSessionStatus,
+  ComparisonSessionsList,
   CreateComparisonQueryParams,
   CreateComparisonSessionParams,
   UpdateComparisonSessionParams,
@@ -43,11 +44,16 @@ export const comparisonApi = createApi({
         body,
       }),
       invalidatesTags: ['ComparisonResult'],
-      transformResponse: (response: ComparisonApiResponse<ComparisonCalculationResponse>) => {
-        if (response.success && response.data) {
+      transformResponse: (response: ComparisonApiResponse<ComparisonCalculationResponse> | ComparisonCalculationResponse) => {
+        // Handle both wrapped and direct response formats
+        if ('success' in response && response.success && response.data) {
           return response.data;
         }
-        throw new Error(response.error?.message || 'Failed to calculate comparison');
+        // If response is already in the expected format, return directly
+        if ('offers' in response && 'scores' in response) {
+          return response as ComparisonCalculationResponse;
+        }
+        throw new Error('Invalid response format');
       },
       transformErrorResponse: (response: FetchBaseQueryError) => {
         const data = response.data as { error?: { message?: string } };
@@ -65,12 +71,29 @@ export const comparisonApi = createApi({
       invalidatesTags: ['ComparisonSession'],
     }),
 
-    getComparisonSessions: builder.query<ComparisonSession[], { status?: ComparisonSessionStatus; category?: ComparisonCategory; limit?: number; offset?: number }>({
+    getComparisonSessions: builder.query<ComparisonSessionsList, { status?: ComparisonSessionStatus; category?: ComparisonCategory; limit?: number; offset?: number }>({
       query: (params) => ({
         url: '/comparison/sessions',
         params,
       }),
       providesTags: ['ComparisonSession'],
+      transformResponse: (response: ComparisonApiResponse<ComparisonSessionsList> | ComparisonSessionsList) => {
+        // Handle wrapped response format
+        if ('success' in response && response.success && response.data) {
+          return response.data;
+        }
+        // Handle backend format: { status: 'success', data: [ ...sessions ] }
+        const respObj = response as unknown as Record<string, unknown>;
+        if ('status' in respObj && (respObj.status as string) === 'success' && 'data' in respObj && Array.isArray(respObj.data)) {
+          const arr = respObj.data as unknown[];
+          return { sessions: arr as unknown as ComparisonSessionsList['sessions'], total: arr.length };
+        }
+        // If response is already in the expected format, return directly
+        if ('sessions' in response && 'total' in response) {
+          return response as ComparisonSessionsList;
+        }
+        throw new Error('Invalid response format');
+      },
     }),
 
     getComparisonSession: builder.query<ComparisonSession, string>({

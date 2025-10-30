@@ -1,9 +1,9 @@
+import CategoryBadge from './CategoryBadge';
+import type { ComparisonCategory } from '../../types/comparison';
+import DecorativePattern from './DecorativePattern';
+import { FaCheck } from 'react-icons/fa';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaCheck } from 'react-icons/fa';
-import type { ComparisonCategory } from '../../types/comparison';
-import CategoryBadge from './CategoryBadge';
-import DecorativePattern from './DecorativePattern';
 
 interface InsuranceTypeCardProps {
   category: ComparisonCategory;
@@ -13,9 +13,21 @@ interface InsuranceTypeCardProps {
   hasExistingContract: boolean;
   onClick: () => void;
   index: number; // for stagger animation
+  disabled?: boolean;
+  comingSoon?: boolean;
 }
 
-const InsuranceTypeCard: React.FC<InsuranceTypeCardProps> = ({ category, label, description, illustration, hasExistingContract, onClick, index }) => {
+const InsuranceTypeCard: React.FC<InsuranceTypeCardProps> = ({
+  category,
+  label,
+  description,
+  illustration,
+  hasExistingContract,
+  onClick,
+  index,
+  disabled = false,
+  comingSoon = false,
+}) => {
   const getCategoryColor = (category: ComparisonCategory) => {
     switch (category) {
       case 'auto':
@@ -31,6 +43,20 @@ const InsuranceTypeCard: React.FC<InsuranceTypeCardProps> = ({ category, label, 
           secondary: 'bg-green-50',
           border: 'hover:border-green-500',
           pattern: 'bg-green-100',
+        };
+      case 'moto':
+        return {
+          primary: 'from-orange-500 to-orange-600',
+          secondary: 'bg-orange-50',
+          border: 'hover:border-orange-500',
+          pattern: 'bg-orange-100',
+        };
+      case 'health':
+        return {
+          primary: 'from-red-500 to-red-600',
+          secondary: 'bg-red-50',
+          border: 'hover:border-red-500',
+          pattern: 'bg-red-100',
         };
       default:
         return {
@@ -49,21 +75,22 @@ const InsuranceTypeCard: React.FC<InsuranceTypeCardProps> = ({ category, label, 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.5 }}
-      whileHover={{ scale: 1.02, y: -8 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={disabled ? {} : { scale: 1.02, y: -8 }}
+      whileTap={disabled ? {} : { scale: 0.98 }}
       className={`
-        relative bg-white rounded-2xl p-6 cursor-pointer border-2 border-transparent
+        relative bg-white rounded-2xl p-6 border-2 border-transparent
         hover:shadow-2xl transition-all duration-300 overflow-hidden
-        ${colors.border}
+        ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
+        ${disabled ? '' : colors.border}
       `}
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
     >
       {/* Decorative background pattern */}
       <DecorativePattern color={colors.pattern} position="top-right" size="lg" />
 
       {/* Illustration container */}
       <div className="relative h-48 mb-6 overflow-hidden rounded-xl">
-        <img src={illustration} alt={`${label} illustration`} className="w-full h-full object-contain p-4" />
+        <img src={illustration} alt={`${label} illustration`} className={`w-full h-full object-contain p-4 transition-all duration-300 ${disabled ? 'grayscale' : ''}`} />
         {/* Subtle overlay for better text contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
       </div>
@@ -74,8 +101,17 @@ const InsuranceTypeCard: React.FC<InsuranceTypeCardProps> = ({ category, label, 
 
         <p className="text-sm text-gray-600 mb-4 leading-relaxed">{description}</p>
 
+        {/* Coming Soon badge */}
+        {comingSoon && (
+          <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + index * 0.1 }}>
+            <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200">
+              <span className="text-xs font-semibold text-purple-700">Bientôt disponible</span>
+            </div>
+          </motion.div>
+        )}
+
         {/* Existing contract badge */}
-        {hasExistingContract && (
+        {!comingSoon && hasExistingContract && (
           <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + index * 0.1 }}>
             <CategoryBadge icon={FaCheck} text="Contrat existant détecté" variant="success" pulse={true} />
           </motion.div>
