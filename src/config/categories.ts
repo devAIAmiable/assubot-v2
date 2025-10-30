@@ -21,10 +21,10 @@ export const CATEGORY_CONFIG = {
 
 // Comparison-specific category mapping
 export const COMPARISON_CATEGORY_CONFIG = {
-  auto: { label: 'Auto', icon: FaCar, description: 'Assurance automobile' },
-  home: { label: 'Habitation', icon: FaHome, description: 'Assurance habitation' },
-  moto: { label: 'Moto', icon: FaMotorcycle, description: 'Assurance moto' },
-  health: { label: 'Santé', icon: FaHeart, description: 'Assurance santé' },
+  auto: { label: 'Auto', icon: FaCar, description: 'Assurance automobile', comingSoon: false },
+  home: { label: 'Habitation', icon: FaHome, description: 'Assurance habitation', comingSoon: false },
+  moto: { label: 'Moto', icon: FaMotorcycle, description: 'Assurance moto', comingSoon: true },
+  health: { label: 'Santé', icon: FaHeart, description: 'Assurance santé', comingSoon: true },
 } as const;
 
 export const getCategoryLabel = (category: ContractCategory): string => {

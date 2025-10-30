@@ -1,5 +1,5 @@
 import type { ComparisonCategory, ComparisonFormula, ComparisonOffer } from '../../types/comparison';
-import { FaCheckCircle, FaChevronLeft, FaChevronRight, FaEye, FaStar, FaTimesCircle } from 'react-icons/fa';
+import { FaCheckCircle, FaChevronLeft, FaChevronRight, FaEye, FaLightbulb, FaQuestionCircle, FaStar, FaTimesCircle } from 'react-icons/fa';
 import { addQueryResult, makeSelectPerOfferStats, selectNlQueries } from '../../store/comparisonSessions/nlQueriesSlice';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
@@ -69,13 +69,14 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   const dispatch = useAppDispatch();
   const nlItems = useAppSelector(selectNlQueries);
 
-  const onAskAi = async () => {
-    if (!aiInput.trim()) return;
+  const onAskAi = async (questionOverride?: string) => {
+    const questionToAsk = (questionOverride ?? aiInput).trim();
+    if (!questionToAsk) return;
     try {
       setAiError(null);
       setAiLoading(true);
       const { comparisonService } = await import('../../services/comparison');
-      const resp = await comparisonService.askSessionQuestion(sessionId, aiInput.trim());
+      const resp = await comparisonService.askSessionQuestion(sessionId, questionToAsk);
       if (resp.success && resp.data) {
         dispatch(
           addQueryResult({
@@ -362,18 +363,45 @@ const ResultsView: React.FC<ResultsViewProps> = ({
           <Avatar isAssistant size="md" />
           <h3 className="text-lg font-semibold text-gray-900">Questions IA</h3>
         </div>
+        <p className="text-sm text-gray-600 mb-4 flex items-start gap-2">
+          <FaLightbulb className="h-4 w-4 text-yellow-500 mt-0.5" /> Posez une question en langage naturel. Nous indiquons pour chaque offre si elle répond à votre demande.
+        </p>
         <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <label htmlFor="ai-question" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+            <FaQuestionCircle className="h-4 w-4 text-[#1e51ab]" /> Votre question
+          </label>
           <textarea
+            id="ai-question"
             placeholder={'Exemple : "Quelles offres couvrent le vol à l\'étranger ?"'}
-            className="w-full p-3 border border-gray-300 rounded-lg resize-none"
+            className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
             rows={3}
             value={aiInput}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAiInput(e.target.value)}
+            aria-label="Question en langage naturel"
           />
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            {["Quelles offres couvrent le vol à l'étranger ?", 'Quelle offre inclut un véhicule de remplacement ?', 'Quelle formule couvre le bris de glace ?'].map((q) => (
+              <button
+                key={q}
+                type="button"
+                onClick={() => onAskAi(q)}
+                className="px-3 py-1.5 text-xs rounded-full border border-gray-300 hover:border-[#1e51ab] hover:text-[#1e51ab] transition-colors"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
           {aiError && <div className="text-red-600 text-sm mt-2">{aiError}</div>}
-          <button onClick={onAskAi} disabled={aiLoading || !aiInput.trim()} className="mt-3 px-4 py-2 bg-[#1e51ab] text-white rounded-lg hover:bg-[#163d82] disabled:opacity-60">
-            {aiLoading ? 'Traitement en cours…' : 'Poser une question'}
-          </button>
+          <div className="mt-3 flex items-center justify-between">
+            <div className="text-xs text-gray-500">Conseil : soyez précis pour de meilleurs résultats.</div>
+            <button
+              onClick={() => onAskAi()}
+              disabled={aiLoading || !aiInput.trim()}
+              className="px-4 py-2 bg-[#1e51ab] text-white rounded-lg hover:bg-[#163d82] disabled:opacity-60"
+            >
+              {aiLoading ? 'Traitement en cours…' : 'Poser la question'}
+            </button>
+          </div>
         </div>
 
         {nlItems.length > 0 && (

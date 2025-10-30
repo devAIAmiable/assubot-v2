@@ -1,6 +1,5 @@
 import type { ComparisonCalculationResponse, ComparisonCategory, ComparisonOffer } from '../types/comparison';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import ErrorBoundary from './comparateur/ErrorBoundary';
 import FormView from './comparateur/FormView';
@@ -11,6 +10,7 @@ import ResultsView from './comparateur/ResultsView';
 import TypeSelectionView from './comparateur/TypeSelectionView';
 import { getContractType } from '../utils/contractAdapters';
 import { useAppSelector } from '../store/hooks';
+import { useNavigate } from 'react-router-dom';
 
 // Create a step type union for type safety
 type ComparateurStep = 'history' | 'type' | 'form' | 'results' | 'loading';
@@ -44,6 +44,8 @@ const ComparateurModule = () => {
   const [comparisonError, setComparisonError] = useState<string | null>(null);
   const [loadingTimer, setLoadingTimer] = useState(0);
   console.log('🚀 ~ ComparateurModule ~ loadingTimer:', loadingTimer);
+  const [sessionId, setSessionId] = useState('');
+
   const [loadingTimerInterval, setLoadingTimerInterval] = useState<ReturnType<typeof setInterval> | null>(null);
   const [filters, setFilters] = useState({
     priceRange: [0, 200],
@@ -248,9 +250,9 @@ const ComparateurModule = () => {
       setComparisonScores(response.scores);
       setLoadingTimerInterval(null);
 
-      const sessionId = response.sessionId;
+      setSessionId(response.sessionId);
       // Redirect directly to dedicated results page using API-provided sessionId
-      navigate(`/app/comparateur/${sessionId}/resultats`);
+      navigate(`/app/comparateur/${response.sessionId}/resultats`);
     },
     [navigate]
   );
@@ -313,6 +315,7 @@ const ComparateurModule = () => {
         {currentStep === 'loading' && <LoadingView selectedType={selectedType} />}
         {currentStep === 'results' && (
           <ResultsView
+            sessionId={sessionId}
             selectedType={selectedType}
             filteredResults={filteredResults}
             paginatedResults={paginatedResults}

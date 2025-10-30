@@ -4,7 +4,7 @@ export const comparisonCategorySchema = z.enum(['auto', 'home', 'moto', 'health'
 
 export const comparisonCalculationRequestSchema = z.object({
   category: comparisonCategorySchema,
-  formData: z.record(z.unknown()),
+  formData: z.record(z.string(), z.unknown()),
   userContractId: z.string().optional(),
   includeUserContract: z.boolean(),
 });
@@ -15,7 +15,7 @@ export const comparisonOfferSchema = z.object({
   category: z.string(),
   isActive: z.boolean().optional(),
   displayOrder: z.number().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
   insurer: z.object({
@@ -57,7 +57,7 @@ export const comparisonCalculationResponseSchema = z.object({
   message: z.string(),
   sessionId: z.string(),
   offers: z.array(comparisonOfferSchema),
-  scores: z.record(z.number()),
+  scores: z.record(z.string(), z.number()),
   totalOffers: z.number(),
   filteredCount: z.number(),
 });
