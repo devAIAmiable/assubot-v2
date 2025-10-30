@@ -5,11 +5,13 @@ import { getContractPremium, getContractType } from '../utils/contractAdapters';
 
 import type { ChartOptions } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
+import { SmartSuggestionCard } from './suggestions/SmartSuggestionCard';
 import { VscRobot } from 'react-icons/vsc';
 import { getProfessionalCategoryLabel } from '../utils/user';
 import { motion } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
 import { useDashboardStats } from '../hooks/useDashboardStats';
+import { useIsAdmin } from '../hooks/useIsAdmin';
 import { useNavigate } from 'react-router-dom';
 
 // Register Chart.js components
@@ -38,6 +40,7 @@ const Dashboard = () => {
   const contracts = useAppSelector((state) => state.contracts?.contracts || []);
   const user = useAppSelector((state) => state.user?.currentUser);
   const { dashboardStats, isLoading, error } = useDashboardStats();
+  const isAdmin = useIsAdmin() && user?.email === 'mario.gbokede@a-lamiable.com';
 
   const handleNavigateToModule = (module: string) => {
     navigate(`/app/${module}`);
@@ -372,11 +375,23 @@ const Dashboard = () => {
                 {user?.professionalCategory ? ` (${getProfessionalCategoryLabel(user.professionalCategory)})` : ''}
               </span>
             </div>
-            <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
-              <FaLightbulb className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune suggestion pour le moment</h3>
-              <p className="text-gray-500 mb-6">AI'A analyse ton profil pour te proposer des recommandations personnalisées</p>
-            </div>
+            {isAdmin ? (
+              <SmartSuggestionCard
+                title="Optimiser l’assurance Auto"
+                description='Doublon détecté : Vous êtes assuré deux fois pour le même véhicule en tant que conducteur principal dans le contrat "Mon Auto 1" et secondaire dans "Mon Auto 2". Vous pourriez conserver "Mon Auto 2" si vous êtes deux utilisateurs du même véhicule.'
+                ctaLabel="Conserver Mon Auto 2"
+                onCtaClick={() => handleNavigateToModule('contrats')}
+                badgeLabel="Suggestion intelligente"
+                Icon={FaExclamationTriangle}
+                accentColor="#f59e0b"
+              />
+            ) : (
+              <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
+                <FaLightbulb className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune suggestion pour le moment</h3>
+                <p className="text-gray-500 mb-6">AI'A analyse ton profil pour te proposer des recommandations personnalisées</p>
+              </div>
+            )}
           </motion.div>
 
           {/* Quick Actions */}
