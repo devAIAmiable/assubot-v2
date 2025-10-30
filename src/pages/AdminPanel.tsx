@@ -1,13 +1,15 @@
-import { FaCog, FaList, FaUpload, FaUserShield } from 'react-icons/fa';
+import { FaCog, FaList, FaUpload, FaUserShield, FaUsers } from 'react-icons/fa';
 import React, { useState } from 'react';
 
 import AdminContractUpload from './AdminContractUpload';
 import AdminContractsTable from '../components/admin/AdminContractsTable';
 import AdminGuard from '../components/AdminGuard';
 import { motion } from 'framer-motion';
+import BatchCreateUsersModal from '../components/admin/BatchCreateUsersModal';
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'upload' | 'contracts'>('contracts');
+  const [openBatchModal, setOpenBatchModal] = useState(false);
 
   const tabs = [
     {
@@ -41,9 +43,18 @@ const AdminPanel: React.FC = () => {
                     <p className="text-gray-600">Gérez les contrats et l'importation</p>
                   </div>
                 </div>
+                <div className="flex items-center space-x-3">
+                  <button
+                    className="inline-flex items-center gap-2 bg-[#1e51ab] hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg"
+                    onClick={() => setOpenBatchModal(true)}
+                  >
+                    <FaUsers />
+                    <span>Créer des utilisateurs en lot</span>
+                  </button>
                 <div className="flex items-center space-x-2 text-green-600">
                   <FaCog className="h-5 w-5" />
                   <span className="text-sm font-medium">Admin</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -92,6 +103,7 @@ const AdminPanel: React.FC = () => {
               </div>
             )}
           </motion.div>
+          <BatchCreateUsersModal open={openBatchModal} onClose={() => setOpenBatchModal(false)} />
         </div>
       </div>
     </AdminGuard>
