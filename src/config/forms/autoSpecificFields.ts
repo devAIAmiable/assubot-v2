@@ -89,6 +89,19 @@ export const autoSpecificFields: RawFormFieldDefinition[] = [
     placeholder: 'Version du véhicule',
   },
   {
+    name: 'registrationNumber',
+    type: 'text',
+    required: true,
+    label: 'Immatriculation',
+    subsection: {
+      id: 'vehicle_identification',
+      label: 'Identification du véhicule',
+    },
+    validation: { pattern: '^[A-Z]{2}[0-9]{3}[A-Z]{2}$' },
+    placeholder: 'AB123CD',
+    helperText: 'Sans espaces ni tirets, format AA123AA',
+  },
+  {
     name: 'modelYear',
     type: 'date',
     required: true,
@@ -1278,7 +1291,7 @@ export const autoSpecificFields: RawFormFieldDefinition[] = [
   {
     name: 'hasAdditionalDrivers',
     type: 'checkbox',
-    required: true,
+    required: false,
     label: 'Conducteurs supplémentaires',
     subsection: {
       id: 'additional_drivers',

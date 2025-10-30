@@ -74,7 +74,6 @@ export function generateAutoFormTestData(): AutoFormTestData {
     nightParkingPostalCode: '75001',
     workInFrance: 'yes',
     workParkingCity: 'Paris',
-    workPostalCode: '75004', // Required when usageType includes work-related options
     securityEquipment: ['alarm', 'gps_tracker'],
 
     // Insurance History (required)
