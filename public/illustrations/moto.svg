@@ -1,0 +1,143 @@
+<svg width="240" height="200" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="motoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF7ED;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFEDD5;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="motoBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EA580C;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="motoSeat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1F2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#111827;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="240" height="200" fill="url(#motoBg)" rx="16"/>
+  
+  <!-- Road/ground -->
+  <path d="M0 160 L240 160 L240 200 L0 200 Z" fill="#FFF7ED"/>
+  
+  <!-- Road lines -->
+  <g opacity="0.3">
+    <rect x="10" y="165" width="30" height="3" fill="#F97316" rx="1"/>
+    <rect x="55" y="165" width="30" height="3" fill="#F97316" rx="1"/>
+    <rect x="100" y="165" width="30" height="3" fill="#F97316" rx="1"/>
+    <rect x="145" y="165" width="30" height="3" fill="#F97316" rx="1"/>
+    <rect x="190" y="165" width="30" height="3" fill="#F97316" rx="1"/>
+  </g>
+  
+  <!-- Motorcycle shadow -->
+  <ellipse cx="120" cy="160" rx="50" ry="8" fill="#E5E7EB" opacity="0.3"/>
+  
+  <!-- Rear wheel -->
+  <g transform="translate(75, 140)">
+    <circle cx="0" cy="0" r="18" fill="#1F2937"/>
+    <circle cx="0" cy="0" r="14" fill="#374151"/>
+    <circle cx="0" cy="0" r="10" fill="#6B7280"/>
+    <circle cx="0" cy="0" r="6" fill="#9CA3AF"/>
+    <circle cx="0" cy="0" r="3" fill="#D1D5DB"/>
+    <!-- Spokes -->
+    <line x1="0" y1="-12" x2="0" y2="12" stroke="#4B5563" stroke-width="1"/>
+    <line x1="-12" y1="0" x2="12" y2="0" stroke="#4B5563" stroke-width="1"/>
+    <line x1="-8" y1="-8" x2="8" y2="8" stroke="#4B5563" stroke-width="1"/>
+    <line x1="-8" y1="8" x2="8" y2="-8" stroke="#4B5563" stroke-width="1"/>
+  </g>
+  
+  <!-- Front wheel -->
+  <g transform="translate(165, 140)">
+    <circle cx="0" cy="0" r="18" fill="#1F2937"/>
+    <circle cx="0" cy="0" r="14" fill="#374151"/>
+    <circle cx="0" cy="0" r="10" fill="#6B7280"/>
+    <circle cx="0" cy="0" r="6" fill="#9CA3AF"/>
+    <circle cx="0" cy="0" r="3" fill="#D1D5DB"/>
+    <!-- Spokes -->
+    <line x1="0" y1="-12" x2="0" y2="12" stroke="#4B5563" stroke-width="1"/>
+    <line x1="-12" y1="0" x2="12" y2="0" stroke="#4B5563" stroke-width="1"/>
+    <line x1="-8" y1="-8" x2="8" y2="8" stroke="#4B5563" stroke-width="1"/>
+    <line x1="-8" y1="8" x2="8" y2="-8" stroke="#4B5563" stroke-width="1"/>
+  </g>
+  
+  <!-- Main frame -->
+  <path d="M75 140 L100 110 L165 140" stroke="#374151" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Engine block -->
+  <rect x="85" y="115" width="30" height="25" fill="#1F2937" rx="3"/>
+  <rect x="87" y="117" width="26" height="21" fill="#374151" rx="2"/>
+  
+  <!-- Exhaust pipe -->
+  <path d="M105 130 Q110 138 115 138 L135 138 Q140 138 140 133 L140 130" stroke="#6B7280" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="140" cy="130" rx="3" ry="5" fill="#9CA3AF"/>
+  
+  <!-- Fuel tank -->
+  <path d="M100 110 Q105 95 120 95 Q135 95 140 110 L135 115 L105 115 Z" fill="url(#motoBody)"/>
+  <path d="M108 100 Q113 98 120 98 Q127 98 132 100" stroke="#EA580C" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Seat -->
+  <path d="M105 110 Q108 103 115 103 L130 103 Q137 103 140 110 L138 113 L107 113 Z" fill="url(#motoSeat)"/>
+  
+  <!-- Handlebars -->
+  <g transform="translate(165, 110)">
+    <line x1="-8" y1="0" x2="8" y2="0" stroke="#374151" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="-8" cy="0" r="3" fill="#6B7280"/>
+    <circle cx="8" cy="0" r="3" fill="#6B7280"/>
+    <!-- Throttle/brake -->
+    <rect x="-10" y="-2" width="4" height="6" fill="#F97316" rx="1"/>
+    <rect x="6" y="-2" width="4" height="6" fill="#EF4444" rx="1"/>
+  </g>
+  
+  <!-- Front fork -->
+  <line x1="165" y1="110" x2="165" y2="125" stroke="#374151" stroke-width="5" stroke-linecap="round"/>
+  
+  <!-- Headlight -->
+  <g transform="translate(165, 100)">
+    <circle cx="0" cy="0" r="8" fill="#FEF3C7"/>
+    <circle cx="0" cy="0" r="6" fill="#FCD34D"/>
+    <circle cx="0" cy="0" r="3" fill="#F59E0B"/>
+    <!-- Light beam -->
+    <path d="M-3 0 L-8 -5 L-8 5 Z" fill="#FEF3C7" opacity="0.5"/>
+  </g>
+  
+  <!-- Rear light -->
+  <circle cx="70" cy="125" r="4" fill="#FEE2E2"/>
+  <circle cx="70" cy="125" r="2" fill="#EF4444"/>
+  
+  <!-- Rear view mirror -->
+  <g transform="translate(155, 108)">
+    <line x1="0" y1="0" x2="-5" y2="-8" stroke="#374151" stroke-width="2"/>
+    <ellipse cx="-5" cy="-10" rx="4" ry="3" fill="#DBEAFE" stroke="#374151" stroke-width="1"/>
+  </g>
+  <g transform="translate(175, 108)">
+    <line x1="0" y1="0" x2="5" y2="-8" stroke="#374151" stroke-width="2"/>
+    <ellipse cx="5" cy="-10" rx="4" ry="3" fill="#DBEAFE" stroke="#374151" stroke-width="1"/>
+  </g>
+  
+  <!-- Windshield -->
+  <path d="M160 105 Q165 85 170 105" fill="#DBEAFE" opacity="0.4" stroke="#93C5FD" stroke-width="1"/>
+  
+  <!-- Speed lines -->
+  <g opacity="0.4">
+    <line x1="200" y1="110" x2="220" y2="110" stroke="#F97316" stroke-width="3" stroke-linecap="round"/>
+    <line x1="205" y1="105" x2="220" y2="105" stroke="#F97316" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="210" y1="100" x2="220" y2="100" stroke="#F97316" stroke-width="2" stroke-linecap="round"/>
+    <line x1="195" y1="115" x2="215" y2="115" stroke="#FB923C" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="200" y1="120" x2="215" y2="120" stroke="#FB923C" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Decorative flames on tank -->
+  <g opacity="0.3">
+    <path d="M110 105 Q112 100 115 105" fill="#DC2626"/>
+    <path d="M120 105 Q122 100 125 105" fill="#EF4444"/>
+    <path d="M128 105 Q130 100 133 105" fill="#DC2626"/>
+  </g>
+  
+  <!-- Insurance shield icon -->
+  <g transform="translate(20, 30)">
+    <circle cx="20" cy="20" r="18" fill="#F97316" opacity="0.1"/>
+    <path d="M20 5 L30 10 L30 25 Q30 35 20 40 Q10 35 10 25 L10 10 Z" fill="#F97316"/>
+    <path d="M16 22 L19 25 L24 18" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
