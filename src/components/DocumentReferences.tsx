@@ -89,10 +89,12 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
       grouped.get(page.page)!.push(page);
     });
 
-    return Array.from(grouped.entries()).map(([pageNumber, regions]) => ({
-      page: pageNumber,
-      regions: regions,
-    }));
+    return Array.from(grouped.entries())
+      .sort(([pageA], [pageB]) => pageA - pageB)
+      .map(([pageNumber, regions]) => ({
+        page: pageNumber,
+        regions: regions,
+      }));
   };
 
   // Get a unique key for the document (handle null id for internal docs)
@@ -145,17 +147,6 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {/* <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openPdfViewer(documentRef);
-                        }}
-                        className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                      >
-                        <FaEye className="text-xs" />
-                        Ouvrir
-                      </button> */}
-
                       <div className="text-gray-400">{isExpanded ? <FaChevronUp className="text-xs" /> : <FaChevronDown className="text-xs" />}</div>
                     </div>
                   </div>
