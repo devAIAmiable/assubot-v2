@@ -83,7 +83,7 @@ const ChatModule: React.FC = () => {
 
   useEffect(() => {
     if (currentChat) {
-      setCurrentContractNames(currentChat.contracts?.map((item: ChatContract) => item.contract?.name).join(', ') || '');
+      setCurrentContractNames(currentChat.contracts?.map((item: ChatContract) => item?.name).join(', ') || '');
     } else {
       setCurrentContractNames('');
     }
@@ -397,7 +397,7 @@ const ChatModule: React.FC = () => {
                                 )}
                               </div>
                               {chat.contracts && chat.contracts.length > 0 && (
-                                <p className="text-xs text-gray-400 truncate mt-1">{chat.contracts.map((item: ChatContract) => item.contract?.name).join(', ')}</p>
+                                <p className="text-xs text-gray-400 truncate mt-1">{chat.contracts.map((item: ChatContract) => item.name).join(', ')}</p>
                               )}
                             </div>
 

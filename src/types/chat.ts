@@ -1,3 +1,6 @@
+import type { ContractCategory, ContractStatus } from './contract';
+
+import type { Insurer } from '../store/insurersApi';
 export interface Chat {
   id: string;
   title: string;
@@ -55,10 +58,10 @@ export interface Contract {
 
 export interface ChatContract {
   id: string;
-  chatId: string;
-  contractId: string;
-  createdAt: string;
-  contract: Contract;
+  name: string;
+  insurer: Insurer;
+  category: ContractCategory;
+  status: ContractStatus;
 }
 
 export interface CreateChatRequest {
