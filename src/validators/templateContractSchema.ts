@@ -12,7 +12,7 @@ export const basicInfoSchema = z.object({
 // Guarantee Detail Schema
 export const guaranteeDetailSchema = z.object({
   service: z.string().optional(),
-  limit: z.string().optional(),
+  ceiling: z.string().optional(),
   plafond: z.string().optional(),
   franchise: z.string().optional(),
   deductible: z.string().optional(),
@@ -31,6 +31,7 @@ export const guaranteeDetailSchema = z.object({
 export const guaranteeSchema = z.object({
   title: z.string().optional(),
   deductible: z.string().optional(),
+  ceiling: z.string().optional(),
   limitation: z.string().optional(),
   details: z.array(guaranteeDetailSchema).optional(),
 });

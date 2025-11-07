@@ -448,13 +448,14 @@ export interface BackendContractGuarantee {
   title: string;
   deductible?: string | null;
   limitation?: string | null;
+  ceiling?: string | null;
   coverages?: BackendCoverage[];
   details?: BackendGuaranteeDetail[];
 }
 
 export interface BackendGuaranteeDetail {
   service?: string;
-  limit?: string;
+  ceiling?: string;
   plafond?: string;
   franchise?: string;
   deductible?: string;

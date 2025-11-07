@@ -48,7 +48,7 @@ const GuaranteeOverview: React.FC<GuaranteeOverviewProps> = ({ guarantee }) => {
           </div>
 
           {/* Financial Section */}
-          {(financial.hasGeneralDeductible || financial.hasGeneralLimitation || financial.servicesWithFinancials > 0) && (
+          {(financial.hasGeneralLimit || financial.hasGeneralDeductible || financial.hasGeneralLimitation || financial.servicesWithFinancials > 0) && (
             <div>
               <div className="space-y-2">
                 {financial.hasGeneralDeductible && (
@@ -60,8 +60,15 @@ const GuaranteeOverview: React.FC<GuaranteeOverviewProps> = ({ guarantee }) => {
 
                 {financial.hasGeneralLimitation && (
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-600">Plafond: </span>
+                    <span className="text-gray-600">Limitation générale :</span>
                     <ExpandableText text={financial.generalLimitation!} className="text-gray-900 font-medium inline" maxLength={60} />
+                  </div>
+                )}
+
+                {financial.hasGeneralLimit && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-gray-600">Plafond général :</span>
+                    <ExpandableText text={financial.generalLimit!} className="text-gray-900 font-medium inline" maxLength={60} />
                   </div>
                 )}
               </div>

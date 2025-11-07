@@ -1,4 +1,4 @@
-import type { BackendContractGuarantee } from '../types/contract';
+import type { BackendContractGuarantee, BackendGuaranteeDetail } from '../types/contract';
 
 export interface GuaranteeStats {
   totalCoverages: number;
@@ -16,7 +16,7 @@ export interface ServiceStats {
   totalCount: number;
   hasFinancialInfo: boolean;
   financialSummary: {
-    limit?: string;
+    ceiling?: string;
     deductible?: string;
     franchise?: string;
     limitation?: string;
@@ -26,11 +26,23 @@ export interface ServiceStats {
 export interface FinancialSummary {
   hasGeneralDeductible: boolean;
   hasGeneralLimitation: boolean;
+  hasGeneralLimit: boolean;
   generalDeductible?: string;
   generalLimitation?: string;
+  generalLimit?: string;
   servicesWithFinancials: number;
   totalServices: number;
 }
+
+const getGuaranteeCeiling = (guarantee: BackendContractGuarantee): string | undefined => {
+  const legacyLimit = (guarantee as { limit?: string | null }).limit;
+  return guarantee.ceiling ?? legacyLimit ?? undefined;
+};
+
+const getDetailCeiling = (detail: BackendGuaranteeDetail): string | undefined => {
+  const legacyLimit = (detail as { limit?: string | null }).limit;
+  return detail.ceiling ?? legacyLimit ?? undefined;
+};
 
 /**
  * Calculate comprehensive statistics for a guarantee
@@ -52,7 +64,10 @@ export function calculateGuaranteeStats(guarantee: BackendContractGuarantee): Gu
   const hasFinancialInfo = Boolean(
     guarantee.deductible ||
       guarantee.limitation ||
-      guarantee.details?.some((detail) => detail.limit || detail.plafond || detail.franchise || detail.deductible || detail.limitation)
+      guarantee.details?.some((detail) => {
+        const ceiling = getDetailCeiling(detail);
+        return ceiling || detail.plafond || detail.franchise || detail.deductible || detail.limitation;
+      })
   );
 
   return {
@@ -75,7 +90,8 @@ export function calculateServiceStats(guarantee: BackendContractGuarantee): Serv
     const coveredCount = detail.coverages?.filter((c) => c.type === 'covered').length || 0;
     const excludedCount = detail.coverages?.filter((c) => c.type === 'not_covered').length || 0;
     const totalCount = coveredCount + excludedCount;
-    const hasFinancialInfo = !!(detail.limit || detail.plafond || detail.franchise || detail.deductible || detail.limitation);
+    const ceiling = getDetailCeiling(detail);
+    const hasFinancialInfo = !!(ceiling || detail.plafond || detail.franchise || detail.deductible || detail.limitation);
 
     return {
       serviceName: detail.service || 'Service non nommé',
@@ -84,7 +100,7 @@ export function calculateServiceStats(guarantee: BackendContractGuarantee): Serv
       totalCount,
       hasFinancialInfo,
       financialSummary: {
-        limit: detail.limit,
+        ceiling,
         deductible: detail.deductible,
         franchise: detail.franchise,
         limitation: detail.limitation,
@@ -99,14 +115,22 @@ export function calculateServiceStats(guarantee: BackendContractGuarantee): Serv
 export function calculateFinancialSummary(guarantee: BackendContractGuarantee): FinancialSummary {
   const hasGeneralDeductible = !!guarantee.deductible;
   const hasGeneralLimitation = !!guarantee.limitation;
-  const servicesWithFinancials = guarantee.details?.filter((detail) => detail.limit || detail.plafond || detail.franchise || detail.deductible || detail.limitation).length || 0;
+  const generalCeiling = getGuaranteeCeiling(guarantee);
+  const hasGeneralLimit = !!generalCeiling;
+  const servicesWithFinancials =
+    guarantee.details?.filter((detail) => {
+      const ceiling = getDetailCeiling(detail);
+      return ceiling || detail.plafond || detail.franchise || detail.deductible || detail.limitation;
+    }).length || 0;
   const totalServices = guarantee.details?.length || 0;
 
   return {
     hasGeneralDeductible,
     hasGeneralLimitation,
+    hasGeneralLimit,
     generalDeductible: guarantee.deductible || undefined,
     generalLimitation: guarantee.limitation || undefined,
+    generalLimit: generalCeiling,
     servicesWithFinancials,
     totalServices,
   };

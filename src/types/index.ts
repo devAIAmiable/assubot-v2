@@ -19,6 +19,7 @@ export interface EditTemplateContractRequest {
   guarantees?: Array<{
     title?: string;
     deductible?: string;
+    ceiling?: string;
     limitation?: string;
     coverages?: Array<{
       type?: 'covered' | 'not_covered';
@@ -26,7 +27,7 @@ export interface EditTemplateContractRequest {
     }>;
     details?: Array<{
       service?: string;
-      limit?: string;
+      ceiling?: string;
       plafond?: string;
       franchise?: string;
       deductible?: string;

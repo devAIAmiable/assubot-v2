@@ -13,7 +13,8 @@ interface GuaranteeServiceAccordionProps {
 const GuaranteeServiceAccordion: React.FC<GuaranteeServiceAccordionProps> = ({ detail, index }) => {
   const coveredItems = detail.coverages?.filter((c) => c.type === 'covered') || [];
   const excludedItems = detail.coverages?.filter((c) => c.type === 'not_covered') || [];
-  const hasFinancialInfo = detail.limit || detail.plafond || detail.franchise || detail.deductible || detail.limitation;
+  const detailCeiling = detail.ceiling ?? (detail as { limit?: string | null }).limit ?? undefined;
+  const hasFinancialInfo = detailCeiling || detail.plafond || detail.franchise || detail.deductible || detail.limitation;
   const [isExpanded, setIsExpanded] = useState(index === 0);
 
   const onToggle = () => {
@@ -53,10 +54,10 @@ const GuaranteeServiceAccordion: React.FC<GuaranteeServiceAccordionProps> = ({ d
               {hasFinancialInfo && (
                 <div className="mb-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {detail.limit && (
+                    {detailCeiling && (
                       <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
                         <div className="text-xs text-amber-600 font-medium mb-1">Plafond</div>
-                        <div className="text-sm text-amber-900 font-semibold">{formatFinancialValue(detail.limit)}</div>
+                        <div className="text-sm text-amber-900 font-semibold">{formatFinancialValue(detailCeiling)}</div>
                       </div>
                     )}
                     {detail.plafond && (

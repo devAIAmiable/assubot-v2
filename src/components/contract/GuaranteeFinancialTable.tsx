@@ -103,7 +103,8 @@ const GuaranteeFinancialTable: React.FC<GuaranteeFinancialTableProps> = ({ guara
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {guarantee.details.map((detail, index) => {
-                  const hasFinancialInfo = detail.limit || detail.plafond || detail.franchise || detail.deductible || detail.limitation;
+                  const detailCeiling = detail.ceiling ?? (detail as { limit?: string | null }).limit ?? undefined;
+                  const hasFinancialInfo = detailCeiling || detail.plafond || detail.franchise || detail.deductible || detail.limitation;
 
                   if (!hasFinancialInfo) return null;
 
@@ -119,7 +120,7 @@ const GuaranteeFinancialTable: React.FC<GuaranteeFinancialTableProps> = ({ guara
                         <div className="text-sm font-medium text-gray-900">{detail.service || 'Service non nommé'}</div>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="text-sm text-gray-900">{formatFinancialValue(detail.limit || detail.plafond)}</div>
+                        <div className="text-sm text-gray-900">{formatFinancialValue(detailCeiling || detail.plafond)}</div>
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2">

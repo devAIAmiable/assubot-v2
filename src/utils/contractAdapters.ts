@@ -82,14 +82,20 @@ export const getContractCoverages = (contract: Contract) => {
     contract.guarantees?.map((guarantee) => ({
       name: guarantee.title,
       details: [
-        {
-          service: guarantee.title,
-          limit: guarantee.details || 'Non spécifié',
-          deductible: 'Non spécifié',
-          restrictions: 'Voir conditions générales',
-          coveredItems: guarantee.covered ? [guarantee.covered] : [],
-          excludedItems: guarantee.notCovered ? [guarantee.notCovered] : [],
-        },
+        (() => {
+          const firstDetail = guarantee.details?.[0];
+          const legacyLimit = (firstDetail as { limit?: string | null } | undefined)?.limit;
+          const ceiling = firstDetail?.ceiling ?? legacyLimit ?? 'Non spécifié';
+
+          return {
+            service: guarantee.title,
+            ceiling,
+            deductible: 'Non spécifié',
+            restrictions: 'Voir conditions générales',
+            coveredItems: guarantee.covered ? [guarantee.covered] : [],
+            excludedItems: guarantee.notCovered ? [guarantee.notCovered] : [],
+          };
+        })(),
       ],
       coveredItems: guarantee.covered ? [guarantee.covered] : [],
       excludedItems: guarantee.notCovered ? [guarantee.notCovered] : [],

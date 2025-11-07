@@ -40,8 +40,16 @@ const TemplateContractEditModal: React.FC<TemplateContractEditModalProps> = ({ i
         contract.guarantees?.map((g) => ({
           title: g.title,
           deductible: g.deductible || undefined,
+          ceiling: g.ceiling || undefined,
           limitation: g.limitation || undefined,
-          details: g.details || [],
+          details:
+            g.details?.map((detail) => {
+              const { limit: legacyLimit, ...detailRest } = detail as { limit?: string | null } & typeof detail;
+              return {
+                ...detailRest,
+                ceiling: detail.ceiling ?? legacyLimit ?? '',
+              };
+            }) || [],
         })) || [],
       exclusions:
         contract.exclusions?.map((e) => ({

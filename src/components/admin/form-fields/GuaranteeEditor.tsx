@@ -10,6 +10,7 @@ interface GuaranteeEditorProps {
   guarantee: {
     title?: string;
     deductible?: string;
+    ceiling?: string;
     limitation?: string;
     details?: BackendGuaranteeDetail[];
   };
@@ -27,7 +28,7 @@ const GuaranteeEditor: React.FC<GuaranteeEditorProps> = ({ guaranteeIndex, guara
       ...currentDetails,
       {
         service: '',
-        limit: '',
+        ceiling: '',
         plafond: '',
         franchise: '',
         deductible: '',
@@ -112,13 +113,23 @@ const GuaranteeEditor: React.FC<GuaranteeEditorProps> = ({ guaranteeIndex, guara
                 />
               </div>
 
-              <div className="md:col-span-2">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Plafond</label>
+                <input
+                  {...register(`guarantees.${guaranteeIndex}.ceiling`)}
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Ex: 100 000€"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Limitation</label>
                 <textarea
                   {...register(`guarantees.${guaranteeIndex}.limitation`)}
                   rows={2}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Ex: Plafond annuel de 100 000€"
+                  placeholder="Ex: Limitation annuelle"
                 />
               </div>
             </div>
@@ -162,7 +173,7 @@ const GuaranteeEditor: React.FC<GuaranteeEditorProps> = ({ guaranteeIndex, guara
                       <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">Plafond</label>
                         <input
-                          {...register(`guarantees.${guaranteeIndex}.details.${detailIndex}.limit`)}
+                          {...register(`guarantees.${guaranteeIndex}.details.${detailIndex}.ceiling`)}
                           type="text"
                           className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                           placeholder="Ex: 100 000€"
