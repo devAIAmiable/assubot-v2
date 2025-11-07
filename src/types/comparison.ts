@@ -186,7 +186,7 @@ export interface ComparisonFormula {
     formulaId: string;
     name: string;
     details: string;
-    limit: number | null;
+    ceiling: number | null;
     deductible: number | null;
     createdAt: string;
   }>;

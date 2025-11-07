@@ -43,7 +43,7 @@ export const comparisonOfferSchema = z.object({
           formulaId: z.string(),
           name: z.string(),
           details: z.string().optional().default(''),
-          limit: z.number().nullable().optional(),
+          ceiling: z.number().nullable().optional(),
           deductible: z.number().nullable().optional(),
           createdAt: z.string().optional(),
         })

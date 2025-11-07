@@ -55,13 +55,16 @@ const ComparateurResultsPage = () => {
         isRecommended: f.isRecommended ?? false,
         createdAt: f.createdAt ?? '',
         updatedAt: f.updatedAt ?? '',
-        guarantees: (f.guarantees ?? []).map((g) => ({
-          ...g,
-          details: g.details ?? '',
-          limit: g.limit ?? null,
-          deductible: g.deductible ?? null,
-          createdAt: g.createdAt ?? '',
-        })),
+        guarantees: (f.guarantees ?? []).map((g) => {
+          const { limit: legacyLimit, ...guaranteeRest } = g as { limit?: number | null } & typeof g;
+          return {
+            ...guaranteeRest,
+            details: g.details ?? '',
+            ceiling: g.ceiling ?? legacyLimit ?? null,
+            deductible: g.deductible ?? null,
+            createdAt: g.createdAt ?? '',
+          };
+        }),
       })),
     }));
   }, [result]);

@@ -28,8 +28,8 @@ const sampleOffer: ComparisonOffer = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       guarantees: [
-        { id: 'g1', formulaId: 'f-1', name: 'Responsabilité civile', details: '...', limit: null, deductible: null, createdAt: new Date().toISOString() },
-        { id: 'g2', formulaId: 'f-1', name: 'Défense-recours', details: '...', limit: null, deductible: null, createdAt: new Date().toISOString() },
+        { id: 'g1', formulaId: 'f-1', name: 'Responsabilité civile', details: '...', ceiling: null, deductible: null, createdAt: new Date().toISOString() },
+        { id: 'g2', formulaId: 'f-1', name: 'Défense-recours', details: '...', ceiling: null, deductible: null, createdAt: new Date().toISOString() },
       ],
     },
   ],
