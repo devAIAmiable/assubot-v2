@@ -51,222 +51,18 @@ import { useContractDownload } from '../hooks/useContractDownload';
 import { useContractSummarize } from '../hooks/useContractSummarize';
 import { useGetContractByIdQuery } from '../store/contractsApi';
 
-function getZoneCoordinates(zoneLabel: string): [number, number] | null {
-  const zoneMap: Record<string, [number, number]> = {
-    // Europe
-    europe: [10, 50],
-    france: [2, 46],
-    allemagne: [10, 51],
-    espagne: [-3, 40],
-    italie: [12, 42],
-    'royaume-uni': [-2, 54],
-    suisse: [8, 47],
-    belgique: [4, 50],
-    'pays-bas': [5, 52],
-    luxembourg: [6, 50],
-    autriche: [14, 47],
-    pologne: [19, 52],
-    'republique-tcheque': [15, 50],
-    slovaquie: [19, 48],
-    hongrie: [19, 47],
-    roumanie: [25, 46],
-    bulgarie: [25, 43],
-    grece: [22, 39],
-    portugal: [-8, 39],
-    irlande: [-8, 53],
-    danemark: [10, 56],
-    suede: [18, 62],
-    norvege: [8, 62],
-    finlande: [26, 64],
-    estonie: [26, 59],
-    lettonie: [25, 57],
-    lituanie: [24, 55],
-    slovenie: [15, 46],
-    croatie: [16, 45],
-    serbie: [21, 44],
-    montenegro: [19, 42],
-    albanie: [20, 41],
-    macedoine: [22, 42],
-    'bosnie-herzegovine': [18, 44],
-    malte: [14, 36],
-    chypre: [33, 35],
-    islande: [-18, 65],
+function getZoneCoordinates(zone: { latitude?: string | null; longitude?: string | null }): [number, number] | null {
+  const latitudeValue = zone.latitude ?? undefined;
+  const longitudeValue = zone.longitude ?? undefined;
 
-    // Amérique du Nord
-    'amerique-du-nord': [-100, 45],
-    'etats-unis': [-98, 39],
-    canada: [-96, 56],
-    mexique: [-102, 23],
-    alaska: [-150, 64],
-    californie: [-120, 37],
-    texas: [-100, 31],
-    floride: [-81, 27],
-    'new-york': [-75, 43],
-    quebec: [-71, 52],
-    ontario: [-79, 50],
-    'colombie-britannique': [-125, 53],
+  const latitude = latitudeValue !== undefined && latitudeValue !== '' ? Number(latitudeValue) : undefined;
+  const longitude = longitudeValue !== undefined && longitudeValue !== '' ? Number(longitudeValue) : undefined;
 
-    // Amérique du Sud
-    'amerique-du-sud': [-60, -15],
-    bresil: [-55, -15],
-    argentine: [-64, -34],
-    chili: [-71, -30],
-    perou: [-75, -10],
-    colombie: [-74, 4],
-    venezuela: [-66, 6],
-    equateur: [-78, -2],
-    bolivie: [-65, -17],
-    paraguay: [-58, -23],
-    uruguay: [-56, -33],
-    guyane: [-59, 5],
-    suriname: [-56, 4],
-    'guyane-francaise': [-53, 4],
+  if (typeof latitude === 'number' && Number.isFinite(latitude) && typeof longitude === 'number' && Number.isFinite(longitude)) {
+    return [longitude, latitude];
+  }
 
-    // Afrique
-    afrique: [20, 0],
-    'afrique-du-nord': [3, 30],
-    'afrique-de-l-ouest': [-10, 10],
-    'afrique-centrale': [20, 0],
-    'afrique-de-l-est': [35, 0],
-    'afrique-du-sud': [25, -30],
-    maroc: [-7, 32],
-    algerie: [3, 28],
-    tunisie: [9, 34],
-    libye: [17, 27],
-    egypte: [30, 27],
-    senegal: [-14, 14],
-    mali: [-3, 17],
-    niger: [8, 17],
-    tchad: [19, 15],
-    soudan: [30, 15],
-    ethiopie: [40, 8],
-    kenya: [38, 0],
-    tanzanie: [35, -6],
-    zambie: [27, -15],
-    zimbabwe: [29, -20],
-    botswana: [24, -22],
-    namibie: [17, -22],
-    angola: [18, -12],
-    congo: [15, -1],
-    rdc: [23, -3],
-    cameroun: [12, 6],
-    nigeria: [8, 10],
-    ghana: [-1, 8],
-    'cote-d-ivoire': [-5, 8],
-    guinee: [-10, 10],
-    'sierra-leone': [-12, 8],
-    liberia: [-9, 6],
-    gambie: [-16, 13],
-    'guinee-bissau': [-15, 12],
-    'cap-vert': [-24, 16],
-    mauritanie: [-12, 20],
-    'burkina-faso': [-2, 12],
-    benin: [2, 9],
-    togo: [1, 8],
-    gabon: [12, -1],
-    'guinee-equatoriale': [10, 2],
-    'sao-tome-et-principe': [7, 1],
-    comores: [44, -12],
-    seychelles: [55, -5],
-    maurice: [58, -20],
-    madagascar: [47, -20],
-    mayotte: [45, -13],
-    reunion: [56, -21],
-
-    // Asie
-    asie: [100, 40],
-    'asie-de-l-est': [120, 35],
-    'asie-du-sud': [80, 20],
-    'asie-du-sud-est': [105, 10],
-    'asie-centrale': [70, 45],
-    chine: [105, 35],
-    japon: [138, 36],
-    'coree-du-sud': [128, 36],
-    'coree-du-nord': [127, 40],
-    mongolie: [105, 46],
-    inde: [78, 20],
-    pakistan: [70, 30],
-    afghanistan: [67, 33],
-    iran: [53, 32],
-    irak: [44, 33],
-    'arabie-saoudite': [45, 24],
-    yemen: [48, 15],
-    oman: [57, 21],
-    'emirats-arabes-unis': [54, 24],
-    qatar: [51, 25],
-    kuwait: [47, 29],
-    bahrein: [50, 26],
-    jordanie: [36, 31],
-    syrie: [39, 35],
-    liban: [36, 34],
-    israel: [35, 31],
-    palestine: [35, 32],
-    turquie: [35, 39],
-    georgie: [43, 42],
-    armenie: [45, 40],
-    azerbaidjan: [47, 40],
-    kazakhstan: [68, 48],
-    ouzbekistan: [64, 41],
-    turkmenistan: [59, 40],
-    kirghizistan: [75, 41],
-    tadjikistan: [71, 39],
-    vietnam: [106, 16],
-    laos: [103, 18],
-    cambodge: [104, 13],
-    thailande: [101, 13],
-    myanmar: [96, 22],
-    malaisie: [102, 3],
-    singapour: [104, 1],
-    brunei: [115, 4],
-    indonesie: [120, -2],
-    philippines: [122, 13],
-    taiwan: [121, 24],
-    'hong-kong': [114, 22],
-    macao: [113, 22],
-    'sri-lanka': [81, 7],
-    maldives: [73, 3],
-    nepal: [84, 28],
-    bhoutan: [90, 27],
-    bangladesh: [90, 24],
-    // Océanie
-    oceanie: [135, -25],
-    australie: [135, -25],
-    'nouvelle-zelande': [174, -41],
-    'papouasie-nouvelle-guinee': [145, -6],
-    fidji: [178, -18],
-    samoa: [-172, -14],
-    tonga: [-175, -21],
-    vanuatu: [167, -16],
-    'nouvelle-caledonie': [166, -21],
-    'polynesie-francaise': [-150, -17],
-
-    // Régions générales
-    monde: [0, 20],
-    'hemisphere-nord': [0, 45],
-    'hemisphere-sud': [0, -45],
-    'zone-euro': [10, 50],
-    schengen: [10, 50],
-    'union-europeenne': [10, 50],
-    ue: [10, 50],
-    mediterranee: [18, 35],
-    atlantique: [-30, 30],
-    pacifique: [180, 0],
-    indien: [80, -20],
-  };
-
-  const normalizedLabel = zoneLabel
-    .toLowerCase()
-    .replace(/[éèêë]/g, 'e')
-    .replace(/[àâä]/g, 'a')
-    .replace(/[îï]/g, 'i')
-    .replace(/[ôö]/g, 'o')
-    .replace(/[ûüù]/g, 'u')
-    .replace(/[ç]/g, 'c')
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-
-  return zoneMap[normalizedLabel] || null;
+  return null;
 }
 
 const ContractDetailsPage = () => {
@@ -473,11 +269,21 @@ const ContractDetailsPage = () => {
 
   // Filter and toggle functions for zones and exclusions
   const filteredZones =
-    contract?.zones?.filter((zone) => {
-      const matchesSearch = zone.label.toLowerCase().includes(zoneSearchQuery.toLowerCase());
-      const matchesType = zoneTypeFilter === 'all' || zone.type === zoneTypeFilter;
-      return matchesSearch && matchesType;
-    }) || [];
+    contract?.zones
+      ?.filter((zone) => {
+        const zoneName = zone.name?.toLowerCase() ?? '';
+        const matchesSearch = zoneName.includes(zoneSearchQuery.toLowerCase());
+        const matchesType = zoneTypeFilter === 'all' || zone.type === zoneTypeFilter;
+        return matchesSearch && matchesType;
+      })
+      .sort((a, b) => {
+        const labelA = getZoneTypeLabel(a.type);
+        const labelB = getZoneTypeLabel(b.type);
+        if (labelA !== labelB) {
+          return labelA.localeCompare(labelB, 'fr', { sensitivity: 'base' });
+        }
+        return (a.name ?? '').localeCompare(b.name ?? '', 'fr', { sensitivity: 'base' });
+      }) || [];
 
   const filteredExclusions =
     contract?.exclusions?.filter((exclusion) => {
@@ -491,34 +297,33 @@ const ContractDetailsPage = () => {
     }));
   };
 
-  const toggleZoneExpansion = (id: string) => {
-    setExpandedZones((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
   const getZoneIcon = (type: string) => {
     switch (type) {
       case 'country':
         return FaFlag;
       case 'zone':
+      case 'region':
+      case 'city':
         return FaMapMarkedAlt;
       default:
         return FaGlobe;
     }
   };
 
-  const getZoneTypeLabel = (type: string) => {
+  function getZoneTypeLabel(type: string): string {
     switch (type) {
       case 'country':
         return 'Pays';
       case 'zone':
         return 'Zone';
+      case 'region':
+        return 'Région';
+      case 'city':
+        return 'Ville';
       default:
         return 'Zone';
     }
-  };
+  }
 
   // Pending/Processing Summarization Message Component
   const PendingSummarizationMessage = () => {
@@ -1097,6 +902,8 @@ const ContractDetailsPage = () => {
                                     <option value="all">Tous</option>
                                     <option value="country">Pays</option>
                                     <option value="zone">Zones</option>
+                                    <option value="region">Régions</option>
+                                    <option value="city">Villes</option>
                                   </select>
                                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <FaChevronDown className="h-3 w-3 text-gray-400" />
@@ -1161,11 +968,15 @@ const ContractDetailsPage = () => {
                                           geographies.map((geo) => {
                                             // Check if this country/region matches any of the contract zones
                                             const isHighlighted = filteredZones.some((zone) => {
-                                              const countryName = geo.properties.name?.toLowerCase();
-                                              const zoneName = zone.label.toLowerCase();
+                                              const zoneCode = zone.code?.toUpperCase();
+                                              const geoCode = String(geo.properties.iso_a2 || geo.properties.ISO_A2 || '').toUpperCase();
+                                              if (zoneCode && geoCode && geoCode !== 'ZZ') {
+                                                return geoCode === zoneCode;
+                                              }
 
-                                              // Direct name matching only
-                                              return countryName === zoneName;
+                                              const geoName = geo.properties.name?.toLowerCase();
+                                              const zoneName = zone.name?.toLowerCase();
+                                              return !!zoneName && !!geoName && geoName === zoneName;
                                             });
 
                                             return (
@@ -1193,7 +1004,7 @@ const ContractDetailsPage = () => {
 
                                       {/* Zone Markers */}
                                       {filteredZones.map((zone) => {
-                                        const coordinates = getZoneCoordinates(zone.label);
+                                        const coordinates = getZoneCoordinates(zone);
                                         if (!coordinates) return null;
 
                                         return (
@@ -1218,7 +1029,7 @@ const ContractDetailsPage = () => {
                                                   textShadow: '1px 1px 3px rgba(255,255,255,0.9)',
                                                 }}
                                               >
-                                                {capitalizeFirst(zone.label)}
+                                                {capitalizeFirst(zone.name)}
                                               </text>
                                             </g>
                                           </Marker>
@@ -1236,17 +1047,20 @@ const ContractDetailsPage = () => {
                               <div>
                                 <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 px-1">Liste des zones de couverture</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                  {filteredZones.map((zone) => {
+                                  {filteredZones.map((zone, zoneIndex) => {
+                                    const zoneKey = zone.id ?? `${zone.code ?? zone.name ?? 'zone'}-${zoneIndex}`;
                                     const ZoneIcon = getZoneIcon(zone.type);
                                     const hasConditions = zone.conditions && zone.conditions.length > 0;
-                                    const isExpanded = expandedZones[zone.id] || false;
+                                    const isExpanded = expandedZones[zoneKey] || false;
 
                                     return (
                                       <motion.div
-                                        key={zone.id}
+                                        key={zoneKey}
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#1e51ab] transition-all group"
+                                        className={`col-span-1 bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#1e51ab] transition-all group ${
+                                          isExpanded ? 'md:col-span-2 lg:col-span-3' : ''
+                                        }`}
                                       >
                                         {/* Card Header */}
                                         <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -1258,10 +1072,12 @@ const ContractDetailsPage = () => {
                                                 </div>
                                               </div>
                                               <div className="flex-1 min-w-0">
-                                                <h5 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{capitalizeFirst(zone.label)}</h5>
-                                                <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-white rounded-full text-xs font-medium text-[#1e51ab]">
-                                                  {getZoneTypeLabel(zone.type)}
-                                                </span>
+                                                <h5 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{capitalizeFirst(zone.name)}</h5>
+                                                <div className="mt-1 flex flex-wrap items-center gap-2">
+                                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white rounded-full text-xs font-medium text-[#1e51ab]">
+                                                    {getZoneTypeLabel(zone.type)}
+                                                  </span>
+                                                </div>
                                               </div>
                                             </div>
                                           </div>
@@ -1270,7 +1086,15 @@ const ContractDetailsPage = () => {
                                         {/* Card Content */}
                                         {hasConditions && (
                                           <div className="p-4">
-                                            <button onClick={() => toggleZoneExpansion(zone.id)} className="w-full flex items-center justify-between text-left group/btn">
+                                            <button
+                                              onClick={() =>
+                                                setExpandedZones((prev) => ({
+                                                  ...prev,
+                                                  [zoneKey]: !prev[zoneKey],
+                                                }))
+                                              }
+                                              className="w-full flex items-center justify-between text-left group/btn"
+                                            >
                                               <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
                                                 <FaInfoCircle className="h-3.5 w-3.5 text-[#1e51ab]" />
                                                 Conditions spécifiques
@@ -1287,8 +1111,11 @@ const ContractDetailsPage = () => {
                                                   className="overflow-hidden"
                                                 >
                                                   <div className="mt-3 space-y-2">
-                                                    {zone.conditions!.map((condition, index) => (
-                                                      <div key={index} className="flex items-start gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-2">
+                                                    {zone.conditions!.map((condition, conditionIndex) => (
+                                                      <div
+                                                        key={`${zoneKey}-condition-${conditionIndex}`}
+                                                        className="flex items-start gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-2"
+                                                      >
                                                         <FaCheck className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
                                                         <span className="leading-relaxed">{condition}</span>
                                                       </div>

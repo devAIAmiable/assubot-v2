@@ -1,4 +1,4 @@
-import type { ContractCategory } from './contract';
+import type { ContractCategory, ZoneType } from './contract';
 import type React from 'react';
 import type { User } from '../store/userSlice';
 
@@ -40,7 +40,7 @@ export interface EditTemplateContractRequest {
   }>;
   exclusions?: Array<{ description?: string; type?: string }>;
   obligations?: Array<{ description?: string; type?: string }>;
-  zones?: Array<{ type?: string; label?: string; conditions?: string[] }>;
+  zones?: Array<{ type?: ZoneType; name?: string; code?: string; latitude?: string | null; longitude?: string | null; conditions?: string[] | null }>;
   terminations?: Array<{ description?: string }>;
   cancellations?: Array<{ question?: string; response?: string }>;
   contacts?: Array<{
@@ -243,9 +243,11 @@ export interface ContractObligation {
 export interface ContractZone {
   id: string;
   contractId: string;
-  label: string;
-  coordinates?: object; // JSON
-  conditions?: string[] | null;
+  type: ZoneType;
+  name: string;
+  code: string;
+  latitude?: string | null;
+  longitude?: string | null;
   createdAt: string;
 }
 

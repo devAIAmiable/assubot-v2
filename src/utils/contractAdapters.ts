@@ -111,7 +111,7 @@ export const getContractExclusions = (contract: Contract): string[] => {
 // Create geographic coverage object
 export const getContractGeographicCoverage = (contract: Contract) => {
   return {
-    countries: contract.zones?.map((z) => z.label) || ['France'],
+    countries: contract.zones?.map((z) => z.name) || ['France'],
   };
 };
 

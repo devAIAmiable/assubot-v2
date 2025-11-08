@@ -141,8 +141,10 @@ export interface ContractZone {
   id: string;
   contractId: string;
   type: ZoneType;
-  label: string;
-  coordinates?: Record<string, unknown>; // JSON data for coordinates
+  name: string;
+  code: string;
+  latitude?: string | null;
+  longitude?: string | null;
   conditions?: string[] | null;
   createdAt: Date;
 
@@ -485,8 +487,10 @@ export interface BackendContractObligation {
 export interface BackendContractZone {
   id: string;
   type: ZoneType;
-  label: string;
-  coordinates?: Record<string, unknown>;
+  name: string;
+  code: string;
+  latitude?: string | null;
+  longitude?: string | null;
   conditions?: string[] | null;
 }
 

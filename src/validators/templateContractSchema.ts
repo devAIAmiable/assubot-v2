@@ -55,9 +55,12 @@ export const obligationSchema = z.object({
 
 // Zone Schema
 export const zoneSchema = z.object({
-  type: z.enum([ZoneType.COUNTRY, ZoneType.ZONE, ZoneType.REGION, ZoneType.CITY] as const).optional(),
-  label: z.string().optional(),
-  conditions: z.array(z.string()).optional().nullable(),
+  type: z.enum([ZoneType.COUNTRY, ZoneType.ZONE, ZoneType.REGION, ZoneType.CITY] as const),
+  name: z.string(),
+  code: z.string(),
+  latitude: z.string().optional().nullable(),
+  longitude: z.string().optional().nullable(),
+  conditions: z.string().optional(),
 });
 
 // Termination Schema

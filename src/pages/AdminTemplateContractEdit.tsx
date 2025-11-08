@@ -82,8 +82,11 @@ const AdminTemplateContractEdit: React.FC = () => {
         zones:
           contract.zones?.map((z) => ({
             type: z.type,
-            label: z.label,
-            conditions: z.conditions || undefined,
+            name: z.name,
+            code: z.code,
+            latitude: z.latitude ?? '',
+            longitude: z.longitude ?? '',
+            conditions: z.conditions?.join('\n') ?? '',
           })) || [],
         terminations: [],
         cancellations:
@@ -139,6 +142,14 @@ const AdminTemplateContractEdit: React.FC = () => {
 
       // Get only the changed fields
       const changedFields = getChangedFields(originalData, currentFormData);
+
+      // Transform zones conditions from string to array
+      if (changedFields.zones) {
+        changedFields.zones = changedFields.zones.map((z: { conditions?: string }) => ({
+          ...z,
+          conditions: z.conditions ? z.conditions.split('\n').filter((c: string) => c.trim() !== '') : null,
+        }));
+      }
 
       await updateContract({
         id: contractId!,
