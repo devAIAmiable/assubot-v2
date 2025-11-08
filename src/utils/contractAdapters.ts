@@ -84,8 +84,22 @@ export const getContractCoverages = (contract: Contract) => {
       details: [
         (() => {
           const firstDetail = guarantee.details?.[0];
-          const legacyLimit = (firstDetail as { limit?: string | null } | undefined)?.limit;
-          const ceiling = firstDetail?.ceiling ?? legacyLimit ?? 'Non spécifié';
+          const ceiling = (() => {
+            if (!firstDetail) {
+              return 'Non spécifié';
+            }
+
+            if (typeof firstDetail === 'string') {
+              return firstDetail || 'Non spécifié';
+            }
+
+            if (typeof firstDetail === 'object') {
+              const detailRecord = firstDetail as { ceiling?: string | null; limit?: string | null };
+              return detailRecord.ceiling ?? detailRecord.limit ?? 'Non spécifié';
+            }
+
+            return 'Non spécifié';
+          })();
 
           return {
             service: guarantee.title,
@@ -174,7 +188,7 @@ export const getContractMonthlyPremium = (contract: Contract): number => {
 
 // Adapter functions for ContractListItem (lightweight contract for lists)
 export const getContractListItemInsurer = (contract: ContractListItem): string => {
-  return contract.insurer?.slug || 'Assureur inconnu';
+  return contract.insurer?.name || contract.insurer?.slug || 'Assureur inconnu';
 };
 
 export const getContractListItemType = (contract: ContractListItem): string => {

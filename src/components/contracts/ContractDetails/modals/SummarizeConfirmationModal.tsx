@@ -2,7 +2,7 @@ import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/re
 import { FaCoins, FaSpinner, FaTimes } from 'react-icons/fa';
 import React, { Fragment } from 'react';
 
-import Button from './Button';
+import Button from '../../../ui/Button';
 
 interface SummarizeConfirmationModalProps {
   isOpen: boolean;

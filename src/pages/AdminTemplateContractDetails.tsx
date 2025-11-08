@@ -32,7 +32,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import Avatar from '../components/ui/Avatar';
 import ContractSummarizationStatus from '../components/ui/ContractSummarizationStatus';
-import GuaranteeDetailModal from '../components/contract/GuaranteeDetailModal';
+import GuaranteeDetailModal from '../components/contracts/ContractDetails/modals/GuaranteeDetailModal';
 import ReactMarkdown from 'react-markdown';
 import { capitalizeFirst } from '../utils/text';
 import { getDisplayValue } from '../utils/dateHelpers';

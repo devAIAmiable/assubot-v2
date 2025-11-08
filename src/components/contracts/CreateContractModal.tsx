@@ -1,13 +1,13 @@
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { FaBell, FaCheck, FaClock, FaTimes } from 'react-icons/fa';
 import { Fragment, useCallback, useState } from 'react';
-
-import Avatar from './ui/Avatar';
-import ContractCreationForm from './contract/ContractCreationForm';
-import type { ContractFormData } from '../types';
 import React from 'react';
-import { contractUploadService } from '../services/contractUploadService';
 import { motion } from 'framer-motion';
+
+import Avatar from '../ui/Avatar';
+import ContractCreationForm from '../contract/ContractCreationForm';
+import type { ContractFormData } from '../../types';
+import { contractUploadService } from '../../services/contractUploadService';
 
 interface CreateContractModalProps {
   open?: boolean;
@@ -40,9 +40,9 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
       } else {
         throw new Error(result.error || 'Échec de la création du contrat');
       }
-    } catch (error) {
-      console.error('Contract creation failed:', error);
-      throw error;
+    } catch (submitError) {
+      console.error('Contract creation failed:', submitError);
+      throw submitError;
     }
   }, []);
 
@@ -53,7 +53,7 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
 
   if (showSuccessMessage) {
     return (
-      <Transition appear show={true} as={Fragment}>
+      <Transition appear show as={Fragment}>
         <Dialog as="div" className="fixed z-50 inset-0 overflow-y-auto" onClose={() => {}}>
           <div className="flex items-center justify-center min-h-screen px-4">
             <TransitionChild
@@ -94,16 +94,16 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
                         <div className="flex items-center space-x-3 py-2">
                           <FaClock className="text-xl text-blue-500 w-5 flex-shrink-0 mx-2" />
                           <span className="text-gray-700">
-                            Temps de traitement moyen: <strong className="text-gray-900">3 minutes</strong>
+                            Temps de traitement moyen&nbsp;: <strong className="text-gray-900">3 minutes</strong>
                           </span>
                         </div>
                         <div className="flex items-center space-x-3 py-2">
                           <FaBell className="text-xl text-blue-500 w-5 flex-shrink-0 mx-2" />
-                          <span className="text-gray-700">Vous serez notifié dès que votre contrat sera disponible</span>
+                          <span className="text-gray-700">Vous serez notifié dès que votre contrat sera disponible.</span>
                         </div>
                         <div className="flex items-center space-x-3">
                           <Avatar isAssistant />
-                          <span className="text-gray-700">AI'A analysera automatiquement vos documents</span>
+                          <span className="text-gray-700">AI'A analysera automatiquement vos documents.</span>
                         </div>
                       </div>
                       <p className="mt-4 text-gray-600 text-sm leading-relaxed">
@@ -114,7 +114,7 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
                       className="bg-[#1e51ab] hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg text-lg transition-colors duration-200 flex items-center space-x-2 mx-auto mt-6"
                       onClick={closeSuccessMessage}
                     >
-                      <FaCheck />
+                      <FaCheck aria-hidden="true" />
                       <span>Compris</span>
                     </button>
                   </div>
@@ -156,8 +156,8 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">Importer mon contrat d'assurance</h2>
-                  <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-                    <FaTimes className="h-6 w-6" />
+                  <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Fermer la fenêtre de création">
+                    <FaTimes className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
 
@@ -175,3 +175,5 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
 };
 
 export default CreateContractModal;
+
+

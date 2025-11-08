@@ -2,11 +2,11 @@ import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/re
 import { FaBars, FaTimes } from 'react-icons/fa';
 import React, { useEffect, useState } from 'react';
 
-import type { BackendContractGuarantee } from '../../types/contract';
-import GuaranteeOverview from './GuaranteeOverview';
-import GuaranteeServiceAccordion from './GuaranteeServiceAccordion';
-import GuaranteeSidebar from './GuaranteeSidebar';
-import { useScrollSpy } from '../../hooks/useScrollSpy';
+import type { BackendContractGuarantee } from '../../../../types/contract';
+import GuaranteeOverview from '../../../contract/GuaranteeOverview';
+import GuaranteeServiceAccordion from '../../../contract/GuaranteeServiceAccordion';
+import GuaranteeSidebar from '../../../contract/GuaranteeSidebar';
+import { useScrollSpy } from '../../../../hooks/useScrollSpy';
 
 interface GuaranteeDetailModalProps {
   isOpen: boolean;

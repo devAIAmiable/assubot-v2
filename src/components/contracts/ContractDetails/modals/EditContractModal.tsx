@@ -1,12 +1,12 @@
-import type { ContractCategory, ContractListItem, UpdateContractRequest } from '../types';
+import type { ContractCategory, ContractListItem, UpdateContractRequest } from '../../../../types';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { FaExclamationTriangle, FaSpinner, FaTimes } from 'react-icons/fa';
 import React, { Fragment, useState } from 'react';
-
-import Button from './ui/Button';
-import { formatDateForInput } from '../utils/dateHelpers';
 import { motion } from 'framer-motion';
-import { useContractOperations } from '../hooks/useContractOperations';
+
+import Button from '../../../ui/Button';
+import { formatDateForInput } from '../../../../utils/dateHelpers';
+import { useContractOperations } from '../../../../hooks/useContractOperations';
 
 interface EditContractModalProps {
   contract: ContractListItem;
@@ -32,12 +32,10 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
     setFormData((prev) => {
       const newData = { ...prev, [field]: value };
 
-      // Validate date relationships
       if (field === 'startDate' && value && newData.endDate) {
         const startDate = new Date(value as string);
         const endDate = new Date(newData.endDate);
         if (startDate > endDate) {
-          // Clear end date if it becomes invalid
           newData.endDate = '';
         }
       }
@@ -46,7 +44,6 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
         const startDate = new Date(newData.startDate);
         const endDate = new Date(value as string);
         if (endDate < startDate) {
-          // Don't update end date if it's before start date
           return prev;
         }
       }
@@ -55,28 +52,24 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
     });
   };
 
-  // Helper function to check if dates are valid
   const areDatesValid = () => {
     if (!formData.startDate || !formData.endDate) return true;
     return new Date(formData.endDate) >= new Date(formData.startDate);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
 
-    // Validate date relationships before submission
     if (!areDatesValid()) {
-      return; // Don't submit if dates are invalid
+      return;
     }
 
     try {
-      // Convert form data to API format
       const updates: UpdateContractRequest = {
         ...formData,
         annualPremiumCents: typeof formData.annualPremiumCents === 'string' ? parseInt(formData.annualPremiumCents) : formData.annualPremiumCents,
       };
 
-      // Convert dates to ISO strings if provided and not empty
       if (updates.startDate && updates.startDate.trim() !== '') {
         updates.startDate = new Date(updates.startDate).toISOString();
       } else {
@@ -92,9 +85,8 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
       await updateContract(contract.id, updates);
       onSuccess?.();
       onClose();
-    } catch (error) {
-      // Error is handled by the hook
-      console.error('Failed to update contract:', error);
+    } catch (updateError) {
+      console.error('Failed to update contract:', updateError);
     }
   };
 
@@ -125,47 +117,47 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
           >
             <DialogPanel className="relative bg-white rounded-2xl max-w-2xl w-full mx-auto shadow-xl max-h-[90vh] overflow-y-auto">
               <form onSubmit={handleSubmit} className="p-6">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">Modifier le contrat</h2>
-                  <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-                    <FaTimes className="h-6 w-6" />
+                  <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Fermer la fenêtre d'édition">
+                    <FaTimes className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
 
-                {/* Error Message */}
                 {updateError && (
                   <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
                     <div className="flex items-center space-x-2">
-                      <FaExclamationTriangle className="h-5 w-5 text-red-500" />
+                      <FaExclamationTriangle className="h-5 w-5 text-red-500" aria-hidden="true" />
                       <p className="text-sm text-red-800">{updateError}</p>
                     </div>
                   </motion.div>
                 )}
 
-                {/* Form Fields */}
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Nom du contrat *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="contract-name">
+                        Nom du contrat *
+                      </label>
                       <input
+                        id="contract-name"
                         type="text"
                         value={formData.name || ''}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        onChange={(event) => handleInputChange('name', event.target.value)}
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Bien(s)/Bénéficiaire(s)
-                        <span className="text-gray-500 text-xs ml-1">(optionnel)</span>
+                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="contract-subject">
+                        Bien(s)/Bénéficiaire(s) <span className="text-gray-500 text-xs ml-1">(optionnel)</span>
                       </label>
                       <input
+                        id="contract-subject"
                         type="text"
                         value={formData.subject || ''}
-                        onChange={(e) => handleInputChange('subject', e.target.value)}
+                        onChange={(event) => handleInputChange('subject', event.target.value)}
                         placeholder="Ex: BMW X4, Appartement Paris 75001"
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
                       />
@@ -174,25 +166,31 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Assureur</label>
                       <input type="text" value={contract.insurer?.name || ''} disabled className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-gray-500" />
-                      <p className="text-xs text-gray-500 mt-1">L'assureur ne peut pas être modifié</p>
+                      <p className="text-xs text-gray-500 mt-1">L'assureur ne peut pas être modifié.</p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Formule</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="contract-formula">
+                        Formule
+                      </label>
                       <input
+                        id="contract-formula"
                         type="text"
                         value={formData.formula || ''}
-                        onChange={(e) => handleInputChange('formula', e.target.value)}
+                        onChange={(event) => handleInputChange('formula', event.target.value)}
                         placeholder="Ex: Tous risques, Tiers, etc."
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Type de contrat *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="contract-category">
+                        Type de contrat *
+                      </label>
                       <select
+                        id="contract-category"
                         value={formData.category || ''}
-                        onChange={(e) => handleInputChange('category', e.target.value as ContractCategory)}
+                        onChange={(event) => handleInputChange('category', event.target.value as ContractCategory)}
                         required
                         disabled
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
@@ -204,15 +202,18 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                         <option value="electronic_devices">Équipements électroniques</option>
                         <option value="other">Autre</option>
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">Le type de contrat ne peut pas être modifié</p>
+                      <p className="text-xs text-gray-500 mt-1">Le type de contrat ne peut pas être modifié.</p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Prime annuelle (€) *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="contract-premium">
+                        Prime annuelle (€) *
+                      </label>
                       <input
+                        id="contract-premium"
                         type="number"
-                        value={formData.annualPremiumCents ? (formData.annualPremiumCents / 100).toString() : 0}
-                        onChange={(e) => handleInputChange('annualPremiumCents', parseInt(e.target.value) * 100)}
+                        value={formData.annualPremiumCents ? (formData.annualPremiumCents / 100).toString() : '0'}
+                        onChange={(event) => handleInputChange('annualPremiumCents', Number(event.target.value) * 100)}
                         min="0"
                         step="0.01"
                         required
@@ -221,33 +222,38 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Date de début</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="contract-start-date">
+                        Date de début
+                      </label>
                       <input
+                        id="contract-start-date"
                         type="date"
                         value={formData.startDate || ''}
-                        onChange={(e) => handleInputChange('startDate', e.target.value)}
+                        onChange={(event) => handleInputChange('startDate', event.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
                       />
-                      <p className="text-xs text-gray-500 mt-1">La date de fin sera automatiquement effacée si elle devient antérieure à cette date</p>
+                      <p className="text-xs text-gray-500 mt-1">La date de fin sera automatiquement effacée si elle devient antérieure à cette date.</p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Date de fin</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="contract-end-date">
+                        Date de fin
+                      </label>
                       <input
+                        id="contract-end-date"
                         type="date"
                         value={formData.endDate || ''}
-                        onChange={(e) => handleInputChange('endDate', e.target.value)}
+                        onChange={(event) => handleInputChange('endDate', event.target.value)}
                         min={formData.startDate || undefined}
                         className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent ${
                           !areDatesValid() ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
                         }`}
                       />
-                      {!areDatesValid() && <p className="text-xs text-red-600 mt-1">La date de fin doit être postérieure à la date de début</p>}
+                      {!areDatesValid() && <p className="text-xs text-red-600 mt-1">La date de fin doit être postérieure à la date de début.</p>}
                     </div>
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex items-center justify-end space-x-4 mt-8 pt-6 border-t border-gray-100">
                   <Button type="button" variant="secondary" onClick={onClose} disabled={isUpdating}>
                     Annuler
@@ -273,3 +279,5 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
 };
 
 export default EditContractModal;
+
+

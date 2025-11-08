@@ -1,4 +1,4 @@
-import { ContactType, ObligationType, ZoneType } from '../../../types/contract';
+import { ContactType, ObligationType } from '../../../types/contract';
 import { FaExclamationTriangle, FaGlobe, FaPhone, FaTimes, FaUserShield } from 'react-icons/fa';
 import React, { useState } from 'react';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
@@ -7,6 +7,9 @@ import { useFieldArray, useFormContext } from 'react-hook-form';
 import AIDisclaimer from '../../ui/AIDisclaimer';
 import ArrayFieldManager from '../form-fields/ArrayFieldManager';
 import type { OtherSectionsFormData } from '../../../validators/templateContractSchema';
+import SectionHeader from '../../ui/SectionHeader';
+
+type ZoneFormValue = (OtherSectionsFormData['zones'][number] & { id?: string }) | undefined;
 
 interface OtherSectionsStepProps {
   onNext?: () => void;
@@ -17,13 +20,12 @@ interface OtherSectionsStepProps {
 }
 
 const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPrevious, onSubmit, isSubmitting }) => {
-  const { control, register } = useFormContext<OtherSectionsFormData>();
+  const { control, register, watch } = useFormContext<OtherSectionsFormData>();
   const [activeTab, setActiveTab] = useState(0);
 
   // Field arrays for each section
   const exclusionsArray = useFieldArray({ control, name: 'exclusions' });
   const obligationsArray = useFieldArray({ control, name: 'obligations' });
-  const zonesArray = useFieldArray({ control, name: 'zones' });
   const cancellationsArray = useFieldArray({ control, name: 'cancellations' });
   const contactsArray = useFieldArray({ control, name: 'contacts' });
 
@@ -70,70 +72,7 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
     </div>
   );
 
-  const renderZoneItem = (_item: unknown, index: number) => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-          <select {...register(`zones.${index}.type`)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <option value={ZoneType.COUNTRY}>Pays</option>
-            <option value={ZoneType.ZONE}>Zone</option>
-            <option value={ZoneType.REGION}>Région</option>
-            <option value={ZoneType.CITY}>Ville</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-          <input
-            {...register(`zones.${index}.name`)}
-            type="text"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ex: Colombie"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Code</label>
-          <input
-            {...register(`zones.${index}.code`)}
-            type="text"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ex: CO"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
-          <input
-            {...register(`zones.${index}.latitude`)}
-            type="text"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ex: 4.58"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
-          <input
-            {...register(`zones.${index}.longitude`)}
-            type="text"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ex: -74.3"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Conditions (optionnel - une par ligne)</label>
-        <textarea
-          {...register(`zones.${index}.conditions`)}
-          rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Ex: Conditions spécifiques pour cette zone"
-        />
-      </div>
-    </div>
-  );
+  const zones = ((watch('zones') as ZoneFormValue[]) || []).filter(Boolean) as ZoneFormValue[];
 
   const renderCancellationItem = (_item: unknown, index: number) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -259,7 +198,49 @@ const OtherSectionsStep: React.FC<OtherSectionsStepProps> = ({ onNext, onPreviou
 
           {/* Zones */}
           <TabPanel>
-            <ArrayFieldManager fieldArray={zonesArray} renderItem={renderZoneItem} addButtonText="Ajouter une zone" emptyMessage="Aucune zone définie" />
+            <div className="space-y-6">
+              <SectionHeader
+                title="Zones de couverture"
+                description="Zones géographiques couvertes par le contrat"
+                tooltip="La modification des zones est temporairement désactivée."
+              />
+              <div className="space-y-4">
+                {zones.length === 0 ? (
+                  <div className="text-sm text-gray-500">Aucune zone définie</div>
+                ) : (
+                  zones.map((zone, index) => (
+                    <div key={zone.id ?? `${zone.code}-${index}`} className="bg-gray-50 rounded-lg border border-gray-200 p-4 space-y-3">
+                      <p className="text-sm text-gray-600">
+                        Modification des zones géographiques désactivée temporairement. Veuillez contacter l'équipe technique pour tout ajustement.
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
+                        <div>
+                          <span className="font-medium">Type :</span> {zone.type || '—'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Nom :</span> {zone.name || '—'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Code :</span> {zone.code || '—'}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                        <div>
+                          <span className="font-medium">Latitude :</span> {zone.latitude || '—'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Longitude :</span> {zone.longitude || '—'}
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        <span className="font-medium">Conditions spécifiques :</span>
+                        <pre className="mt-2 bg-white border border-gray-200 rounded-lg p-3 whitespace-pre-wrap">{zone.conditions || '—'}</pre>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </TabPanel>
 
           {/* Résiliations */}

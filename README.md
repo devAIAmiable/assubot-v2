@@ -50,22 +50,11 @@ The application provides two main API clients and service modules:
 ```typescript
 // Core API (Business Logic)
 import { coreApi } from '../services/api';
-import {
-	authService,
-	contractsService,
-	comparisonService,
-	notificationsService,
-	userService,
-} from '../services/coreApi';
+import { authService, contractsService, comparisonService, notificationsService, userService } from '../services/coreApi';
 
 // AI API (AI/ML Services)
 import { aiApi } from '../services/api';
-import {
-	chatService,
-	analysisService,
-	recommendationService,
-	aiModelService,
-} from '../services/aiApi';
+import { chatService, analysisService, recommendationService, aiModelService } from '../services/aiApi';
 
 // Example usage
 const response = await authService.verify(token);
@@ -256,7 +245,8 @@ docker compose -f docker-compose.dev.yml down --rmi all --volumes
 ```
 src/
 ├── components/          # React components
-│   ├── ContractsModule.tsx
+│   ├── contracts/
+│   │   ├── ContractsModule.tsx
 │   ├── ContractDetailsPage.tsx
 │   ├── CreateContractModal.tsx
 │   └── ...
@@ -279,11 +269,11 @@ The application expects the following API response format:
 
 ```json
 {
-	"success": true,
-	"data": {
-		"message": "string",
-		"resource": "any"
-	}
+  "success": true,
+  "data": {
+    "message": "string",
+    "resource": "any"
+  }
 }
 ```
 
@@ -291,11 +281,11 @@ Error responses should follow:
 
 ```json
 {
-	"status": "error",
-	"error": {
-		"code": "string",
-		"message": "string"
-	}
+  "status": "error",
+  "error": {
+    "code": "string",
+    "message": "string"
+  }
 }
 ```
 

@@ -143,12 +143,9 @@ const AdminTemplateContractEdit: React.FC = () => {
       // Get only the changed fields
       const changedFields = getChangedFields(originalData, currentFormData);
 
-      // Transform zones conditions from string to array
-      if (changedFields.zones) {
-        changedFields.zones = changedFields.zones.map((z: { conditions?: string }) => ({
-          ...z,
-          conditions: z.conditions ? z.conditions.split('\n').filter((c: string) => c.trim() !== '') : null,
-        }));
+      // Skip zone updates for now (read-only)
+      if ('zones' in changedFields) {
+        delete changedFields.zones;
       }
 
       await updateContract({
