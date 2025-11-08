@@ -209,7 +209,15 @@ const ChatModule: React.FC = () => {
   };
 
   const toggleContractSelection = (contractId: string) => {
-    setSelectedContractIds((prev) => (prev.includes(contractId) ? prev.filter((id) => id !== contractId) : [...prev, contractId]));
+    setSelectedContractIds((prev) => {
+      if (prev.includes(contractId)) {
+        return prev.filter((id) => id !== contractId);
+      }
+      if (prev.length >= 2) {
+        return prev;
+      }
+      return [...prev, contractId];
+    });
   };
 
   const handleSendMessage = async () => {
@@ -750,21 +758,32 @@ const ChatModule: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Contrats liés (optionnel)</label>
                   <div className="max-h-40 overflow-y-auto space-y-2 bg-gray-50 rounded-lg p-3 border border-gray-300">
                     {contracts.length > 0 ? (
-                      contracts.map((contract) => (
-                        <label key={contract.id} className="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-gray-100 transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={selectedContractIds.includes(contract.id)}
-                            onChange={() => toggleContractSelection(contract.id)}
-                            className="w-4 h-4 rounded border-gray-300 text-[#1e51ab] focus:ring-[#1e51ab]"
-                          />
-                          <span className="text-sm text-gray-900 font-medium">{contract.name}</span>
-                        </label>
-                      ))
+                      contracts.map((contract) => {
+                        const isSelected = selectedContractIds.includes(contract.id);
+                        const isDisabled = !isSelected && selectedContractIds.length >= 2;
+                        return (
+                          <label
+                            key={contract.id}
+                            className={`flex items-center space-x-3 p-2 rounded transition-colors ${
+                              isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-gray-100'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleContractSelection(contract.id)}
+                              disabled={isDisabled}
+                              className="w-4 h-4 rounded border-gray-300 text-[#1e51ab] focus:ring-[#1e51ab] disabled:cursor-not-allowed disabled:border-gray-200"
+                            />
+                            <span className="text-sm text-gray-900 font-medium">{contract.name}</span>
+                          </label>
+                        );
+                      })
                     ) : (
                       <p className="text-gray-500 text-sm text-center py-4">Aucun contrat disponible</p>
                     )}
                   </div>
+                  {selectedContractIds.length >= 2 && <p className="text-xs text-gray-500 mt-2">Vous pouvez associer au maximum deux contrats par conversation.</p>}
                 </div>
               </div>
 

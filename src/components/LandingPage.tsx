@@ -571,7 +571,7 @@ const LandingPage = () => {
                 icon: <VscGraph className="text-4xl mb-4 text-blue-400" />,
                 title: 'Analytics & Insights',
                 desc: 'Pour les assureurs',
-                target: 'B2C',
+                target: 'B2B',
                 status: 'Q4 2025',
                 gradient: 'from-blue-500/20 to-cyan-500/20',
                 borderColor: 'border-blue-400/30',
@@ -849,6 +849,7 @@ const LandingPage = () => {
                     className="bg-white text-[#1e51ab] px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/app/chatbot')}
                   >
                     Parler à AI'A
                   </motion.button>
@@ -1024,12 +1025,12 @@ const LandingPage = () => {
               <h3 className="text-white font-semibold mb-4">Plateforme</h3>
               <ul className="space-y-2">
                 <li>
-                  <button onClick={() => navigate('/app/contracts')} className="hover:text-white transition-colors text-left">
+                  <button onClick={() => navigate('/app/contrats')} className="hover:text-white transition-colors text-left">
                     Gestion des Contrats
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => navigate('/app/chat')} className="hover:text-white transition-colors text-left">
+                  <button onClick={() => navigate('/app/chatbot')} className="hover:text-white transition-colors text-left">
                     Chatbot IA
                   </button>
                 </li>

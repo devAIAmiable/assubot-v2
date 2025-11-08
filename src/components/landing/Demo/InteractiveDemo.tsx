@@ -239,7 +239,7 @@ const InteractiveDemo: React.FC = () => {
 
     const interval = setInterval(() => {
       setCurrentStep((prev) => (prev + 1) % demoSteps.length);
-    }, 60000);
+    }, 3500);
 
     return () => clearInterval(interval);
   }, [isPlaying, demoSteps.length]);

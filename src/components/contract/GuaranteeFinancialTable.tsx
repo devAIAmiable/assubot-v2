@@ -71,7 +71,7 @@ const GuaranteeFinancialTable: React.FC<GuaranteeFinancialTableProps> = ({ guara
 
             {financial.hasGeneralLimitation && (
               <div className="bg-white rounded-lg p-4 border border-blue-100 sm:col-span-2">
-                <div className="text-sm font-medium text-blue-700 mb-2">Limitation générale</div>
+                <div className="text-sm font-medium text-blue-700 mb-2">Plafond</div>
                 <ExpandableText text={financial.generalLimitation!} className="text-blue-900" />
               </div>
             )}
