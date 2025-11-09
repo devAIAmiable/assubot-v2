@@ -26,9 +26,10 @@ interface ZoneMarkersProps {
   hoveredZoneCode: string | null;
   zoom: number;
   onZoneClick: (zone: ContractZone, layoutId: string) => void;
+  onZoneHover: (code: string | null) => void;
 }
 
-const ZoneMarkers = React.memo<ZoneMarkersProps>(({ zones, hoveredZoneCode, zoom, onZoneClick }) => {
+const ZoneMarkers = React.memo<ZoneMarkersProps>(({ zones, hoveredZoneCode, zoom, onZoneClick, onZoneHover }) => {
   return (
     <>
       {zones.map((zone, zoneIndex) => {
@@ -57,11 +58,24 @@ const ZoneMarkers = React.memo<ZoneMarkersProps>(({ zones, hoveredZoneCode, zoom
         const textColor = baseColor;
 
         return (
-          <Marker key={markerKey} coordinates={coordinates} onClick={() => onZoneClick(zone, layoutId)}>
-            <g>
+          <Marker
+            key={markerKey}
+            coordinates={coordinates}
+            onClick={() => onZoneClick(zone, layoutId)}
+            onMouseEnter={() => onZoneHover(countryCode ?? null)}
+            onMouseLeave={() => onZoneHover(null)}
+          >
+            <g
+              style={{
+                opacity: isDimmed ? 0.35 : 1,
+                filter: isDimmed ? 'grayscale(100%) contrast(85%)' : 'none',
+                transition: 'opacity 0.2s ease, filter 0.2s ease',
+                zIndex: isDimmed ? 0 : 2,
+              }}
+            >
               <title>{`${capitalizeFirst(zone.name)} • ${getZoneTypeLabel(zone.type)}`}</title>
               {/* Pulse animation - faster when hovered */}
-              <circle r={pulseRadius} fill={baseColor} opacity={isDimmed ? '0.1' : '0.2'}>
+              <circle r={pulseRadius} fill={baseColor} opacity={isDimmed ? '0.05' : '0.2'}>
                 <animate attributeName="r" from={pulseRadius * 0.5} to={pulseRadius * 1.5} dur={isHovered ? '1s' : '2s'} begin="0s" repeatCount="indefinite" />
                 <animate attributeName="opacity" from="0.5" to="0" dur={isHovered ? '1s' : '2s'} begin="0s" repeatCount="indefinite" />
               </circle>
@@ -72,7 +86,7 @@ const ZoneMarkers = React.memo<ZoneMarkersProps>(({ zones, hoveredZoneCode, zoom
                     fill="#fff"
                     stroke={strokeColor}
                     strokeWidth={isHovered ? 1.5 * markerScale : 1 * markerScale}
-                    opacity={isDimmed ? 0.75 : isHovered ? 1 : 0.9}
+                    opacity={isDimmed ? 0.2 : isHovered ? 1 : 0.9}
                   >
                     {isHovered && <animate attributeName="r" from={flagRadius} to={flagRadius * 1.15} dur="0.3s" fill="freeze" />}
                   </circle>
@@ -83,11 +97,11 @@ const ZoneMarkers = React.memo<ZoneMarkersProps>(({ zones, hoveredZoneCode, zoom
                     width={flagSize * (isHovered ? 1.15 : 1)}
                     height={flagSize * (isHovered ? 1.15 : 1)}
                     clipPath={`circle(${(flagSize / 2) * (isHovered ? 1.15 : 1)}px at ${(flagSize / 2) * (isHovered ? 1.15 : 1)}px ${(flagSize / 2) * (isHovered ? 1.15 : 1)}px)`}
-                    opacity={isDimmed ? 0.75 : 1}
+                    opacity={isDimmed ? 0.2 : 1}
                   />
                 </>
               ) : (
-                <circle r={dotRadius * (isHovered ? 1.3 : 1)} fill={baseColor} stroke="#fff" strokeWidth={0.75 * markerScale} opacity={isDimmed ? 0.6 : isHovered ? 1 : 0.9} />
+                <circle r={dotRadius * (isHovered ? 1.3 : 1)} fill={baseColor} stroke="#fff" strokeWidth={0.75 * markerScale} opacity={isDimmed ? 0.05 : isHovered ? 1 : 0.9} />
               )}
               <text
                 textAnchor="middle"
@@ -95,7 +109,7 @@ const ZoneMarkers = React.memo<ZoneMarkersProps>(({ zones, hoveredZoneCode, zoom
                 style={{
                   fontFamily: 'system-ui',
                   fill: textColor,
-                  opacity: isDimmed ? 0.7 : 1,
+                  opacity: isDimmed ? 0.3 : 1,
                   fontSize: `${fontSize * (isHovered ? 1.1 : 1)}px`,
                   fontWeight: '700',
                   textShadow: isHovered ? '2px 2px 4px rgba(255,255,255,0.95)' : '1px 1px 3px rgba(255,255,255,0.9)',
@@ -237,7 +251,7 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
   }, []);
 
   const memoizedMarkers = useMemo(
-    () => <ZoneMarkers zones={zonesForMarkers} hoveredZoneCode={hoveredZoneCode} zoom={zoom} onZoneClick={handleZoneClick} />,
+    () => <ZoneMarkers zones={zonesForMarkers} hoveredZoneCode={hoveredZoneCode} zoom={zoom} onZoneClick={handleZoneClick} onZoneHover={setHoveredZoneCode} />,
     [zonesForMarkers, hoveredZoneCode, zoom, handleZoneClick]
   );
 
