@@ -76,16 +76,34 @@ const ChatModule: React.FC = () => {
     sortOrder: 'desc',
     status: ['active'],
   });
-  const contracts = contractsData?.data || [];
+  const contracts = useMemo(() => contractsData?.data ?? [], [contractsData?.data]);
+  const contractsById = useMemo(() => {
+    const map = new Map<string, string>();
+    contracts.forEach((contract) => {
+      if (contract?.id && contract?.name) {
+        map.set(contract.id, contract.name);
+      }
+    });
+    return map;
+  }, [contracts]);
   const chatsById = useMemo(() => new Map(paginatedChats.map((chat) => [chat.id, chat])), [paginatedChats]);
 
   useEffect(() => {
-    if (currentChat) {
-      setCurrentContractNames(currentChat.contracts?.map((item: ChatContract) => item?.name).join(', ') || '');
-    } else {
+    if (!currentChat) {
       setCurrentContractNames('');
+      return;
     }
-  }, [currentChat]);
+
+    const directNames = currentChat.contracts?.map((item: ChatContract) => item?.name).filter((name): name is string => Boolean(name)) ?? [];
+
+    let resolvedNames = directNames;
+
+    if (resolvedNames.length === 0 && Array.isArray(currentChat.contractIds) && currentChat.contractIds.length > 0) {
+      resolvedNames = currentChat.contractIds.map((id) => contractsById.get(id)).filter((name): name is string => Boolean(name));
+    }
+
+    setCurrentContractNames(resolvedNames.join(', '));
+  }, [contractsById, currentChat]);
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -130,6 +148,12 @@ const ChatModule: React.FC = () => {
 
     try {
       await createNewChat(chatData);
+      if (selectedContractIds.length > 0) {
+        const selectedNames = selectedContractIds.map((id) => contractsById.get(id)).filter((name): name is string => Boolean(name));
+        if (selectedNames.length > 0) {
+          setCurrentContractNames(selectedNames.join(', '));
+        }
+      }
       closeNewChatModal();
       setNewChatTitle('');
       setSelectedContractIds([]);
@@ -137,7 +161,7 @@ const ChatModule: React.FC = () => {
     } catch (creationError) {
       console.error('Erreur lors de la création du chat:', creationError);
     }
-  }, [closeNewChatModal, createNewChat, newChatTitle, selectedContractIds]);
+  }, [closeNewChatModal, contractsById, createNewChat, newChatTitle, selectedContractIds]);
 
   const handleSelectChat = useCallback(
     (chatId: string) => {
