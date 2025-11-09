@@ -44,8 +44,6 @@ export const ContractCard = memo(({ contract, index, onEdit, onDelete }: Contrac
   const TypeIcon = getTypeIcon(type);
   const insurerName = getContractListItemInsurer(contract);
   const premiumCents = getContractListItemPremium(contract);
-  const hasPremium = typeof premiumCents === 'number' && Number.isFinite(premiumCents);
-  const premiumEuros = hasPremium ? premiumCents / 100 : null;
   const isPending = contract.status === 'pending';
   const isExpired = contract.endDate ? dayjs(contract.endDate).endOf('day').isBefore(dayjs()) : false;
   const statusClass = statusPillClass(contract.status, isExpired, isPending);
@@ -112,7 +110,7 @@ export const ContractCard = memo(({ contract, index, onEdit, onDelete }: Contrac
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Dépenses annuelles</span>
           <span className={`text-sm font-bold ${isPending ? 'text-gray-400' : 'text-[#1e51ab]'}`}>
-            {isPending || premiumEuros === null ? '-' : `${premiumEuros.toLocaleString('fr-FR')}€`}
+            {isPending || premiumCents === null ? '-' : `${premiumCents.toLocaleString('fr-FR')}€`}
           </span>
         </div>
         <div className="flex items-center justify-between">

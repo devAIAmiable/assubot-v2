@@ -2,10 +2,10 @@ import type { ContractCategory, ContractListItem, UpdateContractRequest } from '
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { FaExclamationTriangle, FaSpinner, FaTimes } from 'react-icons/fa';
 import React, { Fragment, useState } from 'react';
-import { motion } from 'framer-motion';
 
 import Button from '../../../ui/Button';
 import { formatDateForInput } from '../../../../utils/dateHelpers';
+import { motion } from 'framer-motion';
 import { useContractOperations } from '../../../../hooks/useContractOperations';
 
 interface EditContractModalProps {
@@ -27,6 +27,8 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
     startDate: contract.startDate ? formatDateForInput(contract.startDate) : '',
     endDate: contract.endDate ? formatDateForInput(contract.endDate) : '',
   });
+  const [startDateInput, setStartDateInput] = useState(formData.startDate ?? '');
+  const [endDateInput, setEndDateInput] = useState(formData.endDate ?? '');
 
   const handleInputChange = (field: keyof UpdateContractRequest, value: string | number | boolean) => {
     setFormData((prev) => {
@@ -51,6 +53,14 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
       return newData;
     });
   };
+
+  React.useEffect(() => {
+    setStartDateInput(formData.startDate ?? '');
+  }, [formData.startDate]);
+
+  React.useEffect(() => {
+    setEndDateInput(formData.endDate ?? '');
+  }, [formData.endDate]);
 
   const areDatesValid = () => {
     if (!formData.startDate || !formData.endDate) return true;
@@ -228,8 +238,22 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                       <input
                         id="contract-start-date"
                         type="date"
-                        value={formData.startDate || ''}
-                        onChange={(event) => handleInputChange('startDate', event.target.value)}
+                        value={startDateInput}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setStartDateInput(value);
+                          if (value === '' || value.length === 10) {
+                            handleInputChange('startDate', value);
+                          }
+                        }}
+                        onBlur={(event) => {
+                          const value = event.target.value;
+                          if (value === '' || value.length === 10) {
+                            handleInputChange('startDate', value);
+                          } else {
+                            setStartDateInput(formData.startDate ?? '');
+                          }
+                        }}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent"
                       />
                       <p className="text-xs text-gray-500 mt-1">La date de fin sera automatiquement effacée si elle devient antérieure à cette date.</p>
@@ -242,8 +266,22 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
                       <input
                         id="contract-end-date"
                         type="date"
-                        value={formData.endDate || ''}
-                        onChange={(event) => handleInputChange('endDate', event.target.value)}
+                        value={endDateInput}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setEndDateInput(value);
+                          if (value === '' || value.length === 10) {
+                            handleInputChange('endDate', value);
+                          }
+                        }}
+                        onBlur={(event) => {
+                          const value = event.target.value;
+                          if (value === '' || value.length === 10) {
+                            handleInputChange('endDate', value);
+                          } else {
+                            setEndDateInput(formData.endDate ?? '');
+                          }
+                        }}
                         min={formData.startDate || undefined}
                         className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent ${
                           !areDatesValid() ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
@@ -279,5 +317,3 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
 };
 
 export default EditContractModal;
-
-
