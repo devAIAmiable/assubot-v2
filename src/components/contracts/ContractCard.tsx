@@ -1,14 +1,14 @@
-import { FaEdit, FaEye, FaInfoCircle, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback } from 'react';
+import { getContractListItemInsurer, getContractListItemPremium, getContractListItemType } from '../../utils/contractAdapters';
+import { getStatusLabel, getTypeIcon, getTypeLabel } from '../../utils/contract';
+
+import type { ContractListItem } from '../../types/contract';
+import ContractSummarizationStatus from '../ui/ContractSummarizationStatus';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { motion } from 'framer-motion';
-
-import ContractSummarizationStatus from '../ui/ContractSummarizationStatus';
-import type { ContractListItem } from '../../types/contract';
-import { getContractListItemInsurer, getContractListItemPremium, getContractListItemType } from '../../utils/contractAdapters';
 import { getInsurerLogo } from '../../utils/insurerLogo';
-import { getStatusLabel, getTypeIcon, getTypeLabel } from '../../utils/contract';
+import { motion } from 'framer-motion';
 
 interface ContractCardProps {
   contract: ContractListItem;
@@ -100,12 +100,6 @@ export const ContractCard = memo(({ contract, index, onEdit, onDelete }: Contrac
         </div>
         <div className="flex flex-col items-end gap-1 text-right">
           <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusClass}`}>{statusLabel}</span>
-          {isPending && (
-            <div className="flex items-center text-xs text-gray-500" title="Analyse des documents en cours…">
-              <FaInfoCircle className="mr-1" />
-              Analyse en cours…
-            </div>
-          )}
           <ContractSummarizationStatus summarizeStatus={contract.summarizeStatus} />
         </div>
       </div>
