@@ -9,7 +9,7 @@ import ArrayFieldManager from '../form-fields/ArrayFieldManager';
 import type { OtherSectionsFormData } from '../../../validators/templateContractSchema';
 import SectionHeader from '../../ui/SectionHeader';
 
-type ZoneFormValue = (OtherSectionsFormData['zones'][number] & { id?: string }) | undefined;
+type ZoneFormValue = NonNullable<OtherSectionsFormData['zones']>[number] & { id?: string };
 
 interface OtherSectionsStepProps {
   onNext?: () => void;

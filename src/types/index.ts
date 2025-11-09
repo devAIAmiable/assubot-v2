@@ -204,7 +204,7 @@ export interface InsuranceStats {
 
 // Contract Creation Types - matching Prisma schema
 export type DocumentType = 'CP' | 'CG' | 'OTHER';
-export type ContractStatus = 'active' | 'expired' | 'pending';
+export type ContractStatus = 'active' | 'expired' | 'pending' | 'cancelled';
 export type ObligationType = 'subscription' | 'during_contract' | 'claim';
 export type ContactType = 'management' | 'assistance' | 'emergency';
 
@@ -286,7 +286,7 @@ export interface Contract {
   status: ContractStatus;
   createdAt: string;
   updatedAt: string;
-  tacitRenewal: boolean;
+  tacitRenewal?: boolean;
 
   // Optional summarization fields
   summarizeStatus?: 'pending' | 'ongoing' | 'done' | 'failed';

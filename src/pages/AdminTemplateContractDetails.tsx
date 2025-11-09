@@ -1,4 +1,5 @@
-import type { BackendContractGuarantee, Contract } from '../types';
+import type { BackendContractGuarantee } from '../types';
+import type { Contract } from '../types/contract';
 import { FaClipboardList, FaExclamationTriangle, FaGlobe, FaPhone, FaShieldAlt, FaTimes } from 'react-icons/fa';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { useEffect, useState } from 'react';
