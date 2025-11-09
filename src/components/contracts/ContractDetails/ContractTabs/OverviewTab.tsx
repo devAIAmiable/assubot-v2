@@ -1,8 +1,8 @@
-import { FaCheck, FaFilePdf, FaMagic, FaShieldAlt } from 'react-icons/fa';
-import React from 'react';
-
 import type { Contract, DocumentType } from '../../../../types/contract';
+import { FaCheck, FaFilePdf, FaMagic, FaShieldAlt } from 'react-icons/fa';
+
 import AIDisclaimer from '../ui/AIDisclaimer';
+import React from 'react';
 import { capitalizeFirst } from '../../../../utils/text';
 import { formatDateForDisplayFR } from '../../../../utils/dateHelpers';
 
@@ -14,7 +14,7 @@ interface OverviewTabProps {
 
 const OverviewTab: React.FC<OverviewTabProps> = ({ contract, onDownloadDocument, isGeneratingDocument }) => {
   return (
-    <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
+    <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4">
       {/* Mon contrat en un coup d'œil */}
       <div className="mb-6 sm:mb-8">
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-8 rounded-2xl border border-blue-100">

@@ -1,11 +1,11 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import { FaChevronDown, FaChevronUp, FaExclamationTriangle, FaMagic } from 'react-icons/fa';
+
+import AIDisclaimer from '../ui/AIDisclaimer';
+import type { Contract } from '../../../../types/contract';
+import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-
-import type { Contract } from '../../../../types/contract';
-import AIDisclaimer from '../ui/AIDisclaimer';
-import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
 
 interface CancellationsTabProps {
   contract: Contract;
@@ -18,7 +18,7 @@ interface CancellationsTabProps {
 const CancellationsTab: React.FC<CancellationsTabProps> = ({ contract, summarizeStatus, isProcessing, isSummarizing, onSummarize }) => {
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
-      <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
+      <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4">
         <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
         <AIDisclaimer />
       </div>
@@ -28,7 +28,7 @@ const CancellationsTab: React.FC<CancellationsTabProps> = ({ contract, summarize
   const cancellations = contract.cancellations ?? [];
 
   return (
-    <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0 space-y-6">
+    <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4 space-y-6">
       <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 sm:p-8 rounded-2xl border border-yellow-100">
         <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center">
           <FaExclamationTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600 mr-2 sm:mr-3" />

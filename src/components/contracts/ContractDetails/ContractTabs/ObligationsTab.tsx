@@ -1,8 +1,8 @@
+import { AnimatePresence, motion } from 'framer-motion';
+import type { Contract, ObligationType } from '../../../../types/contract';
 import { FaCheck, FaChevronDown, FaChevronUp, FaClipboardList, FaMagic } from 'react-icons/fa';
 import React, { useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 
-import type { Contract, ObligationType } from '../../../../types/contract';
 import AIDisclaimer from '../ui/AIDisclaimer';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
 import { getObligationTypeLabel } from '../../../../utils/contract';
@@ -40,7 +40,7 @@ const ObligationsTab: React.FC<ObligationsTabProps> = ({ contract, summarizeStat
 
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
-      <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
+      <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4">
         <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
         <AIDisclaimer />
       </div>
@@ -48,7 +48,7 @@ const ObligationsTab: React.FC<ObligationsTabProps> = ({ contract, summarizeStat
   }
 
   return (
-    <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0 space-y-4">
+    <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4 space-y-4">
       <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 flex items-center">
         <FaClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mr-2 sm:mr-3" />
         Mes obligations

@@ -1,5 +1,5 @@
 import type { BackendContractGuarantee, Contract, DocumentType } from '../../../types/contract';
-import { FaClipboardList, FaExclamationTriangle, FaEye, FaGlobe, FaPhone, FaShieldAlt, FaTimes } from 'react-icons/fa';
+import { FaClipboardList, FaDownload as FaDownloadIcon, FaEdit as FaEditIcon, FaExclamationTriangle, FaEye, FaGlobe, FaPhone, FaShieldAlt, FaTimes } from 'react-icons/fa';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -221,8 +221,10 @@ const ContractDetailsPage: React.FC = () => {
 
   const firstDocumentType = contract.documents?.[0]?.type;
 
+  const mobileActionColumns = firstDocumentType ? 'grid-cols-[3fr_1fr_1fr]' : 'grid-cols-[3fr_1fr]';
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <ContractHeader
         contract={contract as Contract}
         onBack={handleBack}
@@ -235,7 +237,7 @@ const ContractDetailsPage: React.FC = () => {
 
       <TabGroup selectedIndex={selectedTab} onChange={handleTabChange}>
         <div className="border-b border-gray-200 bg-white">
-          <TabList className="flex space-x-2 overflow-x-auto scrollbar-hide border-b border-gray-200 px-4 sm:px-0">
+          <TabList className="flex space-x-2 overflow-x-auto scrollbar-hide border-b border-gray-200 px-0 sm:px-4">
             {tabs.map((tab, index) => (
               <Tab
                 key={tabIds[index]}
@@ -256,11 +258,11 @@ const ContractDetailsPage: React.FC = () => {
         <div className="flex-1 overflow-y-auto">
           <TabPanels className="h-full">
             <div className="pb-20 lg:pb-0">
-              <TabPanel className="p-4 sm:p-6">
+              <TabPanel className="px-0 py-4 sm:px-6 sm:py-6">
                 <OverviewTab contract={contract as Contract} onDownloadDocument={handleDownloadDocument} isGeneratingDocument={isGenerating} />
               </TabPanel>
 
-              <TabPanel className="p-4 sm:px-0 sm:py-6">
+              <TabPanel className="px-0 py-4 sm:px-0 sm:py-6">
                 <GuaranteesTab
                   contract={contract as Contract}
                   summarizeStatus={contract.summarizeStatus}
@@ -271,7 +273,7 @@ const ContractDetailsPage: React.FC = () => {
                 />
               </TabPanel>
 
-              <TabPanel className="p-4 sm:px-0 sm:py-6">
+              <TabPanel className="px-0 py-4 sm:px-0 sm:py-6">
                 <ExclusionsTab
                   contract={contract as Contract}
                   summarizeStatus={contract.summarizeStatus}
@@ -281,7 +283,7 @@ const ContractDetailsPage: React.FC = () => {
                 />
               </TabPanel>
 
-              <TabPanel className="p-4 sm:px-0 sm:py-6">
+              <TabPanel className="px-0 py-4 sm:px-0 sm:py-6">
                 <ZonesTab
                   contract={contract as Contract}
                   summarizeStatus={contract.summarizeStatus}
@@ -291,7 +293,7 @@ const ContractDetailsPage: React.FC = () => {
                 />
               </TabPanel>
 
-              <TabPanel className="p-4 sm:px-0 sm:py-6">
+              <TabPanel className="px-0 py-4 sm:px-0 sm:py-6">
                 <ObligationsTab
                   contract={contract as Contract}
                   summarizeStatus={contract.summarizeStatus}
@@ -301,7 +303,7 @@ const ContractDetailsPage: React.FC = () => {
                 />
               </TabPanel>
 
-              <TabPanel className="p-4 sm:px-0 sm:py-6">
+              <TabPanel className="px-0 py-4 sm:px-0 sm:py-6">
                 <CancellationsTab
                   contract={contract as Contract}
                   summarizeStatus={contract.summarizeStatus}
@@ -311,7 +313,7 @@ const ContractDetailsPage: React.FC = () => {
                 />
               </TabPanel>
 
-              <TabPanel className="p-4 sm:px-0 sm:py-6">
+              <TabPanel className="px-0 py-4 sm:px-0 sm:py-6">
                 <ContactsTab
                   contract={contract as Contract}
                   summarizeStatus={contract.summarizeStatus}
@@ -325,29 +327,36 @@ const ContractDetailsPage: React.FC = () => {
         </div>
       </TabGroup>
 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex gap-2 z-50 safe-area-inset-bottom">
-        <button
-          onClick={handleSummarize}
-          disabled={isSummarizing || contract.summarizeStatus !== 'pending'}
-          className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label="Résumer le contrat"
-          title={`Résumé IA (${requiredCredits} crédits)`}
-        >
-          Résumer
-        </button>
-        <button onClick={handleEdit} className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg" aria-label="Modifier le contrat">
-          Editer
-        </button>
-        {firstDocumentType && (
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-3 py-2 z-50 safe-area-inset-bottom">
+        <div className={`grid ${mobileActionColumns} gap-2 items-center`}>
+          {/* Résumer button (3/5 width) */}
           <button
-            onClick={handleDownloadFirstDocument}
-            disabled={isGenerating}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Télécharger le premier document"
+            onClick={handleSummarize}
+            disabled={isSummarizing || contract.summarizeStatus !== 'pending'}
+            className="w-full flex items-center justify-center gap-2 px-3 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed truncate"
+            aria-label="Résumer le contrat"
+            title={`Résumé IA (${requiredCredits} crédits)`}
           >
-            Télécharger
+            Résumer
           </button>
-        )}
+
+          {/* Modifier (1/5) */}
+          <button onClick={handleEdit} className="w-full h-12 bg-gray-100 text-gray-700 rounded-lg flex items-center justify-center" aria-label="Modifier le contrat">
+            <FaEditIcon className="h-5 w-5" />
+          </button>
+
+          {/* Télécharger (1/5) */}
+          {firstDocumentType && (
+            <button
+              onClick={handleDownloadFirstDocument}
+              disabled={isGenerating}
+              className="w-full h-12 bg-gray-100 text-gray-700 rounded-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Télécharger le premier document"
+            >
+              <FaDownloadIcon className="h-5 w-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {contract && <EditContractModal contract={contract} isOpen={isEditModalOpen} onClose={handleEditClose} onSuccess={handleEditSuccess} />}

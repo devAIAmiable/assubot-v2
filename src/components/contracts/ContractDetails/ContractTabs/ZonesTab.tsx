@@ -302,7 +302,7 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
 
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
-      <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
+      <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4">
         <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
         <AIDisclaimer />
       </div>
@@ -310,7 +310,7 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
   }
 
   return (
-    <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0 space-y-6">
+    <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4 space-y-6">
       {zones.length === 0 ? (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16 bg-white rounded-2xl border border-gray-200 shadow-sm">
           <div className="relative mx-auto w-24 h-24 mb-6">

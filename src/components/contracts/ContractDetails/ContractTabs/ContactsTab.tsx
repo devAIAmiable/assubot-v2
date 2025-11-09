@@ -1,9 +1,9 @@
-import { FaClock, FaClipboardList, FaEnvelope, FaMagic, FaPhone } from 'react-icons/fa';
-import React from 'react';
+import { FaClipboardList, FaClock, FaEnvelope, FaMagic, FaPhone } from 'react-icons/fa';
 
-import type { Contract } from '../../../../types/contract';
 import AIDisclaimer from '../ui/AIDisclaimer';
+import type { Contract } from '../../../../types/contract';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
+import React from 'react';
 import { getContactTypeLabel } from '../../../../utils/contract';
 
 interface ContactsTabProps {
@@ -17,7 +17,7 @@ interface ContactsTabProps {
 const ContactsTab: React.FC<ContactsTabProps> = ({ contract, summarizeStatus, isProcessing, isSummarizing, onSummarize }) => {
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-0">
+      <div className="max-w-7xl mx-auto px-0 sm:px-4">
         <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
         <AIDisclaimer />
       </div>
@@ -27,7 +27,7 @@ const ContactsTab: React.FC<ContactsTabProps> = ({ contract, summarizeStatus, is
   const contacts = contract.contacts ?? [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-0 space-y-6">
+    <div className="max-w-7xl mx-auto px-0 sm:px-4 space-y-6">
       <h3 className="text-2xl font-semibold text-gray-900 mb-8 flex items-center">
         <FaPhone className="h-6 w-6 text-[#1e51ab] mr-3" />
         Qui contacter

@@ -1,9 +1,9 @@
-import { FaCheck, FaChevronRight, FaMagic, FaShieldAlt, FaTimes } from 'react-icons/fa';
-import React from 'react';
-
 import type { BackendContractGuarantee, Contract } from '../../../../types/contract';
+import { FaCheck, FaChevronRight, FaMagic, FaShieldAlt, FaTimes } from 'react-icons/fa';
+
 import AIDisclaimer from '../ui/AIDisclaimer';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
+import React from 'react';
 
 interface GuaranteesTabProps {
   contract: Contract;
@@ -17,7 +17,7 @@ interface GuaranteesTabProps {
 const GuaranteesTab: React.FC<GuaranteesTabProps> = ({ contract, summarizeStatus, isProcessing, isSummarizing, onSummarize, onSelectGuarantee }) => {
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
-      <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
+      <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4">
         <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
         <AIDisclaimer />
       </div>
@@ -27,7 +27,7 @@ const GuaranteesTab: React.FC<GuaranteesTabProps> = ({ contract, summarizeStatus
   const guarantees = contract.guarantees ?? [];
 
   return (
-    <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0 space-y-6">
+    <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4 space-y-6">
       {guarantees.length > 0 ? (
         <div className="space-y-4 sm:space-y-6">
           <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">

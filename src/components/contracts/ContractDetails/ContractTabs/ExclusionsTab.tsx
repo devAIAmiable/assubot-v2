@@ -1,11 +1,11 @@
 import { FaBan, FaChevronCircleDown, FaChevronUp, FaInfoCircle, FaMagic, FaSearch, FaTimes } from 'react-icons/fa';
 import React, { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
 
-import type { Contract } from '../../../../types/contract';
 import AIDisclaimer from '../ui/AIDisclaimer';
+import type { Contract } from '../../../../types/contract';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
 import { capitalizeFirst } from '../../../../utils/text';
+import { motion } from 'framer-motion';
 
 interface ExclusionsTabProps {
   contract: Contract;
@@ -37,7 +37,7 @@ const ExclusionsTab: React.FC<ExclusionsTabProps> = ({ contract, summarizeStatus
 
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
-      <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
+      <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4">
         <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
         <AIDisclaimer />
       </div>
@@ -45,7 +45,7 @@ const ExclusionsTab: React.FC<ExclusionsTabProps> = ({ contract, summarizeStatus
   }
 
   return (
-    <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0 space-y-6">
+    <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4 space-y-6">
       <div className="flex flex-col gap-4">
         <div className="flex items-start sm:items-center gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-xl bg-amber-100 flex items-center justify-center">

@@ -1,12 +1,12 @@
-import type { BackendContractGuarantee } from '../types';
-import type { Contract } from '../types/contract';
 import { FaClipboardList, FaExclamationTriangle, FaGlobe, FaPhone, FaShieldAlt, FaTimes } from 'react-icons/fa';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import type { BackendContractGuarantee } from '../types';
 import CancellationsTab from '../components/contracts/ContractDetails/ContractTabs/CancellationsTab';
 import ContactsTab from '../components/contracts/ContractDetails/ContractTabs/ContactsTab';
+import type { Contract } from '../types/contract';
 import ContractHeader from '../components/contracts/ContractDetails/ContractHeader';
 import ExclusionsTab from '../components/contracts/ContractDetails/ContractTabs/ExclusionsTab';
 import GuaranteeDetailModal from '../components/contracts/ContractDetails/modals/GuaranteeDetailModal';
@@ -163,7 +163,7 @@ const AdminTemplateContractDetails = () => {
       <TabGroup selectedIndex={selectedTab} onChange={setSelectedTab}>
         {/* Tabs */}
         <div className="border-b border-gray-200 bg-white">
-          <TabList className="flex space-x-2 overflow-x-auto scrollbar-hide border-b border-gray-200 px-4 sm:px-0">
+          <TabList className="flex space-x-2 overflow-x-auto scrollbar-hide border-b border-gray-200 px-0 sm:px-4">
             {tabs.map((tab, index) => (
               <Tab
                 key={index}
