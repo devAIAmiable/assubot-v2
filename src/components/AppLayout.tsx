@@ -1,6 +1,6 @@
-import { FaBell, FaBrain, FaChartLine, FaCog, FaCoins, FaFolder, FaPlay, FaQuestionCircle, FaSignOutAlt, FaUser } from 'react-icons/fa';
+import { Dialog, Menu, Transition } from '@headlessui/react';
+import { FaBars, FaBell, FaBrain, FaChartLine, FaCog, FaCoins, FaFolder, FaPlay, FaQuestionCircle, FaSignOutAlt, FaTimes, FaUser } from 'react-icons/fa';
 import { Fragment, useState } from 'react';
-import { Menu, Transition } from '@headlessui/react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import Avatar from './ui/Avatar';
@@ -16,6 +16,7 @@ import { useVideoModal } from '../hooks/useVideoModal';
 const AppLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Get user from Redux store
   const { currentUser, isAuthenticated } = useAppSelector(getUserState);
@@ -95,7 +96,7 @@ const AppLayout = () => {
               <span className="text-2xl font-bold text-[#1e51ab] hidden sm:block">AssuBot</span>
             </motion.div>
 
-            {/* Navigation Links */}
+            {/* Navigation Links (desktop) */}
             <div className="hidden md:flex space-x-8">
               {navigation.map((item) => {
                 const Icon = item.icon;
@@ -117,20 +118,18 @@ const AppLayout = () => {
             </div>
 
             {/* Right Side - Notifications and User */}
-            <div className="flex items-center space-x-4">
-              {/* Credit Balance */}
+            <div className="flex items-center space-x-3">
               {currentUser?.creditBalance !== undefined && (
                 <button
                   onClick={() => handleNavigate('/app/credits')}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+                  className="hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
                 >
                   <span className="text-sm font-medium text-[#1e51ab] inline">{currentUser.creditBalance}</span>
                   <FaCoins className="h-4 w-4 text-[#1e51ab]" />
                 </button>
               )}
 
-              {/* Notifications */}
-              <Menu as="div" className="relative">
+              <Menu as="div" className="relative hidden md:inline-block">
                 <Menu.Button className="relative p-2 text-gray-600 hover:text-[#1e51ab] hover:bg-gray-50 rounded-lg transition-colors">
                   <FaBell className="h-5 w-5" />
                   {unreadNotifications > 0 && (
@@ -185,8 +184,7 @@ const AppLayout = () => {
                 </Transition>
               </Menu>
 
-              {/* User Menu */}
-              <Menu as="div" className="relative">
+              <Menu as="div" className="relative hidden md:inline-block">
                 <Menu.Button className="flex items-center space-x-2 p-2 text-gray-600 hover:text-[#1e51ab] hover:bg-gray-50 rounded-lg transition-colors">
                   <Avatar user={currentUser || undefined} size="sm" />
                   <div className="hidden sm:block text-left">
@@ -291,34 +289,139 @@ const AppLayout = () => {
                   </Menu.Items>
                 </Transition>
               </Menu>
-            </div>
-          </div>
-        </div>
 
-        {/* Mobile Navigation */}
-        <div className="md:hidden border-t border-gray-200">
-          <div className="px-4 py-2 space-x-1 flex overflow-x-auto">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => handleNavigate(item.path)}
-                  className={`flex items-center px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 ${
-                    item.current ? 'text-[#1e51ab] bg-blue-50' : 'text-gray-600 hover:text-[#1e51ab] hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className="h-3 w-3 mr-1" />
-                  {item.name}
-                </button>
-              );
-            })}
+              {/* Mobile Hamburger */}
+              <button
+                className="md:hidden inline-flex items-center justify-center p-2 text-gray-600 hover:text-[#1e51ab] hover:bg-gray-100 rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Ouvrir le menu mobile"
+              >
+                <FaBars className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
       </motion.nav>
 
+      {/* Mobile Drawer */}
+      <Transition show={isMobileMenuOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50 md:hidden" onClose={setMobileMenuOpen}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-150"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-hidden">
+            <div className="absolute inset-0 flex">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-200"
+                enterFrom="-translate-x-full"
+                enterTo="translate-x-0"
+                leave="ease-in duration-150"
+                leaveFrom="translate-x-0"
+                leaveTo="-translate-x-full"
+              >
+                <Dialog.Panel className="relative w-full max-w-xs bg-white shadow-xl pb-6 flex flex-col">
+                  <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <img src="/logo.png" alt="AssuBot" className="h-7 w-auto" />
+                      <span className="text-lg font-semibold text-[#1e51ab]">AssuBot</span>
+                    </div>
+                    <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-gray-500 hover:text-[#1e51ab]" aria-label="Fermer le menu">
+                      <FaTimes className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <div className="flex items-center space-x-3">
+                      <Avatar user={currentUser || undefined} size="md" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{getUserDisplayName()}</p>
+                        {currentUser?.email && <p className="text-xs text-gray-500">{currentUser.email}</p>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {currentUser?.creditBalance !== undefined && (
+                    <button onClick={() => handleNavigate('/app/credits')} className="mx-4 mt-4 flex items-center justify-between px-4 py-2 rounded-lg bg-blue-50 text-[#1e51ab]">
+                      <span className="text-sm font-medium">Crédits : {currentUser.creditBalance}</span>
+                      <FaCoins className="h-4 w-4" />
+                    </button>
+                  )}
+
+                  <nav className="mt-4 flex-1 overflow-y-auto">
+                    <ul className="px-3 space-y-1">
+                      {navigation.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <li key={item.name}>
+                            <button
+                              onClick={() => {
+                                handleNavigate(item.path);
+                                setMobileMenuOpen(false);
+                              }}
+                              className={`w-full flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                item.current ? 'bg-blue-50 text-[#1e51ab]' : 'text-gray-700 hover:bg-gray-50 hover:text-[#1e51ab]'
+                              }`}
+                            >
+                              <Icon className="h-4 w-4 mr-3" />
+                              {item.name}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </nav>
+
+                  <div className="px-4 space-y-1 border-t border-gray-100 pt-3">
+                    <button
+                      onClick={() => {
+                        handleNavigate('/faq');
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex items-center w-full px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <FaQuestionCircle className="h-4 w-4 mr-3" />
+                      FAQ
+                    </button>
+                    <button
+                      onClick={() => {
+                        openVideoModal();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex items-center w-full px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <FaPlay className="h-4 w-4 mr-3" />
+                      Voir la vidéo AssuBot
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex items-center w-full px-3 py-2 rounded-md text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <FaSignOutAlt className="h-4 w-4 mr-3" />
+                      {isAuthenticated ? 'Se déconnecter' : "Retour à l'accueil"}
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
         <Outlet />
       </main>
 
