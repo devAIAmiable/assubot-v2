@@ -20,6 +20,7 @@ export const ContractStatus = {
   ACTIVE: 'active',
   EXPIRED: 'expired',
   PENDING: 'pending',
+  CANCELLED: 'cancelled',
 } as const;
 
 export const DocumentType = {
@@ -69,6 +70,7 @@ export interface Contract {
   endDate?: string;
   formula?: string;
   annualPremiumCents: number;
+  tacitRenewal?: boolean;
   status: ContractStatus;
   createdAt: string;
   updatedAt: string;
