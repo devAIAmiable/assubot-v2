@@ -1,13 +1,13 @@
-import { FaExclamationTriangle, FaSpinner, FaUpload } from 'react-icons/fa';
-import React, { useCallback, useState } from 'react';
+import { FaExclamationTriangle, FaSearch, FaSpinner, FaUpload } from 'react-icons/fa';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 
 import Button from '../ui/Button';
 import Dropdown, { type DropdownOption } from '../ui/Dropdown';
 import Input from '../ui/Input';
-import InsurerDropdown from '../ui/InsurerDropdown';
 import { motion } from 'framer-motion';
 import { CATEGORY_CONFIG } from '../../config/categories';
+import { type Insurer, useLazyGetInsurersQuery } from '../../store/insurersApi';
 
 interface AdminContractFormData {
   insurer: string;
@@ -24,6 +24,11 @@ const AdminContractForm: React.FC<AdminContractFormProps> = ({ onSubmit }) => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [insurerQuery, setInsurerQuery] = useState('');
+  const [insurerSuggestions, setInsurerSuggestions] = useState<Insurer[]>([]);
+  const [showInsurerSuggestions, setShowInsurerSuggestions] = useState(false);
+  const [insurerSearchError, setInsurerSearchError] = useState<string | null>(null);
+  const suggestionsRef = useRef<HTMLDivElement | null>(null);
 
   const methods = useForm<AdminContractFormData>({
     defaultValues: {
@@ -41,6 +46,9 @@ const AdminContractForm: React.FC<AdminContractFormProps> = ({ onSubmit }) => {
     watch,
     formState: { errors },
   } = methods;
+
+  const insurerId = watch('insurer');
+  const [fetchInsurers, { isFetching: isSearchingInsurers }] = useLazyGetInsurersQuery();
 
   // Options pour les types d'assurance
   const insuranceTypeOptions: DropdownOption[] = Object.entries(CATEGORY_CONFIG).map(([value, config]) => ({
@@ -75,7 +83,7 @@ const AdminContractForm: React.FC<AdminContractFormProps> = ({ onSubmit }) => {
       }
 
       if (!data.insuranceType) {
-        setError("Veuillez sélectionner un type d'assurance");
+        setError("Veuillez sélectionner un produit d'assurance");
         return;
       }
 
@@ -107,6 +115,90 @@ const AdminContractForm: React.FC<AdminContractFormProps> = ({ onSubmit }) => {
     setValue('cgFile', null);
   }, [setValue]);
 
+  const handleInsurerQueryChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setInsurerQuery(value);
+      setShowInsurerSuggestions(true);
+      if (insurerId) {
+        setValue('insurer', '', { shouldDirty: true, shouldValidate: true });
+      }
+      if (!value.trim()) {
+        setInsurerSuggestions([]);
+        setInsurerSearchError(null);
+      }
+    },
+    [insurerId, setValue]
+  );
+
+  const handleInsurerSelect = useCallback(
+    (insurer: Insurer) => {
+      setValue('insurer', insurer.id, { shouldDirty: true, shouldValidate: true });
+      setInsurerQuery(insurer.name);
+      setInsurerSuggestions([]);
+      setShowInsurerSuggestions(false);
+      setInsurerSearchError(null);
+    },
+    [setValue]
+  );
+
+  const handleInsurerBlur = useCallback(() => {
+    if (!insurerId && !insurerQuery.trim()) {
+      setInsurerSuggestions([]);
+      setShowInsurerSuggestions(false);
+    }
+  }, [insurerId, insurerQuery]);
+
+  useEffect(() => {
+    if (!insurerQuery.trim()) {
+      setInsurerSuggestions([]);
+      return;
+    }
+
+    let isCancelled = false;
+    const timeoutId = setTimeout(async () => {
+      try {
+        const response = await fetchInsurers({
+          page: 1,
+          limit: 5,
+          search: insurerQuery.trim(),
+          isActive: true,
+          sortBy: 'name',
+          sortOrder: 'asc',
+        }).unwrap();
+
+        if (!isCancelled) {
+          setInsurerSuggestions(response.data ?? []);
+          setInsurerSearchError(null);
+        }
+      } catch (fetchError) {
+        if (!isCancelled) {
+          setInsurerSuggestions([]);
+          setInsurerSearchError('Impossible de charger les assureurs.');
+          console.error('Erreur lors de la recherche des assureurs:', fetchError);
+        }
+      }
+    }, 250);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [fetchInsurers, insurerQuery]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setShowInsurerSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="space-y-6">
       {error && (
@@ -121,18 +213,72 @@ const AdminContractForm: React.FC<AdminContractFormProps> = ({ onSubmit }) => {
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
           {/* Assureur */}
-          <InsurerDropdown name="insurer" label="Assureur" required error={errors.insurer?.message} />
+          <div className="space-y-2">
+            <label htmlFor="insurer-search" className="block text-sm font-medium text-gray-700">
+              Assureur <span className="text-red-500">*</span>
+            </label>
+            <input type="hidden" {...register('insurer', { required: 'Veuillez sélectionner un assureur' })} />
+            <div className="relative" ref={suggestionsRef}>
+              <input
+                id="insurer-search"
+                type="text"
+                value={insurerQuery}
+                onChange={handleInsurerQueryChange}
+                onFocus={() => {
+                  if (insurerSuggestions.length > 0) {
+                    setShowInsurerSuggestions(true);
+                  }
+                }}
+                onBlur={handleInsurerBlur}
+                placeholder="Rechercher un assureur par nom"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.insurer ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+                }`}
+                autoComplete="off"
+              />
+              <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              {isSearchingInsurers && <FaSpinner className="absolute right-9 top-1/2 -translate-y-1/2 text-blue-500 animate-spin h-4 w-4" />}
 
-          {/* Type d'assurance */}
+              {showInsurerSuggestions && (insurerSuggestions.length > 0 || insurerSearchError) && (
+                <div className="absolute z-40 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg max-h-56 overflow-y-auto">
+                  {insurerSearchError ? (
+                    <div className="px-4 py-3 text-sm text-red-600">{insurerSearchError}</div>
+                  ) : (
+                    insurerSuggestions.map((insurer) => (
+                      <button
+                        key={insurer.id}
+                        type="button"
+                        onClick={() => handleInsurerSelect(insurer)}
+                        className="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors text-sm text-gray-800"
+                      >
+                        {insurer.name}
+                      </button>
+                    ))
+                  )}
+                  {insurerSuggestions.length === 0 && !insurerSearchError && insurerQuery.trim().length > 0 && !isSearchingInsurers && (
+                    <div className="px-4 py-3 text-sm text-gray-500">Aucun assureur trouvé</div>
+                  )}
+                </div>
+              )}
+            </div>
+            {errors.insurer && (
+              <div className="flex items-center text-sm text-red-600">
+                <span className="mr-2">⚠</span>
+                {errors.insurer.message}
+              </div>
+            )}
+          </div>
+
+          {/* Produit d'assurance */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              Type d'assurance <span className="text-red-500">*</span>
+              Produit d'assurance <span className="text-red-500">*</span>
             </label>
             <Dropdown
               options={insuranceTypeOptions}
               value={watch('insuranceType')}
               onChange={(value) => setValue('insuranceType', value)}
-              placeholder="Sélectionnez un type d'assurance"
+              placeholder="Sélectionnez un produit d'assurance"
               error={errors.insuranceType?.message}
             />
           </div>

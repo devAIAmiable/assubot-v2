@@ -20,6 +20,7 @@ const AdminTemplateContractEdit: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [originalData, setOriginalData] = useState<TemplateContractEditFormData | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [updateContract, { isLoading: isSubmitting }] = useUpdateTemplateContractMutation();
 
   // Fetch contract data
@@ -49,7 +50,7 @@ const AdminTemplateContractEdit: React.FC = () => {
 
   // Update form when contract data loads
   React.useEffect(() => {
-    if (contract) {
+    if (contract && !isInitialized) {
       const formData = {
         name: contract.name || '',
         category: contract.category || '',
@@ -106,8 +107,9 @@ const AdminTemplateContractEdit: React.FC = () => {
 
       form.reset(formData);
       setOriginalData(formData);
+      setIsInitialized(true);
     }
-  }, [contract, form]);
+  }, [contract, form, isInitialized]);
 
   // Scroll to top whenever the current step changes
   React.useEffect(() => {

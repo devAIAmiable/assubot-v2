@@ -298,6 +298,8 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
     }
   };
 
+  const shouldShowSummarizeButton = summarizeStatus === undefined || summarizeStatus === 'pending' || summarizeStatus === 'failed';
+
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
       <div className="max-w-full sm:max-w-7xl mx-auto px-4 sm:px-0">
@@ -339,23 +341,25 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
           </div>
           <h4 className="text-xl font-bold text-gray-900 mb-3">Aucune zone détectée</h4>
           <p className="text-base text-gray-600 max-w-md mx-auto mb-6">L'IA peut extraire automatiquement les zones couvertes à partir de vos documents.</p>
-          <button
-            onClick={onSummarize}
-            disabled={isSummarizing}
-            className="inline-flex items-center gap-2 bg-blue-700 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSummarizing ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                <span>Analyse en cours...</span>
-              </>
-            ) : (
-              <>
-                <FaGlobe className="h-4 w-4" />
-                <span>Lancer l'analyse IA</span>
-              </>
-            )}
-          </button>
+          {shouldShowSummarizeButton && (
+            <button
+              onClick={onSummarize}
+              disabled={isSummarizing}
+              className="inline-flex items-center gap-2 bg-blue-700 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSummarizing ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                  <span>Analyse en cours...</span>
+                </>
+              ) : (
+                <>
+                  <FaGlobe className="h-4 w-4" />
+                  <span>Lancer l'analyse IA</span>
+                </>
+              )}
+            </button>
+          )}
         </motion.div>
       ) : (
         <>
