@@ -43,7 +43,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
 
   return (
     <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
-      <div className="px-6 py-4">
+      <div className="px-6 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button onClick={onBack} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Revenir à la liste des contrats">
