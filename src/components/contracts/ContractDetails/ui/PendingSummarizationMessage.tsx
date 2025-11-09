@@ -1,7 +1,6 @@
-import React from 'react';
-import { FaCheck } from 'react-icons/fa';
-
 import Avatar from '../../../ui/Avatar';
+import { FaCheck } from 'react-icons/fa';
+import React from 'react';
 
 interface PendingSummarizationMessageProps {
   status?: 'pending' | 'ongoing' | 'done' | 'failed';
@@ -22,10 +21,7 @@ const PendingSummarizationMessage: React.FC<PendingSummarizationMessageProps> = 
             </div>
           </div>
           <h4 className="text-xl font-semibold text-gray-900 mb-3">Analyse en cours</h4>
-          <p className="text-gray-600 leading-relaxed">
-            J'analyse ton contrat, je reviens vers toi avec les garanties, exclusions et zones importantes. Cela peut prendre quelques instants.
-          </p>
-          <p className="text-sm text-gray-500 mt-2">Cela peut prendre quelques instants</p>
+          <p className="text-gray-600 leading-relaxed">Un peu de patience, je reviens vers toi avec la synthèse du contrat.</p>
         </div>
       </div>
     );
@@ -39,9 +35,7 @@ const PendingSummarizationMessage: React.FC<PendingSummarizationMessageProps> = 
           <Avatar isAssistant />
           <h4 className="text-lg font-semibold text-gray-900 mb-3">{isFailed ? 'Analyse échouée' : 'Analyse en attente'}</h4>
           <p className="text-gray-600 leading-relaxed mb-6">
-            {isFailed
-              ? "L'analyse du contrat a échoué. Clique sur « Réessayer » pour relancer l'analyse."
-              : "Je t'affiche les détails dès que j'ai analysé ton contrat. Clique sur « Lancer l'analyse » pour démarrer"}
+            {isFailed ? "L'analyse du contrat a échoué. Clique sur « Réessayer » pour relancer l'analyse." : 'Un peu de patience, je reviens vers toi avec la synthèse du contrat.'}
           </p>
           <button
             onClick={onSummarize}

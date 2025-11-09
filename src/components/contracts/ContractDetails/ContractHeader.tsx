@@ -12,14 +12,26 @@ import { getInsurerLogo } from '../../../utils/insurerLogo';
 interface ContractHeaderProps {
   contract: Contract;
   onBack: () => void;
-  onEdit: () => void;
+  onEdit?: () => void;
+  onNavigateToEdit?: () => void;
   onSummarize: () => void;
   isSummarizing: boolean;
   summarizeStatus?: Contract['summarizeStatus'];
   requiredCredits?: number;
+  isAdminMode?: boolean;
 }
 
-const ContractHeader: React.FC<ContractHeaderProps> = ({ contract, onBack, onEdit, onSummarize, isSummarizing, summarizeStatus, requiredCredits = 5 }) => {
+const ContractHeader: React.FC<ContractHeaderProps> = ({
+  contract,
+  onBack,
+  onEdit,
+  onNavigateToEdit,
+  onSummarize,
+  isSummarizing,
+  summarizeStatus,
+  requiredCredits = 5,
+  isAdminMode = false,
+}) => {
   const isExpired = useMemo(() => {
     if (!contract.endDate) return false;
     return dayjs(contract.endDate).endOf('day').isBefore(dayjs());
@@ -53,6 +65,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({ contract, onBack, onEdi
                 <h1 className="text-2xl font-bold text-gray-900">{contract.name}</h1>
                 <p className="text-gray-600">
                   {getDisplayValue(contract.insurer?.name)} - {getTypeLabel(getContractListItemType(contract))}
+                  {isAdminMode && <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">Template</span>}
                 </p>
               </div>
             </div>
@@ -74,18 +87,20 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({ contract, onBack, onEdi
                     {isSummarizing ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600" /> : <FaFileSignature className="h-4 w-4" />}
                   </button>
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                    {isSummarizing ? 'Génération en cours...' : `Résumé IA (${requiredCredits} crédits)`}
+                    {isSummarizing ? 'Génération en cours...' : isAdminMode ? 'Résumé IA' : `Résumé IA (${requiredCredits} crédits)`}
                   </div>
                 </div>
               )}
-              <div className="relative group">
-                <button onClick={onEdit} className="p-2 text-gray-600 hover:text-[#1e51ab] transition-colors" aria-label="Modifier le contrat">
-                  <FaEdit className="h-4 w-4" />
-                </button>
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                  Modifier le contrat
+              {(onEdit || onNavigateToEdit) && (
+                <div className="relative group">
+                  <button onClick={onNavigateToEdit || onEdit} className="p-2 text-gray-600 hover:text-[#1e51ab] transition-colors" aria-label="Modifier le contrat">
+                    <FaEdit className="h-4 w-4" />
+                  </button>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                    Modifier le contrat
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
