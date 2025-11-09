@@ -16,7 +16,8 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "prepare": "husky",
-    "lint-staged": "lint-staged"
+    "lint-staged": "lint-staged",
+    "download-flags": "node scripts/download-flags.cjs"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",

@@ -26,6 +26,10 @@ const getZoneCoordinates = (zone: ContractZone): [number, number] | null => {
   const longitude = longitudeValue !== undefined && longitudeValue !== '' ? Number(longitudeValue) : undefined;
 
   if (typeof latitude === 'number' && Number.isFinite(latitude) && typeof longitude === 'number' && Number.isFinite(longitude)) {
+    // Filter out zones with 0,0 coordinates or both values being 0
+    if (latitude === 0 && longitude === 0) {
+      return null;
+    }
     return [longitude, latitude];
   }
 
@@ -194,7 +198,7 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
                   </div>
                   <select
                     value={typeFilter}
-                    onChange={(event) => setTypeFilter(event.target.value as ZonesTabProps['contract']['zones'][number]['type'] | 'all')}
+                    onChange={(event) => setTypeFilter(event.target.value as ContractZone['type'] | 'all')}
                     className="w-full pl-10 pr-8 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent text-sm appearance-none bg-white cursor-pointer"
                   >
                     <option value="all">Tous</option>
@@ -266,6 +270,9 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
                         const coordinates = getZoneCoordinates(zone);
                         if (!coordinates) return null;
 
+                        const countryCode = zone.code?.toUpperCase();
+                        const isCountryWithFlag = zone.type === 'country' && countryCode && countryCode.length === 2;
+
                         return (
                           <Marker key={zone.id} coordinates={coordinates}>
                             <g>
@@ -273,15 +280,22 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
                                 <animate attributeName="r" from="4" to="12" dur="2s" begin="0s" repeatCount="indefinite" />
                                 <animate attributeName="opacity" from="0.5" to="0" dur="2s" begin="0s" repeatCount="indefinite" />
                               </circle>
-                              <circle r="3" fill="#1e51ab" stroke="#fff" strokeWidth="1.5" />
+                              {isCountryWithFlag ? (
+                                <>
+                                  <circle r="10" fill="#fff" stroke="#1e51ab" strokeWidth="2" />
+                                  <image href={`/flags/${zone.type}/${countryCode}.png`} x="-8" y="-8" width="16" height="16" clipPath="circle(8px at 8px 8px)" />
+                                </>
+                              ) : (
+                                <circle r="3" fill="#1e51ab" stroke="#fff" strokeWidth="1.5" />
+                              )}
                               <text
                                 textAnchor="middle"
-                                y="-15"
+                                y={isCountryWithFlag ? '-18' : '-15'}
                                 style={{
                                   fontFamily: 'system-ui',
                                   fill: '#1e51ab',
-                                  fontSize: '11px',
-                                  fontWeight: '600',
+                                  fontSize: isCountryWithFlag ? '12px' : '11px',
+                                  fontWeight: '700',
                                   textShadow: '1px 1px 3px rgba(255,255,255,0.9)',
                                 }}
                               >
@@ -307,6 +321,8 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
                     const ZoneIcon = getZoneIcon(zone.type);
                     const hasConditions = zone.conditions && zone.conditions.length > 0;
                     const isExpanded = expandedZoneId === zoneKey;
+                    const countryCode = zone.code?.toUpperCase();
+                    const showFlag = zone.type === 'country' && countryCode && countryCode.length === 2;
 
                     return (
                       <motion.div
@@ -319,15 +335,38 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
                       >
                         <div className="p-4">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                              <ZoneIcon className="h-5 w-5 text-[#1e51ab]" />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
+                            {showFlag ? (
+                              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 shadow-sm border border-gray-200">
+                                <img
+                                  src={`/flags/${zone.type}/${countryCode}.png`}
+                                  alt={`Drapeau ${zone.name}`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    // Fallback to icon if flag fails to load
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      parent.className = 'w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center';
+                                      const icon = document.createElement('div');
+                                      icon.innerHTML =
+                                        '<svg class="h-5 w-5 text-[#1e51ab]" fill="currentColor" viewBox="0 0 20 20"><path d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z"/></svg>';
+                                      parent.appendChild(icon.firstChild!);
+                                    }
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                <ZoneIcon className="h-5 w-5 text-[#1e51ab]" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <h5 className="text-sm font-semibold text-gray-900">{capitalizeFirst(zone.name)}</h5>
                                 <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">{getZoneTypeLabel(zone.type)}</span>
+                                {countryCode && <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 font-mono">{countryCode}</span>}
                               </div>
-                              {zone.code && <p className="text-xs text-gray-500 mt-1">Code : {zone.code}</p>}
                             </div>
                           </div>
                         </div>
