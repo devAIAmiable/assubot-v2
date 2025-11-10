@@ -33,7 +33,7 @@ const PendingSummarizationMessage: React.FC<PendingSummarizationMessageProps> = 
       <div className="text-center py-12">
         <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 shadow-lg">
           <Avatar isAssistant />
-          <h4 className="text-lg font-semibold text-gray-900 mb-3">{isFailed ? 'Analyse échouée' : 'Analyse en attente'}</h4>
+          <h4 className="text-lg font-semibold text-gray-900 mb-3">{isFailed ? 'Analyse échouée' : 'Résumé en attente'}</h4>
           <p className="text-gray-600 leading-relaxed mb-6">
             {isFailed ? "L'analyse du contrat a échoué. Clique sur « Réessayer » pour relancer l'analyse." : 'Un peu de patience, je reviens vers toi avec la synthèse du contrat.'}
           </p>
