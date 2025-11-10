@@ -24,6 +24,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, zoneKey, zoneIndex, isExpande
   const ZoneIcon = useMemo(() => getZoneIcon(zone.type), [zone.type]);
   const hasConditions = !!zone.conditions && zone.conditions.length > 0;
   const layoutId = zone.id ?? zoneKey;
+  const zoneName = zone.name || zone.label;
 
   return (
     <motion.div
@@ -52,7 +53,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, zoneKey, zoneIndex, isExpande
             onFocus(countryCode);
           }}
           className="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-          aria-label={`Localiser ${zone.name} sur la carte`}
+          aria-label={`Localiser ${zoneName} sur la carte`}
           title="Localiser sur la carte"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
@@ -68,7 +69,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, zoneKey, zoneIndex, isExpande
               <img
                 src={`/flags/${zone.type}/${countryCode}.png`}
                 loading="lazy"
-                alt={`Drapeau ${zone.name}`}
+                alt={`Drapeau ${zoneName}`}
                 className="w-full h-full object-cover"
                 onError={() => setHasFlagError(true)}
               />
@@ -79,7 +80,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, zoneKey, zoneIndex, isExpande
             </div>
           )}
           <div className="flex-1 min-w-0 pr-8">
-            <h5 className="text-sm font-semibold text-gray-900 mb-1">{capitalizeFirst(zone.name)}</h5>
+            <h5 className="text-sm font-semibold text-gray-900 mb-1">{capitalizeFirst(zoneName)}</h5>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">{getZoneTypeLabel(zone.type)}</span>
               {countryCode && <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-mono">{countryCode}</span>}

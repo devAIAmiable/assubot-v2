@@ -145,6 +145,7 @@ export interface ContractZone {
   type: ZoneType;
   name: string;
   code: string;
+  label: string;
   latitude?: string | null;
   longitude?: string | null;
   conditions?: string[] | null;
