@@ -72,15 +72,9 @@ const GuaranteeServiceAccordion: React.FC<GuaranteeServiceAccordionProps> = ({ d
                         <div className="text-sm text-amber-900 font-semibold">{formatFinancialValue(detail.deductible)}</div>
                       </div>
                     )}
-                    {detail.franchise && (
-                      <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
-                        <div className="text-xs text-amber-600 font-medium mb-1">Franchise</div>
-                        <div className="text-sm text-amber-900 font-semibold">{formatFinancialValue(detail.franchise)}</div>
-                      </div>
-                    )}
                     {detail.limitation && (
                       <div className="bg-amber-50 rounded-lg p-3 border border-amber-100 sm:col-span-2">
-                        <div className="text-xs text-amber-600 font-medium mb-1">Limitation</div>
+                        <div className="text-xs text-amber-600 font-medium mb-1">Limite</div>
                         <ExpandableText text={detail.limitation} className="text-sm text-amber-900" />
                       </div>
                     )}
