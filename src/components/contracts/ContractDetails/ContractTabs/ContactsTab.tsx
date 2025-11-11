@@ -2,8 +2,10 @@ import { FaClipboardList, FaClock, FaEnvelope, FaMagic, FaPhone } from 'react-ic
 
 import AIDisclaimer from '../ui/AIDisclaimer';
 import type { Contract } from '../../../../types/contract';
+import { ContractStatus } from '../../../../types/contract';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
 import React from 'react';
+import SummarizedEmptyState from '../ui/SummarizedEmptyState';
 import { getContactTypeLabel } from '../../../../utils/contract';
 
 interface ContactsTabProps {
@@ -15,16 +17,19 @@ interface ContactsTabProps {
 }
 
 const ContactsTab: React.FC<ContactsTabProps> = ({ contract, summarizeStatus, isProcessing, isSummarizing, onSummarize }) => {
+  const isActiveContract = contract.status === ContractStatus.ACTIVE;
+
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
       <div className="max-w-7xl mx-auto px-0 sm:px-4">
-        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
+        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} canSummarize={isActiveContract} />
         <AIDisclaimer />
       </div>
     );
   }
 
   const contacts = contract.contacts ?? [];
+  const hasSummarizedEmpty = summarizeStatus === 'done' && contacts.length === 0;
 
   return (
     <div className="max-w-7xl mx-auto px-0 sm:px-4 space-y-6">
@@ -69,6 +74,10 @@ const ContactsTab: React.FC<ContactsTabProps> = ({ contract, summarizeStatus, is
               </div>
             </div>
           ))
+        ) : hasSummarizedEmpty ? (
+          <div className="col-span-full">
+            <SummarizedEmptyState title="Aucun contact identifié" description="Ce contrat ne contient pas de contacts détectés." />
+          </div>
         ) : (
           <div className="col-span-full text-center text-gray-500 py-8">Aucun contact disponible</div>
         )}

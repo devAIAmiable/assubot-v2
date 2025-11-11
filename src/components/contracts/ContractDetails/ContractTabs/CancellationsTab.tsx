@@ -3,9 +3,11 @@ import { FaChevronDown, FaChevronUp, FaExclamationTriangle, FaMagic } from 'reac
 
 import AIDisclaimer from '../ui/AIDisclaimer';
 import type { Contract } from '../../../../types/contract';
+import { ContractStatus } from '../../../../types/contract';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import SummarizedEmptyState from '../ui/SummarizedEmptyState';
 
 interface CancellationsTabProps {
   contract: Contract;
@@ -16,16 +18,19 @@ interface CancellationsTabProps {
 }
 
 const CancellationsTab: React.FC<CancellationsTabProps> = ({ contract, summarizeStatus, isProcessing, isSummarizing, onSummarize }) => {
+  const isActiveContract = contract.status === ContractStatus.ACTIVE;
+
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
       <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4">
-        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
+        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} canSummarize={isActiveContract} />
         <AIDisclaimer />
       </div>
     );
   }
 
   const cancellations = contract.cancellations ?? [];
+  const hasSummarizedEmpty = summarizeStatus === 'done' && cancellations.length === 0;
 
   return (
     <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4 space-y-6">
@@ -56,6 +61,8 @@ const CancellationsTab: React.FC<CancellationsTabProps> = ({ contract, summarize
                 )}
               </Disclosure>
             ))
+          ) : hasSummarizedEmpty ? (
+            <SummarizedEmptyState title="Aucune information de résiliation identifiée" description="Ce contrat ne contient pas de réponses détectées sur la résiliation." />
           ) : (
             <div className="text-center text-gray-600 text-sm sm:text-base bg-white border border-gray-200 rounded-xl p-6">Aucune information de résiliation disponible</div>
           )}

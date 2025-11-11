@@ -4,6 +4,7 @@ import { getContractListItemInsurer, getContractListItemType } from '../../../ut
 import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../../../utils/contract';
 
 import type { Contract } from '../../../types/contract';
+import { ContractStatus } from '../../../types/contract';
 import ContractSummarizationStatus from '../../ui/ContractSummarizationStatus';
 import dayjs from 'dayjs';
 import { getDisplayValue } from '../../../utils/dateHelpers';
@@ -87,7 +88,8 @@ const ContractHeader: React.FC<ContractHeaderProps> = React.memo(
       return dayjs(contract.endDate).endOf('day').isBefore(dayjs());
     }, [contract.endDate]);
 
-    const canSummarize = summarizeStatus === 'pending' || summarizeStatus === 'failed';
+    const isActiveContract = contract.status === ContractStatus.ACTIVE;
+    const canSummarize = isActiveContract && (summarizeStatus === undefined || summarizeStatus === 'pending' || summarizeStatus === 'failed');
     const contractTypeLabel = useMemo(() => getTypeLabel(getContractListItemType(contract)), [contract]);
 
     // Keyboard shortcuts: E = edit, R = summarize, Backspace = back
@@ -98,11 +100,13 @@ const ContractHeader: React.FC<ContractHeaderProps> = React.memo(
         if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.getAttribute('contenteditable') === 'true')) {
           return;
         }
-        if ((e.key === 'e' || e.key === 'E') && (onNavigateToEdit || onEdit)) {
+        const hasModifier = e.metaKey || e.ctrlKey || e.altKey;
+
+        if (!hasModifier && (e.key === 'e' || e.key === 'E') && (onNavigateToEdit || onEdit)) {
           e.preventDefault();
           (onNavigateToEdit || onEdit)!();
         }
-        if ((e.key === 'r' || e.key === 'R') && canSummarize && !isSummarizing) {
+        if (!hasModifier && isActiveContract && (e.key === 'r' || e.key === 'R') && canSummarize && !isSummarizing) {
           e.preventDefault();
           onSummarize();
         }
@@ -113,7 +117,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = React.memo(
       };
       window.addEventListener('keydown', handler);
       return () => window.removeEventListener('keydown', handler);
-    }, [canSummarize, isSummarizing, onSummarize, onBack, onEdit, onNavigateToEdit]);
+    }, [canSummarize, isSummarizing, onSummarize, onBack, onEdit, onNavigateToEdit, isActiveContract]);
 
     return (
       <header

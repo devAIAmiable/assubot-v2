@@ -4,7 +4,9 @@ import { FaCheck, FaChevronDown, FaChevronUp, FaClipboardList, FaMagic } from 'r
 import React, { useMemo, useState } from 'react';
 
 import AIDisclaimer from '../ui/AIDisclaimer';
+import { ContractStatus } from '../../../../types/contract';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
+import SummarizedEmptyState from '../ui/SummarizedEmptyState';
 import { getObligationTypeLabel } from '../../../../utils/contract';
 
 interface ObligationsTabProps {
@@ -38,14 +40,18 @@ const ObligationsTab: React.FC<ObligationsTabProps> = ({ contract, summarizeStat
     setExpandedType((prev) => (prev === type ? null : type));
   };
 
+  const isActiveContract = contract.status === ContractStatus.ACTIVE;
+
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
       <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4">
-        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
+        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} canSummarize={isActiveContract} />
         <AIDisclaimer />
       </div>
     );
   }
+
+  const hasSummarizedEmpty = summarizeStatus === 'done' && obligations.length === 0;
 
   return (
     <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4 space-y-4">
@@ -55,7 +61,9 @@ const ObligationsTab: React.FC<ObligationsTabProps> = ({ contract, summarizeStat
         <FaMagic className="h-4 w-4 text-blue-500 ml-2" title="Généré par IA" />
       </h3>
 
-      {obligations.length === 0 ? (
+      {hasSummarizedEmpty ? (
+        <SummarizedEmptyState title="Aucune obligation identifiée" description="Ce contrat ne contient pas d'obligations détectées." />
+      ) : obligations.length === 0 ? (
         <div className="text-sm sm:text-base text-center text-gray-500 py-8">Aucune obligation spécifiée</div>
       ) : (
         Object.entries(groupedObligations).map(([type, items]) => {

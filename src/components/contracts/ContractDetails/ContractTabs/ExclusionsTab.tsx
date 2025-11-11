@@ -3,9 +3,11 @@ import React, { useMemo, useState } from 'react';
 
 import AIDisclaimer from '../ui/AIDisclaimer';
 import type { Contract } from '../../../../types/contract';
+import { ContractStatus } from '../../../../types/contract';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
 import { capitalizeFirst } from '../../../../utils/text';
 import { motion } from 'framer-motion';
+import SummarizedEmptyState from '../ui/SummarizedEmptyState';
 
 interface ExclusionsTabProps {
   contract: Contract;
@@ -35,10 +37,12 @@ const ExclusionsTab: React.FC<ExclusionsTabProps> = ({ contract, summarizeStatus
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
+  const isActiveContract = contract.status === ContractStatus.ACTIVE;
+
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
       <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4">
-        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
+        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} canSummarize={isActiveContract} />
         <AIDisclaimer />
       </div>
     );
@@ -83,11 +87,11 @@ const ExclusionsTab: React.FC<ExclusionsTabProps> = ({ contract, summarizeStatus
       </div>
 
       {exclusions.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-          <FaBan className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Aucune exclusion spécifiée</h4>
-          <p className="text-sm sm:text-base text-gray-600">Ce contrat ne contient pas d'exclusions générales</p>
-        </div>
+        <SummarizedEmptyState
+          title="Aucune exclusion spécifiée"
+          description="Ce contrat ne contient pas d'exclusions générales"
+          icon={<FaBan className="h-16 w-16 text-gray-300" />}
+        />
       ) : filteredExclusions.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
           <FaSearch className="h-12 w-12 text-gray-300 mx-auto mb-4" />

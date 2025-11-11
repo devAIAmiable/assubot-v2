@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import CancellationsTab from './ContractTabs/CancellationsTab';
 import ContactsTab from './ContractTabs/ContactsTab';
 import ContractHeader from './ContractHeader';
+import { ContractStatus } from '../../../types/contract';
 import EditContractModal from './modals/EditContractModal';
 import ExclusionsTab from './ContractTabs/ExclusionsTab';
 import GuaranteeDetailModal from './modals/GuaranteeDetailModal';
@@ -133,12 +134,21 @@ const ContractDetailsPage: React.FC = () => {
     setSelectedGuarantee(null);
   };
 
+  const isActiveContract = contract?.status === ContractStatus.ACTIVE;
+  const canSummarize = isActiveContract && (contract?.summarizeStatus === undefined || contract?.summarizeStatus === 'pending' || contract?.summarizeStatus === 'failed');
+
   const handleSummarize = () => {
+    if (!canSummarize) {
+      return;
+    }
     setIsConfirmModalOpen(true);
   };
 
   const handleConfirmSummarize = async () => {
-    if (!contractId) return;
+    if (!contractId || !canSummarize) {
+      setIsConfirmModalOpen(false);
+      return;
+    }
     setIsConfirmModalOpen(false);
     try {
       await summarizeContract(contractId);
@@ -332,7 +342,7 @@ const ContractDetailsPage: React.FC = () => {
           {/* Résumer button (3/5 width) */}
           <button
             onClick={handleSummarize}
-            disabled={isSummarizing || contract.summarizeStatus !== 'pending'}
+            disabled={isSummarizing || !canSummarize}
             className="w-full flex items-center justify-center gap-2 px-3 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed truncate"
             aria-label="Résumer le contrat"
             title={`Résumé IA (${requiredCredits} crédits)`}

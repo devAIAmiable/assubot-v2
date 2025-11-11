@@ -8,6 +8,7 @@ import CancellationsTab from '../components/contracts/ContractDetails/ContractTa
 import ContactsTab from '../components/contracts/ContractDetails/ContractTabs/ContactsTab';
 import type { Contract } from '../types/contract';
 import ContractHeader from '../components/contracts/ContractDetails/ContractHeader';
+import { ContractStatus } from '../types/contract';
 import ExclusionsTab from '../components/contracts/ContractDetails/ContractTabs/ExclusionsTab';
 import GuaranteeDetailModal from '../components/contracts/ContractDetails/modals/GuaranteeDetailModal';
 import GuaranteesTab from '../components/contracts/ContractDetails/ContractTabs/GuaranteesTab';
@@ -138,8 +139,11 @@ const AdminTemplateContractDetails = () => {
     navigate('/app/admin');
   };
 
+  const isActiveContract = contract.status === ContractStatus.ACTIVE;
+  const canSummarize = isActiveContract && (contract.summarizeStatus === undefined || contract.summarizeStatus === 'pending' || contract.summarizeStatus === 'failed');
+
   const handleSummarize = async () => {
-    if (!contractId) return;
+    if (!contractId || !canSummarize) return;
     try {
       await summarizeContract(contractId);
     } catch (error) {

@@ -6,7 +6,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getZoneCoordinates, getZoneTypeLabel } from '../../../../utils/map';
 
 import AIDisclaimer from '../ui/AIDisclaimer';
+import { ContractStatus } from '../../../../types/contract';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
+import SummarizedEmptyState from '../ui/SummarizedEmptyState';
 import ZoneCard from './ZoneCard';
 import ZoneFilters from './ZoneFilters';
 import { capitalizeFirst } from '../../../../utils/text';
@@ -145,6 +147,8 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
   const zoom = mapPosition.zoom;
 
   const zones = useMemo(() => contract.zones ?? [], [contract.zones]);
+  const isActiveContract = contract.status === ContractStatus.ACTIVE;
+  const hasSummarizedEmpty = summarizeStatus === 'done' && zones.length === 0;
 
   const filteredZones = useMemo(() => {
     return zones
@@ -298,12 +302,12 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
     }
   };
 
-  const shouldShowSummarizeButton = summarizeStatus === undefined || summarizeStatus === 'pending' || summarizeStatus === 'failed';
+  const shouldShowSummarizeButton = isActiveContract && (summarizeStatus === undefined || summarizeStatus === 'pending' || summarizeStatus === 'failed');
 
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
       <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4">
-        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
+        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} canSummarize={isActiveContract} />
         <AIDisclaimer />
       </div>
     );
@@ -311,7 +315,12 @@ const ZonesTab: React.FC<ZonesTabProps> = ({ contract, summarizeStatus, isProces
 
   return (
     <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4 space-y-6">
-      {zones.length === 0 ? (
+      {hasSummarizedEmpty ? (
+        <div className="px-0 sm:px-4 space-y-6">
+          <SummarizedEmptyState title="Aucune zone identifiée" description="Ce contrat ne contient pas de zones couvertes détectées." />
+          <AIDisclaimer />
+        </div>
+      ) : zones.length === 0 ? (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16 bg-white rounded-2xl border border-gray-200 shadow-sm">
           <div className="relative mx-auto w-24 h-24 mb-6">
             <motion.div

@@ -1,9 +1,11 @@
 import type { BackendContractGuarantee, Contract } from '../../../../types/contract';
+import { ContractStatus } from '../../../../types/contract';
 import { FaCheck, FaChevronRight, FaMagic, FaShieldAlt, FaTimes } from 'react-icons/fa';
 
 import AIDisclaimer from '../ui/AIDisclaimer';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
 import React from 'react';
+import SummarizedEmptyState from '../ui/SummarizedEmptyState';
 
 interface GuaranteesTabProps {
   contract: Contract;
@@ -15,16 +17,19 @@ interface GuaranteesTabProps {
 }
 
 const GuaranteesTab: React.FC<GuaranteesTabProps> = ({ contract, summarizeStatus, isProcessing, isSummarizing, onSummarize, onSelectGuarantee }) => {
+  const isActiveContract = contract.status === ContractStatus.ACTIVE;
+
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
       <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4">
-        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} />
+        <PendingSummarizationMessage status={summarizeStatus} isProcessing={isProcessing} isSummarizing={isSummarizing} onSummarize={onSummarize} canSummarize={isActiveContract} />
         <AIDisclaimer />
       </div>
     );
   }
 
   const guarantees = contract.guarantees ?? [];
+  const hasSummarizedEmpty = summarizeStatus === 'done' && guarantees.length === 0;
 
   return (
     <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4 space-y-6">
@@ -104,6 +109,8 @@ const GuaranteesTab: React.FC<GuaranteesTabProps> = ({ contract, summarizeStatus
             })}
           </div>
         </div>
+      ) : hasSummarizedEmpty ? (
+        <SummarizedEmptyState title="Aucune garantie identifiée" description="Ce contrat ne contient pas de garanties détectées." />
       ) : (
         <div className="text-center py-12">
           <div className="max-w-sm mx-auto">
