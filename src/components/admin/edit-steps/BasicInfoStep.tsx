@@ -59,15 +59,19 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ onNext, onPrevious }) => 
               name="category"
               control={control}
               render={({ field, fieldState }) => (
-                <Dropdown
-                  label="Catégorie"
-                  options={categories}
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  placeholder="Sélectionnez une catégorie"
-                  error={fieldState.error?.message}
-                  id="category"
-                />
+                <div className="space-y-2">
+                  <Dropdown
+                    label="Catégorie"
+                    options={categories}
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    placeholder="Catégorie non définie"
+                    error={fieldState.error?.message}
+                    id="category"
+                    disabled
+                  />
+                  <p className="text-xs text-gray-500">La catégorie est définie lors de la création du contrat et ne peut pas être modifiée.</p>
+                </div>
               )}
             />
           </div>
