@@ -1,71 +1,68 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface UseScrollSpyOptions {
   threshold?: number;
   rootMargin?: string;
+  root?: Element | null;
 }
 
 /**
- * Hook to track which section is currently in view for scroll spy navigation
+ * Stable scroll spy hook with dynamic root support
  */
-export function useScrollSpy(sectionIds: string[], options: UseScrollSpyOptions = {}): string | null {
+export function useScrollSpy(sectionIds: string[], { threshold = 0.5, rootMargin = '0px 0px -50% 0px', root }: UseScrollSpyOptions = {}) {
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const observedIds = useMemo(() => sectionIds.slice(), [sectionIds]);
 
   useEffect(() => {
-    const { threshold = 0.5, rootMargin = '0px 0px -50% 0px' } = options;
+    if (!observedIds.length) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Find the entry with the highest intersection ratio
-        let maxRatio = 0;
-        let maxEntry: IntersectionObserverEntry | null = null;
+        let best: IntersectionObserverEntry | null = null;
 
-        entries.forEach((entry) => {
-          if (entry.intersectionRatio > maxRatio) {
-            maxRatio = entry.intersectionRatio;
-            maxEntry = entry;
+        for (const entry of entries) {
+          if (!best || entry.intersectionRatio > best.intersectionRatio) {
+            best = entry;
           }
-        });
+        }
 
-        if (maxEntry && (maxEntry as IntersectionObserverEntry).intersectionRatio >= threshold) {
-          setActiveSection((maxEntry as IntersectionObserverEntry).target.id);
+        if (best && best.intersectionRatio >= threshold) {
+          setActiveSection(best.target.id);
         }
       },
       {
-        threshold,
+        root,
         rootMargin,
+        threshold: [0, threshold, 1],
       }
     );
 
-    // Observe all sections
-    sectionIds.forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) {
-        observer.observe(element);
-      }
-    });
+    const elements = observedIds.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => Boolean(el));
 
-    return () => {
-      observer.disconnect();
-    };
-  }, [sectionIds, options.threshold, options.rootMargin]);
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [observedIds, root, rootMargin, threshold]);
 
   return activeSection;
 }
 
 /**
- * Hook to scroll to a specific section smoothly
+ * ScrollToSection with support for custom scroll container
  */
-export function useScrollToSection() {
-  const scrollToSection = (sectionId: string, offset = 0) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const elementPosition = element.offsetTop - offset;
-      window.scrollTo({
-        top: elementPosition,
-        behavior: 'smooth',
-      });
+export function useScrollToSection(scrollContainer?: HTMLElement | null) {
+  const scrollToSection = (id: string, offset = 0) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const top = el.offsetTop - offset;
+
+    if (scrollContainer) {
+      scrollContainer.scrollTo({ top, behavior: 'smooth' });
+      return;
     }
+
+    window.scrollTo({ top, behavior: 'smooth' });
   };
 
   return { scrollToSection };
