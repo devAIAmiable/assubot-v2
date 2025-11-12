@@ -3,6 +3,16 @@ import 'dayjs/locale/fr';
 
 import type { ChatContract, CreateChatRequest, QuickAction } from '../types/chat';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  trackChatCreated,
+  trackChatDeleted,
+  trackChatMessageError,
+  trackChatMessageSent,
+  trackChatQuickAction,
+  trackChatRenamed,
+  trackChatSearch,
+  trackChatSelected,
+} from '@/services/analytics/gtm';
 import { useGetChatMessagesQuery, useGetChatsQuery } from '../store/chatsApi';
 
 import { AnimatePresence } from 'framer-motion';
@@ -14,16 +24,6 @@ import { ChatSidebar } from './chat/ChatSidebar';
 import { DeleteChatModal } from './chat/DeleteChatModal';
 import { ErrorToast } from './chat/ErrorToast';
 import { NewChatModal } from './chat/NewChatModal';
-import {
-  trackChatCreated,
-  trackChatDeleted,
-  trackChatMessageError,
-  trackChatMessageSent,
-  trackChatQuickAction,
-  trackChatRenamed,
-  trackChatSearch,
-  trackChatSelected,
-} from '@/services/analytics/gtm';
 import dayjs from 'dayjs';
 import { useAppSelector } from '../store/hooks';
 import { useChatPagination } from '../hooks/useChatPagination';
@@ -34,8 +34,20 @@ import { useSendMessage } from '../hooks/useSendMessage';
 dayjs.locale('fr');
 
 const ChatModule: React.FC = () => {
-  const { currentChat, loading, error, filters, createNewChat, updateChatById, deleteChatById, selectChat, clearChatError, getChatQuickActions, clearChatQuickActions } =
-    useChats();
+  const {
+    currentChat,
+    loading,
+    error,
+    filters,
+    createNewChat,
+    updateChatById,
+    deleteChatById,
+    selectChat,
+    clearChatError,
+    getChatQuickActions,
+    clearChatQuickActions,
+    clearCurrentChatSelection,
+  } = useChats();
 
   const { chats: paginatedChats, loading: paginationLoading, pagination, goToNextPage, goToPrevPage, search } = useChatPagination();
   const { error: apiError } = useGetChatsQuery(filters || {});
@@ -62,6 +74,12 @@ const ChatModule: React.FC = () => {
   const [messageInput, setMessageInput] = useState('');
   const [showChatList, setShowChatList] = useState(true);
   const [isInitialMessageLoad, setIsInitialMessageLoad] = useState(false);
+
+  useEffect(() => {
+    clearCurrentChatSelection();
+    setShowChatList(true);
+    setCurrentContractNames('');
+  }, [clearCurrentChatSelection]);
   const quickActions = currentChat ? getChatQuickActions(currentChat.id) : [];
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const currentChatId = currentChat?.id ?? null;
@@ -97,6 +115,26 @@ const ChatModule: React.FC = () => {
     return map;
   }, [contracts]);
   const chatsById = useMemo(() => new Map(paginatedChats.map((chat) => [chat.id, chat])), [paginatedChats]);
+
+  const resolvedContractNames = useMemo(() => {
+    if (currentContractNames.trim().length > 0) {
+      return currentContractNames;
+    }
+
+    const directNames = currentChat?.contracts?.map((item: ChatContract) => item?.name).filter((name): name is string => Boolean(name)) ?? [];
+    if (directNames.length > 0) {
+      return directNames.join(', ');
+    }
+
+    if (currentChat?.contractIds && currentChat.contractIds.length > 0) {
+      const mapped = currentChat.contractIds.map((id) => contractsById.get(id)).filter((name): name is string => Boolean(name));
+      if (mapped.length > 0) {
+        return mapped.join(', ');
+      }
+    }
+
+    return '';
+  }, [currentContractNames, currentChat, contractsById]);
 
   useEffect(() => {
     if (!currentChat) {
@@ -332,7 +370,7 @@ const ChatModule: React.FC = () => {
       <div className={`flex-1 flex flex-col bg-white ${showChatList ? 'hidden md:flex' : 'flex'}`}>
         {currentChat ? (
           <>
-            <ChatHeader chat={currentChat} contractNames={currentContractNames} onBack={handleBackToChatList} />
+            <ChatHeader chat={currentChat} contractNames={resolvedContractNames} onBack={handleBackToChatList} />
 
             <ChatMessageList
               messages={messages}

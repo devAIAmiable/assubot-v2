@@ -22,7 +22,7 @@ const ChatHeaderComponent: React.FC<ChatHeaderProps> = ({ chat, contractNames, o
         </div>
         <div>
           <h1 className="text-white font-medium">{chat.title}</h1>
-          {chat.contracts && chat.contracts.length > 0 && <p className="text-xs text-blue-100 mt-1">{contractNames}</p>}
+          {contractNames && <p className="text-xs text-blue-100 mt-1">{contractNames}</p>}
         </div>
       </div>
       <div className="flex items-center gap-2">{/* Reserved for future actions */}</div>
