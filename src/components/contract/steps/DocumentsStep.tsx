@@ -194,8 +194,8 @@ const DocumentsStep: React.FC<DocumentsStepProps> = ({ onDataUpdate, onFileRefsU
               />
 
               {getDocumentForType(docType.type) ? (
-                <div className="flex items-center justify-between pointer-events-none">
-                  <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0 pointer-events-none">
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 bg-white">📄</span>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-zinc-900">{getDocumentForType(docType.type)?.fileName}</p>
@@ -205,11 +205,12 @@ const DocumentsStep: React.FC<DocumentsStepProps> = ({ onDataUpdate, onFileRefsU
 
                   {/* Remove still needs to be clickable: lift above the input */}
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveDocument(docType.type);
                     }}
-                    className="relative z-20 text-sm text-red-600 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 rounded-md px-2 py-1"
+                    className="relative z-20 pointer-events-auto text-sm text-red-600 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 rounded-md px-2 py-1"
                   >
                     Supprimer
                   </button>
