@@ -5,9 +5,9 @@ import AIDisclaimer from '../ui/AIDisclaimer';
 import type { Contract } from '../../../../types/contract';
 import { ContractStatus } from '../../../../types/contract';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
-import { capitalizeFirst } from '../../../../utils/text';
-import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 import SummarizedEmptyState from '../ui/SummarizedEmptyState';
+import { motion } from 'framer-motion';
 
 interface ExclusionsTabProps {
   contract: Contract;
@@ -101,7 +101,7 @@ const ExclusionsTab: React.FC<ExclusionsTabProps> = ({ contract, summarizeStatus
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {filteredExclusions.map((exclusion) => {
-            const description = capitalizeFirst(exclusion.description);
+            const description = exclusion.description;
             const isLong = description.length > 150;
             const isExpanded = expandedId === exclusion.id;
             const truncatedDescription = isLong && !isExpanded ? `${description.substring(0, 150)}…` : description;
@@ -121,7 +121,9 @@ const ExclusionsTab: React.FC<ExclusionsTabProps> = ({ contract, summarizeStatus
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm sm:text-base text-gray-900 leading-relaxed">{truncatedDescription}</p>
+                    <div className="prose prose-sm sm:prose-base text-gray-900 max-w-none leading-relaxed">
+                      <ReactMarkdown>{truncatedDescription}</ReactMarkdown>
+                    </div>
                     {isLong && (
                       <button
                         className="mt-2 text-sm font-medium text-amber-600 hover:text-amber-700 flex items-center gap-1"
