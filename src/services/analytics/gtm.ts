@@ -25,7 +25,7 @@ export type CreditBalanceStatus = 'low' | 'ok' | 'critical';
 export type CreditRefreshSource = 'manual' | 'auto';
 export type CreditHistorySource = 'button' | 'auto';
 export type ComparateurStep = 'history' | 'type' | 'form' | 'loading' | 'results' | string;
-export type GuardType = 'protected_route' | 'profile_completion';
+export type GuardType = 'protected_route' | 'profile_completion' | 'terms_acceptance';
 export type ContractCreationMethod = 'upload' | 'manual';
 export type SortOrder = 'asc' | 'desc';
 

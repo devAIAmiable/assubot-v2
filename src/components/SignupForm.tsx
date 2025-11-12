@@ -181,7 +181,7 @@ const SignupForm: React.FC = () => {
       step1Form.setError('acceptedTerms', { type: 'manual', message: "Vous devez accepter les conditions d'utilisation" });
       return;
     }
-    await handleGoogleSignup(true);
+    await handleGoogleSignup();
   };
 
   // Countdown redirect
