@@ -72,6 +72,11 @@ const LoginForm: React.FC = () => {
           userId: profileResponse.data.user.id,
         });
 
+        if (!profileResponse.data.user.acceptedTerms) {
+          navigate('/auth/accept-terms', { replace: true });
+          return;
+        }
+
         // Redirect to the original intended page or dashboard
         const from = location.state?.from?.pathname || '/app';
         navigate(from, { replace: true });
@@ -80,6 +85,8 @@ const LoginForm: React.FC = () => {
         const userData = {
           ...loginResponse.data?.user,
           name: `${loginResponse.data?.user?.firstName} ${loginResponse.data?.user?.lastName}`,
+          acceptedTerms: loginResponse.data?.user?.acceptedTerms ?? false,
+          termsAcceptedAt: loginResponse.data?.user?.termsAcceptedAt,
         };
 
         dispatch(
@@ -93,6 +100,11 @@ const LoginForm: React.FC = () => {
           method: 'email',
           userId: loginResponse.data?.user?.id,
         });
+
+        if (!userData.acceptedTerms) {
+          navigate('/auth/accept-terms', { replace: true });
+          return;
+        }
 
         const from = location.state?.from?.pathname || '/app';
         navigate(from, { replace: true });

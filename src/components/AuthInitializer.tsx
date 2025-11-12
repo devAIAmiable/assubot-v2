@@ -30,6 +30,8 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
                 ...profileResponse.data.user,
                 name: `${profileResponse.data.user.firstName} ${profileResponse.data.user.lastName}`,
                 professionalCategory: profileResponse.data.user.profession, // Map profession to professionalCategory
+                acceptedTerms: profileResponse.data.user.acceptedTerms ?? false,
+                termsAcceptedAt: profileResponse.data.user.termsAcceptedAt,
               };
 
               // Update Redux state with complete user data
@@ -54,6 +56,8 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
               const userData = {
                 ...authResponse.data.user,
                 name: `${authResponse.data.user.firstName} ${authResponse.data.user.lastName}`,
+                acceptedTerms: authResponse.data.user.acceptedTerms ?? false,
+                termsAcceptedAt: authResponse.data.user.termsAcceptedAt,
               };
 
               dispatch(

@@ -55,6 +55,8 @@ const GoogleCallbackPage: React.FC = () => {
           const userDataWithName = {
             ...user,
             name: `${user.firstName} ${user.lastName}`,
+            acceptedTerms: user.acceptedTerms ?? false,
+            termsAcceptedAt: user.termsAcceptedAt,
           };
 
           // Update Redux state with user data
@@ -66,6 +68,11 @@ const GoogleCallbackPage: React.FC = () => {
           );
 
           trackGoogleSuccess(user);
+
+          if (!userDataWithName.acceptedTerms) {
+            navigate('/auth/accept-terms', { replace: true });
+            return;
+          }
 
           // Check if this is a first-time login (Google or regular)
           if (user.isFirstLogin) {
@@ -102,6 +109,8 @@ const GoogleCallbackPage: React.FC = () => {
                 ...profileResponse.data.user,
                 name: `${profileResponse.data.user.firstName} ${profileResponse.data.user.lastName}`,
                 professionalCategory: profileResponse.data.user.profession, // Map profession to professionalCategory
+                acceptedTerms: profileResponse.data.user.acceptedTerms ?? false,
+                termsAcceptedAt: profileResponse.data.user.termsAcceptedAt,
               };
 
               // Update Redux state with complete user data
@@ -113,6 +122,11 @@ const GoogleCallbackPage: React.FC = () => {
               );
 
               trackGoogleSuccess(profileResponse.data.user);
+
+              if (!profileResponse.data.user.acceptedTerms) {
+                navigate('/auth/accept-terms', { replace: true });
+                return;
+              }
 
               // Check if this is a first-time login (Google or regular)
               if (profileResponse.data.user.isFirstLogin) {
@@ -127,6 +141,8 @@ const GoogleCallbackPage: React.FC = () => {
               const userData = {
                 ...authResponse.data.user,
                 name: `${authResponse.data.user.firstName} ${authResponse.data.user.lastName}`,
+                acceptedTerms: authResponse.data.user.acceptedTerms ?? false,
+                termsAcceptedAt: authResponse.data.user.termsAcceptedAt,
               };
 
               dispatch(
@@ -137,6 +153,11 @@ const GoogleCallbackPage: React.FC = () => {
               );
 
               trackGoogleSuccess(authResponse.data.user);
+
+              if (!userData.acceptedTerms) {
+                navigate('/auth/accept-terms', { replace: true });
+                return;
+              }
 
               // Check if this is a first-time login (Google or regular)
               if (authResponse.data.user.isFirstLogin) {

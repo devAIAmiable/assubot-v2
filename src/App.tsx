@@ -10,6 +10,7 @@ import AdminTemplateContractEdit from './pages/AdminTemplateContractEdit';
 import AppLayout from './components/AppLayout';
 import AuthInitializer from './components/AuthInitializer';
 import ChatModule from './components/ChatModule';
+import TermsAcceptanceGuard from './components/TermsAcceptanceGuard';
 import RouteTracker from './components/analytics/RouteTracker';
 import ComparateurModule from './components/ComparateurModule';
 import ComparateurResultsPage from './pages/ComparateurResultsPage';
@@ -28,6 +29,7 @@ import NotificationsModule from './components/NotificationsModule';
 import PaymentCancelPage from './components/PaymentCancelPage';
 import PaymentSuccessPage from './components/PaymentSuccessPage';
 import { PersistGate } from 'redux-persist/integration/react';
+import AcceptTermsPage from './components/AcceptTermsPage';
 import PrivacyPolicyPage from './components/PrivacyPolicyPage';
 import ProfileCompletionGuard from './components/ProfileCompletionGuard';
 import ProfileModule from './components/ProfileModule';
@@ -74,9 +76,11 @@ function App() {
                     path="/app"
                     element={
                       <ProtectedRoute>
-                        <ProfileCompletionGuard>
-                          <AppLayout />
-                        </ProfileCompletionGuard>
+                        <TermsAcceptanceGuard>
+                          <ProfileCompletionGuard>
+                            <AppLayout />
+                          </ProfileCompletionGuard>
+                        </TermsAcceptanceGuard>
                       </ProtectedRoute>
                     }
                   >
@@ -107,6 +111,7 @@ function App() {
                   <Route path="/forgot-password" element={<ForgotPasswordForm />} />
                   <Route path="/reset-password" element={<ResetPasswordForm />} />
                   <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
+                  <Route path="/auth/accept-terms" element={<AcceptTermsPage />} />
                   <Route path="/payment/success" element={<PaymentSuccessPage />} />
                   <Route path="/payment/cancel" element={<PaymentCancelPage />} />
                 </Routes>

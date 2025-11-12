@@ -101,8 +101,8 @@ Tous les champs d’événement sont en anglais pour faciliter l’exploitation 
   - `src/App.tsx` : `RouteTracker`
 - **Auth**
   - `components/SignupForm.tsx`, `LoginForm.tsx`, `ForgotPasswordForm.tsx`, `ResetPasswordForm.tsx`, `VerifyPage.tsx`
-  - `components/GoogleCallbackPage.tsx`, `hooks/useGoogleAuth.ts`
-  - `components/ProtectedRoute.tsx`, `ProfileCompletionGuard.tsx`
+  - `components/GoogleCallbackPage.tsx`, `hooks/useGoogleAuth.ts`, `components/AcceptTermsPage.tsx`
+  - `components/ProtectedRoute.tsx`, `ProfileCompletionGuard.tsx`, `TermsAcceptanceGuard.tsx`
 - **Profil**
   - `components/ProfileModule.tsx`
   - `hooks/useAvatarUpload.ts`
