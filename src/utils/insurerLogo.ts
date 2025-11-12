@@ -24,6 +24,7 @@ const canonicalKeyToLogoPath: Record<string, string> = {
   axa: '/insurances/axa.png',
   maif: '/insurances/maif.png',
   macif: '/insurances/macif.png',
+  macsf: '/insurances/macsf.png',
   groupama: '/insurances/groupama.png',
   generali: '/insurances/generali.png',
   allianz: '/insurances/allianz.png',
