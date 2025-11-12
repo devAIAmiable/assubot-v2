@@ -6,6 +6,7 @@ import React, { Fragment, useState } from 'react';
 import Button from '../../../ui/Button';
 import { formatDateForInput } from '../../../../utils/dateHelpers';
 import { motion } from 'framer-motion';
+import { trackContractEditSave } from '@/services/analytics/gtm';
 import { useContractOperations } from '../../../../hooks/useContractOperations';
 
 interface EditContractModalProps {
@@ -93,10 +94,19 @@ const EditContractModal: React.FC<EditContractModalProps> = ({ contract, isOpen,
       }
 
       await updateContract(contract.id, updates);
+      trackContractEditSave({
+        contractId: contract.id,
+        status: 'success',
+      });
       onSuccess?.();
       onClose();
-    } catch (updateError) {
-      console.error('Failed to update contract:', updateError);
+    } catch (updateErr) {
+      console.error('Failed to update contract:', updateErr);
+      trackContractEditSave({
+        contractId: contract.id,
+        status: 'error',
+        errorMessage: updateErr instanceof Error ? updateErr.message : 'unknown_error',
+      });
     }
   };
 

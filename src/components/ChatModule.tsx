@@ -14,6 +14,16 @@ import { ChatSidebar } from './chat/ChatSidebar';
 import { DeleteChatModal } from './chat/DeleteChatModal';
 import { ErrorToast } from './chat/ErrorToast';
 import { NewChatModal } from './chat/NewChatModal';
+import {
+  trackChatCreated,
+  trackChatDeleted,
+  trackChatMessageError,
+  trackChatMessageSent,
+  trackChatQuickAction,
+  trackChatRenamed,
+  trackChatSearch,
+  trackChatSelected,
+} from '@/services/analytics/gtm';
 import dayjs from 'dayjs';
 import { useAppSelector } from '../store/hooks';
 import { useChatPagination } from '../hooks/useChatPagination';
@@ -110,6 +120,7 @@ const ChatModule: React.FC = () => {
       search('');
       return;
     }
+    trackChatSearch({ queryLength: searchQuery.trim().length });
     search(searchQuery);
   }, [searchQuery, search]);
 
@@ -147,7 +158,12 @@ const ChatModule: React.FC = () => {
     };
 
     try {
-      await createNewChat(chatData);
+      const result = await createNewChat(chatData);
+      trackChatCreated({
+        chatId: result.chat.id,
+        hasContracts: selectedContractIds.length > 0,
+        contractsCount: selectedContractIds.length,
+      });
       if (selectedContractIds.length > 0) {
         const selectedNames = selectedContractIds.map((id) => contractsById.get(id)).filter((name): name is string => Boolean(name));
         if (selectedNames.length > 0) {
@@ -168,6 +184,7 @@ const ChatModule: React.FC = () => {
       const selectedChat = chatsById.get(chatId);
       if (!selectedChat) return;
 
+      trackChatSelected({ chatId });
       selectChat(selectedChat);
       cancelEdit();
       setShowChatList(false);
@@ -181,6 +198,7 @@ const ChatModule: React.FC = () => {
 
       try {
         await updateChatById(chatId, { title: editingTitle.trim() });
+        trackChatRenamed({ chatId });
         cancelEdit();
       } catch (updateError) {
         console.error('Erreur lors de la mise à jour du chat:', updateError);
@@ -203,6 +221,7 @@ const ChatModule: React.FC = () => {
         selectChat(null);
         setShowChatList(true);
       }
+      trackChatDeleted({ chatId: chatToDelete });
       setShowDeleteModal(false);
       setChatToDelete(null);
     } catch (deleteError) {
@@ -240,8 +259,16 @@ const ChatModule: React.FC = () => {
 
     try {
       await sendUserMessage(currentChatId, messageContent);
+      trackChatMessageSent({
+        chatId: currentChatId,
+        messageLength: messageContent.length,
+      });
     } catch (sendError) {
       console.error("Erreur lors de l'envoi du message:", sendError);
+      trackChatMessageError({
+        chatId: currentChatId,
+        errorMessage: sendError instanceof Error ? sendError.message : 'send_failed',
+      });
       setMessageInput(messageContent);
     }
   }, [currentChatId, messageInput, sendUserMessage, sendingMessage]);
@@ -252,9 +279,17 @@ const ChatModule: React.FC = () => {
 
       try {
         clearChatQuickActions(currentChatId);
+        trackChatQuickAction({
+          chatId: currentChatId,
+          actionLabel: action.label,
+        });
         await sendUserMessage(currentChatId, action.instructions);
       } catch (quickActionError) {
         console.error("Erreur lors de l'envoi de l'action rapide:", quickActionError);
+        trackChatMessageError({
+          chatId: currentChatId,
+          errorMessage: quickActionError instanceof Error ? quickActionError.message : 'quick_action_failed',
+        });
       }
     },
     [clearChatQuickActions, currentChatId, sendUserMessage, sendingMessage]

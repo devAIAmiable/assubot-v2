@@ -1,5 +1,6 @@
 import { FaCheckCircle, FaEye, FaEyeSlash } from 'react-icons/fa';
 import React, { useEffect, useState } from 'react';
+import { trackAccountCreationError, trackAccountCreationSuccess } from '@/services/analytics/gtm';
 
 // Dropdown components removed for simplicity
 import GoogleLoginButton from './ui/GoogleLoginButton';
@@ -150,12 +151,25 @@ const SignupForm: React.FC = () => {
       };
       const response = await authService.signup(payload);
       if (response.success) {
+        const userData = (response.data?.user ?? null) as { id?: string } | null;
+        trackAccountCreationSuccess({
+          method: 'email',
+          userId: userData && typeof userData === 'object' ? userData.id : undefined,
+        });
         setSubmitSuccess(true);
       } else {
+        trackAccountCreationError({
+          method: 'email',
+          errorMessage: response.error,
+        });
         setSubmitError("Une erreur s'est produite. Veuillez réessayer ou contacter le support.");
       }
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : 'Erreur réseau';
+      trackAccountCreationError({
+        method: 'email',
+        errorMessage,
+      });
       setSubmitError(errorMessage);
     }
   };

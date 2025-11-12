@@ -29,6 +29,35 @@
     <meta property="twitter:description" content="Gérez, comparez et optimisez vos contrats d'assurance en toute simplicité avec notre plateforme intelligente." />
     <meta property="twitter:image" content="/logo.png" />
 
+    <script type="module">
+      const enableAnalytics = import.meta.env.VITE_ENABLE_ANALYTICS === 'true';
+      const containerId = import.meta.env.VITE_GTM_CONTAINER_ID;
+
+      if (enableAnalytics && containerId) {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = `https://www.googletagmanager.com/gtm.js?id=${containerId}`;
+        document.head.appendChild(script);
+
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.googletagmanager.com/ns.html?id=${containerId}`;
+        iframe.height = '0';
+        iframe.width = '0';
+        iframe.style.display = 'none';
+        iframe.style.visibility = 'hidden';
+
+        const noscript = document.createElement('noscript');
+        noscript.append(iframe);
+
+        window.addEventListener('DOMContentLoaded', () => {
+          document.body.insertAdjacentElement('afterbegin', noscript);
+        });
+      }
+    </script>
+
     <title>AssuBot - Simplifiez vos assurances avec l'IA</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>

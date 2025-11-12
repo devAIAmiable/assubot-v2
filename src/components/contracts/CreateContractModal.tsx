@@ -8,6 +8,7 @@ import Avatar from '../ui/Avatar';
 import ContractCreationForm from '../contract/ContractCreationForm';
 import type { ContractFormData } from '../../types';
 import { contractUploadService } from '../../services/contractUploadService';
+import { trackContractCreateSubmit } from '@/services/analytics/gtm';
 
 interface CreateContractModalProps {
   open?: boolean;
@@ -36,12 +37,21 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
       const result = await contractUploadService.uploadContract(formData, fileObjects);
 
       if (result.success) {
+        trackContractCreateSubmit({
+          method: 'upload',
+          status: 'success',
+        });
         setShowSuccessMessage(true);
       } else {
         throw new Error(result.error || 'Échec de la création du contrat');
       }
     } catch (submitError) {
       console.error('Contract creation failed:', submitError);
+      trackContractCreateSubmit({
+        method: 'upload',
+        status: 'error',
+        errorMessage: submitError instanceof Error ? submitError.message : 'unknown_error',
+      });
       throw submitError;
     }
   }, []);
@@ -175,5 +185,3 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
 };
 
 export default CreateContractModal;
-
-

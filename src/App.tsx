@@ -10,6 +10,7 @@ import AdminTemplateContractEdit from './pages/AdminTemplateContractEdit';
 import AppLayout from './components/AppLayout';
 import AuthInitializer from './components/AuthInitializer';
 import ChatModule from './components/ChatModule';
+import RouteTracker from './components/analytics/RouteTracker';
 import ComparateurModule from './components/ComparateurModule';
 import ComparateurResultsPage from './pages/ComparateurResultsPage';
 import ContractDetailsPage from './components/contracts/ContractDetails/ContractDetailsPage';
@@ -53,6 +54,7 @@ function App() {
         <AuthInitializer>
           <RealTimeProvider>
             <Router>
+              <RouteTracker />
               <EnvironmentBanner>
                 <Routes>
                   {/* Landing page route */}

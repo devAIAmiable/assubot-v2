@@ -2,6 +2,7 @@ import type { ComparisonCategory, ComparisonCalculationResponse, FormDefinition,
 import { FaArrowLeft, FaArrowRight, FaChevronLeft, FaUser } from 'react-icons/fa';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getVisibleSubsectionGroups, type SubsectionGroup } from '../../utils/formGrouping';
+import { trackComparateurFormSubmit } from '@/services/analytics/gtm';
 import { transformFormDataForBackend } from '../../utils/formDataTransform';
 import { generateAutoFormTestData } from '../../utils/testFormData';
 
@@ -407,6 +408,10 @@ const FormView: React.FC<FormViewProps> = ({
       const response = await calculateComparison(transformedData).unwrap();
 
       // Pass response to parent for processing
+      trackComparateurFormSubmit({
+        category: selectedType ?? undefined,
+        status: 'success',
+      });
       onComparisonSuccess(response);
     } catch (error) {
       // Extract error message
@@ -419,6 +424,11 @@ const FormView: React.FC<FormViewProps> = ({
 
       // Pass error to parent for handling
       onComparisonError(errorMessage);
+      trackComparateurFormSubmit({
+        category: selectedType ?? undefined,
+        status: 'error',
+        errorMessage,
+      });
       console.error('Comparison calculation failed:', error);
     }
   };
