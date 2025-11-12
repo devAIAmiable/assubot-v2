@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import FloatingElements from './FloatingElements';
 import TrustIndicators from './TrustIndicators';
 import { motion } from 'framer-motion';
+import { trackCtaClick } from '@/services/analytics/gtm';
 
 interface AnimatedHeroProps {
   navigateToApp: () => void;
@@ -87,6 +88,11 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ navigateToApp }) => {
 
               <motion.button
                 onClick={() => {
+                  trackCtaClick({
+                    label: 'Voir la démo',
+                    location: 'landing_hero_secondary',
+                    destination: '#demo',
+                  });
                   const demoSection = document.getElementById('demo');
                   demoSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}

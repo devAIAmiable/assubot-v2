@@ -29,6 +29,7 @@ import { motion } from 'framer-motion';
 import { useGetCreditPacksQuery } from '../store/creditPacksApi';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { trackCtaClick } from '@/services/analytics/gtm';
 
 const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -44,9 +45,12 @@ const LandingPage = () => {
   });
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const navigateToApp = () => {
-    navigate('/app');
+  const createNavigateHandler = (destination: string, label: string, location: string) => () => {
+    trackCtaClick({ label, location, destination });
+    navigate(destination);
   };
+
+  const handleNavigateToApp = (location: string, label: string = 'CTA Commencer') => createNavigateHandler('/app', label, location);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData((prev) => ({
@@ -62,6 +66,13 @@ const LandingPage = () => {
     const mailtoLink = `mailto:contact@a-lamiable.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(
       `Nom: ${formData.firstName} ${formData.lastName}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
     )}`;
+
+    // Track CTA click
+    trackCtaClick({
+      label: 'Contact Form Submit',
+      location: 'landing_contact',
+      destination: 'mailto:contact@a-lamiable.com',
+    });
 
     // Open email client
     window.open(mailtoLink, '_blank');
@@ -173,10 +184,10 @@ const LandingPage = () => {
               <a href="#contact" className="text-gray-700 hover:text-[#1e51ab] transition-colors">
                 Contact
               </a>
-              <button onClick={() => navigate('/faq')} className="text-gray-700 hover:text-[#1e51ab] transition-colors">
+              <button onClick={createNavigateHandler('/faq', 'FAQ', 'landing_nav_desktop')} className="text-gray-700 hover:text-[#1e51ab] transition-colors">
                 FAQ
               </button>
-              <button className="bg-[#1e51ab] text-white px-4 py-2 rounded-lg hover:bg-[#163d82] transition-colors" onClick={navigateToApp}>
+              <button className="bg-[#1e51ab] text-white px-4 py-2 rounded-lg hover:bg-[#163d82] transition-colors" onClick={handleNavigateToApp('landing_nav_primary')}>
                 Commencer
               </button>
             </div>
@@ -204,10 +215,13 @@ const LandingPage = () => {
                 <a href="#contact" className="block px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
                   Contact
                 </a>
-                <button onClick={() => navigate('/faq')} className="block w-full text-left px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
+                <button onClick={createNavigateHandler('/faq', 'FAQ', 'landing_nav_mobile')} className="block w-full text-left px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
                   Aide
                 </button>
-                <button className="w-full text-left bg-[#1e51ab] text-white px-3 py-2 rounded-lg hover:bg-[#163d82] transition-colors" onClick={navigateToApp}>
+                <button
+                  className="w-full text-left bg-[#1e51ab] text-white px-3 py-2 rounded-lg hover:bg-[#163d82] transition-colors"
+                  onClick={handleNavigateToApp('landing_nav_mobile')}
+                >
                   Commencer
                 </button>
               </div>
@@ -217,7 +231,7 @@ const LandingPage = () => {
       </motion.nav>
 
       {/* Hero Section */}
-      <AnimatedHero navigateToApp={navigateToApp} />
+      <AnimatedHero navigateToApp={handleNavigateToApp('landing_hero_primary')} />
 
       {/* Features Section - Simple & Clean */}
       <section id="features" className="py-20 bg-gray-50">
@@ -262,7 +276,7 @@ const LandingPage = () => {
               className="bg-[#1e51ab] text-white px-8 py-4 rounded-xl font-semibold hover:bg-[#163d82] transition-colors shadow-lg"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={navigateToApp}
+              onClick={handleNavigateToApp('landing_features_section', 'Découvrir fonctionnalités')}
             >
               Découvrir toutes les fonctionnalités
             </motion.button>
@@ -417,7 +431,7 @@ const LandingPage = () => {
                           className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
                             isFeatured ? 'bg-[#1e51ab] text-white hover:bg-[#163d82]' : 'bg-gray-900 text-white hover:bg-gray-800'
                           }`}
-                          onClick={navigateToApp}
+                          onClick={handleNavigateToApp(`landing_pricing_${pack.id}`, 'Commencer maintenant')}
                         >
                           Commencer maintenant
                         </button>
@@ -849,7 +863,7 @@ const LandingPage = () => {
                     className="bg-white text-[#1e51ab] px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate('/app/chatbot')}
+                    onClick={createNavigateHandler('/app/chatbot', 'Accès chatbot', 'landing_contact')}
                   >
                     Parler à AI'A
                   </motion.button>
@@ -981,7 +995,7 @@ const LandingPage = () => {
             viewport={{ once: true }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={navigateToApp}
+            onClick={handleNavigateToApp('landing_cta_section', "Commencer Aujourd'hui")}
           >
             Commencer Aujourd'hui
           </motion.button>
@@ -1025,17 +1039,17 @@ const LandingPage = () => {
               <h3 className="text-white font-semibold mb-4">Plateforme</h3>
               <ul className="space-y-2">
                 <li>
-                  <button onClick={() => navigate('/app/contrats')} className="hover:text-white transition-colors text-left">
+                  <button onClick={createNavigateHandler('/app/contrats', 'Footer Contrats', 'landing_footer')} className="hover:text-white transition-colors text-left">
                     Gestion des Contrats
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => navigate('/app/chatbot')} className="hover:text-white transition-colors text-left">
+                  <button onClick={createNavigateHandler('/app/chatbot', 'Footer Chatbot', 'landing_footer')} className="hover:text-white transition-colors text-left">
                     Chatbot IA
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => navigate('/app/comparateur')} className="hover:text-white transition-colors text-left">
+                  <button onClick={createNavigateHandler('/app/comparateur', 'Footer Comparateur', 'landing_footer')} className="hover:text-white transition-colors text-left">
                     Comparaison Intelligente
                   </button>
                 </li>
@@ -1061,17 +1075,17 @@ const LandingPage = () => {
               <h3 className="text-white font-semibold mb-4">Support</h3>
               <ul className="space-y-2">
                 <li>
-                  <button onClick={() => navigate('/faq')} className="hover:text-white transition-colors text-left">
+                  <button onClick={createNavigateHandler('/faq', 'Footer FAQ', 'landing_footer')} className="hover:text-white transition-colors text-left">
                     Centre d'Aide
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => navigate('/general-terms')} className="hover:text-white transition-colors text-left">
+                  <button onClick={createNavigateHandler('/general-terms', 'Footer CGU', 'landing_footer')} className="hover:text-white transition-colors text-left">
                     Conditions générales d'utilisation et de vente
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => navigate('/privacy-policy')} className="hover:text-white transition-colors text-left">
+                  <button onClick={createNavigateHandler('/privacy-policy', 'Footer Confidentialité', 'landing_footer')} className="hover:text-white transition-colors text-left">
                     Politique de Confidentialité
                   </button>
                 </li>

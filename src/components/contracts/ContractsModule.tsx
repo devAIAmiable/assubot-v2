@@ -10,6 +10,7 @@ import EditContractModal from './ContractDetails/modals/EditContractModal';
 import Pagination from '../ui/Pagination';
 import Spinner from '../ui/Spinner';
 import { motion } from 'framer-motion';
+import { trackContractDelete, trackContractFilterChange, trackContractSearch, trackContractSortChange } from '@/services/analytics/gtm';
 import { useContractOperations } from '../../hooks/useContractOperations';
 import { useContracts } from '../../hooks/useContracts';
 import { useDebounced } from '../../hooks/useDebounced';
@@ -47,6 +48,7 @@ const ContractsModule = () => {
 
   useEffect(() => {
     if (debouncedQuery !== searchQuery) {
+      trackContractSearch({ queryLength: debouncedQuery.trim().length });
       setSearchQuery(debouncedQuery);
     }
   }, [debouncedQuery, searchQuery, setSearchQuery]);
@@ -60,6 +62,10 @@ const ContractsModule = () => {
   };
 
   const handleTypeFilter = (category: string) => {
+    trackContractFilterChange({
+      filter: 'category',
+      value: category,
+    });
     setCategory(category === 'all' ? 'all' : (category as ContractCategory));
   };
 
@@ -71,7 +77,9 @@ const ContractsModule = () => {
     if (!deletingContract) return;
 
     try {
+      trackContractDelete({ contractId: deletingContract.id, status: 'confirm' });
       await deleteContract(deletingContract.id);
+      trackContractDelete({ contractId: deletingContract.id, status: 'success' });
       setDeletingContract(null);
     } catch (deleteError) {
       console.error('Failed to delete contract:', deleteError);
@@ -79,6 +87,9 @@ const ContractsModule = () => {
   };
 
   const handleCancelDelete = () => {
+    if (deletingContract) {
+      trackContractDelete({ contractId: deletingContract.id, status: 'cancel' });
+    }
     setDeletingContract(null);
   };
 
@@ -193,7 +204,14 @@ const ContractsModule = () => {
                 <span className="px-2 text-sm font-medium text-gray-600">Trier par</span>
                 <select
                   value={selectedSortBy}
-                  onChange={(event) => setSortBy(event.target.value as 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status')}
+                  onChange={(event) => {
+                    const newSortBy = event.target.value as 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'annualPremiumCents' | 'name' | 'category' | 'status';
+                    trackContractSortChange({
+                      sortBy: newSortBy,
+                      sortOrder: selectedSortOrder,
+                    });
+                    setSortBy(newSortBy);
+                  }}
                   className="appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-[#1e51ab] focus:border-transparent transition-colors text-sm"
                 >
                   <option value="createdAt">Date de création</option>
@@ -206,7 +224,14 @@ const ContractsModule = () => {
                   <option value="status">Statut</option>
                 </select>
                 <button
-                  onClick={() => setSortOrder(selectedSortOrder === 'asc' ? 'desc' : 'asc')}
+                  onClick={() => {
+                    const newOrder = selectedSortOrder === 'asc' ? 'desc' : 'asc';
+                    trackContractSortChange({
+                      sortBy: selectedSortBy,
+                      sortOrder: newOrder,
+                    });
+                    setSortOrder(newOrder);
+                  }}
                   className="p-2 hover:bg-white rounded-lg transition-colors"
                   aria-label={`Basculer l'ordre de tri (${selectedSortOrder === 'asc' ? 'croissant' : 'décroissant'})`}
                   type="button"

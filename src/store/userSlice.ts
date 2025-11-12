@@ -21,6 +21,8 @@ export interface User {
   zip?: string;
   phone?: string;
   creditBalance?: number;
+  acceptedTerms?: boolean;
+  termsAcceptedAt?: string;
 }
 
 interface UserState {
@@ -58,11 +60,6 @@ const userSlice = createSlice({
       state.error = null;
       state.loginAttempts = 0;
       state.lastLoginAt = action.payload.lastLoginAt;
-
-      // Update first time login flag
-      if (state.currentUser) {
-        state.currentUser.isFirstLogin = false;
-      }
     },
 
     loginFailure: (state, action: PayloadAction<string>) => {
@@ -145,6 +142,8 @@ const userSlice = createSlice({
         const updatedUser = {
           ...state.currentUser,
           ...action.payload.user,
+          acceptedTerms: action.payload.user.acceptedTerms ?? state.currentUser.acceptedTerms,
+          termsAcceptedAt: action.payload.user.termsAcceptedAt ?? state.currentUser.termsAcceptedAt,
           // Map profession to professionalCategory for frontend compatibility
           professionalCategory: action.payload.user.profession || state.currentUser.professionalCategory,
           // Ensure all address fields are properly mapped

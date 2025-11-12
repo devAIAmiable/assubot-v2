@@ -217,7 +217,7 @@ const ChatSidebarComponent: React.FC<ChatSidebarProps> = ({
                             <span className={`text-xs ${currentChatId === chat.id ? 'text-blue-500' : 'text-gray-400'}`}>
                               {dayjs(chat.lastMessage?.createdAt || chat.updatedAt).format('DD MMM')}
                             </span>
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex gap-1 transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100">
                               <button
                                 onClick={(event) => {
                                   event.stopPropagation();

@@ -1,16 +1,18 @@
+import { useEffect, useRef, useState } from 'react';
 import { FaCoins, FaCreditCard, FaHistory, FaInfoCircle, FaMinus, FaPlus } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+
+import { trackCreditBalanceStatus, trackCreditHistoryView, trackCreditPackCheckout, trackCreditPaymentError, trackCreditTransactionsRefresh } from '@/services/analytics/gtm';
 
 import Button from './ui/Button';
 import TransactionHistoryModal from './TransactionHistoryModal';
-import { creditService } from '../services/creditService';
+import { creditService, type CreditPack } from '../services/creditService';
 import { getUserState } from '../utils/stateHelpers';
-import { motion } from 'framer-motion';
 import { paymentService } from '../services/paymentService';
 import { showToast } from './ui/Toast';
 import { useAppSelector } from '../store/hooks';
 import { useCreditTransactions } from '../hooks/useCreditTransactions';
 import { useGetCreditPacksQuery } from '../store/creditPacksApi';
-import { useState } from 'react';
 
 // Helper function to get French label for transaction type
 const getTransactionLabel = (type: string, source: string) => {
@@ -33,6 +35,8 @@ const getTransactionLabel = (type: string, source: string) => {
   }
 };
 
+const CREDIT_LOW_THRESHOLD = 20;
+
 const CreditPage = () => {
   const { currentUser } = useAppSelector(getUserState);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
@@ -40,8 +44,30 @@ const CreditPage = () => {
 
   const { data: creditPacks = [], isLoading: loading, error, refetch } = useGetCreditPacksQuery();
   const { transactions: recentTransactions, loading: transactionsLoading, error: transactionsError, refetch: refetchTransactions } = useCreditTransactions({ limit: 5 });
+  const previousBalanceStatusRef = useRef<string | null>(null);
 
-  const handlePurchase = async (packageId: string) => {
+  useEffect(() => {
+    if (!currentUser || currentUser.creditBalance === undefined || currentUser.creditBalance === null) {
+      return;
+    }
+
+    const balance = currentUser.creditBalance;
+    const status = balance <= 0 ? 'critical' : balance <= CREDIT_LOW_THRESHOLD ? 'low' : 'ok';
+
+    if (previousBalanceStatusRef.current === `${status}:${balance}`) {
+      return;
+    }
+
+    previousBalanceStatusRef.current = `${status}:${balance}`;
+    trackCreditBalanceStatus({
+      balance,
+      status: status as 'low' | 'ok' | 'critical',
+      threshold: CREDIT_LOW_THRESHOLD,
+    });
+  }, [currentUser?.creditBalance]);
+
+  const handlePurchase = async (pack: CreditPack) => {
+    const packageId = pack.id;
     try {
       setPurchaseLoading(packageId);
 
@@ -51,16 +77,40 @@ const CreditPage = () => {
         // Store the credit pack ID in sessionStorage for use on success page
         sessionStorage.setItem('selectedCreditPackId', packageId);
 
+        trackCreditPackCheckout({
+          packId: pack.id,
+          packName: pack.name,
+          creditAmount: pack.creditAmount,
+          priceEur: pack.priceCents / 100,
+        });
+
         // Redirect to Stripe Checkout
         window.location.href = response.data.url;
       } else {
         showToast.error(response.error || 'Erreur lors de la création du paiement');
+        trackCreditPaymentError({
+          packId: pack.id,
+          errorMessage: response.error || 'create_checkout_failed',
+        });
         setPurchaseLoading(null);
       }
     } catch {
       showToast.error('Erreur lors de la création du paiement');
+      trackCreditPaymentError({
+        packId: pack.id,
+        errorMessage: 'network_error',
+      });
       setPurchaseLoading(null);
     }
+  };
+  const handleOpenHistoryModal = () => {
+    trackCreditHistoryView({ source: 'button' });
+    setIsHistoryModalOpen(true);
+  };
+
+  const handleRefetchTransactions = () => {
+    trackCreditTransactionsRefresh({ source: 'manual' });
+    refetchTransactions();
   };
 
   if (!currentUser) {
@@ -148,7 +198,7 @@ const CreditPage = () => {
                 className={`relative border rounded-xl p-6 cursor-pointer transition-all ${
                   purchaseLoading === pkg.id ? 'border-[#1e51ab] bg-blue-50' : 'border-gray-200 hover:border-[#1e51ab]'
                 } ${pkg.isFeatured ? 'ring-2 ring-[#1e51ab]' : ''}`}
-                onClick={() => handlePurchase(pkg.id)}
+                onClick={() => handlePurchase(pkg)}
               >
                 {pkg.isFeatured && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -167,7 +217,15 @@ const CreditPage = () => {
                       <span className="text-sm text-[#1e51ab]">Chargement...</span>
                     </div>
                   ) : (
-                    <Button variant="secondary" size="sm" className="w-full">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="w-full"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handlePurchase(pkg);
+                      }}
+                    >
                       Sélectionner
                     </Button>
                   )}
@@ -210,7 +268,7 @@ const CreditPage = () => {
         ) : transactionsError ? (
           <div className="text-center py-8">
             <p className="text-red-600 mb-4">{transactionsError}</p>
-            <Button variant="secondary" size="sm" onClick={refetchTransactions}>
+            <Button variant="secondary" size="sm" onClick={handleRefetchTransactions}>
               Réessayer
             </Button>
           </div>
@@ -252,7 +310,7 @@ const CreditPage = () => {
             ))}
             {recentTransactions.length >= 5 && (
               <div className="text-center pt-4">
-                <Button variant="ghost" size="sm" onClick={() => setIsHistoryModalOpen(true)} className="text-[#1e51ab]">
+                <Button variant="ghost" size="sm" onClick={handleOpenHistoryModal} className="text-[#1e51ab]">
                   Voir plus
                 </Button>
               </div>

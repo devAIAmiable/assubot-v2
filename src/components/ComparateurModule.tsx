@@ -9,6 +9,7 @@ import PastComparisonsView from './comparateur/PastComparisonsView';
 import ResultsView from './comparateur/ResultsView';
 import TypeSelectionView from './comparateur/TypeSelectionView';
 import { getContractType } from '../utils/contractAdapters';
+import { trackComparateurFilterChange, trackComparateurResultsLoaded, trackComparateurStepChange } from '@/services/analytics/gtm';
 import { useAppSelector } from '../store/hooks';
 import { useNavigate } from 'react-router-dom';
 
@@ -42,8 +43,6 @@ const ComparateurModule = () => {
   const [comparisonScores, setComparisonScores] = useState<Record<string, number>>({});
   const [askedQuestions, setAskedQuestions] = useState<AskedQuestion[]>([]);
   const [comparisonError, setComparisonError] = useState<string | null>(null);
-  const [loadingTimer, setLoadingTimer] = useState(0);
-  console.log('🚀 ~ ComparateurModule ~ loadingTimer:', loadingTimer);
   const [sessionId, setSessionId] = useState('');
 
   const [loadingTimerInterval, setLoadingTimerInterval] = useState<ReturnType<typeof setInterval> | null>(null);
@@ -53,6 +52,18 @@ const ComparateurModule = () => {
     rating: 0,
     coverages: [] as string[],
   });
+  const previousStepRef = useRef<ComparateurStep>('history');
+
+  useEffect(() => {
+    if (previousStepRef.current !== currentStep) {
+      trackComparateurStepChange({
+        from: previousStepRef.current,
+        to: currentStep,
+        category: selectedType ?? undefined,
+      });
+      previousStepRef.current = currentStep;
+    }
+  }, [currentStep, selectedType]);
 
   // Separate state setters to minimize re-renders
   const updatePriceRange = useCallback((newRange: number[]) => {
@@ -131,6 +142,10 @@ const ComparateurModule = () => {
   const handlePriceRangeChange = useCallback(
     (newRange: number[]) => {
       setIsFilteringResults(true);
+      trackComparateurFilterChange({
+        filter: 'priceRange',
+        value: newRange,
+      });
 
       // Clear existing timer
       if (debounceTimerRef.current) {
@@ -151,6 +166,10 @@ const ComparateurModule = () => {
   const handleRatingChange = useCallback(
     (newRating: number) => {
       setIsFilteringResults(true);
+      trackComparateurFilterChange({
+        filter: 'rating',
+        value: newRating,
+      });
       updateRating(newRating);
       setCurrentPage(1);
 
@@ -165,6 +184,10 @@ const ComparateurModule = () => {
   const handleInsurerChange = useCallback(
     (insurer: string, isChecked: boolean) => {
       setIsFilteringResults(true);
+      trackComparateurFilterChange({
+        filter: 'insurers',
+        value: `${insurer}:${isChecked ? 'add' : 'remove'}`,
+      });
 
       if (isChecked) {
         updateInsurers([...filters.insurers, insurer]);
@@ -183,6 +206,10 @@ const ComparateurModule = () => {
   // Handle filter reset
   const handleFilterReset = useCallback(() => {
     setIsFilteringResults(true);
+    trackComparateurFilterChange({
+      filter: 'reset',
+      value: 'all',
+    });
     resetFilters();
     setCurrentPage(1);
 
@@ -242,7 +269,6 @@ const ComparateurModule = () => {
     (response: ComparisonCalculationResponse) => {
       // Keep brief loading to show progression while preparing redirect
       setCurrentStep('loading');
-      setLoadingTimer(0);
       setComparisonError(null);
 
       // Prime local state once to avoid tearing before redirect (and satisfy linter)
@@ -250,11 +276,17 @@ const ComparateurModule = () => {
       setComparisonScores(response.scores);
       setLoadingTimerInterval(null);
 
+      trackComparateurResultsLoaded({
+        sessionId: response.sessionId,
+        category: selectedType ?? undefined,
+        offersCount: response.offers.length,
+      });
+
       setSessionId(response.sessionId);
       // Redirect directly to dedicated results page using API-provided sessionId
       navigate(`/app/comparateur/${response.sessionId}/resultats`);
     },
-    [navigate]
+    [navigate, selectedType]
   );
 
   // Handle comparison errors

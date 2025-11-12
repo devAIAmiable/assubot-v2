@@ -39,6 +39,8 @@ export const authService = {
         firstName: string;
         lastName: string;
         isFirstLogin: boolean;
+        acceptedTerms?: boolean;
+        termsAcceptedAt?: string;
       };
       message: string;
     }>
@@ -176,6 +178,8 @@ export const authService = {
         firstName: string;
         lastName: string;
         isFirstLogin: boolean;
+        acceptedTerms?: boolean;
+        termsAcceptedAt?: string;
       };
       message: string;
     }>
@@ -189,6 +193,8 @@ export const authService = {
           firstName: string;
           lastName: string;
           isFirstLogin: boolean;
+          acceptedTerms?: boolean;
+          termsAcceptedAt?: string;
         };
       }>('/auth/me');
 
@@ -348,6 +354,8 @@ export const authService = {
         firstName: string;
         lastName: string;
         isFirstLogin: boolean;
+        acceptedTerms?: boolean;
+        termsAcceptedAt?: string;
       };
       message: string;
     }>
@@ -361,6 +369,8 @@ export const authService = {
           firstName: string;
           lastName: string;
           isFirstLogin: boolean;
+          acceptedTerms?: boolean;
+          termsAcceptedAt?: string;
         };
       }>('/auth/google/status');
 
@@ -416,6 +426,81 @@ export const notificationsService = {
 // User profile endpoints
 export const userService = {
   getProfile: () => coreApi.get<unknown>('/user/profile'),
+  acceptTerms: async (
+    userId: string,
+    acceptance: {
+      acceptedTerms: boolean;
+      termsAcceptedAt?: string;
+    }
+  ): Promise<
+    ServiceResponse<{
+      message: string;
+      user: {
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        birthDate?: string;
+        gender?: string;
+        profession?: string;
+        provider: string;
+        isFirstLogin: boolean;
+        isActive: boolean;
+        isVerified: boolean;
+        acceptedTerms: boolean;
+        termsAcceptedAt?: string;
+        createdAt: string;
+        updatedAt: string;
+        address?: string;
+        city?: string;
+        zip?: string;
+      };
+    }>
+  > => {
+    try {
+      const response = await coreApi.put<{
+        message: string;
+        user: {
+          id: string;
+          email: string;
+          firstName: string;
+          lastName: string;
+          birthDate?: string;
+          gender?: string;
+          profession?: string;
+          provider: string;
+          isFirstLogin: boolean;
+          isActive: boolean;
+          isVerified: boolean;
+          acceptedTerms: boolean;
+          termsAcceptedAt?: string;
+          createdAt: string;
+          updatedAt: string;
+          address?: string;
+          city?: string;
+          zip?: string;
+        };
+      }>(`/users/${userId}`, acceptance);
+
+      if (response.success && response.status === 'success') {
+        return {
+          success: true,
+          data: response.data,
+        };
+      }
+
+      return {
+        success: false,
+        error: response.error?.message || "Erreur lors de l'acceptation des conditions",
+      };
+    } catch (error) {
+      console.error('Accept terms error:', error);
+      return {
+        success: false,
+        error: 'Erreur de connexion au serveur',
+      };
+    }
+  },
   updateProfile: async (profileData: {
     firstName?: string;
     lastName?: string;

@@ -26,6 +26,7 @@ import {
   type PasswordChangeFormData,
 } from '../schemas/profileValidation';
 import { getProfessionalCategoryLabel, professionalCategoryOptions } from '../utils/user';
+import { trackProfileAddressSaved, trackProfileAvatarUpload, trackProfilePasswordChange, trackProfilePersonalSaved } from '@/services/analytics/gtm';
 
 const ProfileModule = () => {
   const navigate = useNavigate();
@@ -138,9 +139,14 @@ const ProfileModule = () => {
     });
 
     if (result.success) {
+      trackProfilePersonalSaved({ status: 'success' });
       showToast.success('Informations personnelles mises à jour avec succès');
       setIsEditingPersonal(false);
     } else {
+      trackProfilePersonalSaved({
+        status: 'error',
+        errorMessage: result.error || 'profile_update_error',
+      });
       showToast.error('Erreur lors de la mise à jour des informations personnelles');
     }
   };
@@ -161,9 +167,14 @@ const ProfileModule = () => {
     });
 
     if (result.success) {
+      trackProfileAddressSaved({ status: 'success' });
       showToast.success('Adresse mise à jour avec succès');
       setIsEditingAddress(false);
     } else {
+      trackProfileAddressSaved({
+        status: 'error',
+        errorMessage: result.error || 'address_update_error',
+      });
       showToast.error("Erreur lors de la mise à jour de l'adresse");
     }
   };
@@ -183,10 +194,15 @@ const ProfileModule = () => {
     });
 
     if (result.success) {
+      trackProfilePasswordChange({ status: 'success' });
       showToast.success('Mot de passe changé avec succès');
       passwordForm.reset();
       setIsChangingPassword(false);
     } else {
+      trackProfilePasswordChange({
+        status: 'error',
+        errorMessage: result.error || 'password_change_error',
+      });
       showToast.error('Erreur lors du changement de mot de passe');
     }
   };
@@ -194,12 +210,22 @@ const ProfileModule = () => {
   const handleAvatarUpload = async (file: File) => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
+      trackProfileAvatarUpload({
+        status: 'error',
+        errorMessage: 'invalid_file_type',
+        fileSizeKb: Math.round(file.size / 1024),
+      });
       showToast.error('Veuillez sélectionner un fichier image valide.');
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
+      trackProfileAvatarUpload({
+        status: 'error',
+        errorMessage: 'file_too_large',
+        fileSizeKb: Math.round(file.size / 1024),
+      });
       showToast.error('Le fichier est trop volumineux. Taille maximum : 5MB.');
       return;
     }

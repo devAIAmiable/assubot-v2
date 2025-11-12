@@ -7,6 +7,7 @@ import Avatar from '../ui/Avatar';
 import React from 'react';
 import { getInsurerLogo } from '../../utils/insurerLogo';
 import { motion } from 'framer-motion';
+import { trackComparateurAiQuestion } from '@/services/analytics/gtm';
 
 interface Filters {
   priceRange: number[];
@@ -78,6 +79,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
       const { comparisonService } = await import('../../services/comparison');
       const resp = await comparisonService.askSessionQuestion(sessionId, questionToAsk);
       if (resp.success && resp.data) {
+        trackComparateurAiQuestion({ sessionId, hasResponse: true });
         dispatch(
           addQueryResult({
             id: resp.data.id,
@@ -90,7 +92,12 @@ const ResultsView: React.FC<ResultsViewProps> = ({
         setAiInput('');
       } else {
         setAiError(resp.error || 'Échec du traitement de la question');
+        trackComparateurAiQuestion({ sessionId, hasResponse: false });
       }
+    } catch (error) {
+      console.error('AI question error:', error);
+      setAiError('Erreur de connexion au serveur');
+      trackComparateurAiQuestion({ sessionId, hasResponse: false });
     } finally {
       setAiLoading(false);
     }

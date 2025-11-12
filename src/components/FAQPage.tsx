@@ -3,6 +3,7 @@ import { FaArrowLeft, FaChevronDown, FaCog, FaCreditCard, FaLightbulb, FaQuestio
 
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { trackCtaClick, trackNavigationRedirect } from '@/services/analytics/gtm';
 
 interface FAQQuestion {
   id: number;
@@ -28,6 +29,11 @@ const FAQPage = () => {
   const [activeTab, setActiveTab] = useState('all');
 
   const handleGoBack = () => {
+    trackNavigationRedirect({
+      from: '/faq',
+      to: 'history_back',
+      reason: 'cta_back',
+    });
     navigate(-1);
   };
 
@@ -311,6 +317,11 @@ const FAQPage = () => {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => {
+                trackCtaClick({
+                  label: 'FAQ Contact',
+                  location: 'faq_contact_section',
+                  destination: '/',
+                });
                 navigate('/');
                 setTimeout(() => {
                   const contactSection = document.getElementById('contact');

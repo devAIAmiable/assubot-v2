@@ -3,6 +3,16 @@ import 'dayjs/locale/fr';
 
 import type { ChatContract, CreateChatRequest, QuickAction } from '../types/chat';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  trackChatCreated,
+  trackChatDeleted,
+  trackChatMessageError,
+  trackChatMessageSent,
+  trackChatQuickAction,
+  trackChatRenamed,
+  trackChatSearch,
+  trackChatSelected,
+} from '@/services/analytics/gtm';
 import { useGetChatMessagesQuery, useGetChatsQuery } from '../store/chatsApi';
 
 import { AnimatePresence } from 'framer-motion';
@@ -24,8 +34,20 @@ import { useSendMessage } from '../hooks/useSendMessage';
 dayjs.locale('fr');
 
 const ChatModule: React.FC = () => {
-  const { currentChat, loading, error, filters, createNewChat, updateChatById, deleteChatById, selectChat, clearChatError, getChatQuickActions, clearChatQuickActions } =
-    useChats();
+  const {
+    currentChat,
+    loading,
+    error,
+    filters,
+    createNewChat,
+    updateChatById,
+    deleteChatById,
+    selectChat,
+    clearChatError,
+    getChatQuickActions,
+    clearChatQuickActions,
+    clearCurrentChatSelection,
+  } = useChats();
 
   const { chats: paginatedChats, loading: paginationLoading, pagination, goToNextPage, goToPrevPage, search } = useChatPagination();
   const { error: apiError } = useGetChatsQuery(filters || {});
@@ -52,6 +74,12 @@ const ChatModule: React.FC = () => {
   const [messageInput, setMessageInput] = useState('');
   const [showChatList, setShowChatList] = useState(true);
   const [isInitialMessageLoad, setIsInitialMessageLoad] = useState(false);
+
+  useEffect(() => {
+    clearCurrentChatSelection();
+    setShowChatList(true);
+    setCurrentContractNames('');
+  }, [clearCurrentChatSelection]);
   const quickActions = currentChat ? getChatQuickActions(currentChat.id) : [];
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const currentChatId = currentChat?.id ?? null;
@@ -88,6 +116,26 @@ const ChatModule: React.FC = () => {
   }, [contracts]);
   const chatsById = useMemo(() => new Map(paginatedChats.map((chat) => [chat.id, chat])), [paginatedChats]);
 
+  const resolvedContractNames = useMemo(() => {
+    if (currentContractNames.trim().length > 0) {
+      return currentContractNames;
+    }
+
+    const directNames = currentChat?.contracts?.map((item: ChatContract) => item?.name).filter((name): name is string => Boolean(name)) ?? [];
+    if (directNames.length > 0) {
+      return directNames.join(', ');
+    }
+
+    if (currentChat?.contractIds && currentChat.contractIds.length > 0) {
+      const mapped = currentChat.contractIds.map((id) => contractsById.get(id)).filter((name): name is string => Boolean(name));
+      if (mapped.length > 0) {
+        return mapped.join(', ');
+      }
+    }
+
+    return '';
+  }, [currentContractNames, currentChat, contractsById]);
+
   useEffect(() => {
     if (!currentChat) {
       setCurrentContractNames('');
@@ -110,6 +158,7 @@ const ChatModule: React.FC = () => {
       search('');
       return;
     }
+    trackChatSearch({ queryLength: searchQuery.trim().length });
     search(searchQuery);
   }, [searchQuery, search]);
 
@@ -147,7 +196,12 @@ const ChatModule: React.FC = () => {
     };
 
     try {
-      await createNewChat(chatData);
+      const result = await createNewChat(chatData);
+      trackChatCreated({
+        chatId: result.chat.id,
+        hasContracts: selectedContractIds.length > 0,
+        contractsCount: selectedContractIds.length,
+      });
       if (selectedContractIds.length > 0) {
         const selectedNames = selectedContractIds.map((id) => contractsById.get(id)).filter((name): name is string => Boolean(name));
         if (selectedNames.length > 0) {
@@ -168,6 +222,7 @@ const ChatModule: React.FC = () => {
       const selectedChat = chatsById.get(chatId);
       if (!selectedChat) return;
 
+      trackChatSelected({ chatId });
       selectChat(selectedChat);
       cancelEdit();
       setShowChatList(false);
@@ -181,6 +236,7 @@ const ChatModule: React.FC = () => {
 
       try {
         await updateChatById(chatId, { title: editingTitle.trim() });
+        trackChatRenamed({ chatId });
         cancelEdit();
       } catch (updateError) {
         console.error('Erreur lors de la mise à jour du chat:', updateError);
@@ -203,6 +259,7 @@ const ChatModule: React.FC = () => {
         selectChat(null);
         setShowChatList(true);
       }
+      trackChatDeleted({ chatId: chatToDelete });
       setShowDeleteModal(false);
       setChatToDelete(null);
     } catch (deleteError) {
@@ -240,8 +297,16 @@ const ChatModule: React.FC = () => {
 
     try {
       await sendUserMessage(currentChatId, messageContent);
+      trackChatMessageSent({
+        chatId: currentChatId,
+        messageLength: messageContent.length,
+      });
     } catch (sendError) {
       console.error("Erreur lors de l'envoi du message:", sendError);
+      trackChatMessageError({
+        chatId: currentChatId,
+        errorMessage: sendError instanceof Error ? sendError.message : 'send_failed',
+      });
       setMessageInput(messageContent);
     }
   }, [currentChatId, messageInput, sendUserMessage, sendingMessage]);
@@ -252,9 +317,17 @@ const ChatModule: React.FC = () => {
 
       try {
         clearChatQuickActions(currentChatId);
+        trackChatQuickAction({
+          chatId: currentChatId,
+          actionLabel: action.label,
+        });
         await sendUserMessage(currentChatId, action.instructions);
       } catch (quickActionError) {
         console.error("Erreur lors de l'envoi de l'action rapide:", quickActionError);
+        trackChatMessageError({
+          chatId: currentChatId,
+          errorMessage: quickActionError instanceof Error ? quickActionError.message : 'quick_action_failed',
+        });
       }
     },
     [clearChatQuickActions, currentChatId, sendUserMessage, sendingMessage]
@@ -297,7 +370,7 @@ const ChatModule: React.FC = () => {
       <div className={`flex-1 flex flex-col bg-white ${showChatList ? 'hidden md:flex' : 'flex'}`}>
         {currentChat ? (
           <>
-            <ChatHeader chat={currentChat} contractNames={currentContractNames} onBack={handleBackToChatList} />
+            <ChatHeader chat={currentChat} contractNames={resolvedContractNames} onBack={handleBackToChatList} />
 
             <ChatMessageList
               messages={messages}

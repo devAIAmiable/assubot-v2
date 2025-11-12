@@ -13,6 +13,7 @@ interface AppConfig {
   // Feature Flags
   enableAnalytics: boolean;
   enableDebugMode: boolean;
+  gtmContainerId: string;
 
   // Timeouts
   apiTimeout: number;
@@ -54,6 +55,7 @@ export const config: AppConfig = {
   // Feature Flags
   enableAnalytics: getEnvVarAsBoolean('VITE_ENABLE_ANALYTICS', false),
   enableDebugMode: getEnvVarAsBoolean('VITE_ENABLE_DEBUG_MODE', false),
+  gtmContainerId: getEnvVar('VITE_GTM_CONTAINER_ID', ''),
 
   // Timeouts
   apiTimeout: getEnvVarAsNumber('VITE_API_TIMEOUT', 10000),
