@@ -1,6 +1,7 @@
 import type { ContractCategory, ContractStatus } from './contract';
 
 import type { Insurer } from '../store/insurersApi';
+
 export interface Chat {
   id: string;
   title: string;
@@ -30,6 +31,7 @@ export interface DocumentPageReference {
 
 export interface DocumentReference {
   id: string | null;
+  contractName: string | null;
   contractId: string | null;
   type: string;
   url?: string;

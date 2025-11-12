@@ -49,7 +49,7 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
     });
   };
 
-  const getDocumentName = (documentType: string) => {
+  const getDocumentName = (documentRef: DocumentReference) => {
     // Use document type as the primary identifier
     const typeMap: Record<string, string> = {
       CP: 'Conditions Particulières',
@@ -61,9 +61,9 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
       OTHER: 'Document',
     };
 
-    const typeName = typeMap[documentType] || documentType;
+    const typeName = typeMap[documentRef.type] || documentRef.type;
 
-    return typeName;
+    return (documentRef.contractName ?? 'Document') + ' - ' + typeName;
   };
 
   const getPageDisplayText = (pageNumber: number) => {
@@ -139,7 +139,7 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
                     <div className="flex items-center gap-3">
                       <FaFilePdf className="text-red-600 text-sm flex-shrink-0" />
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900 truncate">{getDocumentName(documentRef.type)}</h4>
+                        <h4 className="text-sm font-medium text-gray-900 truncate">{getDocumentName(documentRef)}</h4>
                         <p className="text-xs text-gray-500">
                           {referenceCount} référence{referenceCount > 1 ? 's' : ''}
                         </p>
@@ -223,7 +223,7 @@ const DocumentReferences: React.FC<DocumentReferencesProps> = ({ references, cla
         <PdfViewerModal
           isOpen={pdfViewer.isOpen}
           onClose={closePdfViewer}
-          title={getDocumentName(pdfViewer.documentRef.type)}
+          title={getDocumentName(pdfViewer.documentRef)}
           documentReference={pdfViewer.documentRef}
           contractId={pdfViewer.documentRef.contractId || ''}
           highlightPage={pdfViewer.highlightPage}
