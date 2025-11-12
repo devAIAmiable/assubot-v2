@@ -43,7 +43,6 @@ const ComparateurModule = () => {
   const [comparisonScores, setComparisonScores] = useState<Record<string, number>>({});
   const [askedQuestions, setAskedQuestions] = useState<AskedQuestion[]>([]);
   const [comparisonError, setComparisonError] = useState<string | null>(null);
-  const [loadingTimer, setLoadingTimer] = useState(0);
   const [sessionId, setSessionId] = useState('');
 
   const [loadingTimerInterval, setLoadingTimerInterval] = useState<ReturnType<typeof setInterval> | null>(null);
@@ -270,7 +269,6 @@ const ComparateurModule = () => {
     (response: ComparisonCalculationResponse) => {
       // Keep brief loading to show progression while preparing redirect
       setCurrentStep('loading');
-      setLoadingTimer(0);
       setComparisonError(null);
 
       // Prime local state once to avoid tearing before redirect (and satisfy linter)
