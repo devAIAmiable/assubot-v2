@@ -1,4 +1,4 @@
-import { FaArrowLeft, FaEdit, FaFileSignature, FaInfoCircle } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaFileSignature, FaInfoCircle, FaTrash, FaSpinner } from 'react-icons/fa';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { getContractListItemInsurer, getContractListItemType } from '../../../utils/contractAdapters';
 import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../../../utils/contract';
@@ -16,7 +16,9 @@ interface ContractHeaderProps {
   onEdit?: () => void;
   onNavigateToEdit?: () => void;
   onSummarize: () => void;
+  onDelete?: () => void;
   isSummarizing: boolean;
+  isDeleting?: boolean;
   summarizeStatus?: Contract['summarizeStatus'];
   requiredCredits?: number;
   isAdminMode?: boolean;
@@ -37,7 +39,7 @@ const Tooltip: React.FC<{ label: string; children: React.ReactNode }> = ({ label
 const IconButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { ariaLabel: string }> = ({ ariaLabel, className = '', children, ...props }) => (
   <button
     aria-label={ariaLabel}
-    className={`p-2 rounded-lg text-gray-600 hover:text-blue-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-colors ${className}`}
+    className={`p-2 rounded-lg text-gray-600 hover:text-blue-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     {...props}
   >
     {children}
@@ -82,7 +84,7 @@ const LogoOrIcon: React.FC<{ contract: Contract }> = ({ contract }) => {
 };
 
 const ContractHeader: React.FC<ContractHeaderProps> = React.memo(
-  ({ contract, onBack, onEdit, onNavigateToEdit, onSummarize, isSummarizing, summarizeStatus, requiredCredits = 5, isAdminMode = false }) => {
+  ({ contract, onBack, onEdit, onNavigateToEdit, onSummarize, onDelete, isSummarizing, isDeleting = false, summarizeStatus, requiredCredits = 5, isAdminMode = false }) => {
     const isExpired = useMemo(() => {
       if (!contract.endDate) return false;
       return dayjs(contract.endDate).endOf('day').isBefore(dayjs());
@@ -110,6 +112,10 @@ const ContractHeader: React.FC<ContractHeaderProps> = React.memo(
           e.preventDefault();
           onSummarize();
         }
+        if (!hasModifier && (e.key === 'd' || e.key === 'D') && onDelete && !isDeleting) {
+          e.preventDefault();
+          onDelete();
+        }
         if (e.key === 'Backspace' && !e.metaKey && !e.ctrlKey) {
           e.preventDefault();
           onBack();
@@ -117,7 +123,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = React.memo(
       };
       window.addEventListener('keydown', handler);
       return () => window.removeEventListener('keydown', handler);
-    }, [canSummarize, isSummarizing, onSummarize, onBack, onEdit, onNavigateToEdit, isActiveContract]);
+    }, [canSummarize, isSummarizing, isDeleting, onSummarize, onBack, onEdit, onNavigateToEdit, onDelete, isActiveContract]);
 
     return (
       <header
@@ -172,6 +178,15 @@ const ContractHeader: React.FC<ContractHeaderProps> = React.memo(
                 <Tooltip label="Modifier le contrat">
                   <IconButton ariaLabel="Modifier le contrat" onClick={onNavigateToEdit || onEdit}>
                     <FaEdit className="h-4 w-4" />
+                  </IconButton>
+                </Tooltip>
+              )}
+
+              {/* Delete */}
+              {onDelete && (
+                <Tooltip label="Supprimer le contrat">
+                  <IconButton ariaLabel="Supprimer le contrat" onClick={onDelete} disabled={isDeleting} className="text-gray-600 hover:text-red-600">
+                    {isDeleting ? <FaSpinner className="h-4 w-4 animate-spin" /> : <FaTrash className="h-4 w-4" />}
                   </IconButton>
                 </Tooltip>
               )}

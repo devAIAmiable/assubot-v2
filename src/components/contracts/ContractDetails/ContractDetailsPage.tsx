@@ -17,12 +17,16 @@ import ObligationsTab from './ContractTabs/ObligationsTab';
 import OverviewTab from './ContractTabs/OverviewTab';
 import SummarizeConfirmationModal from './modals/SummarizeConfirmationModal';
 import ZonesTab from './ContractTabs/ZonesTab';
+import DeleteConfirmationModal from '../DeleteConfirmationModal';
 import { selectIsContractProcessing } from '../../../store/contractProcessingSlice';
 import { useAppSelector } from '../../../store/hooks';
 import { useContractDownload } from '../../../hooks/useContractDownload';
 import { useContractSummarizationListener } from '../../../hooks/useContractSummarizationListener';
 import { useContractSummarize } from '../../../hooks/useContractSummarize';
+import { useContractOperations } from '../../../hooks/useContractOperations';
 import { useGetContractByIdQuery } from '../../../store/contractsApi';
+import { trackContractDelete } from '@/services/analytics/gtm';
+import { showToast } from '../../ui/Toast';
 
 const DEFAULT_REQUIRED_CREDITS = 5;
 
@@ -52,6 +56,7 @@ const ContractDetailsPage: React.FC = () => {
 
   const { generateDownloadUrls, isGenerating } = useContractDownload();
   const { summarizeContract, isSummarizing, insufficientCredits } = useContractSummarize();
+  const { deleteContract, isDeleting: isDeletingContract, deleteError } = useContractOperations();
 
   const isProcessing = useAppSelector((state) => selectIsContractProcessing(state, contractId || ''));
   const currentUser = useAppSelector((state) => state.user.currentUser);
@@ -86,6 +91,7 @@ const ContractDetailsPage: React.FC = () => {
 
   const [selectedTab, setSelectedTab] = useState<number>(() => getInitialTabIndex());
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedGuarantee, setSelectedGuarantee] = useState<BackendContractGuarantee | null>(null);
   const [isGuaranteeModalOpen, setIsGuaranteeModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -100,6 +106,12 @@ const ContractDetailsPage: React.FC = () => {
       setSelectedTab(index);
     }
   }, [tabIds]);
+
+  useEffect(() => {
+    if (deleteError) {
+      showToast.error(deleteError);
+    }
+  }, [deleteError]);
 
   const handleTabChange = (index: number) => {
     setSelectedTab(index);
@@ -122,6 +134,37 @@ const ContractDetailsPage: React.FC = () => {
 
   const handleEditSuccess = () => {
     setIsEditModalOpen(false);
+  };
+
+  const handleDeleteContract = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    if (contractId) {
+      trackContractDelete({ contractId, status: 'cancel' });
+    }
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!contractId) {
+      setIsDeleteModalOpen(false);
+      return;
+    }
+
+    try {
+      trackContractDelete({ contractId, status: 'confirm' });
+      await deleteContract(contractId);
+      trackContractDelete({ contractId, status: 'success' });
+      showToast.success('Contrat supprimé avec succès.');
+      navigate('/app/contrats');
+    } catch (deleteErr) {
+      console.error('Failed to delete contract:', deleteErr);
+      showToast.error('Erreur lors de la suppression du contrat.');
+    } finally {
+      setIsDeleteModalOpen(false);
+    }
   };
 
   const handleSelectGuarantee = (guarantee: BackendContractGuarantee) => {
@@ -240,7 +283,9 @@ const ContractDetailsPage: React.FC = () => {
         onBack={handleBack}
         onEdit={handleEdit}
         onSummarize={handleSummarize}
+        onDelete={handleDeleteContract}
         isSummarizing={isSummarizing}
+        isDeleting={isDeletingContract}
         summarizeStatus={contract.summarizeStatus}
         requiredCredits={requiredCredits}
       />
@@ -372,6 +417,14 @@ const ContractDetailsPage: React.FC = () => {
       {contract && <EditContractModal contract={contract} isOpen={isEditModalOpen} onClose={handleEditClose} onSuccess={handleEditSuccess} />}
 
       {selectedGuarantee && <GuaranteeDetailModal isOpen={isGuaranteeModalOpen} onClose={handleCloseGuaranteeModal} guarantee={selectedGuarantee} />}
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        contractName={contract.name}
+        isDeleting={isDeletingContract}
+      />
 
       <InsufficientCreditsModal
         isOpen={insufficientCredits.isModalOpen}
