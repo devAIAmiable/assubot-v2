@@ -1,4 +1,4 @@
-import { FaCog, FaList, FaUpload, FaUserShield, FaUsers } from 'react-icons/fa';
+import { FaList, FaUpload, FaUserShield } from 'react-icons/fa';
 import React, { useState } from 'react';
 
 import AdminContractUpload from './AdminContractUpload';
@@ -43,7 +43,7 @@ const AdminPanel: React.FC = () => {
                     <p className="text-gray-600">Gérez les contrats et l'importation</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
+                {/* <div className="flex items-center space-x-3">
                   <button
                     className="inline-flex items-center gap-2 bg-[#1e51ab] hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg"
                     onClick={() => setOpenBatchModal(true)}
@@ -55,7 +55,7 @@ const AdminPanel: React.FC = () => {
                     <FaCog className="h-5 w-5" />
                     <span className="text-sm font-medium">Admin</span>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
