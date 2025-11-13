@@ -48,15 +48,24 @@ const getDetailCeiling = (detail: BackendGuaranteeDetail): string | undefined =>
  * Calculate comprehensive statistics for a guarantee
  */
 export function calculateGuaranteeStats(guarantee: BackendContractGuarantee): GuaranteeStats {
-  const totalCoverages =
+  // Count coverages from guarantee level
+  const guaranteeCoverages = guarantee.coverages?.filter((c) => c.type === 'covered').length || 0;
+  const guaranteeExclusions = guarantee.coverages?.filter((c) => c.type === 'not_covered').length || 0;
+
+  // Count coverages from details level
+  const detailsCoverages =
     guarantee.details?.reduce((total, detail) => {
       return total + (detail.coverages?.filter((c) => c.type === 'covered').length || 0);
     }, 0) || 0;
 
-  const totalExclusions =
+  const detailsExclusions =
     guarantee.details?.reduce((total, detail) => {
       return total + (detail.coverages?.filter((c) => c.type === 'not_covered').length || 0);
     }, 0) || 0;
+
+  // Total = guarantee level + details level
+  const totalCoverages = guaranteeCoverages + detailsCoverages;
+  const totalExclusions = guaranteeExclusions + detailsExclusions;
 
   const totalItems = totalCoverages + totalExclusions;
   const coveragePercentage = totalItems > 0 ? Math.round((totalCoverages / totalItems) * 100) : 0;
