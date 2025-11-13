@@ -1,7 +1,6 @@
 import { FaUserShield } from 'react-icons/fa';
 import React from 'react';
-import type { RootState } from '../store';
-import { useSelector } from 'react-redux';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 interface AdminGuardProps {
   children: React.ReactNode;
@@ -9,9 +8,7 @@ interface AdminGuardProps {
 }
 
 const AdminGuard: React.FC<AdminGuardProps> = ({ children, fallback }) => {
-  const currentUser = useSelector((state: RootState) => state.user.currentUser);
-
-  const isAdmin = currentUser?.email?.endsWith('@a-lamiable.com');
+  const isAdmin = useIsAdmin();
 
   if (!isAdmin) {
     return (
@@ -23,8 +20,7 @@ const AdminGuard: React.FC<AdminGuardProps> = ({ children, fallback }) => {
                 <FaUserShield className="text-4xl text-white" />
               </div>
               <h4 className="text-2xl font-semibold text-red-600 mt-4">Accès non autorisé</h4>
-              <p className="text-gray-600 mt-4">Cette page est réservée aux administrateurs avec un email @a-lamiable.com</p>
-              <p className="text-sm text-gray-500 mt-2">Email actuel: {currentUser?.email || 'Non connecté'}</p>
+              <p className="text-gray-600 mt-4">Cette page est réservée aux administrateurs</p>
             </div>
           </div>
         </div>
