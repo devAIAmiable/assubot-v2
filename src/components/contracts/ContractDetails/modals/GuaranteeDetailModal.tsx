@@ -1,5 +1,4 @@
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
-import clsx from 'clsx';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -7,6 +6,7 @@ import type { BackendContractGuarantee } from '../../../../types/contract';
 import GuaranteeOverview from '../../../contract/GuaranteeOverview';
 import GuaranteeServiceAccordion from '../../../contract/GuaranteeServiceAccordion';
 import GuaranteeSidebar from '../../../contract/GuaranteeSidebar';
+import clsx from 'clsx';
 import { useScrollSpy } from '../../../../hooks/useScrollSpy';
 
 interface GuaranteeDetailModalProps {
@@ -63,17 +63,18 @@ const GuaranteeDetailModal: React.FC<GuaranteeDetailModalProps> = ({ isOpen, onC
       return;
     }
 
-    // Only update if we've reached the manual target or if there's no manual target
-    if (manualTargetRef.current && manualTargetRef.current !== activeScrollSection) {
-      return;
-    }
-
-    // Clear manual target if we've reached it
-    if (manualTargetRef.current === activeScrollSection) {
-      manualTargetRef.current = null;
-      if (manualTimeoutRef.current) {
-        window.clearTimeout(manualTimeoutRef.current);
-        manualTimeoutRef.current = null;
+    // If we have a manual target, only accept scroll spy updates that match it
+    if (manualTargetRef.current) {
+      if (manualTargetRef.current === activeScrollSection) {
+        // We've reached the target, clear the manual state
+        manualTargetRef.current = null;
+        if (manualTimeoutRef.current) {
+          window.clearTimeout(manualTimeoutRef.current);
+          manualTimeoutRef.current = null;
+        }
+      } else {
+        // Still scrolling to target, ignore this update
+        return;
       }
     }
 
@@ -89,17 +90,23 @@ const GuaranteeDetailModal: React.FC<GuaranteeDetailModalProps> = ({ isOpen, onC
   }, [activeScrollSection, isManualSelection]);
 
   const handleSectionChange = useCallback((section: string) => {
+    // Set manual target and flag
     manualTargetRef.current = section;
     setIsManualSelection(true);
+
+    // Clear any existing timeout
     if (manualTimeoutRef.current) {
       window.clearTimeout(manualTimeoutRef.current);
     }
+
+    // Safety timeout: force exit manual mode after 2 seconds
     manualTimeoutRef.current = window.setTimeout(() => {
       setIsManualSelection(false);
-      manualTargetRef.current = null;
+      // Keep manualTargetRef so scroll spy can still detect when we reach it
       manualTimeoutRef.current = null;
-    }, 1200);
+    }, 2000);
 
+    // Immediately update UI
     setActiveSection(section);
     if (section.startsWith('prestation-')) {
       const idx = Number(section.replace('prestation-', ''));
@@ -110,6 +117,7 @@ const GuaranteeDetailModal: React.FC<GuaranteeDetailModalProps> = ({ isOpen, onC
       setExpandedServiceIndex(null);
     }
 
+    // Scroll to element
     const element = document.getElementById(section);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
