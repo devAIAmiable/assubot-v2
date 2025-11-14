@@ -1,8 +1,8 @@
 import { FaCheck, FaInfoCircle } from 'react-icons/fa';
+import { calculateGuaranteeStats, calculateServiceStats } from '../../utils/guaranteeCalculations';
 
 import type { BackendContractGuarantee } from '../../types/contract';
 import React from 'react';
-import { calculateServiceStats } from '../../utils/guaranteeCalculations';
 import { motion } from 'framer-motion';
 
 interface GuaranteeSidebarProps {
@@ -13,13 +13,14 @@ interface GuaranteeSidebarProps {
 
 const GuaranteeSidebar: React.FC<GuaranteeSidebarProps> = ({ guarantee, activeSection, onSectionChange }) => {
   const prestationStats = calculateServiceStats(guarantee);
+  const guaranteeStats = calculateGuaranteeStats(guarantee);
 
   const sections = [
     {
       id: 'overview',
       label: "Vue d'ensemble",
       icon: FaInfoCircle,
-      description: 'Synthèse, stats et conditions financières',
+      description: `${guaranteeStats.totalCoverages} couvert • ${guaranteeStats.totalExclusions} exclus`,
     },
     ...prestationStats.map((prestation, index) => ({
       id: `prestation-${index}`,
