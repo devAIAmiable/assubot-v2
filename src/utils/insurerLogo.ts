@@ -24,7 +24,7 @@ const canonicalKeyToLogoPath: Record<string, string> = {
   abeille: '/insurances/abeille.png',
   acheel: '/insurances/acheel.png',
   acommeassure: '/insurances/acommeassure.png',
-  active: '/insurances/active.jpeg',
+  active: '/insurances/active.png',
   aema: '/insurances/aema.png',
   aesio: '/insurances/aesio.png',
   ag2r: '/insurances/ag2r.png',
