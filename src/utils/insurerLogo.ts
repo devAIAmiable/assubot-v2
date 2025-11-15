@@ -132,58 +132,14 @@ const canonicalKeyToLogoPath: Record<string, string> = {
   zurichinsurance: '/insurances/zurichinsurance.png',
 };
 
-// Aliases that should point to a canonical key above
-const aliasToCanonicalKey: Record<string, string> = {
-  // Existing variations
-  societegenerale: 'sg',
-  sgassurance: 'sg',
-
-  // New brand variations and common forms
-  abeilleassurances: 'abeille',
-  abeilleassurance: 'abeille',
-  acompassure: 'acomassure', // resilience to spelling
-  acommeassure: 'acomassure',
-  acommeassur: 'acomassure',
-  acommeassures: 'acomassure',
-  areasassurances: 'areas',
-  areassurance: 'areas',
-  banquepopulaireassurances: 'banquepopulaire',
-  bnpparibas: 'bnpparibascardif',
-  bnpcardif: 'bnpparibascardif',
-  cardifiardassurances: 'cardifiard',
-  caisseepargneassurances: 'caisseepargne',
-  caisseepargneassurance: 'caisseepargne',
-  cadepargne: 'caisseepargne',
-  caassurance: 'caassurances',
-  creditagricoleassurances: 'camca',
-  creditmutuelassurance: 'creditmutuel',
-};
-
 export const getInsurerLogo = (insurer: string | undefined): string | undefined => {
   if (!insurer) return undefined;
   const normalized = normalizeBrand(insurer);
 
-  // Resolve alias to canonical key if present
-  const canonicalKey = aliasToCanonicalKey[normalized] ?? normalized;
-
   // Direct match
-  if (canonicalKeyToLogoPath[canonicalKey]) {
-    return canonicalKeyToLogoPath[canonicalKey];
+  if (canonicalKeyToLogoPath[normalized]) {
+    return canonicalKeyToLogoPath[normalized];
   }
-
-  // Contains-based heuristics as fallback (keep minimal for safety)
-  if (normalized.includes('axa')) return '/insurances/axa.png';
-  if (normalized.includes('maif')) return '/insurances/maif.png';
-  if (normalized.includes('macif')) return '/insurances/macif.png';
-  if (normalized.includes('groupama')) return '/insurances/groupama.png';
-  if (normalized.includes('generali')) return '/insurances/generali.png';
-  if (normalized.includes('allianz')) return '/insurances/allianz.png';
-  if (normalized.includes('direct')) return '/insurances/direct.png';
-  if (normalized.includes('kenko')) return '/insurances/kenko.png';
-  if (normalized.includes('lcl')) return '/insurances/lcl.png';
-  if (normalized.includes('camca')) return '/insurances/camca.jpeg';
-  if (normalized.includes('sg') || normalized.includes('sgassurance') || normalized.includes('societegenerale')) return '/insurances/sg.png';
-  if (normalized.includes('harmonie')) return '/insurances/maif.png';
 
   return undefined;
 };
