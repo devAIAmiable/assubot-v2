@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
 import { useLogout } from '../hooks/useLogout';
 import { useVideoModal } from '../hooks/useVideoModal';
+import config from '../config/env';
 
 const AppLayout = () => {
   const navigate = useNavigate();
@@ -53,13 +54,16 @@ const AppLayout = () => {
       icon: VscRobot,
       current: getCurrentModule() === 'chatbot',
     },
-    {
+  ];
+
+  if (config.enableComparateur) {
+    navigation.push({
       name: 'Comparateur',
       path: '/app/comparateur',
       icon: FaBrain,
       current: getCurrentModule() === 'comparateur',
-    },
-  ];
+    });
+  }
 
   const unreadNotifications = notifications.filter((n) => n.unread).length;
 

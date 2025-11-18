@@ -41,8 +41,12 @@ import SignupForm from './components/SignupForm';
 import Spinner from './components/ui/Spinner';
 import ToastContainer from './components/ui/Toast';
 import VerifyPage from './components/VerifyPage';
+import config from './config/env';
 
 function App() {
+  const comparateurRouteElement = config.enableComparateur ? <ComparateurModule /> : <Navigate to="/app/dashboard" replace />;
+  const comparateurResultsRouteElement = config.enableComparateur ? <ComparateurResultsPage /> : <Navigate to="/app/dashboard" replace />;
+
   return (
     <Provider store={store}>
       <PersistGate
@@ -92,8 +96,8 @@ function App() {
                     <Route path="contrats" element={<ContractsModule />} />
                     <Route path="contrats/:contractId" element={<ContractDetailsPage />} />
                     <Route path="chatbot" element={<ChatModule />} />
-                    <Route path="comparateur" element={<ComparateurModule />} />
-                    <Route path="comparateur/:sessionId/resultats" element={<ComparateurResultsPage />} />
+                    <Route path="comparateur" element={comparateurRouteElement} />
+                    <Route path="comparateur/:sessionId/resultats" element={comparateurResultsRouteElement} />
                     <Route path="credits" element={<CreditPage />} />
                     <Route path="notifications" element={<NotificationsModule />} />
                     <Route path="profil" element={<ProfileModule />} />

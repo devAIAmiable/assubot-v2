@@ -14,6 +14,7 @@ interface AppConfig {
   enableAnalytics: boolean;
   enableDebugMode: boolean;
   gtmContainerId: string;
+  enableComparateur: boolean;
 
   // Timeouts
   apiTimeout: number;
@@ -40,6 +41,9 @@ const getEnvVarAsBoolean = (key: string, defaultValue: boolean): boolean => {
   return value.toLowerCase() === 'true';
 };
 
+const appEnvironment = getEnvVar('VITE_APP_ENV', 'local');
+const isProductionEnvironment = appEnvironment === 'production';
+
 export const config: AppConfig = {
   // Core API URLs
   coreApiUrl: getEnvVar('VITE_CORE_API_URL', 'http://localhost:3000/api/v1'),
@@ -50,12 +54,13 @@ export const config: AppConfig = {
   // App Configuration
   appName: getEnvVar('VITE_APP_NAME', 'AssuBot'),
   appVersion: getEnvVar('VITE_APP_VERSION', '1.0.0'),
-  environment: getEnvVar('VITE_APP_ENV', 'local'),
+  environment: appEnvironment,
 
   // Feature Flags
   enableAnalytics: getEnvVarAsBoolean('VITE_ENABLE_ANALYTICS', false),
   enableDebugMode: getEnvVarAsBoolean('VITE_ENABLE_DEBUG_MODE', false),
   gtmContainerId: getEnvVar('VITE_GTM_CONTAINER_ID', ''),
+  enableComparateur: !isProductionEnvironment && getEnvVarAsBoolean('VITE_ENABLE_COMPARATEUR', true),
 
   // Timeouts
   apiTimeout: getEnvVarAsNumber('VITE_API_TIMEOUT', 10000),
