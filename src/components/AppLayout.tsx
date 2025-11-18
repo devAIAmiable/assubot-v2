@@ -6,13 +6,13 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Avatar from './ui/Avatar';
 import VideoModal from './ui/VideoModal';
 import { VscRobot } from 'react-icons/vsc';
+import config from '../config/env';
 import { getProfessionalCategoryLabel } from '../utils/user';
 import { getUserState } from '../utils/stateHelpers';
 import { motion } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
 import { useLogout } from '../hooks/useLogout';
 import { useVideoModal } from '../hooks/useVideoModal';
-import config from '../config/env';
 
 const AppLayout = () => {
   const navigate = useNavigate();
@@ -345,13 +345,20 @@ const AppLayout = () => {
                   </div>
 
                   <div className="px-4 py-3 border-b border-gray-100">
-                    <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() => {
+                        handleNavigate('/app/profil');
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex items-center space-x-3 w-full text-left rounded-lg hover:bg-gray-50 p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1e51ab]"
+                    >
                       <Avatar user={currentUser || undefined} size="md" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">{getUserDisplayName()}</p>
                         {currentUser?.email && <p className="text-xs text-gray-500">{currentUser.email}</p>}
+                        <p className="text-xs text-[#1e51ab] mt-1">Voir mon profil</p>
                       </div>
-                    </div>
+                    </button>
                   </div>
 
                   {currentUser?.creditBalance !== undefined && (
