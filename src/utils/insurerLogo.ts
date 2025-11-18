@@ -1,26 +1,14 @@
 // Normalize a brand string to a comparable key that is resilient to
 // accents, punctuation, common suffixes, and spacing.
 const normalizeBrand = (value: string): string => {
-  return (
-    value
-      .toLowerCase()
-      // remove diacritics (accents)
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      // remove common suffixes/words
-      .replace(/\bmutuelle\b/g, '')
-      .replace(/\bassurances\b/g, '')
-      .replace(/\bassurance\b/g, '')
-      // remove all non-alphanumerics
-      .replace(/[^a-z0-9]/g, '')
-      // collapse spaces (after punctuation removal none should remain)
-      .trim()
-  );
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
 };
 
-// Map of canonical keys to logo paths
 const canonicalKeyToLogoPath: Record<string, string> = {
-  // Existing brands
   abeille: '/insurances/abeille.png',
   acheel: '/insurances/acheel.png',
   acommeassure: '/insurances/acommeassure.png',
