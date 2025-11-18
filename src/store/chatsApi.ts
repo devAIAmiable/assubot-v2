@@ -222,7 +222,7 @@ export const chatsApi = createApi({
         message: response.data.error.message,
         code: response.data.error.code,
       }),
-      async onQueryStarted({ chatId, message }, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ chatId, message }, { dispatch, queryFulfilled, getState }) {
         // Generate optimistic message ID and timestamp
         const optimisticId = `optimistic-${Date.now()}-${Math.random()}`;
         const now = new Date();
@@ -246,6 +246,56 @@ export const chatsApi = createApi({
             }
           })
         );
+
+        // Optimistically update getChats cache entries to reorder the list immediately
+        // This happens BEFORE the API response, so the UI updates instantly
+        const state = getState() as { chat?: { filters?: ChatFilters } };
+        const currentFilters = state.chat?.filters;
+
+        // Update cache with current filters (most likely to be in use)
+        const filtersToUpdate: (ChatFilters | undefined)[] = [
+          currentFilters, // Current filters from Redux state
+          undefined, // Default query
+          {}, // Empty filters
+          { page: 1, limit: 10 }, // Common pagination
+          { page: 1, limit: 10, sortBy: 'updatedAt', sortOrder: 'desc' }, // Default sort
+        ];
+
+        // Remove duplicates by comparing JSON stringified versions
+        const seen = new Set<string>();
+        const uniqueFilters = filtersToUpdate.filter((f) => {
+          const key = JSON.stringify(f || {});
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+        // Store patch results for potential rollback
+        const chatListPatchResults: Array<{ undo: () => void }> = [];
+
+        uniqueFilters.forEach((filters) => {
+          try {
+            const patchResult = dispatch(
+              chatsApi.util.updateQueryData('getChats', filters, (draft) => {
+                if (draft && draft.chats) {
+                  const chatIndex = draft.chats.findIndex((chat) => chat.id === chatId);
+                  if (chatIndex !== -1) {
+                    // Remove the chat from its current position
+                    const [updatedChat] = draft.chats.splice(chatIndex, 1);
+                    // Update it with optimistic updatedAt (current time)
+                    const chatToMove = { ...updatedChat, updatedAt: new Date().toISOString() };
+                    // Move it to the top (assuming default sort is by updatedAt desc)
+                    draft.chats.unshift(chatToMove);
+                  }
+                }
+              })
+            );
+            chatListPatchResults.push(patchResult);
+          } catch {
+            // If update fails, skip this filter combination
+            // This is expected for filter combinations that aren't in cache
+          }
+        });
 
         try {
           const { data } = await queryFulfilled;
@@ -293,9 +343,36 @@ export const chatsApi = createApi({
           if (data.actions && Array.isArray(data.actions)) {
             dispatch({ type: 'chat/setQuickActions', payload: { chatId, actions: data.actions } });
           }
+
+          // Update the chat list with the real data from API response
+          // This refines the optimistic update with actual data
+          uniqueFilters.forEach((filters) => {
+            try {
+              dispatch(
+                chatsApi.util.updateQueryData('getChats', filters, (draft) => {
+                  if (draft && draft.chats) {
+                    const chatIndex = draft.chats.findIndex((chat) => chat.id === chatId);
+                    if (chatIndex !== -1) {
+                      // Update with real data from API response
+                      draft.chats[chatIndex] = { ...draft.chats[chatIndex], ...data.chat, updatedAt: data.chat.updatedAt || new Date().toISOString() };
+                    } else if (data.chat && (!filters || !filters.search)) {
+                      // If chat not found in current page and no search filter, add it to the top
+                      draft.chats.unshift(data.chat);
+                    }
+                  }
+                })
+              );
+            } catch {
+              // If update fails, skip this filter combination
+            }
+          });
+
+          // Invalidate all Chat queries to trigger refetch for any queries not updated above
+          dispatch(chatsApi.util.invalidateTags([{ type: 'Chat' }]));
         } catch (error) {
-          // Revert optimistic update on error
+          // Revert optimistic updates on error
           patchResult.undo();
+          chatListPatchResults.forEach((patch) => patch.undo());
           throw error;
         }
       },

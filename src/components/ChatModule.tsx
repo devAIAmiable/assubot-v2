@@ -49,7 +49,7 @@ const ChatModule: React.FC = () => {
     clearCurrentChatSelection,
   } = useChats();
 
-  const { chats: paginatedChats, loading: paginationLoading, pagination, goToNextPage, goToPrevPage, search } = useChatPagination();
+  const { chats: paginatedChats, loading: paginationLoading, pagination, goToNextPage, goToPrevPage, search, refetch: refetchChats } = useChatPagination();
   const { error: apiError } = useGetChatsQuery(filters || {});
 
   const { data: messagesData, isLoading: messagesLoading } = useGetChatMessagesQuery(
@@ -301,6 +301,9 @@ const ChatModule: React.FC = () => {
         chatId: currentChatId,
         messageLength: messageContent.length,
       });
+      // Refetch chats list to update sorting (API sorts by updatedAt by default)
+      // The invalidation in the mutation should handle this, but we refetch explicitly to ensure it happens
+      refetchChats();
     } catch (sendError) {
       console.error("Erreur lors de l'envoi du message:", sendError);
       trackChatMessageError({
@@ -309,7 +312,7 @@ const ChatModule: React.FC = () => {
       });
       setMessageInput(messageContent);
     }
-  }, [currentChatId, messageInput, sendUserMessage, sendingMessage]);
+  }, [currentChatId, messageInput, sendUserMessage, sendingMessage, refetchChats]);
 
   const handleQuickAction = useCallback(
     async (action: QuickAction) => {
@@ -322,6 +325,8 @@ const ChatModule: React.FC = () => {
           actionLabel: action.label,
         });
         await sendUserMessage(currentChatId, action.instructions);
+        // Refetch chats list to update sorting (API sorts by updatedAt by default)
+        refetchChats();
       } catch (quickActionError) {
         console.error("Erreur lors de l'envoi de l'action rapide:", quickActionError);
         trackChatMessageError({
@@ -330,7 +335,7 @@ const ChatModule: React.FC = () => {
         });
       }
     },
-    [clearChatQuickActions, currentChatId, sendUserMessage, sendingMessage]
+    [clearChatQuickActions, currentChatId, sendUserMessage, sendingMessage, refetchChats]
   );
 
   const handleKeyDown = useCallback(

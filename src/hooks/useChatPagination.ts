@@ -6,7 +6,7 @@ export const useChatPagination = () => {
   const { filters, updateFilters } = useChats();
 
   // Use RTK Query for data fetching
-  const { data: chatsData, isLoading: loading } = useGetChatsQuery(filters || {});
+  const { data: chatsData, isLoading: loading, refetch } = useGetChatsQuery(filters || {});
 
   // Extract data from response
   const chats = chatsData?.chats || [];
@@ -76,6 +76,7 @@ export const useChatPagination = () => {
     loading,
     pagination,
     filters,
+    refetch,
     goToNextPage,
     goToPrevPage,
     goToPage,
