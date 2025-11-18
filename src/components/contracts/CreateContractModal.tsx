@@ -1,13 +1,13 @@
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { FaBell, FaCheck, FaClock, FaTimes } from 'react-icons/fa';
 import { Fragment, useCallback, useState } from 'react';
-import React from 'react';
-import { motion } from 'framer-motion';
 
 import Avatar from '../ui/Avatar';
 import ContractCreationForm from '../contract/ContractCreationForm';
 import type { ContractFormData } from '../../types';
+import React from 'react';
 import { contractUploadService } from '../../services/contractUploadService';
+import { motion } from 'framer-motion';
 import { trackContractCreateSubmit } from '@/services/analytics/gtm';
 
 interface CreateContractModalProps {
@@ -104,7 +104,7 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
                         <div className="flex items-center space-x-3 py-2">
                           <FaClock className="text-xl text-blue-500 w-5 flex-shrink-0 mx-2" />
                           <span className="text-gray-700">
-                            Temps de traitement moyen&nbsp;: <strong className="text-gray-900">3 minutes</strong>
+                            Temps de traitement moyen&nbsp;: <strong className="text-gray-900">3 minutes*</strong>
                           </span>
                         </div>
                         <div className="flex items-center space-x-3 py-2">
@@ -127,6 +127,10 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
                       <FaCheck aria-hidden="true" />
                       <span>Compris</span>
                     </button>
+                    <div className="mt-6">
+                      {/* Small footer text */}
+                      <p className="text-gray-600 text-sm leading-relaxed">Les PDFs scannés peuvent prendre plus de temps à analyser.</p>
+                    </div>
                   </div>
                 </div>
               </DialogPanel>
