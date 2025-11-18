@@ -1,11 +1,12 @@
 import type { BackendContractGuarantee, Contract } from '../../../../types/contract';
-import { ContractStatus } from '../../../../types/contract';
 import { FaCheck, FaChevronRight, FaMagic, FaShieldAlt, FaTimes } from 'react-icons/fa';
+import React, { useMemo } from 'react';
 
 import AIDisclaimer from '../ui/AIDisclaimer';
+import { ContractStatus } from '../../../../types/contract';
 import PendingSummarizationMessage from '../ui/PendingSummarizationMessage';
-import React from 'react';
 import SummarizedEmptyState from '../ui/SummarizedEmptyState';
+import { calculateGuaranteeStats } from '../../../../utils/guaranteeCalculations';
 
 interface GuaranteesTabProps {
   contract: Contract;
@@ -18,6 +19,18 @@ interface GuaranteesTabProps {
 
 const GuaranteesTab: React.FC<GuaranteesTabProps> = ({ contract, summarizeStatus, isProcessing, isSummarizing, onSummarize, onSelectGuarantee }) => {
   const isActiveContract = contract.status === ContractStatus.ACTIVE;
+  const guarantees = useMemo(() => contract.guarantees ?? [], [contract.guarantees]);
+  const enrichedGuarantees = useMemo(
+    () =>
+      guarantees.map((guarantee) => ({
+        guarantee,
+        stats: calculateGuaranteeStats(guarantee),
+      })),
+    [guarantees]
+  );
+  const totalCoverages = enrichedGuarantees.reduce((sum, entry) => sum + entry.stats.totalCoverages, 0);
+  const totalExclusions = enrichedGuarantees.reduce((sum, entry) => sum + entry.stats.totalExclusions, 0);
+  const hasSummarizedEmpty = summarizeStatus === 'done' && guarantees.length === 0;
 
   if (summarizeStatus === 'pending' || summarizeStatus === 'ongoing') {
     return (
@@ -27,9 +40,6 @@ const GuaranteesTab: React.FC<GuaranteesTabProps> = ({ contract, summarizeStatus
       </div>
     );
   }
-
-  const guarantees = contract.guarantees ?? [];
-  const hasSummarizedEmpty = summarizeStatus === 'done' && guarantees.length === 0;
 
   return (
     <div className="max-w-full sm:max-w-7xl mx-auto px-0 sm:px-4 space-y-6">
@@ -44,46 +54,17 @@ const GuaranteesTab: React.FC<GuaranteesTabProps> = ({ contract, summarizeStatus
             <div className="h-4 w-px bg-gray-300" />
             <div className="flex items-center gap-2">
               <FaCheck className="text-green-600" />
-              <span className="text-sm text-gray-700">
-                {guarantees.reduce((total, guarantee) => {
-                  return (
-                    total +
-                    (guarantee.details?.reduce((detailTotal, detail) => {
-                      return detailTotal + (detail.coverages?.filter((coverage) => coverage.type === 'covered').length || 0);
-                    }, 0) || 0)
-                  );
-                }, 0)}{' '}
-                couvertures
-              </span>
+              <span className="text-sm text-gray-700">{totalCoverages} couvertures</span>
             </div>
             <div className="h-4 w-px bg-gray-300" />
             <div className="flex items-center gap-2">
               <FaTimes className="text-red-600" />
-              <span className="text-sm text-gray-700">
-                {guarantees.reduce((total, guarantee) => {
-                  return (
-                    total +
-                    (guarantee.details?.reduce((detailTotal, detail) => {
-                      return detailTotal + (detail.coverages?.filter((coverage) => coverage.type === 'not_covered').length || 0);
-                    }, 0) || 0)
-                  );
-                }, 0)}{' '}
-                exclusions
-              </span>
+              <span className="text-sm text-gray-700">{totalExclusions} exclusions</span>
             </div>
           </div>
 
           <div className="space-y-3">
-            {guarantees.map((guarantee, index) => {
-              const coverageCount =
-                guarantee.details?.reduce((total, detail) => {
-                  return total + (detail.coverages?.filter((coverage) => coverage.type === 'covered').length || 0);
-                }, 0) || 0;
-              const exclusionCount =
-                guarantee.details?.reduce((total, detail) => {
-                  return total + (detail.coverages?.filter((coverage) => coverage.type === 'not_covered').length || 0);
-                }, 0) || 0;
-
+            {enrichedGuarantees.map(({ guarantee, stats }, index) => {
               return (
                 <button
                   key={guarantee.id}
@@ -98,7 +79,7 @@ const GuaranteesTab: React.FC<GuaranteesTabProps> = ({ contract, summarizeStatus
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm sm:text-base font-semibold text-gray-900 mb-1">{guarantee.title}</h4>
                         <p className="text-xs sm:text-sm text-gray-500">
-                          {coverageCount} couvertures • {exclusionCount} exclusions
+                          {stats.totalCoverages} couvertures • {stats.totalExclusions} exclusions
                         </p>
                       </div>
                     </div>
