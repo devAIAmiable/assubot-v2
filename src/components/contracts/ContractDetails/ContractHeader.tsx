@@ -84,7 +84,7 @@ const LogoOrIcon: React.FC<{ contract: Contract }> = ({ contract }) => {
 };
 
 const ContractHeader: React.FC<ContractHeaderProps> = React.memo(
-  ({ contract, onBack, onEdit, onNavigateToEdit, onSummarize, onDelete, isSummarizing, isDeleting = false, summarizeStatus, requiredCredits = 5, isAdminMode = false }) => {
+  ({ contract, onBack, onEdit, onNavigateToEdit, onSummarize, onDelete, isSummarizing, isDeleting = false, summarizeStatus, requiredCredits = 40, isAdminMode = false }) => {
     const isExpired = useMemo(() => {
       if (!contract.endDate) return false;
       return dayjs(contract.endDate).endOf('day').isBefore(dayjs());
