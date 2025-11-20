@@ -49,7 +49,7 @@ export const useContractSummarize = (): UseContractSummarizeReturn => {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la génération du résumé du contrat';
       setError(errorMessage);
 
-      const handled = insufficientCredits.handleInsufficientCredits(err as Error, 'la génération du résumé du contrat', 5);
+      const handled = insufficientCredits.handleInsufficientCredits(err as Error, 'la génération du résumé du contrat', 40);
 
       if (!handled) {
         showToast.error(errorMessage);

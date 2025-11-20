@@ -8,6 +8,7 @@ import CancellationsTab from './ContractTabs/CancellationsTab';
 import ContactsTab from './ContractTabs/ContactsTab';
 import ContractHeader from './ContractHeader';
 import { ContractStatus } from '../../../types/contract';
+import DeleteConfirmationModal from '../DeleteConfirmationModal';
 import EditContractModal from './modals/EditContractModal';
 import ExclusionsTab from './ContractTabs/ExclusionsTab';
 import GuaranteeDetailModal from './modals/GuaranteeDetailModal';
@@ -17,18 +18,17 @@ import ObligationsTab from './ContractTabs/ObligationsTab';
 import OverviewTab from './ContractTabs/OverviewTab';
 import SummarizeConfirmationModal from './modals/SummarizeConfirmationModal';
 import ZonesTab from './ContractTabs/ZonesTab';
-import DeleteConfirmationModal from '../DeleteConfirmationModal';
 import { selectIsContractProcessing } from '../../../store/contractProcessingSlice';
+import { showToast } from '../../ui/Toast';
+import { trackContractDelete } from '@/services/analytics/gtm';
 import { useAppSelector } from '../../../store/hooks';
 import { useContractDownload } from '../../../hooks/useContractDownload';
+import { useContractOperations } from '../../../hooks/useContractOperations';
 import { useContractSummarizationListener } from '../../../hooks/useContractSummarizationListener';
 import { useContractSummarize } from '../../../hooks/useContractSummarize';
-import { useContractOperations } from '../../../hooks/useContractOperations';
 import { useGetContractByIdQuery } from '../../../store/contractsApi';
-import { trackContractDelete } from '@/services/analytics/gtm';
-import { showToast } from '../../ui/Toast';
 
-const DEFAULT_REQUIRED_CREDITS = 5;
+const DEFAULT_REQUIRED_CREDITS = 40;
 
 const slugify = (value: string): string =>
   value

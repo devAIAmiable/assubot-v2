@@ -340,7 +340,7 @@ const CreditPage = () => {
                   </div>
                   <div className="flex items-start justify-between">
                     <span>• Résumé de contrat (IA)</span>
-                    <span className="font-semibold">5 crédits</span>
+                    <span className="font-semibold">40 crédits</span>
                   </div>
                   <div className="flex items-start justify-between">
                     <span>• Suggestion intelligente</span>
