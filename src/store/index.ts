@@ -2,13 +2,12 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { persistReducer, persistStore } from 'redux-persist';
 
 import chatReducer from './chatSlice';
-import comparisonSessionsReducer from './comparisonSessions/slice';
 import { chatsApi } from './chatsApi';
 import { comparisonApi } from './comparisonApi';
+import comparisonSessionsReducer from './comparisonSessions/slice';
 import comparisonsReducer from './comparisonsSlice';
 import contractCreationReducer from './contractCreationSlice';
 import contractProcessingReducer from './contractProcessingSlice';
-import nlQueriesReducer from './comparisonSessions/nlQueriesSlice';
 import { contractsApi } from './contractsApi';
 import contractsReducer from './contractsSlice';
 import { creditPacksApi } from './creditPacksApi';
@@ -16,8 +15,10 @@ import { creditTransactionsApi } from './creditTransactionsApi';
 import { generalTermsApi } from './generalTermsApi';
 import { insurersApi } from './insurersApi';
 import { internalDocumentApi } from './internalDocumentApi';
+import nlQueriesReducer from './comparisonSessions/nlQueriesSlice';
 import { notificationsApi } from './notificationsApi';
 import storage from 'redux-persist/lib/storage';
+import { userCreditsApi } from './userCreditsApi';
 import userReducer from './userSlice';
 
 // Custom persist config for user slice that excludes error and loading states
@@ -51,6 +52,7 @@ const rootReducer = combineReducers({
   [insurersApi.reducerPath]: insurersApi.reducer,
   [internalDocumentApi.reducerPath]: internalDocumentApi.reducer,
   [notificationsApi.reducerPath]: notificationsApi.reducer,
+  [userCreditsApi.reducerPath]: userCreditsApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -71,7 +73,8 @@ export const store = configureStore({
       generalTermsApi.middleware,
       insurersApi.middleware,
       internalDocumentApi.middleware,
-      notificationsApi.middleware
+      notificationsApi.middleware,
+      userCreditsApi.middleware
     ),
 });
 
