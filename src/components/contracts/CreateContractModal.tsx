@@ -129,7 +129,7 @@ const CreateContractModal: React.FC<CreateContractModalProps> = ({ open: propOpe
                     </button>
                     <div className="mt-6">
                       {/* Small footer text */}
-                      <p className="text-gray-600 text-sm leading-relaxed">Les PDFs scannés peuvent prendre plus de temps à analyser.</p>
+                      <p className="text-gray-600 text-sm leading-relaxed">(*)&nbsp;Les fichiers PDF scannés peuvent nécessiter un temps d’analyse plus long</p>
                     </div>
                   </div>
                 </div>
