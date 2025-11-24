@@ -28,7 +28,7 @@ import { useContractSummarizationListener } from '../../../hooks/useContractSumm
 import { useContractSummarize } from '../../../hooks/useContractSummarize';
 import { useGetContractByIdQuery } from '../../../store/contractsApi';
 
-const DEFAULT_REQUIRED_CREDITS = 40;
+const DEFAULT_REQUIRED_CREDITS = 5;
 
 const slugify = (value: string): string =>
   value

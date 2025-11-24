@@ -1,4 +1,4 @@
-import { FaArrowLeft, FaEdit, FaFileSignature, FaInfoCircle, FaTrash, FaSpinner } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaFileSignature, FaInfoCircle, FaSpinner, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { getContractListItemInsurer, getContractListItemType } from '../../../utils/contractAdapters';
 import { getStatusColor, getStatusLabel, getTypeIcon, getTypeLabel } from '../../../utils/contract';
@@ -84,7 +84,7 @@ const LogoOrIcon: React.FC<{ contract: Contract }> = ({ contract }) => {
 };
 
 const ContractHeader: React.FC<ContractHeaderProps> = React.memo(
-  ({ contract, onBack, onEdit, onNavigateToEdit, onSummarize, onDelete, isSummarizing, isDeleting = false, summarizeStatus, requiredCredits = 40, isAdminMode = false }) => {
+  ({ contract, onBack, onEdit, onNavigateToEdit, onSummarize, onDelete, isSummarizing, isDeleting = false, summarizeStatus, requiredCredits = 5, isAdminMode = false }) => {
     const isExpired = useMemo(() => {
       if (!contract.endDate) return false;
       return dayjs(contract.endDate).endOf('day').isBefore(dayjs());
