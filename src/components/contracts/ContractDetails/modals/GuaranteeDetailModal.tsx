@@ -20,8 +20,11 @@ const GuaranteeDetailModal: React.FC<GuaranteeDetailModalProps> = ({ isOpen, onC
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [expandedServiceIndex, setExpandedServiceIndex] = useState<number | null>(guarantee.details && guarantee.details.length > 0 ? 0 : null);
   const [isManualSelection, setIsManualSelection] = useState(false);
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
   const manualTargetRef = useRef<string | null>(null);
   const manualTimeoutRef = useRef<number | null>(null);
+  const scrollTimeoutRef = useRef<number | null>(null);
+  const isProgrammaticScrollRef = useRef(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const sectionIds = useMemo(() => ['overview', ...(guarantee.details?.map((_, index) => `prestation-${index}`) || [])], [guarantee.details]);
@@ -30,10 +33,15 @@ const GuaranteeDetailModal: React.FC<GuaranteeDetailModalProps> = ({ isOpen, onC
     setActiveSection('overview');
     setExpandedServiceIndex(guarantee.details && guarantee.details.length > 0 ? 0 : null);
     setIsManualSelection(false);
+    setIsUserScrolling(false);
     manualTargetRef.current = null;
     if (manualTimeoutRef.current) {
       window.clearTimeout(manualTimeoutRef.current);
       manualTimeoutRef.current = null;
+    }
+    if (scrollTimeoutRef.current) {
+      window.clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = null;
     }
     if (contentRef.current) {
       contentRef.current.scrollTo({ top: 0 });
@@ -46,8 +54,51 @@ const GuaranteeDetailModal: React.FC<GuaranteeDetailModalProps> = ({ isOpen, onC
         window.clearTimeout(manualTimeoutRef.current);
         manualTimeoutRef.current = null;
       }
+      if (scrollTimeoutRef.current) {
+        window.clearTimeout(scrollTimeoutRef.current);
+        scrollTimeoutRef.current = null;
+      }
     };
   }, []);
+
+  // Détecter le scroll manuel de l'utilisateur
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const scrollContainer = contentRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      // Si c'est un scroll programmatique, on l'ignore
+      if (isProgrammaticScrollRef.current) {
+        isProgrammaticScrollRef.current = false;
+        return;
+      }
+
+      // Marquer que l'utilisateur scroll manuellement
+      setIsUserScrolling(true);
+
+      // Nettoyer le timeout précédent
+      if (scrollTimeoutRef.current) {
+        window.clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // Réinitialiser après 300ms d'inactivité de scroll
+      scrollTimeoutRef.current = window.setTimeout(() => {
+        setIsUserScrolling(false);
+        scrollTimeoutRef.current = null;
+      }, 300);
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        window.clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [isOpen]);
 
   const scrollContainer = contentRef.current;
   const scrollSpyOptions = useMemo(() => ({ threshold: 0.25, rootMargin: '-15% 0px -55% 0px', root: scrollContainer }), [scrollContainer]);
@@ -60,6 +111,13 @@ const GuaranteeDetailModal: React.FC<GuaranteeDetailModalProps> = ({ isOpen, onC
 
     // Ignore all scroll spy updates during manual selection
     if (isManualSelection) {
+      return;
+    }
+
+    // Ignorer les mises à jour du scroll spy pendant que l'utilisateur scroll manuellement
+    if (isUserScrolling) {
+      // On met à jour seulement la section active pour la sidebar, mais on n'ouvre pas les accordéons
+      setActiveSection(activeScrollSection);
       return;
     }
 
@@ -87,16 +145,21 @@ const GuaranteeDetailModal: React.FC<GuaranteeDetailModalProps> = ({ isOpen, onC
     } else {
       setExpandedServiceIndex(null);
     }
-  }, [activeScrollSection, isManualSelection]);
+  }, [activeScrollSection, isManualSelection, isUserScrolling]);
 
   const handleSectionChange = useCallback((section: string) => {
     // Set manual target and flag
     manualTargetRef.current = section;
     setIsManualSelection(true);
+    setIsUserScrolling(false); // Réinitialiser le flag de scroll manuel
 
     // Clear any existing timeout
     if (manualTimeoutRef.current) {
       window.clearTimeout(manualTimeoutRef.current);
+    }
+    if (scrollTimeoutRef.current) {
+      window.clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = null;
     }
 
     // Safety timeout: force exit manual mode after 2 seconds
@@ -117,9 +180,10 @@ const GuaranteeDetailModal: React.FC<GuaranteeDetailModalProps> = ({ isOpen, onC
       setExpandedServiceIndex(null);
     }
 
-    // Scroll to element
+    // Scroll to element (marquer comme scroll programmatique)
     const element = document.getElementById(section);
     if (element) {
+      isProgrammaticScrollRef.current = true;
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
