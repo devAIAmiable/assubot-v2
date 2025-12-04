@@ -3,6 +3,7 @@ import './App.css';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { persistor, store } from './store/index';
 
+import AcceptTermsPage from './components/AcceptTermsPage';
 import AdminContractUpload from './pages/AdminContractUpload';
 import AdminPanel from './pages/AdminPanel';
 import AdminTemplateContractDetails from './pages/AdminTemplateContractDetails';
@@ -10,8 +11,6 @@ import AdminTemplateContractEdit from './pages/AdminTemplateContractEdit';
 import AppLayout from './components/AppLayout';
 import AuthInitializer from './components/AuthInitializer';
 import ChatModule from './components/ChatModule';
-import TermsAcceptanceGuard from './components/TermsAcceptanceGuard';
-import RouteTracker from './components/analytics/RouteTracker';
 import ComparateurModule from './components/ComparateurModule';
 import ComparateurResultsPage from './pages/ComparateurResultsPage';
 import ContractDetailsPage from './components/contracts/ContractDetails/ContractDetailsPage';
@@ -29,7 +28,6 @@ import NotificationsModule from './components/NotificationsModule';
 import PaymentCancelPage from './components/PaymentCancelPage';
 import PaymentSuccessPage from './components/PaymentSuccessPage';
 import { PersistGate } from 'redux-persist/integration/react';
-import AcceptTermsPage from './components/AcceptTermsPage';
 import PrivacyPolicyPage from './components/PrivacyPolicyPage';
 import ProfileCompletionGuard from './components/ProfileCompletionGuard';
 import ProfileModule from './components/ProfileModule';
@@ -37,8 +35,10 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { Provider } from 'react-redux';
 import RealTimeProvider from './components/RealTimeProvider';
 import ResetPasswordForm from './components/ResetPasswordForm';
+import RouteTracker from './components/analytics/RouteTracker';
 import SignupForm from './components/SignupForm';
 import Spinner from './components/ui/Spinner';
+import TermsAcceptanceGuard from './components/TermsAcceptanceGuard';
 import ToastContainer from './components/ui/Toast';
 import VerifyPage from './components/VerifyPage';
 import config from './config/env';
@@ -93,8 +93,8 @@ function App() {
 
                     {/* Module routes */}
                     <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="contrats" element={<ContractsModule />} />
-                    <Route path="contrats/:contractId" element={<ContractDetailsPage />} />
+                    <Route path="contracts" element={<ContractsModule />} />
+                    <Route path="contracts/:contractId" element={<ContractDetailsPage />} />
                     <Route path="chatbot" element={<ChatModule />} />
                     <Route path="comparateur" element={comparateurRouteElement} />
                     <Route path="comparateur/:sessionId/resultats" element={comparateurResultsRouteElement} />

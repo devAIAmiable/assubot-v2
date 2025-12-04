@@ -49,7 +49,7 @@ export const ContractCard = memo(({ contract, index, onEdit, onDelete }: Contrac
   const statusClass = statusPillClass(contract.status, isExpired, isPending);
   const statusLabel = isPending ? 'En cours de traitement' : isExpired ? 'Expiré' : getStatusLabel(contract.status);
   const logoSrc = insurerName ? getInsurerLogo(insurerName) : undefined;
-  const contractLink = `/app/contrats/${contract.id}`;
+  const contractLink = `/app/contracts/${contract.id}`;
 
   const handleEdit = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {

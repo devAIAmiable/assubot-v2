@@ -121,7 +121,7 @@ const ContractDetailsPage: React.FC = () => {
   };
 
   const handleBack = () => {
-    navigate('/app/contrats');
+    navigate('/app/contracts');
   };
 
   const handleEdit = () => {
@@ -158,7 +158,7 @@ const ContractDetailsPage: React.FC = () => {
       await deleteContract(contractId);
       trackContractDelete({ contractId, status: 'success' });
       showToast.success('Contrat supprimé avec succès.');
-      navigate('/app/contrats');
+      navigate('/app/contracts');
     } catch (deleteErr) {
       console.error('Failed to delete contract:', deleteErr);
       showToast.error('Erreur lors de la suppression du contrat.');
@@ -250,7 +250,7 @@ const ContractDetailsPage: React.FC = () => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-900 mb-4">Erreur lors du chargement</h1>
           <p className="text-red-600 mb-6">{errorMessage}</p>
-          <button onClick={() => navigate('/app/contrats')} className="px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-medium hover:bg-[#163d82] transition-colors">
+          <button onClick={() => navigate('/app/contracts')} className="px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-medium hover:bg-[#163d82] transition-colors">
             Retour aux contrats
           </button>
         </div>
@@ -264,7 +264,7 @@ const ContractDetailsPage: React.FC = () => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Contrat non trouvé</h1>
           <p className="text-gray-600 mb-6">Le contrat que vous recherchez n'existe pas.</p>
-          <button onClick={() => navigate('/app/contrats')} className="px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-medium hover:bg-[#163d82] transition-colors">
+          <button onClick={() => navigate('/app/contracts')} className="px-6 py-3 bg-[#1e51ab] text-white rounded-xl font-medium hover:bg-[#163d82] transition-colors">
             Retour aux contrats
           </button>
         </div>

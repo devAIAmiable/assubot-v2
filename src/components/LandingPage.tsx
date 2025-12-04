@@ -26,10 +26,10 @@ import StatsCounter from './landing/Stats/StatsCounter';
 import TestimonialCarousel from './landing/Testimonials/TestimonialCarousel';
 import { VscRobot } from 'react-icons/vsc';
 import { motion } from 'framer-motion';
+import { trackCtaClick } from '@/services/analytics/gtm';
 import { useGetCreditPacksQuery } from '../store/creditPacksApi';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { trackCtaClick } from '@/services/analytics/gtm';
 
 const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -1039,7 +1039,7 @@ const LandingPage = () => {
               <h3 className="text-white font-semibold mb-4">Plateforme</h3>
               <ul className="space-y-2">
                 <li>
-                  <button onClick={createNavigateHandler('/app/contrats', 'Footer Contrats', 'landing_footer')} className="hover:text-white transition-colors text-left">
+                  <button onClick={createNavigateHandler('/app/contracts', 'Footer Contrats', 'landing_footer')} className="hover:text-white transition-colors text-left">
                     Gestion des Contrats
                   </button>
                 </li>

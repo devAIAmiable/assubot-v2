@@ -169,7 +169,7 @@ const Dashboard = () => {
       title: 'Gérer mes contrats',
       description: "Centralisez et organisez tous vos contrats d'assurance",
       icon: FaFileContract,
-      module: 'contrats',
+      module: 'contracts',
       color: 'bg-blue-50 text-[#1e51ab]',
       borderColor: 'border-blue-200',
     },
@@ -333,7 +333,7 @@ const Dashboard = () => {
                   {totalAnnual === 0 && (
                     <div className="text-center text-gray-500 py-8">
                       <p>Aucun contrat actif trouvé</p>
-                      <button onClick={() => handleNavigateToModule('contrats')} className="mt-4 text-[#1e51ab] hover:text-[#163d82] font-medium">
+                      <button onClick={() => handleNavigateToModule('contracts')} className="mt-4 text-[#1e51ab] hover:text-[#163d82] font-medium">
                         Ajouter vos premiers contrats
                       </button>
                     </div>
@@ -380,7 +380,7 @@ const Dashboard = () => {
                 title="Optimiser l’assurance Auto"
                 description='Doublon détecté : Vous êtes assuré deux fois pour le même véhicule en tant que conducteur principal dans le contrat "Mon Auto 1" et secondaire dans "Mon Auto 2". Vous pourriez conserver "Mon Auto 2" si vous êtes deux utilisateurs du même véhicule.'
                 ctaLabel="Conserver Mon Auto 2"
-                onCtaClick={() => handleNavigateToModule('contrats')}
+                onCtaClick={() => handleNavigateToModule('contracts')}
                 badgeLabel="Suggestion intelligente"
                 Icon={FaExclamationTriangle}
                 accentColor="#f59e0b"

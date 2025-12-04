@@ -44,9 +44,9 @@ const AppLayout = () => {
     },
     {
       name: 'Contrats',
-      path: '/app/contrats',
+      path: '/app/contracts',
       icon: FaFolder,
-      current: getCurrentModule() === 'contrats',
+      current: getCurrentModule() === 'contracts',
     },
     {
       name: "AI'A",
