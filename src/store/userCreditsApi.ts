@@ -1,6 +1,6 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
 import { config } from '../config/env';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { createBaseQueryWithAuth } from '../utils/baseQueryWithAuth';
 
 interface CreditsApiResponse {
   status?: string;
@@ -13,7 +13,7 @@ interface CreditsApiResponse {
 
 export const userCreditsApi = createApi({
   reducerPath: 'userCreditsApi',
-  baseQuery: fetchBaseQuery({
+  baseQuery: createBaseQueryWithAuth({
     baseUrl: config.coreApiUrl,
     credentials: 'include',
   }),

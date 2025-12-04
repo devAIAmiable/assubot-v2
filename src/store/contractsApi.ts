@@ -15,10 +15,11 @@ import type {
   UploadUrlRequest,
   UploadUrlResponse,
 } from '../types';
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 import type { ContractCategory } from '../types/contract';
 import { config } from '../config/env';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { createBaseQueryWithAuth } from '../utils/baseQueryWithAuth';
 
 // Define the API response wrapper type based on backend spec
 interface ApiResponse<T> {
@@ -119,8 +120,8 @@ interface ApiErrorResponse {
   };
 }
 
-// Base query with authentication
-const baseQuery = fetchBaseQuery({
+// Base query with authentication and 401 auto-logout
+const baseQuery = createBaseQueryWithAuth({
   baseUrl: `${config.coreApiUrl}/contracts`,
   credentials: 'include',
   prepareHeaders: (headers) => {

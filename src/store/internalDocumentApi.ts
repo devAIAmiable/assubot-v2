@@ -1,6 +1,6 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
 import { config } from '../config/env';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { createBaseQueryWithAuth } from '../utils/baseQueryWithAuth';
 
 // Single document download response
 interface SingleDocumentDownloadResponse {
@@ -19,8 +19,8 @@ interface ApiErrorResponse {
   };
 }
 
-// Base query with authentication
-const baseQuery = fetchBaseQuery({
+// Base query with authentication and 401 auto-logout
+const baseQuery = createBaseQueryWithAuth({
   baseUrl: `${config.coreApiUrl}/documents`,
   credentials: 'include',
   prepareHeaders: (headers) => {

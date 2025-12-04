@@ -13,13 +13,14 @@ import type {
   CreateComparisonSessionParams,
   UpdateComparisonSessionParams,
 } from '../types/comparison';
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import config from '../config/env';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { createBaseQueryWithAuth } from '../utils/baseQueryWithAuth';
 
-// Base query with authentication
-const baseQuery = fetchBaseQuery({
+// Base query with authentication and 401 auto-logout
+const baseQuery = createBaseQueryWithAuth({
   baseUrl: config.coreApiUrl,
   credentials: 'include',
   prepareHeaders: (headers) => {

@@ -1,6 +1,6 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
 import config from '../config/env';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { createBaseQueryWithAuth } from '../utils/baseQueryWithAuth';
 
 // Notification types
 export type NotificationType =
@@ -79,7 +79,7 @@ export interface DeleteNotificationResponse {
 
 export const notificationsApi = createApi({
   reducerPath: 'notificationsApi',
-  baseQuery: fetchBaseQuery({
+  baseQuery: createBaseQueryWithAuth({
     baseUrl: config.coreApiUrl,
     credentials: 'include',
     prepareHeaders: (headers) => {

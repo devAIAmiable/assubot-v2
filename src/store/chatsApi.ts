@@ -13,9 +13,10 @@ import type {
   SendMessageResponse,
   UpdateChatRequest,
 } from '../types/chat';
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 import { config } from '../config/env';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { createBaseQueryWithAuth } from '../utils/baseQueryWithAuth';
 
 // Note: ApiResponse interface removed as it's not used in this API
 
@@ -27,8 +28,8 @@ interface ApiErrorResponse {
   };
 }
 
-// Base query with authentication
-const baseQuery = fetchBaseQuery({
+// Base query with authentication and 401 auto-logout
+const baseQuery = createBaseQueryWithAuth({
   baseUrl: `${config.coreApiUrl}/chats`,
   credentials: 'include',
   prepareHeaders: (headers) => {
