@@ -20,7 +20,7 @@ import SummarizeConfirmationModal from './modals/SummarizeConfirmationModal';
 import ZonesTab from './ContractTabs/ZonesTab';
 import { selectIsContractProcessing } from '../../../store/contractProcessingSlice';
 import { showToast } from '../../ui/Toast';
-import { trackContractDelete } from '@/services/analytics/gtm';
+import { trackContractDelete } from '@/services/analytics';
 import { useAppSelector } from '../../../store/hooks';
 import { useContractDownload } from '../../../hooks/useContractDownload';
 import { useContractOperations } from '../../../hooks/useContractOperations';

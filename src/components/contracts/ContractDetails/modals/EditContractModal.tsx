@@ -6,7 +6,7 @@ import React, { Fragment, useState } from 'react';
 import Button from '../../../ui/Button';
 import { formatDateForInput } from '../../../../utils/dateHelpers';
 import { motion } from 'framer-motion';
-import { trackContractEditSave } from '@/services/analytics/gtm';
+import { trackContractEditSave } from '@/services/analytics';
 import { useContractOperations } from '../../../../hooks/useContractOperations';
 
 interface EditContractModalProps {

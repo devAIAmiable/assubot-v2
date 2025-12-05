@@ -5,10 +5,10 @@ import React, { useState } from 'react';
 import Logo from './ui/Logo';
 import Spinner from './ui/Spinner';
 import { authService } from '../services/coreApi';
+import { trackResetPasswordSubmit } from '@/services/analytics';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { trackResetPasswordSubmit } from '@/services/analytics/gtm';
 
 const resetPasswordSchema = z
   .object({

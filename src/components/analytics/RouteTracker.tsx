@@ -1,4 +1,4 @@
-import { trackPageView } from '@/services/analytics/gtm';
+import { trackPageView } from '@/services/analytics';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 

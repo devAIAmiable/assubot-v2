@@ -2,7 +2,7 @@ import type { ComparisonCategory, ComparisonCalculationResponse, FormDefinition,
 import { FaArrowLeft, FaArrowRight, FaChevronLeft, FaUser } from 'react-icons/fa';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getVisibleSubsectionGroups, type SubsectionGroup } from '../../utils/formGrouping';
-import { trackComparateurFormSubmit } from '@/services/analytics/gtm';
+import { trackComparateurFormSubmit } from '@/services/analytics';
 import { transformFormDataForBackend } from '../../utils/formDataTransform';
 import { generateAutoFormTestData } from '../../utils/testFormData';
 

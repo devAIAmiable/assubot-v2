@@ -1,8 +1,8 @@
 import { FaTimes, FaPlus, FaMinus, FaExclamationTriangle, FaInbox } from 'react-icons/fa';
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { motion } from 'framer-motion';
-import { trackCreditTransactionsRefresh } from '@/services/analytics/gtm';
+import { trackCreditTransactionsRefresh } from '@/services/analytics';
 import { useLazyCreditTransactions } from '../hooks/useCreditTransactions';
 import { type CreditTransactionsFilters, type CreditTransaction } from '../store/creditTransactionsApi';
 import Button from './ui/Button';
@@ -26,12 +26,27 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
 
   const { getCreditTransactions, transactions, pagination, loading, error } = useLazyCreditTransactions();
 
+  const loadTransactions = useCallback(
+    async (source: 'manual' | 'auto' = 'auto') => {
+      const queryFilters = {
+        limit: 10,
+        offset: currentOffset,
+        type: filters.type,
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined,
+      };
+      trackCreditTransactionsRefresh({ source });
+      await getCreditTransactions(queryFilters);
+    },
+    [currentOffset, filters, getCreditTransactions]
+  );
+
   // Load initial data when modal opens
   useEffect(() => {
     if (isOpen && allTransactions.length === 0) {
       loadTransactions();
     }
-  }, [isOpen]);
+  }, [isOpen, allTransactions.length, loadTransactions]);
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -41,7 +56,7 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
       setHasMore(true);
       loadTransactions();
     }
-  }, [filters]);
+  }, [filters, isOpen, loadTransactions]);
 
   // Update transactions when new data arrives
   useEffect(() => {
@@ -55,19 +70,7 @@ const TransactionHistoryModal = ({ isOpen, onClose }: TransactionHistoryModalPro
       }
       setHasMore(pagination?.hasMore || false);
     }
-  }, [transactions, pagination]);
-
-  const loadTransactions = async (source: 'manual' | 'auto' = 'auto') => {
-    const queryFilters = {
-      limit: 10,
-      offset: currentOffset,
-      type: filters.type,
-      startDate: filters.startDate || undefined,
-      endDate: filters.endDate || undefined,
-    };
-    trackCreditTransactionsRefresh({ source });
-    await getCreditTransactions(queryFilters);
-  };
+  }, [transactions, pagination, currentOffset]);
 
   const loadMoreTransactions = async () => {
     if (!hasMore || loading || loadingMore) return;

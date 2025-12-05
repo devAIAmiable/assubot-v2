@@ -2,7 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 
 import React from 'react';
 // import Spinner from './ui/Spinner';
-import { trackGuardRedirect } from '@/services/analytics/gtm';
+import { trackGuardRedirect } from '@/services/analytics';
 import { useAppSelector } from '../store/hooks';
 
 interface ProtectedRouteProps {

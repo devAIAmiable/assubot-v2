@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FaSpinner } from 'react-icons/fa';
 
-import { trackAccountCreationSuccess, trackLoginError, trackLoginSuccess } from '@/services/analytics/gtm';
+import { trackAccountCreationSuccess, trackLoginError, trackLoginSuccess } from '@/services/analytics';
 
 import { authService } from '../services/coreApi';
 import { useAppDispatch } from '../store/hooks';

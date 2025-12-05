@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { FaCoins, FaCreditCard, FaHistory, FaInfoCircle, FaMinus, FaPlus } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
-import { trackCreditBalanceStatus, trackCreditHistoryView, trackCreditPackCheckout, trackCreditPaymentError, trackCreditTransactionsRefresh } from '@/services/analytics/gtm';
+import { trackCreditBalanceStatus, trackCreditHistoryView, trackCreditPackCheckout, trackCreditPaymentError, trackCreditTransactionsRefresh } from '@/services/analytics';
 
 import Button from './ui/Button';
 import TransactionHistoryModal from './TransactionHistoryModal';
@@ -64,7 +64,7 @@ const CreditPage = () => {
       status: status as 'low' | 'ok' | 'critical',
       threshold: CREDIT_LOW_THRESHOLD,
     });
-  }, [currentUser?.creditBalance]);
+  }, [currentUser]);
 
   const handlePurchase = async (pack: CreditPack) => {
     const packageId = pack.id;

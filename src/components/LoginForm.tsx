@@ -2,7 +2,7 @@ import { FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import { trackLoginError, trackLoginSuccess } from '@/services/analytics/gtm';
+import { trackLoginError, trackLoginSuccess } from '@/services/analytics';
 
 import GoogleLoginButton from './ui/GoogleLoginButton';
 import Logo from './ui/Logo';

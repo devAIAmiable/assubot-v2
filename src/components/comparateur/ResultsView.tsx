@@ -7,7 +7,7 @@ import Avatar from '../ui/Avatar';
 import React from 'react';
 import { getInsurerLogo } from '../../utils/insurerLogo';
 import { motion } from 'framer-motion';
-import { trackComparateurAiQuestion } from '@/services/analytics/gtm';
+import { trackComparateurAiQuestion } from '@/services/analytics';
 
 interface Filters {
   priceRange: number[];

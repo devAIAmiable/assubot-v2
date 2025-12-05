@@ -1,6 +1,6 @@
 import { FaCheckCircle, FaEye, FaEyeSlash } from 'react-icons/fa';
 import React, { useEffect, useState } from 'react';
-import { trackAccountCreationError, trackAccountCreationSuccess } from '@/services/analytics/gtm';
+import { trackAccountCreationError, trackAccountCreationSuccess } from '@/services/analytics';
 
 // Dropdown components removed for simplicity
 import GoogleLoginButton from './ui/GoogleLoginButton';

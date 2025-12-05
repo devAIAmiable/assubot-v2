@@ -26,7 +26,7 @@ import StatsCounter from './landing/Stats/StatsCounter';
 import TestimonialCarousel from './landing/Testimonials/TestimonialCarousel';
 import { VscRobot } from 'react-icons/vsc';
 import { motion } from 'framer-motion';
-import { trackCtaClick } from '@/services/analytics/gtm';
+import { trackCtaClick } from '@/services/analytics';
 import { useGetCreditPacksQuery } from '../store/creditPacksApi';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -51,6 +51,19 @@ const LandingPage = () => {
   };
 
   const handleNavigateToApp = (location: string, label: string = 'CTA Commencer') => createNavigateHandler('/app', label, location);
+
+  // Track anchor link clicks (navigation within page)
+  const handleAnchorClick = (anchorId: string, label: string, location: string) => () => {
+    trackCtaClick({ label, location, destination: `#${anchorId}` });
+    const element = document.getElementById(anchorId);
+    element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Track external link clicks
+  const handleExternalLinkClick = (url: string, label: string, location: string) => () => {
+    trackCtaClick({ label, location, destination: url });
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData((prev) => ({
@@ -172,18 +185,18 @@ const LandingPage = () => {
             </div>
 
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-700 hover:text-[#1e51ab] transition-colors">
+              <button onClick={handleAnchorClick('features', 'Nav Fonctionnalités', 'landing_nav_desktop')} className="text-gray-700 hover:text-[#1e51ab] transition-colors">
                 Fonctionnalités
-              </a>
-              <a href="#pricing" className="text-gray-700 hover:text-[#1e51ab] transition-colors">
+              </button>
+              <button onClick={handleAnchorClick('pricing', 'Nav Tarifs', 'landing_nav_desktop')} className="text-gray-700 hover:text-[#1e51ab] transition-colors">
                 Tarifs
-              </a>
-              <a href="#about" className="text-gray-700 hover:text-[#1e51ab] transition-colors">
+              </button>
+              <button onClick={handleAnchorClick('about', 'Nav À propos', 'landing_nav_desktop')} className="text-gray-700 hover:text-[#1e51ab] transition-colors">
                 À propos
-              </a>
-              <a href="#contact" className="text-gray-700 hover:text-[#1e51ab] transition-colors">
+              </button>
+              <button onClick={handleAnchorClick('contact', 'Nav Contact', 'landing_nav_desktop')} className="text-gray-700 hover:text-[#1e51ab] transition-colors">
                 Contact
-              </a>
+              </button>
               <button onClick={createNavigateHandler('/faq', 'FAQ', 'landing_nav_desktop')} className="text-gray-700 hover:text-[#1e51ab] transition-colors">
                 FAQ
               </button>
@@ -203,18 +216,21 @@ const LandingPage = () => {
           {isMenuOpen && (
             <motion.div className="md:hidden" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-                <a href="#features" className="block px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
+                <button
+                  onClick={handleAnchorClick('features', 'Nav Fonctionnalités', 'landing_nav_mobile')}
+                  className="block w-full text-left px-3 py-2 text-gray-700 hover:text-[#1e51ab]"
+                >
                   Fonctionnalités
-                </a>
-                <a href="#pricing" className="block px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
+                </button>
+                <button onClick={handleAnchorClick('pricing', 'Nav Tarifs', 'landing_nav_mobile')} className="block w-full text-left px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
                   Tarifs
-                </a>
-                <a href="#about" className="block px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
+                </button>
+                <button onClick={handleAnchorClick('about', 'Nav À propos', 'landing_nav_mobile')} className="block w-full text-left px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
                   À propos
-                </a>
-                <a href="#contact" className="block px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
+                </button>
+                <button onClick={handleAnchorClick('contact', 'Nav Contact', 'landing_nav_mobile')} className="block w-full text-left px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
                   Contact
-                </a>
+                </button>
                 <button onClick={createNavigateHandler('/faq', 'FAQ', 'landing_nav_mobile')} className="block w-full text-left px-3 py-2 text-gray-700 hover:text-[#1e51ab]">
                   Aide
                 </button>
@@ -1013,26 +1029,22 @@ const LandingPage = () => {
               </div>
               <p className="text-gray-400">Développé par A l'Amiable - Simplifier les décisions d'assurance grâce à l'IA et à l'automatisation.</p>
               <div className="flex ">
-                <a
-                  href="https://linkedin.com/company/a-lamiable"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={handleExternalLinkClick('https://linkedin.com/company/a-lamiable', 'Social LinkedIn', 'landing_footer')}
                   className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
                 >
                   <span className="text-sm font-bold">
                     <FaLinkedin />
                   </span>
-                </a>
-                <a
-                  href="https://instagram.com/aia.alamiable"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                </button>
+                <button
+                  onClick={handleExternalLinkClick('https://instagram.com/aia.alamiable', 'Social Instagram', 'landing_footer')}
                   className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
                 >
                   <span className="text-sm font-bold">
                     <FaInstagram />
                   </span>
-                </a>
+                </button>
               </div>
             </div>
             <div>
@@ -1059,15 +1071,18 @@ const LandingPage = () => {
               <h3 className="text-white font-semibold mb-4">Entreprise</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="https://a-lamiable.com/" className="hover:text-white transition-colors">
+                  <button
+                    onClick={handleExternalLinkClick('https://a-lamiable.com/', 'Footer À Propos', 'landing_footer')}
+                    className="hover:text-white transition-colors text-left"
+                  >
                     À Propos
-                  </a>
+                  </button>
                 </li>
 
                 <li>
-                  <a href="#contact" className="hover:text-white transition-colors">
+                  <button onClick={handleAnchorClick('contact', 'Footer Contact', 'landing_footer')} className="hover:text-white transition-colors text-left">
                     Contact
-                  </a>
+                  </button>
                 </li>
               </ul>
             </div>
@@ -1089,11 +1104,11 @@ const LandingPage = () => {
                     Politique de Confidentialité
                   </button>
                 </li>
-                {/* <li>
-                  <button onClick={() => navigate('/legal-notices')} className="hover:text-white transition-colors text-left">
+                <li>
+                  <button onClick={createNavigateHandler('/legal-notices', 'Footer Mentions légales', 'landing_footer')} className="hover:text-white transition-colors text-left">
                     Mentions légales
                   </button>
-                </li> */}
+                </li>
               </ul>
             </div>
           </div>

@@ -1,16 +1,15 @@
 import { FaCheckCircle, FaCoins } from 'react-icons/fa';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-
-import { trackCreditPackPurchase } from '@/services/analytics/gtm';
 
 import Button from './ui/Button';
+import type { CreditPack } from '../services/creditService';
+import { motion } from 'framer-motion';
+import { trackCreditPackPurchase } from '@/services/analytics';
+import { updateCredits } from '../store/userSlice';
 import { useAppDispatch } from '../store/hooks';
 import { useGetCreditPacksQuery } from '../store/creditPacksApi';
-import { updateCredits } from '../store/userSlice';
 import { userService } from '../services/coreApi';
-import type { CreditPack } from '../services/creditService';
 
 const PaymentSuccessPage = () => {
   const navigate = useNavigate();
@@ -25,15 +24,18 @@ const PaymentSuccessPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [creditsAdded, setCreditsAdded] = useState<number>(0);
 
-  const trackPurchaseOutcome = (status: 'success' | 'error', pack?: CreditPack | null) => {
-    trackCreditPackPurchase({
-      packId: pack?.id ?? creditPackId ?? 'unknown',
-      packName: pack?.name ?? 'unknown',
-      creditAmount: pack?.creditAmount ?? 0,
-      priceEur: pack ? pack.priceCents / 100 : 0,
-      paymentStatus: status,
-    });
-  };
+  const trackPurchaseOutcome = useCallback(
+    (status: 'success' | 'error', pack?: CreditPack | null) => {
+      trackCreditPackPurchase({
+        packId: pack?.id ?? creditPackId ?? 'unknown',
+        packName: pack?.name ?? 'unknown',
+        creditAmount: pack?.creditAmount ?? 0,
+        priceEur: pack ? pack.priceCents / 100 : 0,
+        paymentStatus: status,
+      });
+    },
+    [creditPackId]
+  );
 
   useEffect(() => {
     const processPurchase = async () => {
@@ -87,7 +89,7 @@ const PaymentSuccessPage = () => {
     };
 
     processPurchase();
-  }, [sessionId, creditPackId, creditPacks, dispatch, navigate]);
+  }, [sessionId, creditPackId, creditPacks, dispatch, navigate, trackPurchaseOutcome]);
 
   const handleBackToCredits = () => {
     navigate('/app/credits');

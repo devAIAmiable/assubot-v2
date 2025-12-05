@@ -1,10 +1,10 @@
 import { FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import React, { useEffect, useState } from 'react';
+import { trackAccountVerificationResult, trackAccountVerificationView } from '@/services/analytics';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import Spinner from './ui/Spinner';
 import { authService } from '../services/coreApi';
-import { trackAccountVerificationResult, trackAccountVerificationView } from '@/services/analytics/gtm';
 
 const VerifyPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -45,7 +45,7 @@ const VerifyPage: React.FC = () => {
     };
 
     verifyToken();
-  }, []); // Empty dependency array to run only once on mount
+  }, [searchParams]); // Run when searchParams changes
 
   const handleRedirect = () => {
     navigate('/login');

@@ -2,7 +2,7 @@ import { uploadAvatarFailure, uploadAvatarStart, uploadAvatarSuccess } from '../
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 import { getUserState } from '../utils/stateHelpers';
-import { trackProfileAvatarUpload } from '@/services/analytics/gtm';
+import { trackProfileAvatarUpload } from '@/services/analytics';
 import { useCallback } from 'react';
 import { userService } from '../services/coreApi';
 

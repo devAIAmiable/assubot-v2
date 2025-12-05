@@ -2,10 +2,10 @@ import { FaArrowLeft, FaEnvelope } from 'react-icons/fa';
 import React, { useState } from 'react';
 
 import { Link } from 'react-router-dom';
-import { trackForgotPasswordRequest } from '@/services/analytics/gtm';
 import Logo from './ui/Logo';
 import Spinner from './ui/Spinner';
 import { authService } from '../services/coreApi';
+import { trackForgotPasswordRequest } from '@/services/analytics';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';

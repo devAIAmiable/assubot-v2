@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { FaArrowLeft, FaChevronDown, FaCog, FaCreditCard, FaLightbulb, FaQuestionCircle, FaSearch, FaShieldAlt } from 'react-icons/fa';
+import { trackCtaClick, trackNavigationRedirect } from '@/services/analytics';
 
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { trackCtaClick, trackNavigationRedirect } from '@/services/analytics/gtm';
 
 interface FAQQuestion {
   id: number;

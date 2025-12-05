@@ -1,8 +1,8 @@
 import { Navigate, useLocation } from 'react-router-dom';
 
 import React from 'react';
-import { trackGuardRedirect } from '@/services/analytics/gtm';
 import { getUserState } from '../utils/stateHelpers';
+import { trackGuardRedirect } from '@/services/analytics';
 import { useAppSelector } from '../store/hooks';
 
 interface ProfileCompletionGuardProps {

@@ -26,7 +26,7 @@ import {
   type PasswordChangeFormData,
 } from '../schemas/profileValidation';
 import { getProfessionalCategoryLabel, professionalCategoryOptions } from '../utils/user';
-import { trackProfileAddressSaved, trackProfileAvatarUpload, trackProfilePasswordChange, trackProfilePersonalSaved } from '@/services/analytics/gtm';
+import { trackProfileAddressSaved, trackProfileAvatarUpload, trackProfilePasswordChange, trackProfilePersonalSaved } from '@/services/analytics';
 
 const ProfileModule = () => {
   const navigate = useNavigate();

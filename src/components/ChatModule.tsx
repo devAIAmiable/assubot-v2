@@ -12,7 +12,7 @@ import {
   trackChatRenamed,
   trackChatSearch,
   trackChatSelected,
-} from '@/services/analytics/gtm';
+} from '@/services/analytics';
 import { useGetChatMessagesQuery, useGetChatsQuery } from '../store/chatsApi';
 
 import { AnimatePresence } from 'framer-motion';

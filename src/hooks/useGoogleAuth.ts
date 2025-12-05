@@ -1,10 +1,9 @@
-import { useState } from 'react';
-
-import { trackAccountCreationError, trackLoginError } from '@/services/analytics/gtm';
+import { loginFailure, loginStart } from '../store/userSlice';
+import { trackAccountCreationError, trackLoginError } from '@/services/analytics';
 
 import { authService } from '../services/coreApi';
 import { useAppDispatch } from '../store/hooks';
-import { loginFailure, loginStart } from '../store/userSlice';
+import { useState } from 'react';
 
 export const useGoogleAuth = () => {
   const [isLoading, setIsLoading] = useState(false);

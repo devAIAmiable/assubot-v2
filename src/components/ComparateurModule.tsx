@@ -1,4 +1,5 @@
 import type { ComparisonCalculationResponse, ComparisonCategory, ComparisonOffer } from '../types/comparison';
+import { trackComparateurFilterChange, trackComparateurResultsLoaded, trackComparateurStepChange } from '@/services/analytics';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import ErrorBoundary from './comparateur/ErrorBoundary';
@@ -9,7 +10,6 @@ import PastComparisonsView from './comparateur/PastComparisonsView';
 import ResultsView from './comparateur/ResultsView';
 import TypeSelectionView from './comparateur/TypeSelectionView';
 import { getContractType } from '../utils/contractAdapters';
-import { trackComparateurFilterChange, trackComparateurResultsLoaded, trackComparateurStepChange } from '@/services/analytics/gtm';
 import { useAppSelector } from '../store/hooks';
 import { useNavigate } from 'react-router-dom';
 

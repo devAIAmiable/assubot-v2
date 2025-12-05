@@ -15,6 +15,7 @@ interface AppConfig {
   enableDebugMode: boolean;
   gtmContainerId: string;
   umamiScriptUrl: string;
+  umamiApiUrl: string;
   umamiWebsiteId: string;
   enableComparateur: boolean;
 
@@ -46,6 +47,34 @@ const getEnvVarAsBoolean = (key: string, defaultValue: boolean): boolean => {
 const appEnvironment = getEnvVar('VITE_APP_ENV', 'local');
 const isProductionEnvironment = appEnvironment === 'production';
 
+/**
+ * Derives Umami API URL from script URL by removing /script.js suffix
+ * Falls back to http://localhost:3000 if script URL is not set
+ */
+const getUmamiApiUrl = (): string => {
+  const scriptUrl = getEnvVar('VITE_UMAMI_SCRIPT_URL', '');
+  if (!scriptUrl) {
+    return 'http://localhost:3000';
+  }
+
+  // Remove /script.js suffix if present
+  if (scriptUrl.endsWith('/script.js')) {
+    return scriptUrl.replace('/script.js', '');
+  }
+
+  // Remove trailing slash if present
+  const baseUrl = scriptUrl.replace(/\/$/, '');
+
+  // Extract base URL (protocol + host + port)
+  try {
+    const url = new URL(baseUrl);
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    // If URL parsing fails, try to extract base by removing /script.js or last path segment
+    return baseUrl.split('/').slice(0, -1).join('/') || 'http://localhost:3000';
+  }
+};
+
 export const config: AppConfig = {
   // Core API URLs
   coreApiUrl: getEnvVar('VITE_CORE_API_URL', 'http://localhost:3000/api/v1'),
@@ -63,6 +92,7 @@ export const config: AppConfig = {
   enableDebugMode: getEnvVarAsBoolean('VITE_ENABLE_DEBUG_MODE', false),
   gtmContainerId: getEnvVar('VITE_GTM_CONTAINER_ID', ''),
   umamiScriptUrl: getEnvVar('VITE_UMAMI_SCRIPT_URL', ''),
+  umamiApiUrl: getUmamiApiUrl(),
   umamiWebsiteId: getEnvVar('VITE_UMAMI_WEBSITE_ID', ''),
   enableComparateur: !isProductionEnvironment && getEnvVarAsBoolean('VITE_ENABLE_COMPARATEUR', true),
 

@@ -1,6 +1,7 @@
 import type { ContractCategory, ContractListItem } from '../../types/contract';
 import { FaChevronDown, FaFileContract, FaPlus } from 'react-icons/fa';
 import { StatCard, StatsGrid } from '../ui';
+import { trackContractDelete, trackContractFilterChange, trackContractSearch, trackContractSortChange } from '@/services/analytics';
 import { useEffect, useMemo, useState } from 'react';
 
 import ContractCard from './ContractCard';
@@ -10,7 +11,6 @@ import EditContractModal from './ContractDetails/modals/EditContractModal';
 import Pagination from '../ui/Pagination';
 import Spinner from '../ui/Spinner';
 import { motion } from 'framer-motion';
-import { trackContractDelete, trackContractFilterChange, trackContractSearch, trackContractSortChange } from '@/services/analytics/gtm';
 import { useContractOperations } from '../../hooks/useContractOperations';
 import { useContracts } from '../../hooks/useContracts';
 import { useDebounced } from '../../hooks/useDebounced';

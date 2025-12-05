@@ -3,16 +3,16 @@ import React, { useEffect, useState } from 'react';
 import FloatingElements from './FloatingElements';
 import TrustIndicators from './TrustIndicators';
 import { motion } from 'framer-motion';
-import { trackCtaClick } from '@/services/analytics/gtm';
+import { trackCtaClick } from '@/services/analytics';
 
 interface AnimatedHeroProps {
   navigateToApp: () => void;
 }
 
+const heroTexts = ["Simplifiez vos Assurances avec l'IA", 'Gérez vos contrats intelligemment', 'Comparez et économisez facilement'];
+
 const AnimatedHero: React.FC<AnimatedHeroProps> = ({ navigateToApp }) => {
   const [currentText, setCurrentText] = useState(0);
-
-  const heroTexts = ["Simplifiez vos Assurances avec l'IA", 'Gérez vos contrats intelligemment', 'Comparez et économisez facilement'];
 
   useEffect(() => {
     const interval = setInterval(() => {

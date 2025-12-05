@@ -8,7 +8,7 @@ import type { ContractFormData } from '../../types';
 import React from 'react';
 import { contractUploadService } from '../../services/contractUploadService';
 import { motion } from 'framer-motion';
-import { trackContractCreateSubmit } from '@/services/analytics/gtm';
+import { trackContractCreateSubmit } from '@/services/analytics';
 
 interface CreateContractModalProps {
   open?: boolean;
