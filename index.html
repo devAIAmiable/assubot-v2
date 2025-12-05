@@ -32,7 +32,10 @@
     <script type="module">
       const enableAnalytics = import.meta.env.VITE_ENABLE_ANALYTICS === 'true';
       const containerId = import.meta.env.VITE_GTM_CONTAINER_ID;
+      const umamiScriptUrl = import.meta.env.VITE_UMAMI_SCRIPT_URL;
+      const umamiWebsiteId = import.meta.env.VITE_UMAMI_WEBSITE_ID;
 
+      // Load Google Tag Manager
       if (enableAnalytics && containerId) {
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
@@ -55,6 +58,15 @@
         window.addEventListener('DOMContentLoaded', () => {
           document.body.insertAdjacentElement('afterbegin', noscript);
         });
+      }
+
+      // Load Umami Analytics
+      if (enableAnalytics && umamiScriptUrl && umamiWebsiteId) {
+        const umamiScript = document.createElement('script');
+        umamiScript.defer = true;
+        umamiScript.src = umamiScriptUrl;
+        umamiScript.setAttribute('data-website-id', umamiWebsiteId);
+        document.head.appendChild(umamiScript);
       }
     </script>
 

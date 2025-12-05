@@ -14,6 +14,8 @@ interface AppConfig {
   enableAnalytics: boolean;
   enableDebugMode: boolean;
   gtmContainerId: string;
+  umamiScriptUrl: string;
+  umamiWebsiteId: string;
   enableComparateur: boolean;
 
   // Timeouts
@@ -60,6 +62,8 @@ export const config: AppConfig = {
   enableAnalytics: getEnvVarAsBoolean('VITE_ENABLE_ANALYTICS', false),
   enableDebugMode: getEnvVarAsBoolean('VITE_ENABLE_DEBUG_MODE', false),
   gtmContainerId: getEnvVar('VITE_GTM_CONTAINER_ID', ''),
+  umamiScriptUrl: getEnvVar('VITE_UMAMI_SCRIPT_URL', ''),
+  umamiWebsiteId: getEnvVar('VITE_UMAMI_WEBSITE_ID', ''),
   enableComparateur: !isProductionEnvironment && getEnvVarAsBoolean('VITE_ENABLE_COMPARATEUR', true),
 
   // Timeouts
