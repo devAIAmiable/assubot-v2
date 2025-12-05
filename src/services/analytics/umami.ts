@@ -1,5 +1,4 @@
-import type { AnalyticsEventName, GtmEvent, GtmEventName } from './types';
-
+import type { AnalyticsEventName } from './types';
 import config from '@/config/env';
 
 declare global {
@@ -38,16 +37,19 @@ const isUmamiReady = (): boolean => {
  * Only tracks allowed UX events (page_view, cta_click)
  * Business actions are silently ignored
  */
-export const trackUmamiEvent = <K extends GtmEventName>(event: GtmEvent<K>): boolean => {
+export const trackUmamiEvent = (event: { event: string; [key: string]: unknown }): boolean => {
   // Check if analytics is enabled
   if (!config.enableAnalytics || !config.umamiWebsiteId) {
     return false;
   }
 
+  // Extract event name safely
+  const eventName = String(event.event || '');
+
   // Only track allowed UX events - ignore business actions
-  if (!isEventAllowed(event.event)) {
+  if (!isEventAllowed(eventName)) {
     if (config.enableDebugMode) {
-      console.debug('[Umami Analytics] Business action event ignored:', event.event);
+      console.debug('[Umami Analytics] Business action event ignored:', eventName);
     }
     return false;
   }
@@ -59,18 +61,18 @@ export const trackUmamiEvent = <K extends GtmEventName>(event: GtmEvent<K>): boo
 
   try {
     // Extract event data (all fields except 'event')
-    const eventPayload = { ...event };
-    delete (eventPayload as { event?: string }).event;
+    const eventPayload = { ...event } as Record<string, unknown>;
+    delete eventPayload.event;
 
     // Add metadata
     const eventData: Record<string, unknown> = {
-      ...(eventPayload as Record<string, unknown>),
+      ...eventPayload,
       app_environment: config.environment,
       app_version: config.appVersion,
     };
 
     // Track event with Umami
-    window.umami!.track(event.event, eventData);
+    window.umami!.track(eventName, eventData);
 
     return true;
   } catch (error) {
